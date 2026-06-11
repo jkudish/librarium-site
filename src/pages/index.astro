@@ -72,15 +72,16 @@ const stats = [
 
   fanning out to <span class="text-white">6 providers</span>
 
-  <span class="text-emerald-400">✓</span> perplexity-sonar-pro   <span class="text-neutral-500">ai-grounded     </span>2.1s   12 sources
-  <span class="text-emerald-400">✓</span> gemini-grounded        <span class="text-neutral-500">ai-grounded     </span>3.4s    9 sources
-  <span class="text-emerald-400">✓</span> exa                    <span class="text-neutral-500">ai-grounded     </span>1.8s   25 sources
-  <span class="text-emerald-400">✓</span> brave-search           <span class="text-neutral-500">raw-search      </span>0.9s   20 results
-  <span class="text-emerald-400">✓</span> tavily                 <span class="text-neutral-500">raw-search      </span>1.2s   10 results
-  <span class="text-amber-300">◷</span> openai-deep            <span class="text-neutral-500">deep-research   </span>submitted
+  <span class="text-emerald-400">✓</span> perplexity-sonar-pro   <span class="text-neutral-500">ai-grounded     </span>   2.1s    12 sources
+  <span class="text-emerald-400">✓</span> gemini-grounded        <span class="text-neutral-500">ai-grounded     </span>   3.4s     9 sources
+  <span class="text-emerald-400">✓</span> exa                    <span class="text-neutral-500">ai-grounded     </span>   1.8s    25 sources
+  <span class="text-emerald-400">✓</span> brave-search           <span class="text-neutral-500">raw-search      </span>   0.9s    20 results
+  <span class="text-emerald-400">✓</span> tavily                 <span class="text-neutral-500">raw-search      </span>   1.2s    10 results
+  <span class="text-amber-300">◷</span> openai-deep            <span class="text-neutral-500">deep-research   </span><span class="text-amber-300">submitted</span>
 
-  <span class="text-amber-300">▸</span> <span class="text-white">61 unique sources</span> after dedupe
-  <span class="text-amber-300">▸</span> agents/librarium/1781136000-postgres-pooling/</code></pre>
+  <span class="text-neutral-500">5 succeeded, 0 failed, 1 async pending</span>
+  <span class="text-amber-300">▸</span> <span class="text-white">61 unique sources</span> after dedupe (76 total citations)
+  <span class="text-amber-300">▸</span> ~/research/agents/librarium/1781136000-postgres-pooling/</code></pre>
           </div>
         </div>
       </div>
@@ -277,10 +278,11 @@ const stats = [
           glyph.textContent = "◷";
           glyph.className = "text-amber-300";
           result.textContent = "submitted";
+          result.className = "text-amber-300";
         } else {
           glyph.textContent = "✓";
           glyph.className = "text-emerald-400";
-          result.textContent = `${p.dur.toFixed(1)}s   ${String(p.count).padStart(2)} ${p.unit}`;
+          result.textContent = `${p.dur.toFixed(1)}s`.padStart(7) + `   ${String(p.count).padStart(3)} ${p.unit}`;
         }
       }, p.dur * 1000);
     }
@@ -293,10 +295,12 @@ const stats = [
     await sleep(maxDur * 1000 + 500);
     clearInterval(spinner);
 
-    // Summary
-    code.append("\n  ", span("▸", "text-amber-300"), " ", span("61 unique sources", "text-white"), " after dedupe\n");
+    // Summary (matches the real run output format)
+    code.append("\n", span("  5 succeeded, 0 failed, 1 async pending", "text-neutral-500"), "\n");
     await sleep(150);
-    code.append("  ", span("▸", "text-amber-300"), " agents/librarium/1781136000-postgres-pooling/");
+    code.append("  ", span("▸", "text-amber-300"), " ", span("61 unique sources", "text-white"), " after dedupe (76 total citations)\n");
+    await sleep(150);
+    code.append("  ", span("▸", "text-amber-300"), " ~/research/agents/librarium/1781136000-postgres-pooling/");
     await sleep(7000);
   }
 

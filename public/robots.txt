@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://librarium.jkudish.com/sitemap-index.xml
+Sitemap: https://librarium.agentsy.build/sitemap-index.xml

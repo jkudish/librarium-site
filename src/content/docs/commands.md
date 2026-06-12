@@ -95,12 +95,13 @@ librarium answer <query> [options]
 ```
 $ librarium answer "what changed in postgres 17 logical replication"
 
-  fanning out to 4 providers
+  fanning out to 5 providers
 
-  ✓ perplexity-sonar-pro   ai-grounded        2.0s    11 sources
-  ✓ gemini-grounded        ai-grounded        2.7s     8 sources
-  ✓ exa                    ai-grounded        1.6s    19 sources
-  ✓ brave-search           raw-search         0.8s    15 results
+  ✓ gemini-grounded     ai-grounded        2.7s     8 sources
+  ✓ openrouter-online   ai-grounded        2.1s     7 sources
+  ✓ brave-answers       ai-grounded        0.9s    15 sources
+  ✓ exa                 ai-grounded        1.6s    19 sources
+  ✓ kagi-fastgpt        ai-grounded        3.4s     4 sources
 
   Postgres 17 makes logical replication materially easier to operate. Replication
   slots and subscription state now survive a major-version upgrade with pg_upgrade,
@@ -117,7 +118,7 @@ $ librarium answer "what changed in postgres 17 logical replication"
   [3] pg_upgrade and replication slots
   [4] What's new in Postgres 17
 
-  4 succeeded, 0 failed, 0 async pending in 2.9s
+  5 succeeded, 0 failed, 0 async pending in 3.4s
   ▸ 38 unique sources after dedupe (53 total citations)
   ▸ ~/research/agents/librarium/1781136000-what-changed-in-postgres-17/
 ```

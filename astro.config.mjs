@@ -10,7 +10,9 @@ export default defineConfig({
   },
   markdown: {
     shikiConfig: {
-      theme: "github-dark",
+      // github-dark-default's palette is designed for a near-black background,
+      // so it stays AA-readable on the neutral-950 pre override in global.css.
+      theme: "github-dark-default",
     },
   },
 });

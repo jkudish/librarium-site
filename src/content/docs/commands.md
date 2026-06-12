@@ -292,6 +292,16 @@ Auto-detects your install method and runs the correct upgrade command.
 librarium upgrade
 ```
 
+## install-skill
+
+Installs the librarium skill for Claude Code into `~/.claude/skills/librarium`, teaching the agent how to run research workflows with librarium. The skill version matches your installed CLI, falling back to the latest from main.
+
+```bash
+librarium install-skill
+```
+
+Once installed, Claude Code uses librarium when you ask it to research a topic.
+
 ## Output format
 
 Each research run creates a timestamped output directory:

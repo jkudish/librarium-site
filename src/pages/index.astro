@@ -301,7 +301,98 @@ const stats = [
     code.append("  ", span("▸", "text-amber-300"), " ", span("61 unique sources", "text-white"), " after dedupe (76 total citations)\n");
     await sleep(150);
     code.append("  ", span("▸", "text-amber-300"), " ~/research/agents/librarium/1781136000-postgres-pooling/");
-    await sleep(7000);
+    await sleep(4000);
+  }
+
+  // Act 2: the browse pager (mirrors the real fullscreen reader).
+  const PAGER_VIEW = 13;
+  const PAGER_LINES: Array<[string, string]> = [
+    ["font-semibold text-white underline", "PostgreSQL Connection Pooling"],
+    ["", ""],
+    ["", "Connection pooling keeps a fixed set of database"],
+    ["", "connections open and shares them across clients,"],
+    ["", "avoiding the cost of a new backend per query."],
+    ["", ""],
+    ["font-semibold text-cyan-300", "Why it matters"],
+    ["", ""],
+    ["", "• Postgres forks a process per connection"],
+    ["", "• Each idle connection costs roughly 10 MB"],
+    ["", "• Most apps hold connections longer than needed"],
+    ["", ""],
+    ["text-neutral-500", "  # pgbouncer.ini"],
+    ["text-neutral-500", "  [databases]"],
+    ["text-neutral-500", "  app = host=127.0.0.1 port=5432"],
+    ["text-neutral-500", "  pool_mode = transaction"],
+    ["", ""],
+    ["font-semibold text-cyan-300", "Pool modes"],
+    ["", ""],
+    ["", "Session pooling pins a server connection to the"],
+    ["", "client for its lifetime. Transaction pooling"],
+    ["", "returns it after each transaction and supports"],
+    ["", "far more clients per server connection."],
+    ["", ""],
+    ["font-semibold text-cyan-300", "Choosing pool size"],
+    ["", ""],
+    ["", "A common starting point is (2 x cores) plus the"],
+    ["", "effective spindle count. Measure under load"],
+    ["", "before tuning further."],
+    ["", ""],
+    ["font-semibold text-cyan-300", "Caveats"],
+    ["", ""],
+    ["", "• Transaction mode breaks session state (SET,"],
+    ["", "  LISTEN/NOTIFY, advisory locks)"],
+    ["", "• Prepared statements need workarounds in"],
+    ["", "  transaction mode"],
+    ["", ""],
+    ["font-semibold text-cyan-300", "Sources"],
+    ["", ""],
+    ["", "• pgbouncer.org/config"],
+    ["", "• postgresql.org/docs/current/runtime-config"],
+    ["", "• wiki.postgresql.org/wiki/Number_Of_Database_Connections"],
+  ];
+
+  function pagerStatus(top: number): string {
+    const total = PAGER_LINES.length;
+    const bottom = Math.min(total, top + PAGER_VIEW);
+    const pos =
+      top <= 0
+        ? `top ${bottom}/${total}`
+        : bottom >= total
+          ? `bot ${total}/${total}`
+          : `${Math.round((bottom / total) * 100)}% ${bottom}/${total}`;
+    return ` exa  ${pos}  j/k scroll · space/b page · g/G top/bottom · o $PAGER · q back`;
+  }
+
+  function renderPager(code: HTMLElement, top: number) {
+    code.replaceChildren();
+    for (const [cls, text] of PAGER_LINES.slice(top, top + PAGER_VIEW)) {
+      code.append(span(text, cls), "\n");
+    }
+    code.append("\n", span(pagerStatus(top), "text-neutral-500"));
+  }
+
+  async function browseAct(code: HTMLElement) {
+    code.replaceChildren();
+    const cmd = span("");
+    const cursor = span("▍", "text-neutral-500");
+    code.append(span("$ ", "text-neutral-500"), cmd, cursor);
+    await sleep(500);
+    await typeInto(cmd, "librarium browse");
+    await sleep(350);
+    cursor.remove();
+    code.append("\n\n");
+    code.append(span("◆", "text-amber-300"), "  postgres pooling · 6 providers · just now\n");
+    code.append(span("│", "text-neutral-500"), "  ", span("● exa · ai-grounded · 25 sources", "text-white"), "\n");
+    code.append(span("│", "text-neutral-500"), "  ", span("○ perplexity-sonar-pro · ai-grounded · 12 sources", "text-neutral-500"), "\n");
+    code.append(span("│", "text-neutral-500"), "  ", span("○ gemini-grounded · ai-grounded · 9 sources", "text-neutral-500"), "\n");
+    code.append(span("└", "text-neutral-500"));
+    await sleep(1400);
+    renderPager(code, 0);
+    await sleep(1800);
+    renderPager(code, 13);
+    await sleep(1800);
+    renderPager(code, 29);
+    await sleep(2600);
   }
 
   const terminal = document.getElementById("terminal-demo");

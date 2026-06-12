@@ -107,4 +107,4 @@ The `usage` field is also written to each provider's `.meta.json` file and inclu
 
 **Async deep-research from the library.** `dispatch` with `mode: 'async'` or `'mixed'` returns `asyncTasks` handles. Polling and retrieval are the caller's responsibility. In the CLI, `librarium status` handles this.
 
-**Bring your own persistence.** Core returns data. Where it goes (D1, R2, files, or nowhere) is up to you.
+**Bring your own persistence.** Core returns data. Where it goes (D1, R2, files, or nowhere) is up to you. If you just want a machine-readable file rather than in-memory results, the CLI's `run --jsonl` (or `librarium jsonl`) writes a `results.jsonl` per run with the full provider content embedded - one independently parseable JSON object per line.

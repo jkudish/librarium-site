@@ -45,10 +45,59 @@ const { results, asyncTasks } = await dispatch({
 
 for (const r of results) {
   // { provider, tier, status, text, sourceUrls, citations, durationMs,
-  //   model, tokenUsage, error, fallbackFor }
+  //   model, tokenUsage, usage, error, fallbackFor }
   console.log(r.provider, r.status, r.sourceUrls);
 }
 ```
+
+## dispatch() parameters
+
+The `dispatch()` function accepts an optional `tierQueries` parameter that overrides the query sent to each tier. This is the same mechanism `run --refine` uses to dispatch tier-tuned variants from `librarium refine`:
+
+```ts
+const { results } = await dispatch({
+  config,
+  providerIds: ['gemini-grounded', 'openrouter-online', 'openai-deep'],
+  query: 'How to scale postgres connections',
+  mode: 'mixed',
+  credentials,
+  tierQueries: {
+    'deep-research': 'Comprehensive analysis of PostgreSQL connection scaling strategies including pgBouncer, connection pooling architectures, and tuning recommendations for high-concurrency workloads',
+    'ai-grounded': 'Best practices for scaling PostgreSQL connections in production',
+    'raw-search': 'postgres connection pooling scaling pgbouncer',
+  },
+});
+```
+
+`tierQueries` is additive -- providers whose tier has no entry fall back to the root `query`.
+
+## Result shape
+
+Each result in the `results` array includes an optional `usage` field populated from whatever each provider's API actually reports. Usage is never estimated from pricing tables -- it contains only data the API itself returned:
+
+```ts
+{
+  provider: 'gemini-grounded',
+  tier: 'ai-grounded',
+  status: 'success',
+  text: '...',
+  sourceUrls: [...],
+  citations: [...],
+  durationMs: 1840,
+  model: 'gemini-2.5-flash',
+  usage: {
+    inputTokens: 312,
+    outputTokens: 890,
+    totalTokens: 1202,
+    costUsd: 0.0012,      // only present when the API reported cost
+    raw: { ... }          // raw provider usage object
+  },
+  error: undefined,
+  fallbackFor: undefined,
+}
+```
+
+The `usage` field is also written to each provider's `.meta.json` file and included in `run.json` when running via the CLI.
 
 ## Key notes
 

@@ -11,11 +11,11 @@ Groups are named collections of provider IDs. Librarium ships with six default g
 | Group | Providers | Use case |
 |---|---|---|
 | `deep` | perplexity-sonar-deep, perplexity-deep-research, perplexity-advanced-deep, openai-deep, openai-deep-o3, gemini-deep | Thorough async research |
-| `quick` | perplexity-sonar-pro, brave-answers, exa, kagi-fastgpt | Fast AI-grounded answers |
+| `quick` | gemini-grounded, openrouter-online, brave-answers, exa, kagi-fastgpt | Fast AI-grounded answers |
 | `raw` | perplexity-search, brave-search, jina-search, firecrawl-search, searchapi, serpapi, tavily | Traditional search results |
-| `fast` | perplexity-sonar-pro, perplexity-search, brave-answers, exa, kagi-fastgpt, jina-search, brave-search, firecrawl-search, tavily | Quick results from multiple tiers |
+| `fast` | perplexity-sonar-pro, gemini-grounded, openrouter-online, perplexity-search, brave-answers, exa, kagi-fastgpt, jina-search, brave-search, firecrawl-search, tavily | Quick results from multiple tiers |
 | `comprehensive` | All deep-research + all ai-grounded | Deep + AI-grounded combined |
-| `all` | All 18 providers | Maximum coverage |
+| `all` | All 20 providers | Maximum coverage |
 
 ## Custom groups
 
@@ -49,6 +49,8 @@ Librarium supports three execution modes, configurable via `--mode` or the `defa
 **`async`.** Submit deep-research tasks and return immediately. Use `librarium status --wait --retrieve` to poll and fetch results later.
 
 **`mixed`** (default). Run ai-grounded and raw-search providers synchronously. Submit deep-research providers asynchronously. You get fast results right away and can retrieve deep research later.
+
+True background submission depends on the provider's API. `openai-deep`, `openai-deep-o3`, and `perplexity-sonar-deep` (via Perplexity's Async Sonar API) submit and return immediately in `mixed`/`async` mode; poll with `librarium status --wait`. `perplexity-deep-research` and `perplexity-advanced-deep` use Perplexity's Agent API, which has no background mode, so they complete inline even in mixed mode. `gemini-deep` also completes inline.
 
 ## Provider fallback
 

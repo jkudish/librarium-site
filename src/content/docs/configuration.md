@@ -79,6 +79,21 @@ Some providers support optional model overrides. For example, to override Gemini
 }
 ```
 
+## Query refinement config
+
+The `refine` key configures which provider and model are used when `librarium run --refine` or `librarium refine` rewrites a query into tier-tuned variants. By default the LLM call cascades through the first available of OpenAI, Gemini, or Perplexity by configured API key. Pin a specific provider and model with:
+
+```json
+{
+  "refine": {
+    "provider": "openai",
+    "model": "gpt-4o-mini"
+  }
+}
+```
+
+Setting an explicit `provider` disables the cascade and uses only the named provider. If refinement fails for any reason, the run proceeds with the original query unchanged.
+
 ## Project config example
 
 Place `.librarium.json` in the root of any project to override settings for that context:

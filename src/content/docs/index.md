@@ -50,15 +50,17 @@ npx librarium run "your query"
 
 ## Quick start
 
-Run `init --auto` once to discover API keys already present in your environment and enable matching providers:
+The easiest way to get started is to run `librarium` with no arguments in a terminal. It launches an interactive wizard: enter your query, pick a provider group, choose a mode, and kick off the run -- all with guided prompts.
+
+```bash
+librarium
+```
+
+Or run `init --auto` once to discover API keys already present in your environment and enable matching providers, then run a query directly:
 
 ```bash
 librarium init --auto
-```
 
-Then run a research query:
-
-```bash
 # Run a research query
 librarium run "PostgreSQL connection pooling best practices"
 

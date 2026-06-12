@@ -39,6 +39,12 @@ Librarium organizes its 20 built-in providers into three tiers based on capabili
 | Tavily Search | `tavily` | raw-search | `TAVILY_API_KEY` |
 | Firecrawl Search | `firecrawl-search` | raw-search | `FIRECRAWL_API_KEY` |
 
+## Async behavior notes
+
+`perplexity-sonar-deep` uses Perplexity's Async Sonar API (`POST /v1/async/sonar`, polled via `GET /v1/async/sonar/{id}`). In `mixed` and `async` modes it submits and returns immediately; `librarium status --wait --retrieve` polls and retrieves results like `openai-deep` tasks.
+
+`perplexity-deep-research` and `perplexity-advanced-deep` use Perplexity's Agent API, which has no background mode. They complete inline even in `mixed` mode.
+
 ## Legacy provider ID aliases
 
 Perplexity provider IDs were renamed to match current product names:

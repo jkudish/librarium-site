@@ -1,7 +1,7 @@
 ---
 title: Configuration
-description: Layered config system, global and project config examples, and API key resolution.
-order: 5
+description: Layered config system, global and project config examples, API key resolution, and setup commands.
+order: 6
 ---
 
 ## Layered configuration
@@ -139,4 +139,24 @@ librarium config --global
 
 # Output raw JSON
 librarium config --json
+```
+
+## init
+
+Set up librarium configuration. Auto mode discovers API keys from your environment and enables matching providers.
+
+```bash
+# Auto-discover (non-interactive)
+librarium init --auto
+
+# Interactive setup
+librarium init
+```
+
+## doctor
+
+Health check: tests API connectivity for all enabled providers.
+
+```bash
+librarium doctor [--json]
 ```

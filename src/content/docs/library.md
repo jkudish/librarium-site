@@ -1,7 +1,7 @@
 ---
 title: Library usage
 description: Use librarium/core as an embeddable library in Workers, edge runtimes, and Node.js.
-order: 6
+order: 8
 ---
 
 ## librarium/core

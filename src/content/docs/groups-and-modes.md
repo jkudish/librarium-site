@@ -1,7 +1,7 @@
 ---
 title: Groups and modes
 description: Provider groups, execution modes, and fallback behavior.
-order: 4
+order: 5
 ---
 
 ## Default groups

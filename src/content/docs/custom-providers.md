@@ -1,7 +1,7 @@
 ---
 title: Custom providers
 description: Build and register custom npm or script providers for librarium.
-order: 7
+order: 9
 ---
 
 ## Overview

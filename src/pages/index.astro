@@ -25,11 +25,6 @@ const tiers = [
   },
 ];
 
-const stats = [
-  { label: "Built-in providers", value: "20" },
-  { label: "Research tiers", value: "3" },
-  { label: "Command to run them all", value: "1" },
-];
 ---
 
 <Base title="librarium — the meta harness for research queries">
@@ -53,11 +48,49 @@ const stats = [
               </button>
             </div>
           </div>
-          <p class="mt-6 text-base/7 text-neutral-500 sm:text-sm/6">Also available via Homebrew, curl, npx, or <span class="font-mono">import 'librarium/core'</span>.</p>
+          <p class="mt-6 text-base/7 text-neutral-500 sm:text-sm/6">
+            Also available via
+            <span class="relative inline-block">
+              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">Homebrew</button>
+              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
+                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
+                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>brew install jkudish/tap/librarium</code>
+                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="brew install jkudish/tap/librarium">copy</button>
+                </span>
+              </span>
+            </span>,
+            <span class="relative inline-block">
+              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">curl</button>
+              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
+                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
+                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh</code>
+                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh">copy</button>
+                </span>
+              </span>
+            </span>,
+            <span class="relative inline-block">
+              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">npx</button>
+              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
+                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
+                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>npx librarium run "your query"</code>
+                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd={'npx librarium run "your query"'}>copy</button>
+                </span>
+              </span>
+            </span>, or
+            <span class="relative inline-block">
+              <button type="button" class="install-method font-mono underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">import 'librarium/core'</button>
+              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
+                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
+                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>npm install librarium</code>
+                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="npm install librarium">copy</button>
+                </span>
+              </span>
+            </span>.
+          </p>
         </div>
 
         <!-- Terminal -->
-        <div class="rounded-xl bg-neutral-950 shadow-lg ring-1 ring-black/5">
+        <div class="rounded-xl bg-neutral-950 shadow-lg ring-1 ring-neutral-950/5">
           <div class="flex items-center justify-between border-b border-white/10 px-5 py-3">
             <p class="font-mono text-sm text-neutral-400 sm:text-xs">zsh — librarium</p>
             <div class="flex gap-x-1.5">
@@ -66,42 +99,101 @@ const stats = [
               <span class="size-2.5 rounded-full bg-white/15"></span>
             </div>
           </div>
-          <div class="overflow-x-auto p-5 font-mono text-sm/7 sm:text-[0.8125rem]/6" id="terminal-demo">
+          <div class="overflow-x-auto p-5 font-mono text-sm/7 sm:text-terminal/6" id="terminal-demo">
             <pre
-              class="text-neutral-300"><code id="terminal-code"><span class="text-neutral-500">$ </span>librarium run <span class="text-amber-300">"postgres pooling"</span>
+              class="text-neutral-300"><code id="terminal-code"><span class="text-neutral-500">$ </span>librarium answer <span class="text-amber-300">"how to get cited in ai answers"</span>
 
-  fanning out to <span class="text-white">6 providers</span>
+  fanning out to <span class="text-white">5 providers</span>
 
-  <span class="text-emerald-400">✓</span> perplexity-sonar-pro   <span class="text-neutral-500">ai-grounded     </span>   2.1s    12 sources
-  <span class="text-emerald-400">✓</span> gemini-grounded        <span class="text-neutral-500">ai-grounded     </span>   3.4s     9 sources
-  <span class="text-emerald-400">✓</span> exa                    <span class="text-neutral-500">ai-grounded     </span>   1.8s    25 sources
-  <span class="text-emerald-400">✓</span> brave-search           <span class="text-neutral-500">raw-search      </span>   0.9s    20 results
-  <span class="text-emerald-400">✓</span> tavily                 <span class="text-neutral-500">raw-search      </span>   1.2s    10 results
-  <span class="text-amber-300">◷</span> openai-deep            <span class="text-neutral-500">deep-research   </span><span class="text-amber-300">submitted</span>
+  <span class="text-emerald-400">✓</span> gemini-grounded    <span class="text-neutral-500">ai-grounded    </span> 1.1s   9 sources
+  <span class="text-emerald-400">✓</span> openrouter-online  <span class="text-neutral-500">ai-grounded    </span> 1.9s   7 sources
+  <span class="text-emerald-400">✓</span> brave-answers      <span class="text-neutral-500">ai-grounded    </span> 0.6s  20 sources
+  <span class="text-emerald-400">✓</span> exa                <span class="text-neutral-500">ai-grounded    </span> 1.4s  10 sources
+  <span class="text-emerald-400">✓</span> kagi-fastgpt       <span class="text-neutral-500">ai-grounded    </span> 4.7s   3 sources
 
-  <span class="text-neutral-500">5 succeeded, 0 failed, 1 async pending</span>
-  <span class="text-amber-300">▸</span> <span class="text-white">61 unique sources</span> after dedupe (76 total citations)
-  <span class="text-amber-300">▸</span> ~/research/agents/librarium/1781136000-postgres-pooling/</code></pre>
+  AI engines cite pages they can parse and trust:
+  structured headings, direct answers high on the
+  page, and schema markup all raise citation rates
+  <span class="text-amber-300">[1]</span> <span class="text-amber-300">[2]</span>. Mentions on Reddit, reviews, and listicles
+  matter more than backlinks for LLM visibility <span class="text-amber-300">[3]</span>.
+
+  <span class="font-semibold text-white">Sources</span>
+  <span class="text-amber-300">[1]</span> How AI search engines pick citations
+  <span class="text-amber-300">[2]</span> Schema markup and LLM visibility
+  <span class="text-amber-300">[3]</span> Reddit's outsized role in AI answers
+
+  <span class="text-neutral-500">5 succeeded, 0 failed in 4.7s</span>
+  <span class="text-amber-300">▸</span> <span class="text-white">31 unique sources</span> after dedupe (49 total citations)
+  <span class="text-amber-300">▸</span> ./agents/librarium/1781136000-how-to-get-cited-in-ai/</code></pre>
           </div>
         </div>
       </div>
 
-      <!-- Stat strip -->
-      <div class="mx-auto mt-20 max-w-6xl px-6 lg:px-8">
-        <dl class="grid grid-cols-1 border-y border-neutral-950/10 py-8 sm:grid-cols-3">
-          {stats.map((stat, i) => (
-            <div
-              class:list={[
-                "max-sm:border-t max-sm:border-neutral-950/10 max-sm:py-4 sm:border-l sm:border-neutral-950/10 sm:px-8",
-                i === 0 && "max-sm:border-t-0 max-sm:pt-0 sm:border-l-0 sm:pl-0",
-                i === stats.length - 1 && "max-sm:pb-0 sm:pr-0",
-              ]}
-            >
-              <dt class="text-base/7 text-neutral-500 sm:text-sm/6">{stat.label}</dt>
-              <dd class="mt-1 text-3xl font-semibold tracking-tight text-neutral-950 tabular-nums">{stat.value}</dd>
-            </div>
-          ))}
+    </section>
+
+    <!-- Features -->
+    <section class="py-20 sm:py-24" id="features">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Features</p>
+        <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">Built for serious research workflows.</h2>
+        <dl class="mt-12 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="border-t border-neutral-950/10 pt-6">
+            <dt class="text-base font-semibold text-neutral-950">Live fan-out table</dt>
+            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Every provider resolves in place with timing, source counts, and reported cost. Slow ones get highlighted; failures fall back to a configured backup.</dd>
+          </div>
+          <div class="border-t border-neutral-950/10 pt-6">
+            <dt class="text-base font-semibold text-neutral-950">Grounded answers</dt>
+            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6"><span class="font-mono text-amber-700">librarium answer</span> fans out, then synthesizes one cited answer from what actually came back. Every claim maps to a real source.</dd>
+          </div>
+          <div class="border-t border-neutral-950/10 pt-6">
+            <dt class="text-base font-semibold text-neutral-950">Reports for humans and machines</dt>
+            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">A tabbed HTML report for reading, <span class="font-mono text-amber-700">results.jsonl</span> with full content for pipelines, and a browsable run directory for everything else.</dd>
+          </div>
+          <div class="border-t border-neutral-950/10 pt-6">
+            <dt class="text-base font-semibold text-neutral-950">Tier-tuned queries</dt>
+            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6"><span class="font-mono text-amber-700">--refine</span> rewrites your query three ways with one LLM call: a brief for deep research, a question for AI answers, keywords for raw search.</dd>
+          </div>
+          <div class="border-t border-neutral-950/10 pt-6">
+            <dt class="text-base font-semibold text-neutral-950">Async deep research</dt>
+            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Submit long-running jobs and walk away. <span class="font-mono text-amber-700">status --wait --retrieve</span> collects the reports when they land.</dd>
+          </div>
+          <div class="border-t border-neutral-950/10 pt-6">
+            <dt class="text-base font-semibold text-neutral-950">Built for agents</dt>
+            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">An agent skill, an MCP server, and an embeddable edge-safe core. Your agents fan out, browse, and cite without screen-scraping a terminal.</dd>
+          </div>
         </dl>
+        <p class="mt-10 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">Plus provider groups, automatic fallbacks, and custom providers from npm or local scripts. <a href="/docs/commands" class="font-medium text-amber-700 hover:text-amber-600">Full command reference</a></p>
+      </div>
+    </section>
+
+    <!-- Library -->
+    <section class="py-20 sm:py-24" id="library">
+      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-x-8 gap-y-12 px-6 lg:grid-cols-2 lg:px-8">
+        <div>
+          <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">librarium/core</p>
+          <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">A CLI for you. A library for your agents.</h2>
+          <p class="mt-6 max-w-[56ch] text-base/7 text-pretty text-neutral-600">The same adapters and dispatcher behind the CLI ship as an embeddable core that returns structured results in memory. No filesystem, no Node-only dependencies; it runs in Cloudflare Workers and other edge runtimes. Wire it into agents, pipelines, or apps.</p>
+          <a href="/docs/library" class="mt-8 inline-flex items-center gap-x-2 text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">
+            Read the library docs
+            <svg viewBox="0 0 20 20" class="size-5 shrink-0 fill-amber-700" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd"/></svg>
+          </a>
+        </div>
+        <div class="rounded-xl bg-neutral-950 shadow-lg ring-1 ring-neutral-950/5">
+          <p class="border-b border-white/10 px-5 py-3 font-mono text-sm text-neutral-400 sm:text-xs">research.ts</p>
+          <div class="overflow-x-auto p-5 font-mono text-sm/7 sm:text-terminal/6">
+            <pre
+              class="text-neutral-300"><code><span class="text-violet-300">import</span> {"{"} dispatch {"}"} <span class="text-violet-300">from</span> <span class="text-amber-300">'librarium/core'</span>
+
+<span class="text-violet-300">const</span> run = <span class="text-violet-300">await</span> <span class="text-sky-300">dispatch</span>({"{"}
+  query: <span class="text-amber-300">'HTTP/3 adoption in 2026'</span>,
+  providers: [<span class="text-amber-300">'perplexity-sonar-pro'</span>, <span class="text-amber-300">'exa'</span>],
+{"}"})
+
+<span class="text-violet-300">for</span> (<span class="text-violet-300">const</span> result <span class="text-violet-300">of</span> run.results) {"{"}
+  console.<span class="text-sky-300">log</span>(result.provider, result.sources)
+{"}"}</code></pre>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -126,72 +218,7 @@ const stats = [
             </div>
           ))}
         </div>
-        <p class="mt-10 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">Twenty built-in providers. <a href="/docs/providers" class="font-medium text-amber-700 hover:text-amber-600">See the full catalog</a></p>
-      </div>
-    </section>
-
-    <!-- Features -->
-    <section class="py-20 sm:py-24" id="features">
-      <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Features</p>
-        <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">Built for serious research workflows.</h2>
-        <dl class="mt-12 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Parallel fan-out</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Your query hits every enabled provider at once. Per-provider timeouts and a concurrency cap keep runs predictable.</dd>
-          </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Normalize and dedupe</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Twenty response formats collapse into one. Duplicate sources get merged; citations survive.</dd>
-          </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Provider groups</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Run <span class="font-mono text-amber-700">--group fast</span> when you need answers now, <span class="font-mono text-amber-700">--group deep</span> when it matters. Or define your own stacks.</dd>
-          </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Async deep research</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Submit long-running jobs and walk away. <span class="font-mono text-amber-700">status --wait --retrieve</span> collects the reports when they land.</dd>
-          </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Automatic fallbacks</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">A provider errors out or times out, and a configured backup picks up the run. The output notes what stepped in.</dd>
-          </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Bring your own providers</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Wire in custom providers from npm modules or local scripts. They join groups and fallbacks like the built-ins.</dd>
-          </div>
-        </dl>
-      </div>
-    </section>
-
-    <!-- Library -->
-    <section class="py-20 sm:py-24" id="library">
-      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-x-8 gap-y-12 px-6 lg:grid-cols-2 lg:px-8">
-        <div>
-          <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">librarium/core</p>
-          <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">A CLI for you. A library for your agents.</h2>
-          <p class="mt-6 max-w-[56ch] text-base/7 text-pretty text-neutral-600">The same adapters and dispatcher behind the CLI ship as an embeddable core that returns structured results in memory. No filesystem, no Node-only dependencies; it runs in Cloudflare Workers and other edge runtimes. Wire it into agents, pipelines, or apps.</p>
-          <a href="/docs/library" class="mt-8 inline-flex items-center gap-x-2 text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">
-            Read the library docs
-            <svg viewBox="0 0 20 20" class="size-5 shrink-0 fill-amber-700" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd"/></svg>
-          </a>
-        </div>
-        <div class="rounded-xl bg-neutral-950 shadow-lg ring-1 ring-black/5">
-          <p class="border-b border-white/10 px-5 py-3 font-mono text-sm text-neutral-400 sm:text-xs">research.ts</p>
-          <div class="overflow-x-auto p-5 font-mono text-sm/7 sm:text-[0.8125rem]/6">
-            <pre
-              class="text-neutral-300"><code><span class="text-violet-300">import</span> {"{"} dispatch {"}"} <span class="text-violet-300">from</span> <span class="text-amber-300">'librarium/core'</span>
-
-<span class="text-violet-300">const</span> run = <span class="text-violet-300">await</span> <span class="text-sky-300">dispatch</span>({"{"}
-  query: <span class="text-amber-300">'HTTP/3 adoption in 2026'</span>,
-  providers: [<span class="text-amber-300">'perplexity-sonar-pro'</span>, <span class="text-amber-300">'exa'</span>],
-{"}"})
-
-<span class="text-violet-300">for</span> (<span class="text-violet-300">const</span> result <span class="text-violet-300">of</span> run.results) {"{"}
-  console.<span class="text-sky-300">log</span>(result.provider, result.sources)
-{"}"}</code></pre>
-          </div>
-        </div>
+        <p class="mt-10 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">Twenty-plus built-in providers. <a href="/docs/providers" class="font-medium text-amber-700 hover:text-amber-600">See the full catalog</a></p>
       </div>
     </section>
 
@@ -200,9 +227,18 @@ const stats = [
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <div class="rounded-xl border border-neutral-950/10 bg-neutral-950/2 px-6 py-16 text-center sm:px-16">
           <h2 class="mx-auto max-w-[30ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">Stop searching one engine at a time.</h2>
-          <p class="mx-auto mt-5 max-w-[48ch] text-lg text-pretty text-neutral-600">Install librarium, run <span class="font-mono">init --auto</span> to discover the API keys you already have, and fire your first fan-out in under a minute.</p>
-          <div class="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <p class="rounded-lg bg-white px-4 py-2.5 font-mono text-base text-neutral-800 ring-1 ring-neutral-950/10 sm:text-sm"><span class="text-neutral-400 select-none">$ </span>librarium init --auto</p>
+          <p class="mx-auto mt-5 max-w-[48ch] text-lg text-pretty text-neutral-600">Install librarium and fire off your first deep research in under a minute.</p>
+          <div class="mx-auto mt-9 max-w-2xl rounded-lg bg-white text-left ring-1 ring-neutral-950/10">
+            <div class="flex items-center justify-between border-b border-neutral-950/10 py-2 pr-2 pl-4">
+              <p class="text-base/7 text-neutral-500 sm:text-sm/6">Paste this into your agent</p>
+              <button type="button" id="copy-prompt" class="relative rounded-md bg-white px-2.5 py-1 font-mono text-sm font-medium text-neutral-600 ring-1 ring-neutral-950/10 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-xs">
+                <span id="copy-prompt-label">copy</span>
+                <span class="pointer-fine:hidden absolute top-1/2 left-1/2 size-[max(100%,3rem)] -translate-1/2" aria-hidden="true"></span>
+              </button>
+            </div>
+            <p id="agent-prompt" class="p-4 font-mono text-base/7 text-neutral-800 sm:text-sm/6">Install librarium, the research fan-out CLI (npm i -g librarium), set it up with librarium init --auto and librarium install-skill, then use it to kick off a deep research on <span class="text-amber-700">[a topic of my choosing]</span>.</p>
+          </div>
+          <div class="mt-6 flex justify-center">
             <a href="https://github.com/jkudish/librarium" class="rounded-lg px-4 py-2.5 text-base font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3 sm:text-sm">View on GitHub</a>
           </div>
         </div>
@@ -217,13 +253,31 @@ const stats = [
   // Animated terminal demo: typed command, parallel fan-out, providers
   // resolving at their real relative speeds. Falls back to the static
   // final frame when JS is off or the user prefers reduced motion.
-  const PROVIDERS = [
-    { id: "perplexity-sonar-pro", tier: "ai-grounded", dur: 2.1, count: 12, unit: "sources" },
-    { id: "gemini-grounded", tier: "ai-grounded", dur: 3.4, count: 9, unit: "sources" },
-    { id: "exa", tier: "ai-grounded", dur: 1.8, count: 25, unit: "sources" },
-    { id: "brave-search", tier: "raw-search", dur: 0.9, count: 20, unit: "results" },
-    { id: "tavily", tier: "raw-search", dur: 1.2, count: 10, unit: "results" },
-    { id: "openai-deep", tier: "deep-research", dur: 0.6, async: true },
+  type DemoProvider = {
+    id: string;
+    tier: string;
+    dur: number;
+    count: number;
+    unit: string;
+  };
+  const PROVIDERS: DemoProvider[] = [
+    { id: "gemini-grounded", tier: "ai-grounded", dur: 1.1, count: 9, unit: "sources" },
+    { id: "openrouter-online", tier: "ai-grounded", dur: 1.9, count: 7, unit: "sources" },
+    { id: "brave-answers", tier: "ai-grounded", dur: 0.6, count: 20, unit: "sources" },
+    { id: "exa", tier: "ai-grounded", dur: 1.4, count: 10, unit: "sources" },
+    { id: "kagi-fastgpt", tier: "ai-grounded", dur: 4.7, count: 3, unit: "sources" },
+  ];
+  const ANSWER_LINES: Array<Array<[string, string]>> = [
+    [["", "AI engines cite pages they can parse and trust:"]],
+    [["", "structured headings, direct answers high on the"]],
+    [["", "page, and schema markup all raise citation rates"]],
+    [["text-amber-300", "[1]"], ["", " "], ["text-amber-300", "[2]"], ["", ". Mentions on Reddit, reviews, and listicles"]],
+    [["", "matter more than backlinks for LLM visibility "], ["text-amber-300", "[3]"], ["", "."]],
+  ];
+  const ANSWER_SOURCES = [
+    "How AI search engines pick citations",
+    "Schema markup and LLM visibility",
+    "Reddit's outsized role in AI answers",
   ];
   const SPINNER = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
@@ -252,38 +306,31 @@ const stats = [
     const cursor = span("▍", "text-neutral-500");
     code.append(span("$ ", "text-neutral-500"), cmd, query, cursor);
     await sleep(600);
-    await typeInto(cmd, "librarium run ");
-    await typeInto(query, '"postgres pooling"');
+    await typeInto(cmd, "librarium answer ");
+    await typeInto(query, '"how to get cited in ai answers"');
     await sleep(350);
     cursor.remove();
     code.append("\n\n");
 
     // Fan-out line
-    code.append("  fanning out to ", span("6 providers", "text-white"), "\n\n");
+    code.append("  fanning out to ", span("5 providers", "text-white"), "\n\n");
     await sleep(400);
 
     // All providers appear at once, each resolving on its own clock
     const pending = new Set<HTMLSpanElement>();
     for (const p of PROVIDERS) {
       const glyph = span(SPINNER[0], "text-neutral-500");
-      const id = span(p.id.padEnd(23), "text-neutral-500");
-      const tier = span(p.tier.padEnd(16), "text-neutral-500");
+      const id = span(p.id.padEnd(19), "text-neutral-500");
+      const tier = span(p.tier.padEnd(15), "text-neutral-500");
       const result = span("");
       code.append("  ", glyph, " ", id, tier, result, "\n");
       pending.add(glyph);
       setTimeout(() => {
         pending.delete(glyph);
         id.className = "";
-        if (p.async) {
-          glyph.textContent = "◷";
-          glyph.className = "text-amber-300";
-          result.textContent = "submitted";
-          result.className = "text-amber-300";
-        } else {
-          glyph.textContent = "✓";
-          glyph.className = "text-emerald-400";
-          result.textContent = `${p.dur.toFixed(1)}s`.padStart(7) + `   ${String(p.count).padStart(3)} ${p.unit}`;
-        }
+        glyph.textContent = "✓";
+        glyph.className = "text-emerald-400";
+        result.textContent = `${p.dur.toFixed(1)}s`.padStart(5) + `  ${String(p.count).padStart(2)} ${p.unit}`;
       }, p.dur * 1000);
     }
     let frame = 0;
@@ -295,12 +342,24 @@ const stats = [
     await sleep(maxDur * 1000 + 500);
     clearInterval(spinner);
 
-    // Summary (matches the real run output format)
-    code.append("\n", span("  5 succeeded, 0 failed, 1 async pending", "text-neutral-500"), "\n");
-    await sleep(150);
-    code.append("  ", span("▸", "text-amber-300"), " ", span("61 unique sources", "text-white"), " after dedupe (76 total citations)\n");
-    await sleep(150);
-    code.append("  ", span("▸", "text-amber-300"), " ~/research/agents/librarium/1781136000-postgres-pooling/");
+    // Synthesis beat, then the grounded answer (matches the real answer output)
+    await sleep(900);
+    code.append("\n");
+    for (const lineParts of ANSWER_LINES) {
+      code.append("  ");
+      for (const [cls, text] of lineParts) code.append(span(text, cls));
+      code.append("\n");
+      await sleep(110);
+    }
+    code.append("\n  ", span("Sources", "font-semibold text-white"), "\n");
+    for (let i = 0; i < ANSWER_SOURCES.length; i++) {
+      code.append("  ", span(`[${i + 1}]`, "text-amber-300"), ` ${ANSWER_SOURCES[i]}\n`);
+      await sleep(90);
+    }
+    await sleep(250);
+    code.append("\n", span("  5 succeeded, 0 failed in 4.7s", "text-neutral-500"), "\n");
+    code.append("  ", span("▸", "text-amber-300"), " ", span("31 unique sources", "text-white"), " after dedupe (49 total citations)\n");
+    code.append("  ", span("▸", "text-amber-300"), " ./agents/librarium/1781136000-how-to-get-cited-in-ai/");
     await sleep(7000);
   }
 
@@ -311,21 +370,70 @@ const stats = [
     // Lock the height to the static final frame so the loop never shifts layout
     terminal.style.minHeight = `${terminal.offsetHeight}px`;
     (async () => {
-      while (true) await round(code);
+      while (true) {
+        await round(code);
+      }
     })();
   }
 </script>
 
 <script>
-  const button = document.getElementById("copy-install");
-  const label = document.getElementById("copy-install-label");
-  const command = document.getElementById("install-command");
-  button?.addEventListener("click", async () => {
-    if (!command?.textContent || !label) return;
-    await navigator.clipboard.writeText(command.textContent);
-    label.textContent = "copied";
-    setTimeout(() => {
-      label.textContent = "copy";
-    }, 2000);
+  function wireCopy(buttonId: string, labelId: string, sourceId: string) {
+    const button = document.getElementById(buttonId);
+    const label = document.getElementById(labelId);
+    const source = document.getElementById(sourceId);
+    button?.addEventListener("click", async () => {
+      if (!source?.textContent || !label) return;
+      await navigator.clipboard.writeText(source.textContent.trim());
+      label.textContent = "copied";
+      setTimeout(() => {
+        label.textContent = "copy";
+      }, 2000);
+    });
+  }
+  wireCopy("copy-install", "copy-install-label", "install-command");
+  wireCopy("copy-prompt", "copy-prompt-label", "agent-prompt");
+</script>
+
+<script>
+  // Install-method popovers: click a method to reveal its command.
+  const triggers = [...document.querySelectorAll<HTMLButtonElement>(".install-method")];
+
+  function closeAll(except?: HTMLButtonElement) {
+    for (const trigger of triggers) {
+      if (trigger === except) continue;
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.parentElement?.querySelector(".install-pop")?.classList.add("hidden");
+    }
+  }
+
+  for (const trigger of triggers) {
+    trigger.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const pop = trigger.parentElement?.querySelector(".install-pop");
+      const isOpen = trigger.getAttribute("aria-expanded") === "true";
+      closeAll(trigger);
+      trigger.setAttribute("aria-expanded", String(!isOpen));
+      pop?.classList.toggle("hidden", isOpen);
+    });
+  }
+
+  document.addEventListener("click", (event) => {
+    if (event.target instanceof Element && event.target.closest(".install-pop")) return;
+    closeAll();
   });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeAll();
+  });
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>(".install-copy")) {
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await navigator.clipboard.writeText(button.dataset.cmd ?? "");
+      button.textContent = "copied";
+      setTimeout(() => {
+        button.textContent = "copy";
+      }, 2000);
+    });
+  }
 </script>

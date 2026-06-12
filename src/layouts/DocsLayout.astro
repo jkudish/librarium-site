@@ -2,6 +2,7 @@
 import Base from "./Base.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import DocsNav from "../components/DocsNav.astro";
 import { getCollection } from "astro:content";
 
 interface Props {
@@ -30,6 +31,7 @@ const navItems = allDocs
     <div class="border-b border-neutral-950/10 py-4 lg:hidden">
       <details class="group">
         <summary
+          aria-label="Documentation navigation"
           class="flex cursor-pointer list-none items-center justify-between text-sm font-semibold text-neutral-950 tracking-tight"
         >
           <span>{title}</span>
@@ -42,31 +44,7 @@ const navItems = allDocs
           </svg>
         </summary>
         <nav class="mt-3 flex flex-col gap-y-0.5" aria-label="Documentation pages">
-          <ul role="list" class="flex flex-col gap-y-0.5">
-            {
-              navItems.map((item) => {
-                const isActive =
-                  item.slug === currentSlug ||
-                  (item.slug === "" && currentSlug === "index");
-                return (
-                  <li>
-                    <a
-                      href={item.href}
-                      class:list={[
-                        "block rounded-lg px-3 py-1.5 text-sm",
-                        isActive
-                          ? "bg-neutral-950/[0.04] text-neutral-950"
-                          : "text-neutral-600 hover:text-neutral-950",
-                      ]}
-                      aria-current={isActive ? "page" : undefined}
-                    >
-                      {item.title}
-                    </a>
-                  </li>
-                );
-              })
-            }
-          </ul>
+          <DocsNav navItems={navItems} currentSlug={currentSlug} />
         </nav>
       </details>
     </div>
@@ -76,38 +54,14 @@ const navItems = allDocs
       <!-- Sidebar (desktop only) -->
       <aside class="hidden w-52 shrink-0 lg:block">
         <nav class="sticky top-8" aria-label="Documentation">
-          <ul role="list" class="flex flex-col gap-y-0.5">
-            {
-              navItems.map((item) => {
-                const isActive =
-                  item.slug === currentSlug ||
-                  (item.slug === "" && currentSlug === "index");
-                return (
-                  <li>
-                    <a
-                      href={item.href}
-                      class:list={[
-                        "block rounded-lg px-3 py-1.5 text-sm",
-                        isActive
-                          ? "bg-neutral-950/[0.04] text-neutral-950"
-                          : "text-neutral-600 hover:text-neutral-950",
-                      ]}
-                      aria-current={isActive ? "page" : undefined}
-                    >
-                      {item.title}
-                    </a>
-                  </li>
-                );
-              })
-            }
-          </ul>
+          <DocsNav navItems={navItems} currentSlug={currentSlug} />
         </nav>
       </aside>
 
       <!-- Main content -->
       <main class="min-w-0 flex-1">
         <h1
-          class="text-3xl font-semibold tracking-tight text-balance text-neutral-950"
+          class="text-3xl sm:text-4xl font-semibold tracking-tight text-balance text-neutral-950"
         >
           {title}
         </h1>

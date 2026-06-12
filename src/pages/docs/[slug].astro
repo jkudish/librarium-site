@@ -1,8 +1,9 @@
 ---
-import { getCollection, render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import { type CollectionEntry, getCollection, render } from "astro:content";
 import DocsLayout from "../../layouts/DocsLayout.astro";
 
-export async function getStaticPaths() {
+export const getStaticPaths: GetStaticPaths = async () => {
   const docs = await getCollection("docs");
   return docs
     .filter((entry) => entry.id !== "index")
@@ -10,9 +11,9 @@ export async function getStaticPaths() {
       params: { slug: entry.id },
       props: { entry },
     }));
-}
+};
 
-const { entry } = Astro.props;
+const { entry } = Astro.props as { entry: CollectionEntry<"docs"> };
 const { Content } = await render(entry);
 ---
 

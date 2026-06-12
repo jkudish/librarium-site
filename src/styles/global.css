@@ -3,6 +3,17 @@
 @theme {
   --font-sans: "Geist", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
+  /* Dense 13px size for the terminal/code demo panels. */
+  --text-terminal: 0.8125rem;
+}
+
+@layer base {
+  a:focus-visible,
+  button:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--color-amber-600);
+    outline-offset: 2px;
+  }
 }
 
 /* Prose styles for rendered markdown (docs pages). */
@@ -13,6 +24,10 @@
 
   & > * + * {
     margin-top: --spacing(5);
+  }
+
+  & > :first-child {
+    margin-top: 0;
   }
 
   & h1,
@@ -103,6 +118,9 @@
   }
 
   & table {
+    /* display: block so wide flag tables scroll instead of forcing page overflow on mobile */
+    display: block;
+    overflow-x: auto;
     width: 100%;
     text-align: left;
     font-size: var(--text-sm);

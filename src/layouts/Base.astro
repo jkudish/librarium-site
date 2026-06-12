@@ -10,6 +10,37 @@ const {
   title,
   description = "Librarium fans one research query out to search engines, AI-grounded answers, and deep-research APIs in parallel, then merges everything into one structured output.",
 } = Astro.props;
+
+const canonical = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).href
+  : undefined;
+
+const jsonLd = JSON.stringify([
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "librarium",
+    description:
+      "The meta harness for research queries: a CLI, embeddable library, MCP server, and agent skill that each fan one query out to 20+ search and deep-research APIs in parallel and merge the results into structured, deduplicated output.",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "macOS, Linux, Windows",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    license: "https://github.com/jkudish/librarium/blob/main/LICENSE",
+    url: Astro.site?.href,
+    downloadUrl: "https://www.npmjs.com/package/librarium",
+    sameAs: [
+      "https://github.com/jkudish/librarium",
+      "https://www.npmjs.com/package/librarium",
+    ],
+    author: { "@type": "Person", name: "Joey Kudish", url: "https://jkudish.com" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "librarium",
+    url: Astro.site?.href,
+  },
+]);
 ---
 
 <!doctype html>
@@ -19,11 +50,16 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/og.jpg" />
+    <meta property="og:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:site_name" content="librarium" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <script type="application/ld+json" set:html={jsonLd} />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

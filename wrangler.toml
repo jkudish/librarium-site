@@ -1,0 +1,14 @@
+name = "librarium-site"
+account_id = "89d91856a820628804e70d3df988cbc5"
+compatibility_date = "2026-06-12"
+
+# Assets-only Worker: no main script, just the static Astro build.
+[assets]
+directory = "./dist"
+
+[[routes]]
+pattern = "librarium.agentsy.build"
+custom_domain = true
+
+[observability]
+enabled = true

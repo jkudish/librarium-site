@@ -1,12 +1,14 @@
 ---
 title: Commands
-description: The core research workflow commands -- run, status, browse, and related flags.
+description: The core research workflow commands -- run, answer, status, browse, usage, and related flags.
 order: 2
 ---
 
 ## Interactive wizard
 
 Running `librarium` with no arguments in a terminal starts an interactive wizard: enter the query, pick a group (with provider counts and tier breakdowns as hints) or hand-pick providers, choose the mode, confirm, and the run executes with the live table. Afterwards it offers to open the results in the browser. Non-TTY invocations print help instead, so scripts never hang.
+
+When an LLM client key is configured, the wizard also offers a synthesis toggle after its refine prompt: confirm it to synthesize a grounded answer from the results, producing the same `answer.md` and run metadata as [`librarium answer`](#answer).
 
 ```bash
 librarium
@@ -28,6 +30,8 @@ librarium run <query> [options]
 | `-o, --output <dir>` | Output base directory |
 | `--parallel <n>` | Max parallel requests |
 | `--timeout <n>` | Timeout per provider in seconds |
+| `--max-cost <usd>` | Stop launching providers once API-reported cost crosses this budget (see [Spend guardrails](#spend-guardrails)) |
+| `-y, --yes` | Skip the deep-research pre-flight confirm |
 | `--json` | Output `run.json` to stdout |
 | `--refine` | Rewrite the query into tier-tuned variants with one LLM call before dispatch |
 | `--html` | Generate a self-contained `report.html` in the run directory |
@@ -51,7 +55,7 @@ librarium run "Node.js 22 features" --group fast
 librarium run "postgres scaling" --html --open
 ```
 
-The `--providers` flag accepts canonical IDs, legacy aliases, or display names (case- and punctuation-insensitive, so `"Exa Search"`, `exa-search`, and `EXA SEARCH` all resolve to `exa`). Display names are a CLI input convenience only. Config files (provider keys, custom groups, fallback targets) still require canonical IDs or legacy aliases.
+The `--providers` flag accepts canonical IDs, legacy aliases, or display names (case- and punctuation-insensitive, so `"Exa Search"`, `exa-search`, and `EXA SEARCH` all resolve to `exa`). Display names are a CLI input convenience only. If a name is ambiguous, the run stops and lists the matching candidates; if it is unrecognized, the run stops with a short did-you-mean list of suggestions. Config files (provider keys, custom groups, fallback targets) still require canonical IDs or legacy aliases.
 
 In an interactive terminal, `run` shows a live per-provider results table. Every row appears at fan-out with a spinner and ticking elapsed time, then resolves in place as results arrive:
 
@@ -77,6 +81,71 @@ $ librarium run "postgres pooling best practices"
 ```
 
 Successes are green, failures red with the reason inline, async submissions amber. Durations of 10s or more are highlighted. When a provider's API reports usage, a dim suffix shows it on the line (`· 8.4k tok` or `· $0.012`), and the summary adds a `reported cost` line covering the providers that reported one -- costs are never estimated from pricing tables, only taken from API responses. Piped or CI output degrades to plain append-on-completion lines, and `--json` keeps stdout pure JSON (the table goes to stderr).
+
+## answer
+
+Fan out a query and synthesize one grounded, cited answer from the results.
+
+```bash
+librarium answer <query> [options]
+```
+
+`answer` runs the same fan-out as `run` (defaulting to the `quick` group, overridable with `-g`/`-p`/`-m` and the usual run flags), then makes one LLM synthesis call over the successful providers' content plus the deduped source list. The model is instructed to answer only from the findings, cite with inline `[n]` indices that map to the numbered source list, and state what is uncertain rather than invent. The answer is rendered in the terminal followed by a hyperlinked source list, and written to `answer.md` in the run directory.
+
+```
+$ librarium answer "what changed in postgres 17 logical replication"
+
+  fanning out to 4 providers
+
+  ✓ perplexity-sonar-pro   ai-grounded        2.0s    11 sources
+  ✓ gemini-grounded        ai-grounded        2.7s     8 sources
+  ✓ exa                    ai-grounded        1.6s    19 sources
+  ✓ brave-search           raw-search         0.8s    15 results
+
+  Postgres 17 makes logical replication materially easier to operate. Replication
+  slots and subscription state now survive a major-version upgrade with pg_upgrade,
+  so you no longer have to resync subscribers after an upgrade [1] [3]. It also adds
+  failover-aware slots that can follow a promoted standby, closing a long-standing
+  gap for high-availability setups [2].
+
+  What the findings do not settle is exact performance deltas under heavy write load;
+  the sources describe the features but not benchmarked throughput [4].
+
+  Sources
+  [1] PostgreSQL 17 Release Notes
+  [2] Logical replication failover in PG17
+  [3] pg_upgrade and replication slots
+  [4] What's new in Postgres 17
+
+  4 succeeded, 0 failed, 0 async pending in 2.9s
+  ▸ 38 unique sources after dedupe (53 total citations)
+  ▸ ~/research/agents/librarium/1781136000-what-changed-in-postgres-17/
+```
+
+The synthesis call uses the first available of OpenAI (`gpt-5-mini`), Gemini (`gemini-2.5-flash`), or Perplexity (`sonar`), overridable via an `answer: { provider, model }` config key that falls back to the `refine` config and then to those defaults. Synthesis fails open: if every client fails (quota, auth, timeout), a detailed warning prints and the run summary and output directory still appear, so the research is never lost. The exit code reflects the run, not the synthesis.
+
+`answer` accepts the usual run flags, including `--max-cost`, `--html`, and `--jsonl`. When the run directory contains `answer.md`, both `report.html` (an Answer section leading the report) and `results.jsonl` (a `"type":"answer"` line) pick it up automatically on generation and regeneration -- see [Output formats](/docs/output-formats). The [interactive wizard](#interactive-wizard) also offers grounded synthesis after its refine prompt when an LLM client key is configured.
+
+## Spend guardrails
+
+Two opt-in guardrails help avoid surprise spend on large fan-outs.
+
+**Deep-research pre-flight confirm.** When a run would dispatch three or more deep-research-tier providers, an interactive terminal shows a confirmation first, listing the providers and warning that deep research takes minutes and bills per call. Pass `-y, --yes` to skip it. Non-TTY runs (pipes, CI) never prompt and are never refused, so scripts never hang. The wizard's own confirm counts as consent, so running through the wizard never double-prompts.
+
+**Cost budget (`--max-cost <usd>` or `defaults.maxCostUsd`).** A runtime circuit breaker, not an estimator. As provider results arrive, librarium accumulates the cost each provider's API actually reported. Once the accumulated total crosses the budget, providers that have not started yet are skipped (shown as `skipped` in the table and `run.json`, with a budget reason); in-flight requests are allowed to finish, because aborting a request mid-flight is hostile to most provider APIs and you would be billed anyway. The flag wins over the config key. When the breaker trips, the summary adds a line like:
+
+```
+  ▸ budget reached: $0.48 reported of $0.50 budget, skipped 3 providers
+```
+
+### What counts toward the budget
+
+The budget is honest, not predictive. Only costs an API actually reports count toward it. A provider that reports no cost contributes `0`, so the accumulated total is always a lower bound on real spend, never an estimate from a pricing table. That has two consequences worth understanding:
+
+- Providers that report nothing can run "for free" as far as the breaker is concerned, even though they may cost real money. The budget cannot stop what it cannot see.
+- Deep-research costs land at *retrieval* (when you run `librarium status --wait`), long after the dispatch that submitted them has returned. Those async costs cannot be pre-metered and so cannot be enforced by `--max-cost` at submit time.
+
+Use `--max-cost` as a backstop against runaway synchronous fan-outs, not as a hard billing cap.
 
 ## status
 
@@ -104,6 +173,38 @@ Retrieved results render with the same table line format as `run`, with the outp
 
 ```
   ✓ openai-deep   deep-research     95.0s    14 sources   openai-deep.md, 2310 words
+```
+
+## usage
+
+Aggregate API-reported cost and tokens across past runs.
+
+```bash
+librarium usage [options]
+```
+
+| Flag | Description |
+|---|---|
+| `--days <n>` | Only include runs from the last N days (filtered by manifest timestamp) |
+| `--json` | Output JSON |
+| `-o, --output <dir>` | Output base directory |
+
+`usage` walks the `run.json` manifests under the output base directory and totals up cost and tokens per provider, plus a run count and date range. As with the run summary, only API-reported costs are counted (providers that report nothing contribute `0`), so figures are honest lower bounds, never pricing-table estimates. The output notes how many runs had no reported usage.
+
+```
+$ librarium usage --days 30
+
+Usage (last 30 days):
+
+  provider       cost  tokens  runs
+  -----------  ------  ------  ----
+  openai-deep   $0.50    5.0k     1
+  exa          $0.020    1.5k     1
+
+  runs: 2
+  total reported cost: $0.52
+  date range: 2026-01-14 15:58 to 2026-01-14 16:00
+  1 of 2 runs had no reported usage
 ```
 
 ## browse
@@ -163,4 +264,16 @@ librarium groups remove my-stack
 
 # Output as JSON
 librarium groups --json
+```
+
+## mcp
+
+Start an MCP server over stdio so AI agents can drive librarium through tool calls. See [Using with AI agents](/docs/using-with-agents) for setup and the full tool list.
+
+```bash
+# Register with Claude Code
+claude mcp add librarium -- librarium mcp
+
+# Or run directly (stdout is the protocol stream; diagnostics go to stderr)
+librarium mcp
 ```

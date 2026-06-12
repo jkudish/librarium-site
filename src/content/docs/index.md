@@ -6,7 +6,7 @@ order: 1
 
 ## What is librarium?
 
-Librarium fans out research queries to multiple search and deep-research APIs in parallel, then merges everything into one structured output. It ships with 20 built-in provider adapters spanning traditional search engines, AI-grounded answers, and deep-research APIs. Librarium works both as a CLI and as an embeddable library via `librarium/core`, which runs in Cloudflare Workers and other edge runtimes.
+Librarium fans out research queries to multiple search and deep-research APIs in parallel, then merges everything into one structured output. It ships with 24 built-in provider adapters spanning traditional search engines, AI-grounded answers, deep-research APIs, and an opt-in ungrounded LLM tier. Librarium works both as a CLI and as an embeddable library via `librarium/core`, which runs in Cloudflare Workers and other edge runtimes.
 
 ## Installation
 
@@ -61,8 +61,11 @@ Or run `init --auto` once to discover API keys already present in your environme
 ```bash
 librarium init --auto
 
-# Run a research query
+# Fan out a research query across providers (live results table)
 librarium run "PostgreSQL connection pooling best practices"
+
+# Or get one grounded, cited answer synthesized from the results
+librarium answer "what changed in postgres 17 logical replication"
 
 # Use a specific group
 librarium run "React Server Components" --group quick

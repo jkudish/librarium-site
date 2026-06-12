@@ -18,6 +18,7 @@ Each research run creates a timestamped output directory:
   perplexity-sonar-pro.meta.json  # Per-provider metadata (model, timing, citations)
   brave-answers.md
   brave-answers.meta.json
+  answer.md              # Present when the run was `librarium answer` or the wizard's synthesis toggle
   async-tasks.json       # Present if any async tasks were submitted
 ```
 
@@ -69,6 +70,8 @@ Each line in a `results.jsonl` file has a `type` field:
 
 **Line 1 -- run header** (`"type":"run"`): query, slug, timestamp, mode, succeeded/failed/pending counts, unique source count, total citation count, and optional `refinedQueries` (only present when `--refine` was used).
 
+**Optional answer line** (`"type":"answer"`): emitted right after the run header when the run directory contains an `answer.md` (from [`librarium answer`](/docs/commands#answer) or the wizard's synthesis toggle). Carries optional `provider` and `model` (from `run.json`'s `answer` metadata) and `content` (the full `answer.md` body).
+
 **One line per provider** (`"type":"result"`): id, tier, status, durationMs, citationCount, optional usage object, optional error string, optional fallbackFor string, and `content` (the full markdown from the provider's `.md` file, or `null` when missing or pending).
 
 **One line per deduped source** (`"type":"source"`): url, optional title, providers array, citationCount.
@@ -96,7 +99,7 @@ Generate a self-contained `report.html` for a run directory (default: the most r
 librarium html [run-dir] [--open]
 ```
 
-The report contains the query, run metadata, the provider results table as tabs, with each provider's rendered markdown in a panel below, and the deduped source list with provider attribution. Provider markdown is HTML-escaped, so untrusted output cannot inject script. Results retrieved after the run (async deep research) fill in when the report is regenerated; `status --retrieve` regenerates an existing `report.html` automatically.
+The report contains the query, run metadata, the provider results table as tabs, with each provider's rendered markdown in a panel below, and the deduped source list with provider attribution. When the run directory contains an `answer.md` (from [`librarium answer`](/docs/commands#answer) or the wizard's synthesis toggle), an Answer section leads the report before the provider tabs, showing the synthesizing provider/model dimly. Answer and provider markdown are HTML-escaped with the same untrusted handling, so untrusted output cannot inject script. Results retrieved after the run (async deep research) fill in when the report is regenerated; `status --retrieve` regenerates an existing `report.html` automatically.
 
 ## jsonl command
 

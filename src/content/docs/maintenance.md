@@ -1,6 +1,6 @@
 ---
 title: Maintenance
-description: Cleanup, upgrade, shell completions, and install-skill.
+description: Cleanup, upgrade, and shell completions.
 order: 7
 ---
 
@@ -72,10 +72,4 @@ librarium completions fish > ~/.config/fish/completions/librarium.fish
 
 ## install-skill
 
-Installs the librarium skill for Claude Code into `~/.claude/skills/librarium`, teaching the agent how to run research workflows with librarium. The skill version matches your installed CLI, falling back to the latest from main.
-
-```bash
-librarium install-skill
-```
-
-Once installed, Claude Code uses librarium when you ask it to research a topic.
+Installs the librarium skill for Claude Code. Documented with the rest of the agent integrations on [Using with AI agents](/docs/using-with-agents).

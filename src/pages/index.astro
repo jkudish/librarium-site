@@ -63,7 +63,7 @@ const tiers = [
           </div>
           <div class="overflow-x-auto p-5 font-mono text-sm/7 sm:text-terminal/6" id="terminal-demo">
             <pre
-              class="text-neutral-300"><code id="terminal-code"><span class="text-neutral-500">$ </span>librarium answer <span class="text-amber-300">"postgres pooling"</span>
+              class="text-neutral-300"><code id="terminal-code"><span class="text-neutral-500">$ </span>librarium answer <span class="text-amber-300">"how to get cited in ai answers"</span>
 
   fanning out to <span class="text-white">6 providers</span>
 
@@ -74,20 +74,20 @@ const tiers = [
   <span class="text-emerald-400">✓</span> exa                <span class="text-neutral-500">ai-grounded    </span> 1.4s  10 sources
   <span class="text-emerald-400">✓</span> kagi-fastgpt       <span class="text-neutral-500">ai-grounded    </span> 4.7s   3 sources
 
-  Use a connection pooler rather than raising
-  max_connections: Postgres forks a process per
-  connection, so idle connections waste memory <span class="text-amber-300">[1]</span> <span class="text-amber-300">[2]</span>.
-  PgBouncer in transaction mode is the standard
-  choice; start near 2 x cores and measure <span class="text-amber-300">[3]</span>.
+  AI engines cite pages they can parse and trust:
+  structured headings, direct answers high on the
+  page, and schema markup all raise citation rates
+  <span class="text-amber-300">[1]</span> <span class="text-amber-300">[2]</span>. Mentions on Reddit, reviews, and listicles
+  matter more than backlinks for LLM visibility <span class="text-amber-300">[3]</span>.
 
   <span class="font-semibold text-white">Sources</span>
-  <span class="text-amber-300">[1]</span> PgBouncer documentation
-  <span class="text-amber-300">[2]</span> PostgreSQL: connections and pooling
-  <span class="text-amber-300">[3]</span> Sizing your connection pool
+  <span class="text-amber-300">[1]</span> How AI search engines pick citations
+  <span class="text-amber-300">[2]</span> Schema markup and LLM visibility
+  <span class="text-amber-300">[3]</span> Reddit's outsized role in AI answers
 
   <span class="text-neutral-500">5 succeeded, 0 failed, 1 async pending in 4.7s</span>
   <span class="text-amber-300">▸</span> <span class="text-white">31 unique sources</span> after dedupe (49 total citations)
-  <span class="text-amber-300">▸</span> ./agents/librarium/1781136000-postgres-pooling/</code></pre>
+  <span class="text-amber-300">▸</span> ./agents/librarium/1781136000-how-to-get-cited-in-ai/</code></pre>
           </div>
         </div>
       </div>
@@ -199,7 +199,7 @@ const tiers = [
                 <span class="pointer-fine:hidden absolute top-1/2 left-1/2 size-[max(100%,3rem)] -translate-1/2" aria-hidden="true"></span>
               </button>
             </div>
-            <p id="agent-prompt" class="p-4 font-mono text-base/7 text-neutral-800 sm:text-sm/6">Install librarium, the research fan-out CLI (npm i -g librarium), set it up with librarium init --auto and librarium install-skill, then use it to kick off a deep research on a topic from this project.</p>
+            <p id="agent-prompt" class="p-4 font-mono text-base/7 text-neutral-800 sm:text-sm/6">Install librarium, the research fan-out CLI (npm i -g librarium), set it up with librarium init --auto and librarium install-skill, then use it to kick off a deep research on <span class="text-amber-700">[a topic of my choosing]</span>.</p>
           </div>
           <div class="mt-6 flex justify-center">
             <a href="https://github.com/jkudish/librarium" class="rounded-lg px-4 py-2.5 text-base font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3 sm:text-sm">View on GitHub</a>
@@ -233,16 +233,16 @@ const tiers = [
     { id: "kagi-fastgpt", tier: "ai-grounded", dur: 4.7, count: 3, unit: "sources" },
   ];
   const ANSWER_LINES: Array<Array<[string, string]>> = [
-    [["", "Use a connection pooler rather than raising"]],
-    [["", "max_connections: Postgres forks a process per"]],
-    [["", "connection, so idle connections waste memory "], ["text-amber-300", "[1]"], ["", " "], ["text-amber-300", "[2]"], ["", "."]],
-    [["", "PgBouncer in transaction mode is the standard"]],
-    [["", "choice; start near 2 x cores and measure "], ["text-amber-300", "[3]"], ["", "."]],
+    [["", "AI engines cite pages they can parse and trust:"]],
+    [["", "structured headings, direct answers high on the"]],
+    [["", "page, and schema markup all raise citation rates"]],
+    [["text-amber-300", "[1]"], ["", " "], ["text-amber-300", "[2]"], ["", ". Mentions on Reddit, reviews, and listicles"]],
+    [["", "matter more than backlinks for LLM visibility "], ["text-amber-300", "[3]"], ["", "."]],
   ];
   const ANSWER_SOURCES = [
-    "PgBouncer documentation",
-    "PostgreSQL: connections and pooling",
-    "Sizing your connection pool",
+    "How AI search engines pick citations",
+    "Schema markup and LLM visibility",
+    "Reddit's outsized role in AI answers",
   ];
   const SPINNER = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
@@ -272,7 +272,7 @@ const tiers = [
     code.append(span("$ ", "text-neutral-500"), cmd, query, cursor);
     await sleep(600);
     await typeInto(cmd, "librarium answer ");
-    await typeInto(query, '"postgres pooling"');
+    await typeInto(query, '"how to get cited in ai answers"');
     await sleep(350);
     cursor.remove();
     code.append("\n\n");
@@ -331,7 +331,7 @@ const tiers = [
     await sleep(250);
     code.append("\n", span("  5 succeeded, 0 failed, 1 async pending in 4.7s", "text-neutral-500"), "\n");
     code.append("  ", span("▸", "text-amber-300"), " ", span("31 unique sources", "text-white"), " after dedupe (49 total citations)\n");
-    code.append("  ", span("▸", "text-amber-300"), " ./agents/librarium/1781136000-postgres-pooling/");
+    code.append("  ", span("▸", "text-amber-300"), " ./agents/librarium/1781136000-how-to-get-cited-in-ai/");
     await sleep(7000);
   }
 

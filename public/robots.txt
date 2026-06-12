@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://librarium.jkudish.com/sitemap-index.xml

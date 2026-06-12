@@ -83,37 +83,6 @@ const tiers = [
 
     </section>
 
-    <!-- Library -->
-    <section class="py-20 sm:py-24" id="library">
-      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-x-8 gap-y-12 px-6 lg:grid-cols-2 lg:px-8">
-        <div>
-          <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">librarium/core</p>
-          <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">A CLI for you. A library for your agents.</h2>
-          <p class="mt-6 max-w-[56ch] text-base/7 text-pretty text-neutral-600">The same adapters and dispatcher behind the CLI ship as an embeddable core that returns structured results in memory. No filesystem, no Node-only dependencies; it runs in Cloudflare Workers and other edge runtimes. Wire it into agents, pipelines, or apps.</p>
-          <a href="/docs/library" class="mt-8 inline-flex items-center gap-x-2 text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">
-            Read the library docs
-            <svg viewBox="0 0 20 20" class="size-5 shrink-0 fill-amber-700" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd"/></svg>
-          </a>
-        </div>
-        <div class="rounded-xl bg-neutral-950 shadow-lg ring-1 ring-black/5">
-          <p class="border-b border-white/10 px-5 py-3 font-mono text-sm text-neutral-400 sm:text-xs">research.ts</p>
-          <div class="overflow-x-auto p-5 font-mono text-sm/7 sm:text-[0.8125rem]/6">
-            <pre
-              class="text-neutral-300"><code><span class="text-violet-300">import</span> {"{"} dispatch {"}"} <span class="text-violet-300">from</span> <span class="text-amber-300">'librarium/core'</span>
-
-<span class="text-violet-300">const</span> run = <span class="text-violet-300">await</span> <span class="text-sky-300">dispatch</span>({"{"}
-  query: <span class="text-amber-300">'HTTP/3 adoption in 2026'</span>,
-  providers: [<span class="text-amber-300">'perplexity-sonar-pro'</span>, <span class="text-amber-300">'exa'</span>],
-{"}"})
-
-<span class="text-violet-300">for</span> (<span class="text-violet-300">const</span> result <span class="text-violet-300">of</span> run.results) {"{"}
-  console.<span class="text-sky-300">log</span>(result.provider, result.sources)
-{"}"}</code></pre>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Features -->
     <section class="py-20 sm:py-24" id="features">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
@@ -146,6 +115,37 @@ const tiers = [
           </div>
         </dl>
         <p class="mt-10 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">Plus provider groups, automatic fallbacks, and custom providers from npm or local scripts. <a href="/docs/commands" class="font-medium text-amber-700 hover:text-amber-600">Full command reference</a></p>
+      </div>
+    </section>
+
+    <!-- Library -->
+    <section class="py-20 sm:py-24" id="library">
+      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-x-8 gap-y-12 px-6 lg:grid-cols-2 lg:px-8">
+        <div>
+          <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">librarium/core</p>
+          <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">A CLI for you. A library for your agents.</h2>
+          <p class="mt-6 max-w-[56ch] text-base/7 text-pretty text-neutral-600">The same adapters and dispatcher behind the CLI ship as an embeddable core that returns structured results in memory. No filesystem, no Node-only dependencies; it runs in Cloudflare Workers and other edge runtimes. Wire it into agents, pipelines, or apps.</p>
+          <a href="/docs/library" class="mt-8 inline-flex items-center gap-x-2 text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">
+            Read the library docs
+            <svg viewBox="0 0 20 20" class="size-5 shrink-0 fill-amber-700" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd"/></svg>
+          </a>
+        </div>
+        <div class="rounded-xl bg-neutral-950 shadow-lg ring-1 ring-black/5">
+          <p class="border-b border-white/10 px-5 py-3 font-mono text-sm text-neutral-400 sm:text-xs">research.ts</p>
+          <div class="overflow-x-auto p-5 font-mono text-sm/7 sm:text-[0.8125rem]/6">
+            <pre
+              class="text-neutral-300"><code><span class="text-violet-300">import</span> {"{"} dispatch {"}"} <span class="text-violet-300">from</span> <span class="text-amber-300">'librarium/core'</span>
+
+<span class="text-violet-300">const</span> run = <span class="text-violet-300">await</span> <span class="text-sky-300">dispatch</span>({"{"}
+  query: <span class="text-amber-300">'HTTP/3 adoption in 2026'</span>,
+  providers: [<span class="text-amber-300">'perplexity-sonar-pro'</span>, <span class="text-amber-300">'exa'</span>],
+{"}"})
+
+<span class="text-violet-300">for</span> (<span class="text-violet-300">const</span> result <span class="text-violet-300">of</span> run.results) {"{"}
+  console.<span class="text-sky-300">log</span>(result.provider, result.sources)
+{"}"}</code></pre>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -188,7 +188,7 @@ const tiers = [
                 <span class="pointer-fine:hidden absolute top-1/2 left-1/2 size-[max(100%,3rem)] -translate-1/2" aria-hidden="true"></span>
               </button>
             </div>
-            <p id="agent-prompt" class="p-4 font-mono text-base/7 text-neutral-800 sm:text-sm/6">Install the librarium CLI globally with npm, run librarium init --auto to discover API keys from my environment, run librarium install-skill so you can use it for research, then verify the setup with librarium doctor.</p>
+            <p id="agent-prompt" class="p-4 font-mono text-base/7 text-neutral-800 sm:text-sm/6">Install librarium, the research fan-out CLI (npm i -g librarium, source at github.com/jkudish/librarium), run librarium init --auto to discover API keys from my environment, run librarium install-skill so you can use it for research, then verify the setup with librarium doctor.</p>
           </div>
           <div class="mt-6 flex justify-center">
             <a href="https://github.com/jkudish/librarium" class="rounded-lg px-4 py-2.5 text-base font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3 sm:text-sm">View on GitHub</a>
@@ -390,7 +390,10 @@ const tiers = [
     // Lock the height to the static final frame so the loop never shifts layout
     terminal.style.minHeight = `${terminal.offsetHeight}px`;
     (async () => {
-      while (true) await round(code);
+      while (true) {
+        await round(code);
+        await browseAct(code);
+      }
     })();
   }
 </script>

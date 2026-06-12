@@ -1,16 +1,16 @@
 ---
 title: Using with AI agents
-description: The Claude Code skill, the MCP server and its tools, agent prompts, and CLAUDE.md setup.
+description: The agent skill, the MCP server and its tools, agent prompts, and CLAUDE.md setup.
 order: 10
 ---
 
 ## Overview
 
-Librarium is designed to be used by AI coding agents. There are four ways to set it up: a Claude Code skill, an MCP server, a drop-in agent prompt, or project-scoped CLAUDE.md instructions.
+Librarium is designed to be used by AI coding agents. There are four ways to set it up: an agent skill, an MCP server, a drop-in agent prompt, or project-scoped CLAUDE.md instructions.
 
-## Option 1: Claude Code skill (recommended)
+## Option 1: Agent skill (recommended)
 
-The built-in skill teaches Claude Code how to use librarium through a 7-phase research workflow.
+The built-in skill teaches your agent how to use librarium through a 7-phase research workflow.
 
 ```bash
 # Install via CLI

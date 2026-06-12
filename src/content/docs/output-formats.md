@@ -45,7 +45,13 @@ Each research run creates a timestamped output directory:
       "wordCount": 850,
       "citationCount": 12,
       "outputFile": "perplexity-sonar-pro.md",
-      "metaFile": "perplexity-sonar-pro.meta.json"
+      "metaFile": "perplexity-sonar-pro.meta.json",
+      "usage": {
+        "inputTokens": 312,
+        "outputTokens": 890,
+        "totalTokens": 1202,
+        "costUsd": 0.0012
+      }
     }
   ],
   "sources": {
@@ -57,6 +63,8 @@ Each research run creates a timestamped output directory:
   "exitCode": 0
 }
 ```
+
+`usage` appears on providers whose API reported token or cost data -- it is taken from API responses only, never estimated from pricing tables.
 
 ## --json vs results.jsonl
 

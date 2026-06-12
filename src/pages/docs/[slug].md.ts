@@ -1,5 +1,6 @@
 import type { APIRoute, GetStaticPaths } from "astro";
-import { getCollection } from "astro:content";
+import { type CollectionEntry, getCollection } from "astro:content";
+import { serializeDocEntry } from "../../lib/docs";
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const docs = await getCollection("docs");
@@ -9,10 +10,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const GET: APIRoute = ({ props }) => {
-  const { entry } = props as {
-    entry: { data: { title: string; description: string }; body?: string };
-  };
-  const body = `# ${entry.data.title}\n\n> ${entry.data.description}\n\n${entry.body ?? ""}\n`;
+  const { entry } = props as { entry: CollectionEntry<"docs"> };
+  const body = serializeDocEntry(entry) + "\n";
   return new Response(body, {
     headers: { "Content-Type": "text/markdown; charset=utf-8" },
   });

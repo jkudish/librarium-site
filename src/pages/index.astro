@@ -65,8 +65,9 @@ const tiers = [
             <pre
               class="text-neutral-300"><code id="terminal-code"><span class="text-neutral-500">$ </span>librarium answer <span class="text-amber-300">"postgres pooling"</span>
 
-  fanning out to <span class="text-white">5 providers</span>
+  fanning out to <span class="text-white">6 providers</span>
 
+  <span class="text-amber-300">◷</span> openai-deep         <span class="text-neutral-500">deep-research </span><span class="text-amber-300">submitted</span>
   <span class="text-emerald-400">✓</span> gemini-grounded     <span class="text-neutral-500">ai-grounded   </span>   1.1s     9 sources
   <span class="text-emerald-400">✓</span> openrouter-online   <span class="text-neutral-500">ai-grounded   </span>   1.9s     7 sources   <span class="text-neutral-500">· $0.004</span>
   <span class="text-emerald-400">✓</span> brave-answers       <span class="text-neutral-500">ai-grounded   </span>   0.6s    20 sources
@@ -88,7 +89,7 @@ const tiers = [
   <span class="text-amber-300">[3]</span> Why you should use connection pooling
   <span class="text-amber-300">[4]</span> Sizing your connection pool
 
-  <span class="text-neutral-500">5 succeeded, 0 failed, 0 async pending in 4.7s</span>
+  <span class="text-neutral-500">5 succeeded, 0 failed, 1 async pending in 4.7s</span>
   <span class="text-amber-300">▸</span> <span class="text-white">31 unique sources</span> after dedupe (49 total citations)
   <span class="text-amber-300">▸</span> ~/research/agents/librarium/1781136000-postgres-pooling/</code></pre>
           </div>
@@ -184,7 +185,7 @@ const tiers = [
             </div>
           ))}
         </div>
-        <p class="mt-10 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">Twenty-four built-in providers. <a href="/docs/providers" class="font-medium text-amber-700 hover:text-amber-600">See the full catalog</a></p>
+        <p class="mt-10 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">Twenty-plus built-in providers. <a href="/docs/providers" class="font-medium text-amber-700 hover:text-amber-600">See the full catalog</a></p>
       </div>
     </section>
 
@@ -193,7 +194,7 @@ const tiers = [
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <div class="rounded-xl border border-neutral-950/10 bg-neutral-950/2 px-6 py-16 text-center sm:px-16">
           <h2 class="mx-auto max-w-[30ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">Stop searching one engine at a time.</h2>
-          <p class="mx-auto mt-5 max-w-[48ch] text-lg text-pretty text-neutral-600">Install librarium and wire it into your agent in under a minute.</p>
+          <p class="mx-auto mt-5 max-w-[48ch] text-lg text-pretty text-neutral-600">Install librarium and fire off your first deep research in under a minute.</p>
           <div class="mx-auto mt-9 max-w-2xl rounded-lg bg-white text-left ring-1 ring-neutral-950/10">
             <div class="flex items-center justify-between border-b border-neutral-950/10 py-2 pr-2 pl-4">
               <p class="text-base/7 text-neutral-500 sm:text-sm/6">Paste this into your agent</p>
@@ -202,7 +203,7 @@ const tiers = [
                 <span class="pointer-fine:hidden absolute top-1/2 left-1/2 size-[max(100%,3rem)] -translate-1/2" aria-hidden="true"></span>
               </button>
             </div>
-            <p id="agent-prompt" class="p-4 font-mono text-base/7 text-neutral-800 sm:text-sm/6">Install librarium, the research fan-out CLI (npm i -g librarium, source at github.com/jkudish/librarium), run librarium init --auto to discover API keys from my environment, run librarium install-skill so you can use it for research, then verify the setup with librarium doctor.</p>
+            <p id="agent-prompt" class="p-4 font-mono text-base/7 text-neutral-800 sm:text-sm/6">Install librarium, the research fan-out CLI (npm i -g librarium, source at github.com/jkudish/librarium), run librarium init --auto to discover API keys from my environment, run librarium install-skill so you can use it for research, and verify the setup with librarium doctor. Then kick off a first deep research on a topic from this project (librarium run "your question" -g deep --refine) and collect the reports with librarium status --wait --retrieve when they land.</p>
           </div>
           <div class="mt-6 flex justify-center">
             <a href="https://github.com/jkudish/librarium" class="rounded-lg px-4 py-2.5 text-base font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3 sm:text-sm">View on GitHub</a>
@@ -219,7 +220,17 @@ const tiers = [
   // Animated terminal demo: typed command, parallel fan-out, providers
   // resolving at their real relative speeds. Falls back to the static
   // final frame when JS is off or the user prefers reduced motion.
-  const PROVIDERS = [
+  type DemoProvider = {
+    id: string;
+    tier: string;
+    dur: number;
+    count?: number;
+    unit?: string;
+    usage?: string;
+    async?: boolean;
+  };
+  const PROVIDERS: DemoProvider[] = [
+    { id: "openai-deep", tier: "deep-research", dur: 2.4, async: true },
     { id: "gemini-grounded", tier: "ai-grounded", dur: 1.1, count: 9, unit: "sources" },
     { id: "openrouter-online", tier: "ai-grounded", dur: 1.9, count: 7, unit: "sources", usage: "$0.004" },
     { id: "brave-answers", tier: "ai-grounded", dur: 0.6, count: 20, unit: "sources" },
@@ -276,7 +287,7 @@ const tiers = [
     code.append("\n\n");
 
     // Fan-out line
-    code.append("  fanning out to ", span("5 providers", "text-white"), "\n\n");
+    code.append("  fanning out to ", span("6 providers", "text-white"), "\n\n");
     await sleep(400);
 
     // All providers appear at once, each resolving on its own clock
@@ -329,7 +340,7 @@ const tiers = [
       await sleep(90);
     }
     await sleep(250);
-    code.append("\n", span("  5 succeeded, 0 failed, 0 async pending in 4.7s", "text-neutral-500"), "\n");
+    code.append("\n", span("  5 succeeded, 0 failed, 1 async pending in 4.7s", "text-neutral-500"), "\n");
     code.append("  ", span("▸", "text-amber-300"), " ", span("31 unique sources", "text-white"), " after dedupe (49 total citations)\n");
     code.append("  ", span("▸", "text-amber-300"), " ~/research/agents/librarium/1781136000-postgres-pooling/");
     await sleep(5000);

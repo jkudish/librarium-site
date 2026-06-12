@@ -15,9 +15,9 @@ export const GET: APIRoute = async ({ site }) => {
 
   const body = `# librarium
 
-> The meta harness for research queries. Librarium fans one query out to search engines, AI-grounded answers, and deep-research APIs in parallel (20+ provider adapters across deep-research, ai-grounded, and raw-search tiers), then collects, normalizes, and deduplicates everything into structured output. It is a CLI, an embeddable edge-safe library (librarium/core), an MCP server, and a Claude Code skill.
+> The meta harness for research queries. Librarium fans one query out to search engines, AI-grounded answers, and deep-research APIs in parallel (20+ provider adapters across deep-research, ai-grounded, and raw-search tiers), then collects, normalizes, and deduplicates everything into structured output. It is a CLI, an embeddable edge-safe library (librarium/core), an MCP server, and an agent skill.
 
-Install: \`npm i -g librarium\` (Node >= 20.12). Configure with \`librarium init --auto\`, which discovers API keys from the environment. Agents can install the Claude Code skill with \`librarium install-skill\` or connect over MCP with \`librarium mcp\`.
+Install: \`npm i -g librarium\` (Node >= 20.12). Configure with \`librarium init --auto\`, which discovers API keys from the environment. Agents can install the agent skill with \`librarium install-skill\` or connect over MCP with \`librarium mcp\`.
 
 ## Docs
 

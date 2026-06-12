@@ -1,0 +1,40 @@
+---
+interface NavItem {
+  slug: string;
+  title: string;
+  href: string;
+}
+
+interface Props {
+  navItems: NavItem[];
+  currentSlug: string;
+}
+
+const { navItems, currentSlug } = Astro.props;
+---
+
+<ul role="list" class="flex flex-col gap-y-0.5">
+  {
+    navItems.map((item) => {
+      const isActive =
+        item.slug === currentSlug ||
+        (item.slug === "" && currentSlug === "index");
+      return (
+        <li>
+          <a
+            href={item.href}
+            class:list={[
+              "block rounded-lg px-3 py-1.5 text-sm",
+              isActive
+                ? "bg-neutral-950/4 text-neutral-950"
+                : "text-neutral-600 hover:text-neutral-950",
+            ]}
+            aria-current={isActive ? "page" : undefined}
+          >
+            {item.title}
+          </a>
+        </li>
+      );
+    })
+  }
+</ul>

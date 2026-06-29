@@ -199,7 +199,7 @@ Rules:
 
 ### Operation data shapes
 
-- `execute` and `retrieve`: `ProviderResult` (includes `provider`, `tier`, `content`, `citations`, `durationMs`).
+- `execute` and `retrieve`: `ProviderResult` (includes `provider`, `tier`, `content`, `citations`, `durationMs`; optionally `model`, `tokenUsage`, and `usage`). Return `usage` (with `costUsd` and/or token counts) when your API reports them -- see [Metering and cost](#metering-and-cost).
 - `submit`: `AsyncTaskHandle`.
 - `poll`: `AsyncPollResult`.
 - `test`: `{ ok: boolean; error?: string }`.
@@ -212,6 +212,16 @@ All responses are validated. Invalid payloads fail the operation.
 - `submit`: uses `options.timeout` seconds (minimum 1s).
 - `describe`, `poll`, `test`: 30s default.
 - `retrieve`: 120s default.
+
+## Metering and cost
+
+[Metering](/docs/commands#metering-registry-and-the-estimated-budget) lets librarium track and budget per-provider cost. How a custom provider participates:
+
+- **Reported cost works.** If your `execute`/`retrieve` result includes a `usage` object with `costUsd`, librarium surfaces it as `metering.actual` with `source: "provider_reported"`, counts it toward the `--max-cost` budget, and aggregates it in `librarium usage`. Token-only `usage` (no `costUsd`) is reported as tokens. This is the recommended way for a custom provider to expose cost -- it is taken from your response, never estimated.
+- **Custom providers are `manual_unmetered`.** The per-provider `metering_kind` and pre-dispatch *estimate* (`estimateMetering`) are a built-in registry concept; custom providers have no registry entry, so their `metering.kind` is always `manual_unmetered` and they produce no pre-dispatch estimate.
+- **Estimated budget treats them as $0.** Because they have no estimate, custom providers reserve `0` against `--max-estimated-cost` and are never skipped by it. The honest `--max-cost` (reported) budget is what bounds their actual spend.
+
+In short: return `usage.costUsd` to participate in reported-cost tracking and `--max-cost`; pre-dispatch estimation and `--max-estimated-cost` apply to built-in providers only.
 
 ## Error handling
 

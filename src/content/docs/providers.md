@@ -75,7 +75,7 @@ Two Perplexity providers use the Agent API, which has no background mode. They c
 
 ### Usage and cost reporting
 
-Librarium never estimates costs from pricing tables. Usage data comes only from what each provider's API actually returns.
+*Reported* cost is never estimated from pricing tables: `usage.costUsd` comes only from what each provider's API actually returns. (A separate, clearly-labelled pre-dispatch *estimate* lane exists -- see [Metering kinds](#metering-kinds) below -- but it never touches reported cost.)
 
 | Provider | What the API reports |
 |---|---|
@@ -86,6 +86,21 @@ Librarium never estimates costs from pricing tables. Usage data comes only from 
 | `gemini-deep` | Interactions API token counts (`total_input_tokens`, `total_output_tokens`) only; no cost field |
 
 All other providers either return no usage data or return only token counts with no cost. The reported totals in `summary.md` and the live table cover only the providers that reported something -- the displayed cost is always sourced from the API, never calculated.
+
+### Metering kinds
+
+So that the providers above (which report no native cost) can still be budgeted *before* a call runs, every built-in provider declares a **metering kind** in a built-in registry, shown in `librarium ls`:
+
+| Kind | Providers |
+|---|---|
+| `native_cost` (API returns real cost) | `perplexity-sonar-pro`, `perplexity-sonar-deep`, `perplexity-deep-research`, `perplexity-advanced-deep`, `openrouter-online`, `openrouter-chat`, `exa` |
+| `native_tokens` (tokens only, no cost) | `claude`, `openai-chat`, `gemini-chat`, `openai-deep`, `openai-deep-o3`, `gemini-deep`, `gemini-grounded` |
+| `request_priced` (flat/plan price per request) | `serpapi`, `searchapi`, `brave-search`, `brave-answers`, `kagi-fastgpt`, `perplexity-search` |
+| `credit_priced` (account credits per request) | `tavily`, `firecrawl-search`, `you-research` |
+| `api_unit_priced` (per token/unit, size known only after the call) | `jina-search` |
+| `manual_unmetered` (no reliable per-call metering) | custom providers |
+
+`request_priced` and `credit_priced` providers can produce a **network-free pre-dispatch estimate** used by the [estimated budget](/docs/commands#metering-registry-and-the-estimated-budget) (`--max-estimated-cost`). Estimates are guesses, kept entirely separate from reported cost: flat request-priced providers carry a default USD figure (`costConfidence: estimated`), while plan-dependent credit/unit providers emit only unit metadata until you configure a price in their [`options`](/docs/configuration). This is metadata about the provider, not a pricing table applied to reported cost.
 
 ### Model overrides
 

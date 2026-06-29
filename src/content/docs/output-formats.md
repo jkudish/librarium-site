@@ -51,6 +51,10 @@ Each research run creates a timestamped output directory:
         "outputTokens": 890,
         "totalTokens": 1202,
         "costUsd": 0.0012
+      },
+      "metering": {
+        "kind": "native_cost",
+        "actual": { "costUsd": 0.0012, "source": "provider_reported" }
       }
     }
   ],

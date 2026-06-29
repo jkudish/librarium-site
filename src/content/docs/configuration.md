@@ -62,6 +62,10 @@ Each layer overrides the previous one:
 
 The optional `defaults.maxCostUsd` key sets a default cost budget for runs -- the runtime circuit breaker described in [Spend guardrails](/docs/commands#spend-guardrails). The `--max-cost` flag wins over it. Omit it for no limit.
 
+The optional `defaults.maxEstimatedCostUsd` key sets a default *pre-dispatch reservation* ceiling -- the estimated budget described in [Metering registry and the estimated budget](/docs/commands#metering-registry-and-the-estimated-budget). The `--max-estimated-cost` flag wins over it. It is fully independent of `maxCostUsd` (the two never reconcile). Omit it for no limit.
+
+To make estimates for request- or credit-priced providers exact instead of using the built-in defaults, set pricing in that provider's `options`: `perRequestUsd` for request-priced providers, or `creditUsd` plus `creditsPerRequest` for credit-priced ones. A configured price raises the estimate's `costConfidence` from `estimated` to `configured`.
+
 ## API key resolution
 
 API keys use the `$ENV_VAR` pattern. The value `"$PERPLEXITY_API_KEY"` resolves to `process.env.PERPLEXITY_API_KEY` at runtime. Keys are never stored in plaintext.

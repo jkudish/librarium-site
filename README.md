@@ -6,7 +6,7 @@ Static site built with Astro 6 and Tailwind CSS v4. No JS framework; the landing
 
 ## Development
 
-Requires Node 22+.
+Requires Node 22.12+.
 
 ```bash
 npm install

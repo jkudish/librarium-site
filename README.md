@@ -2,7 +2,7 @@
 
 Marketing and documentation website for [librarium](https://github.com/jkudish/librarium), the meta harness for research queries. Live at [librarium.agentsy.build](https://librarium.agentsy.build).
 
-Static site built with Astro 6 and Tailwind CSS v4. No JS framework; the landing page terminal animation is vanilla JS with a static fallback for no-JS and `prefers-reduced-motion`.
+Static site built with Astro 7 and Tailwind CSS v4. No JS framework; the landing page terminal animation is vanilla JS with a static fallback for no-JS and `prefers-reduced-motion`.
 
 ## Development
 
@@ -47,6 +47,6 @@ There is no CI/CD — deploys are manual after merging to `main`.
 
 - **Docs are sourced from the librarium repo** (its `README.md` and `docs/provider-development.md`). When CLI behavior changes, sync the affected pages here — commands, flags, groups, provider counts, and examples are the usual drift points.
 - **The terminal demo has two copies.** The static markup in `index.astro`'s `<code id="terminal-code">` is the no-JS/reduced-motion fallback *and* the layout-height anchor; it must match the animation's final frame (same lines, same column padding). Keep demo lines ≤ ~57 chars so the panel never scrolls horizontally on desktop.
-- **`vite` is pinned `^7` in devDependencies on purpose.** Astro 6 bundles vite 7; letting the Tailwind plugin resolve vite 8 (rolldown) breaks the build. Drop the pin only when Astro itself moves to vite 8.
+- **`vite` is kept as a direct dev dependency.** Keep it aligned with Astro's supported Vite major so the Tailwind plugin and Astro use the same Vite line.
 - **Single light color scheme**, neutral palette with an amber accent (`amber-700` links/accents, `amber-300` in terminals). Product name is lowercase `librarium` except sentence-initial.
 - Page metadata, OG tags, and JSON-LD live in `src/layouts/Base.astro`.

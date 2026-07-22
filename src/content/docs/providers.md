@@ -101,12 +101,14 @@ So that the providers above (which report no native cost) can still be budgeted 
 
 | Kind | Providers |
 |---|---|
-| `native_cost` (API returns real cost) | `perplexity-sonar-pro`, `perplexity-sonar-deep`, `perplexity-deep-research`, `perplexity-advanced-deep`, `openrouter-online`, `openrouter-chat`, `exa`, `grok` |
-| `native_tokens` (tokens only, no cost) | `claude`, `openai-chat`, `gemini-chat`, `openai-deep`, `openai-deep-o3`, `gemini-deep`, `gemini-grounded` |
+| `native_cost` (API returns real cost) | `perplexity-sonar-pro`, `perplexity-sonar-deep`, `perplexity-deep-research`, `perplexity-advanced-deep`, `openrouter-online`, `openrouter-chat`, `exa` |
+| `native_tokens` (tokens reported; no cost field required) | `claude`, `openai-chat`, `gemini-chat`, `openai-deep`, `openai-deep-o3`, `gemini-deep`, `gemini-grounded`, `grok`* |
 | `request_priced` (flat/plan price per request) | `serpapi`, `searchapi`, `brave-search`, `kagi-fastgpt`, `perplexity-search` |
 | `credit_priced` (account credits per request) | `tavily`, `firecrawl-search`, `you-research` |
 | `api_unit_priced` (per token/unit, size known only after the call) | `jina-search`, `brave-answers` |
 | `manual_unmetered` (no reliable per-call metering) | custom providers |
+
+\* `grok` is registered as `native_tokens` so it keeps a pre-dispatch estimate for `--max-estimated-cost` reservations, but it additionally reports an actual dollar cost (converted from xAI's `cost_in_usd_ticks`) as `usage.costUsd` — the registry kind describes the estimate lane, not a limit on reported cost.
 
 `request_priced` and `credit_priced` providers can produce a **network-free pre-dispatch estimate** used by the [estimated budget](/docs/commands#metering-registry-and-the-estimated-budget) (`--max-estimated-cost`). Estimates are guesses, kept entirely separate from reported cost: flat request-priced providers carry a default USD figure (`costConfidence: estimated`), while plan-dependent credit/unit providers emit only unit metadata until you configure a price in their [`options`](/docs/configuration). This is metadata about the provider, not a pricing table applied to reported cost.
 

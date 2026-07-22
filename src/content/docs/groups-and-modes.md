@@ -14,9 +14,9 @@ Groups are named collections of provider IDs. Librarium ships with seven default
 | `quick` | gemini-grounded, openrouter-online, brave-answers, exa, kagi-fastgpt | Fast AI-grounded answers |
 | `raw` | perplexity-search, brave-search, jina-search, firecrawl-search, searchapi, serpapi, tavily | Traditional search results |
 | `fast` | perplexity-sonar-pro, gemini-grounded, openrouter-online, perplexity-search, brave-answers, exa, kagi-fastgpt, jina-search, brave-search, firecrawl-search, tavily | Quick results from multiple tiers |
-| `comprehensive` | All deep-research + all ai-grounded (13 providers) | Deep + AI-grounded combined |
+| `comprehensive` | All deep-research + all ai-grounded (14 providers, including Grok) | Deep + AI-grounded combined |
 | `llm` | claude, openai-chat, gemini-chat, openrouter-chat | Ungrounded LLM baseline / contrast (no citations) |
-| `all` | All 20 grounded providers | Maximum grounded coverage (excludes the `llm` tier) |
+| `all` | All 21 grounded providers (including Grok) | Maximum grounded coverage (excludes the `llm` tier) |
 
 Every grounded default group, including `all`, excludes the ungrounded `llm` tier. Opt in explicitly via `--group llm`, `-p claude,openai-chat,...`, or a custom group. See [the llm tier](/docs/providers#the-llm-tier-ungrounded-baseline--contrast) for why.
 

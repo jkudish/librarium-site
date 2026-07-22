@@ -1,12 +1,12 @@
 ---
 title: Providers
-description: The four provider tiers, all 24 built-in providers, API key setup, and behavioral notes.
+description: The four provider tiers, all 25 built-in providers, API key setup, and behavioral notes.
 order: 4
 ---
 
 ## Provider tiers
 
-Librarium organizes its 24 built-in providers into four tiers based on capabilities, latency, and depth.
+Librarium organizes its 25 built-in providers into four tiers based on capabilities, latency, and depth.
 
 **deep-research.** Async deep research providers that take minutes to complete but produce comprehensive, multi-source reports. These providers may use a submit/poll/retrieve pattern. Best for thorough research on important topics.
 
@@ -28,6 +28,7 @@ Librarium organizes its 24 built-in providers into four tiers based on capabilit
 | [Gemini Deep Research](https://ai.google.dev/gemini-api/docs) | `gemini-deep` | deep-research | `GEMINI_API_KEY` |
 | [Perplexity Sonar Pro](https://docs.perplexity.ai/home) | `perplexity-sonar-pro` | ai-grounded | `PERPLEXITY_API_KEY` |
 | [Gemini Grounded Search](https://ai.google.dev/gemini-api/docs) | `gemini-grounded` | ai-grounded | `GEMINI_API_KEY` |
+| [Grok (xAI)](https://console.x.ai) | `grok` | ai-grounded | `XAI_API_KEY` |
 | [ChatGPT Search (OpenRouter)](https://openrouter.ai/models) | `openrouter-online` | ai-grounded | `OPENROUTER_API_KEY` |
 | [Brave AI Answers](https://brave.com/search/api/) | `brave-answers` | ai-grounded | `BRAVE_API_KEY` |
 | [Exa Search](https://exa.ai/docs/reference/search-api-guide) | `exa` | ai-grounded | `EXA_API_KEY` |
@@ -73,6 +74,12 @@ Two Perplexity providers use the Agent API, which has no background mode. They c
 - `perplexity-deep-research`
 - `perplexity-advanced-deep`
 
+### AI-grounded answer behavior
+
+**`grok` (xAI).** Queries xAI's official Responses API with the `web_search` tool for live web grounding. Citations come from `url_citation` annotations, normalized into the source set, and the answer markdown keeps the inline `[[n]](url)` markers. Defaults to the `grok-4.5` model with a per-provider `model` override -- select `grok-4.3` for cost-sensitive runs (see [Model overrides](#model-overrides)). X / social search is intentionally excluded from requests. Reported cost is the honest API figure, converted from xAI's `cost_in_usd_ticks`.
+
+**`brave-answers` (Brave AI Answers).** Uses Brave's Answers API -- the OpenAI-compatible `chat/completions` endpoint -- and streams the response. Answer content is the native Answers markdown (the adapter no longer fabricates `## AI Summary` / `## Web Results` headings). Citations arrive as inline stream metadata and are normalized and deduplicated; usage comes from Brave's response headers, and `usage.costUsd` is set only when Brave reports an explicit dollar figure. The provider requires the Answers subscription on your Brave plan: a search-only key (no subscription) fails with a clear "not subscribed" error (`400 OPTION_NOT_IN_PLAN`, pointing at the plan upgrade), while an invalid key fails with `422 SUBSCRIPTION_TOKEN_INVALID` (pointing at `BRAVE_API_KEY`).
+
 ### Usage and cost reporting
 
 *Reported* cost is never estimated from pricing tables: `usage.costUsd` comes only from what each provider's API actually returns. (A separate, clearly-labelled pre-dispatch *estimate* lane exists -- see [Metering kinds](#metering-kinds) below -- but it never touches reported cost.)
@@ -82,6 +89,7 @@ Two Perplexity providers use the Agent API, which has no background mode. They c
 | `perplexity-sonar-pro`, `perplexity-search`, `perplexity-sonar-deep` | Token counts (`prompt_tokens`, `completion_tokens`) and `cost.total_cost` (USD) when present |
 | `openrouter-online`, `openrouter-chat` | Token counts and a flat `cost` field (USD) |
 | `exa` | `costDollars.total` (USD); no token counts |
+| `grok` | Converted USD cost from xAI's `cost_in_usd_ticks`, surfaced as reported `costUsd` |
 | `gemini-grounded` | `usageMetadata` token counts (`promptTokenCount`, `candidatesTokenCount`) only; no cost field |
 | `gemini-deep` | Interactions API token counts (`total_input_tokens`, `total_output_tokens`) only; no cost field |
 
@@ -94,11 +102,13 @@ So that the providers above (which report no native cost) can still be budgeted 
 | Kind | Providers |
 |---|---|
 | `native_cost` (API returns real cost) | `perplexity-sonar-pro`, `perplexity-sonar-deep`, `perplexity-deep-research`, `perplexity-advanced-deep`, `openrouter-online`, `openrouter-chat`, `exa` |
-| `native_tokens` (tokens only, no cost) | `claude`, `openai-chat`, `gemini-chat`, `openai-deep`, `openai-deep-o3`, `gemini-deep`, `gemini-grounded` |
-| `request_priced` (flat/plan price per request) | `serpapi`, `searchapi`, `brave-search`, `brave-answers`, `kagi-fastgpt`, `perplexity-search` |
+| `native_tokens` (tokens reported; no cost field required) | `claude`, `openai-chat`, `gemini-chat`, `openai-deep`, `openai-deep-o3`, `gemini-deep`, `gemini-grounded`, `grok`* |
+| `request_priced` (flat/plan price per request) | `serpapi`, `searchapi`, `brave-search`, `kagi-fastgpt`, `perplexity-search` |
 | `credit_priced` (account credits per request) | `tavily`, `firecrawl-search`, `you-research` |
-| `api_unit_priced` (per token/unit, size known only after the call) | `jina-search` |
+| `api_unit_priced` (per token/unit, size known only after the call) | `jina-search`, `brave-answers` |
 | `manual_unmetered` (no reliable per-call metering) | custom providers |
+
+\* `grok` is registered as `native_tokens` so it keeps a pre-dispatch estimate for `--max-estimated-cost` reservations, but it additionally reports an actual dollar cost (converted from xAI's `cost_in_usd_ticks`) as `usage.costUsd` — the registry kind describes the estimate lane, not a limit on reported cost.
 
 `request_priced` and `credit_priced` providers can produce a **network-free pre-dispatch estimate** used by the [estimated budget](/docs/commands#metering-registry-and-the-estimated-budget) (`--max-estimated-cost`). Estimates are guesses, kept entirely separate from reported cost: flat request-priced providers carry a default USD figure (`costConfidence: estimated`), while plan-dependent credit/unit providers emit only unit metadata until you configure a price in their [`options`](/docs/configuration). This is metadata about the provider, not a pricing table applied to reported cost.
 
@@ -118,7 +128,21 @@ So that the providers above (which report no native cost) can still be budgeted 
 }
 ```
 
-The four llm-tier providers (`claude`, `openai-chat`, `gemini-chat`, `openrouter-chat`) also accept a per-provider `model` config override; see [the llm tier](#the-llm-tier-ungrounded-baseline--contrast) for their defaults. No other built-in provider currently exposes a model override via config. The OpenRouter and Perplexity Agent-based grounded providers use fixed model identifiers in their adapter code.
+`grok` also accepts a per-provider `model` config key. It defaults to `grok-4.5`; set `model` to `grok-4.3` for cost-sensitive runs:
+
+```json
+{
+  "providers": {
+    "grok": {
+      "apiKey": "$XAI_API_KEY",
+      "enabled": true,
+      "model": "grok-4.3"
+    }
+  }
+}
+```
+
+The four llm-tier providers (`claude`, `openai-chat`, `gemini-chat`, `openrouter-chat`) also accept a per-provider `model` config override; see [the llm tier](#the-llm-tier-ungrounded-baseline--contrast) for their defaults. Aside from `grok` (above), no other built-in provider currently exposes a model override via config. The OpenRouter and Perplexity Agent-based grounded providers use fixed model identifiers in their adapter code.
 
 ### API key setup and signup links
 
@@ -128,6 +152,7 @@ The four llm-tier providers (`claude`, `openai-chat`, `gemini-chat`, `openrouter
 | Perplexity | `PERPLEXITY_API_KEY` | [docs.perplexity.ai/home](https://docs.perplexity.ai/home) |
 | OpenAI | `OPENAI_API_KEY` | [platform.openai.com](https://platform.openai.com) |
 | Google Gemini | `GEMINI_API_KEY` | [ai.google.dev](https://ai.google.dev/gemini-api/docs) |
+| xAI (Grok) | `XAI_API_KEY` | [console.x.ai](https://console.x.ai) |
 | Brave | `BRAVE_API_KEY` | [brave.com/search/api](https://brave.com/search/api/) |
 | Exa | `EXA_API_KEY` | [exa.ai](https://exa.ai/docs/reference/search-api-guide) |
 | You.com | `YOU_COM_API_KEY` | [you.com/docs/welcome](https://you.com/docs/welcome) |

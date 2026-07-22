@@ -47,6 +47,10 @@ Each layer overrides the previous one:
       "apiKey": "$EXA_API_KEY",
       "enabled": true
     },
+    "grok": {
+      "apiKey": "$XAI_API_KEY",
+      "enabled": true
+    },
     "tavily": {
       "apiKey": "$TAVILY_API_KEY",
       "enabled": true
@@ -81,6 +85,20 @@ Some providers support optional model overrides. Gemini Deep Research defaults t
       "apiKey": "$GEMINI_API_KEY",
       "enabled": true,
       "model": "deep-research-max-preview-04-2026"
+    }
+  }
+}
+```
+
+Grok (xAI) also accepts a `model` key. It requires `XAI_API_KEY` and defaults to `grok-4.5`; set `model` to `grok-4.3` for cost-sensitive runs:
+
+```json
+{
+  "providers": {
+    "grok": {
+      "apiKey": "$XAI_API_KEY",
+      "enabled": true,
+      "model": "grok-4.3"
     }
   }
 }

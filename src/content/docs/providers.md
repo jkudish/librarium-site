@@ -78,7 +78,7 @@ Two Perplexity providers use the Agent API, which has no background mode. They c
 
 **`grok` (xAI).** Queries xAI's official Responses API with the `web_search` tool for live web grounding. Citations come from `url_citation` annotations, normalized into the source set, and the answer markdown keeps the inline `[[n]](url)` markers. Defaults to the `grok-4.5` model with a per-provider `model` override -- select `grok-4.3` for cost-sensitive runs (see [Model overrides](#model-overrides)). X / social search is intentionally excluded from requests. Reported cost is the honest API figure, converted from xAI's `cost_in_usd_ticks`.
 
-**`brave-answers` (Brave AI Answers).** Uses Brave's Answers API -- the OpenAI-compatible `chat/completions` endpoint -- and streams the response. Answer content is the native Answers markdown (the adapter no longer fabricates `## AI Summary` / `## Web Results` headings). Citations arrive as inline stream metadata and are normalized and deduplicated; usage comes from Brave's response headers, and `usage.costUsd` is set only when Brave reports an explicit dollar figure. The provider requires the Answers subscription on your Brave plan: a search-only key (no subscription) fails with a clear "not subscribed" error (`400 OPTION_NOT_IN_PLAN`, pointing at the plan upgrade), while an invalid key fails with `422 SUBSCRIPTION_TOKEN_INVALID` (pointing at `BRAVE_API_KEY`).
+**`brave-answers` (Brave AI Answers).** Uses Brave's Answers API -- the OpenAI-compatible `chat/completions` endpoint -- and streams the response. Answer content is the native Answers markdown (the adapter no longer fabricates `## AI Summary` / `## Web Results` headings). Citations arrive as inline stream metadata and are normalized and deduplicated; usage arrives as a trailing inline `<usage>` stream tag carrying token counts and Brave's own dollar cost breakdown, and `usage.costUsd` is set from the API-reported `X-Request-Total-Cost` figure (with the final stream chunk's token counts and legacy `x-request-*` response headers as fallbacks). The provider requires the Answers subscription on your Brave plan: a search-only key (no subscription) fails with a clear "not subscribed" error (`400 OPTION_NOT_IN_PLAN`, pointing at the plan upgrade), while an invalid key fails with `422 SUBSCRIPTION_TOKEN_INVALID` (pointing at `BRAVE_API_KEY`).
 
 ### Usage and cost reporting
 
@@ -90,6 +90,7 @@ Two Perplexity providers use the Agent API, which has no background mode. They c
 | `openrouter-online`, `openrouter-chat` | Token counts and a flat `cost` field (USD) |
 | `exa` | `costDollars.total` (USD); no token counts |
 | `grok` | Converted USD cost from xAI's `cost_in_usd_ticks`, surfaced as reported `costUsd` |
+| `brave-answers` | Token counts and total USD cost from the inline `<usage>` stream tag (`X-Request-Total-Cost`) |
 | `gemini-grounded` | `usageMetadata` token counts (`promptTokenCount`, `candidatesTokenCount`) only; no cost field |
 | `gemini-deep` | Interactions API token counts (`total_input_tokens`, `total_output_tokens`) only; no cost field |
 
@@ -105,10 +106,12 @@ So that the providers above (which report no native cost) can still be budgeted 
 | `native_tokens` (tokens reported; no cost field required) | `claude`, `openai-chat`, `gemini-chat`, `openai-deep`, `openai-deep-o3`, `gemini-deep`, `gemini-grounded`, `grok`* |
 | `request_priced` (flat/plan price per request) | `serpapi`, `searchapi`, `brave-search`, `kagi-fastgpt`, `perplexity-search` |
 | `credit_priced` (account credits per request) | `tavily`, `firecrawl-search`, `you-research` |
-| `api_unit_priced` (per token/unit, size known only after the call) | `jina-search`, `brave-answers` |
+| `api_unit_priced` (per token/unit, size known only after the call) | `jina-search`, `brave-answers`** |
 | `manual_unmetered` (no reliable per-call metering) | custom providers |
 
 \* `grok` is registered as `native_tokens` so it keeps a pre-dispatch estimate for `--max-estimated-cost` reservations, but it additionally reports an actual dollar cost (converted from xAI's `cost_in_usd_ticks`) as `usage.costUsd` — the registry kind describes the estimate lane, not a limit on reported cost.
+
+\*\* `brave-answers` is `api_unit_priced` for the estimate lane (cost depends on tokens consumed per call), but it likewise reports an actual dollar cost as `usage.costUsd`, taken from the `X-Request-Total-Cost` figure in Brave's inline `<usage>` stream tag.
 
 `request_priced` and `credit_priced` providers can produce a **network-free pre-dispatch estimate** used by the [estimated budget](/docs/commands#metering-registry-and-the-estimated-budget) (`--max-estimated-cost`). Estimates are guesses, kept entirely separate from reported cost: flat request-priced providers carry a default USD figure (`costConfidence: estimated`), while plan-dependent credit/unit providers emit only unit metadata until you configure a price in their [`options`](/docs/configuration). This is metadata about the provider, not a pricing table applied to reported cost.
 

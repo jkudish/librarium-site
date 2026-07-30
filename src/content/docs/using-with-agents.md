@@ -71,8 +71,8 @@ Groups:
   deep           -- Thorough async research (minutes)
   fast           -- Quick results from multiple tiers
   comprehensive  -- Deep + AI-grounded combined
-  llm            -- Ungrounded LLM baseline / contrast (no citations)
-  all            -- All 21 grounded providers (excludes the llm tier)
+  llm            -- Opt-in LLM answers with web search and citations by default
+  all            -- All 20 grounded providers (excludes the llm tier)
 
 Output lands in ./agents/librarium/<timestamp>-<slug>/:
   summary.md     -- Synthesized overview with stats

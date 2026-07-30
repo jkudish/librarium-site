@@ -6,7 +6,7 @@ order: 1
 
 ## What is librarium?
 
-Librarium fans out research queries to multiple search and deep-research APIs in parallel, then merges everything into one structured output. It ships with 25 built-in provider adapters spanning traditional search engines, AI-grounded answers, deep-research APIs, and an opt-in ungrounded LLM tier. Librarium works both as a CLI and as an embeddable library via `librarium/core`, which runs in Cloudflare Workers and other edge runtimes.
+Librarium fans out research queries to multiple search and deep-research APIs in parallel, then merges everything into one structured output. It ships with 24 built-in provider adapters spanning traditional search engines, AI-grounded answers, deep-research APIs, and an opt-in LLM tier. Librarium works both as a CLI and as an embeddable library via `librarium/core`, which runs in Cloudflare Workers and other edge runtimes.
 
 ## Installation
 

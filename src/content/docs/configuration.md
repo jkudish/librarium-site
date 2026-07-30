@@ -76,6 +76,60 @@ API keys use the `$ENV_VAR` pattern. The value `"$PERPLEXITY_API_KEY"` resolves 
 
 ## Model overrides
 
+Claude defaults to Sonnet 5 with a 16,000-token output ceiling, adaptive
+thinking, and `medium` effort. The larger ceiling leaves room for both thinking
+and the visible answer; it is a cap, not a target:
+
+```json
+{
+  "providers": {
+    "claude": {
+      "apiKey": "$ANTHROPIC_API_KEY",
+      "enabled": true,
+      "model": "claude-sonnet-5",
+      "options": {
+        "maxTokens": 16000,
+        "thinking": "adaptive",
+        "effort": "medium"
+      }
+    }
+  }
+}
+```
+
+`maxTokens` must be a positive integer. `thinking` accepts `adaptive` or
+`disabled`; `effort` accepts `low`, `medium`, `high`, `xhigh`, or `max`.
+Adaptive thinking and medium effort are automatic only for the default Sonnet
+5 model. When `model` is overridden, thinking and effort are omitted unless
+explicitly configured, avoiding unsupported fields on older models.
+
+OpenAI Research defaults to GPT-5.6 Sol with `xhigh` reasoning and OpenAI's
+standard web-search return-token budget. Configure its model and research
+limits under the canonical `openai-research` provider ID:
+
+```json
+{
+  "providers": {
+    "openai-research": {
+      "apiKey": "$OPENAI_API_KEY",
+      "enabled": true,
+      "model": "gpt-5.6-sol",
+      "options": {
+        "reasoningEffort": "high",
+        "maxToolCalls": 5,
+        "returnTokenBudget": "default"
+      }
+    }
+  }
+}
+```
+
+`reasoningEffort` accepts `none`, `low`, `medium`, `high`, `xhigh`, or `max`
+and defaults to `xhigh`. `maxToolCalls` must be a positive integer when set.
+`returnTokenBudget` accepts `default` or `unlimited` and defaults to `default`.
+Use `unlimited` only for high-effort research that needs to inspect unusually
+large amounts of web content; it can increase latency and token usage.
+
 Some providers support optional model overrides. Gemini Deep Research defaults to the `deep-research-preview-04-2026` agent; set `model` to `deep-research-max-preview-04-2026` for the heavier (and more expensive) variant:
 
 ```json
@@ -104,7 +158,7 @@ Grok (xAI) also accepts a `model` key. It requires `XAI_API_KEY` and defaults to
 }
 ```
 
-The llm-tier providers (`claude`, `openai-chat`, `gemini-chat`, `openrouter-chat`) each accept a per-provider `model` key the same way. See [Providers](/docs/providers#the-llm-tier-ungrounded-baseline--contrast) for their defaults.
+The llm-tier providers (`claude`, `openai-chat`, `gemini-chat`, `openrouter-chat`) each accept a per-provider `model` key the same way. See [Providers](/docs/providers#the-llm-tier) for their defaults.
 
 ## Query refinement config
 
@@ -195,7 +249,7 @@ librarium init --auto
 librarium init
 ```
 
-`init` never enables the ungrounded llm-tier providers by default: `init --auto` skips them even when their key is present (printing them as found-but-ungrounded with a hint to opt in), and interactive `init` lists them unchecked with an `[ungrounded]` marker. See [the llm tier](/docs/providers#the-llm-tier-ungrounded-baseline--contrast).
+`init` never enables llm-tier providers by default: `init --auto` skips them even when their key is present (printing them as found-but-opt-in), and interactive `init` lists them unchecked. See [the llm tier](/docs/providers#the-llm-tier).
 
 ## doctor
 

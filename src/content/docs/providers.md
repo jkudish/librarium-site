@@ -1,12 +1,12 @@
 ---
 title: Providers
-description: The four provider tiers, all 25 built-in providers, API key setup, and behavioral notes.
+description: The four provider tiers, all 24 built-in providers, API key setup, and behavioral notes.
 order: 4
 ---
 
 ## Provider tiers
 
-Librarium organizes its 25 built-in providers into four tiers based on capabilities, latency, and depth.
+Librarium organizes its 24 built-in providers into four tiers based on capabilities, latency, and depth.
 
 **deep-research.** Async deep research providers that take minutes to complete but produce comprehensive, multi-source reports. These providers may use a submit/poll/retrieve pattern. Best for thorough research on important topics.
 
@@ -14,7 +14,7 @@ Librarium organizes its 25 built-in providers into four tiers based on capabilit
 
 **raw-search.** Traditional search engine results. Fast responses with many links and snippets, but no AI synthesis. Useful for broad link discovery and verifying specific facts.
 
-**llm.** Ungrounded generic LLMs (Claude, OpenAI, Gemini, or anything via OpenRouter). These return the model's direct answer to the research prompt with no web grounding and no citations, so they contribute zero sources to the deduplicated source set, `sources.json`, and the report tallies. They exist as an opt-in baseline/contrast layer: run them alongside grounded research to see what the model says on its own versus what grounded providers surface. Because they are ungrounded, they are excluded from every grounded default group (`quick`, `fast`, `raw`, `deep`, `comprehensive`, and `all`). Opt in explicitly via `-p claude,openai-chat,...`, a custom group, or `--group llm`. Each provider takes a cheap default model with a per-provider `model` config override.
+**llm.** Generic model answers from Claude, OpenAI, Gemini, or OpenRouter. These are provider-style model calls rather than dedicated research APIs. Web search and citations are on by default and can be disabled globally with `defaults.llmWebSearch: false` or per provider with `options.webSearch: false`. They remain excluded from every grounded default group (`quick`, `fast`, `raw`, `deep`, `comprehensive`, and `all`) so normal runs do not silently add extra model calls. Opt in explicitly via `-p claude,openai-chat,...`, a custom group, or `--group llm`. Each provider accepts a default model with a per-provider `model` override.
 
 ## Provider list
 
@@ -23,8 +23,7 @@ Librarium organizes its 25 built-in providers into four tiers based on capabilit
 | [Perplexity Sonar Deep Research](https://docs.perplexity.ai/home) | `perplexity-sonar-deep` | deep-research | `PERPLEXITY_API_KEY` |
 | [Perplexity Deep Research](https://docs.perplexity.ai/home) | `perplexity-deep-research` | deep-research | `PERPLEXITY_API_KEY` |
 | [Perplexity Advanced Deep Research](https://docs.perplexity.ai/home) | `perplexity-advanced-deep` | deep-research | `PERPLEXITY_API_KEY` |
-| [OpenAI Deep Research (o4-mini)](https://developers.openai.com/api/reference/overview) | `openai-deep` | deep-research | `OPENAI_API_KEY` |
-| [OpenAI Deep Research (o3)](https://developers.openai.com/api/reference/overview) | `openai-deep-o3` | deep-research | `OPENAI_API_KEY` |
+| [OpenAI Research (GPT-5.6 Sol)](https://developers.openai.com/api/docs/guides/deep-research) | `openai-research` | deep-research | `OPENAI_API_KEY` |
 | [Gemini Deep Research](https://ai.google.dev/gemini-api/docs) | `gemini-deep` | deep-research | `GEMINI_API_KEY` |
 | [Perplexity Sonar Pro](https://docs.perplexity.ai/home) | `perplexity-sonar-pro` | ai-grounded | `PERPLEXITY_API_KEY` |
 | [Gemini Grounded Search](https://ai.google.dev/gemini-api/docs) | `gemini-grounded` | ai-grounded | `GEMINI_API_KEY` |
@@ -46,18 +45,18 @@ Librarium organizes its 25 built-in providers into four tiers based on capabilit
 | [Gemini Chat](https://ai.google.dev/gemini-api/docs) | `gemini-chat` | llm | `GEMINI_API_KEY` |
 | [OpenRouter Chat](https://openrouter.ai/models) | `openrouter-chat` | llm | `OPENROUTER_API_KEY` |
 
-## The llm tier (ungrounded baseline / contrast)
+## The llm tier
 
-The `llm` tier is deliberately kept apart from the grounded tiers. Grounded providers earn their place in the source tallies by citing the web; ungrounded LLMs do not, so librarium never silently folds them into a grounded run. `llm`-tier rows in the live table and result output render a dim `ungrounded` in place of the source count, and the dedupe pipeline, `sources.json`, and report source totals are completely unaffected by their presence. Use the built-in `llm` group (`--group llm`) to run all four at once.
+The `llm` tier is deliberately kept apart from the default grounded groups. Its adapters use their provider's web-search feature where available: Anthropic web search for `claude`, OpenAI `web_search` for `openai-chat`, Google Search grounding for `gemini-chat`, and OpenRouter's `openrouter:web_search` server tool for `openrouter-chat`. Disable web search globally with `defaults.llmWebSearch: false` or per provider with `options.webSearch: false`; a provider with search disabled contributes no citations or source URLs. Use the built-in `llm` group (`--group llm`) to run all four at once.
 
-**Opt-in, never auto-enabled.** Several llm-tier providers share an API key with their grounded counterparts (`OPENAI_API_KEY`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY`; Claude uses `ANTHROPIC_API_KEY`). To keep a plain `librarium run` -- which dispatches every *enabled* provider -- from silently calling an ungrounded model, `init` treats the llm tier specially:
+**Opt-in, never auto-enabled.** Several llm-tier providers share an API key with their grounded counterparts (`OPENAI_API_KEY`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY`; Claude uses `ANTHROPIC_API_KEY`). To keep a plain `librarium run` -- which dispatches every *enabled* provider -- from silently calling extra model APIs, `init` treats the llm tier specially:
 
-- `librarium init --auto` **does not** enable llm-tier providers, even when their key is present. It prints them as found-but-ungrounded with a hint to opt in.
-- Interactive `librarium init` **lists** the llm-tier providers but leaves them **unchecked** (with an `[ungrounded]` marker), so you must tick them deliberately.
+- `librarium init --auto` **does not** enable llm-tier providers, even when their key is present. It prints them as found-but-opt-in with a hint to opt in.
+- Interactive `librarium init` **lists** the llm-tier providers but leaves them **unchecked**, so you must select them deliberately.
 
 As a result they stay out of the default run unless you explicitly enable them in config. Reach for them on demand via `-p claude,openai-chat,...`, a custom group, or `--group llm` regardless of your init choices.
 
-Default models per provider (each overridable with a per-provider `model` config key): `claude` uses `claude-haiku-4-5`, `openai-chat` uses `gpt-5-mini`, `gemini-chat` uses `gemini-2.5-flash`, and `openrouter-chat` uses `openai/gpt-4o-mini`.
+Default models per provider (each overridable with a per-provider `model` config key): `claude` uses `claude-sonnet-5`, `openai-chat` uses `gpt-5-mini`, `gemini-chat` uses `gemini-3.6-flash`, and `openrouter-chat` uses `openai/gpt-5.6-terra`. Claude additionally exposes configurable output, thinking, and effort controls documented under [Model overrides](/docs/configuration#model-overrides).
 
 ## Provider notes
 
@@ -66,7 +65,7 @@ Default models per provider (each overridable with a per-provider `model` config
 Four providers use a true background submit/poll/retrieve pattern and return immediately in `mixed` or `async` mode:
 
 - `perplexity-sonar-deep` -- uses Perplexity's Async Sonar API (`POST /v1/async/sonar`, polled via `GET /v1/async/sonar/{id}`). Submits and returns a pending handle; poll with `librarium status --wait --retrieve`.
-- `openai-deep` and `openai-deep-o3` -- use OpenAI's background deep research API. Same submit-and-poll flow.
+- `openai-research` -- uses the OpenAI Responses API with GPT-5.6 Sol, `web_search`, and background execution. Same submit-and-poll flow.
 - `gemini-deep` -- uses Google's Interactions API (`POST /v1beta/interactions` with `background: true`). Submits and returns a pending handle; poll with `librarium status --wait --retrieve`.
 
 Two Perplexity providers use the Agent API, which has no background mode. They complete inline even in `mixed` or `async` mode:
@@ -75,6 +74,11 @@ Two Perplexity providers use the Agent API, which has no background mode. They c
 - `perplexity-advanced-deep`
 
 ### AI-grounded answer behavior
+
+**`openrouter-online` (ChatGPT Search).** Keeps its GPT-4o Mini/Exa-backed
+search profile but uses OpenRouter's current `openrouter:web_search` server
+tool rather than the deprecated `:online` model suffix. URL annotations are
+normalized into Librarium citations and source records.
 
 **`grok` (xAI).** Queries xAI's official Responses API with the `web_search` tool for live web grounding. Citations come from `url_citation` annotations, normalized into the source set, and the answer markdown keeps the inline `[[n]](url)` markers. Defaults to the `grok-4.5` model with a per-provider `model` override -- select `grok-4.3` for cost-sensitive runs (see [Model overrides](#model-overrides)). X / social search is intentionally excluded from requests. Reported cost is the honest API figure, converted from xAI's `cost_in_usd_ticks`.
 
@@ -103,7 +107,7 @@ So that the providers above (which report no native cost) can still be budgeted 
 | Kind | Providers |
 |---|---|
 | `native_cost` (API returns real cost) | `perplexity-sonar-pro`, `perplexity-sonar-deep`, `perplexity-deep-research`, `perplexity-advanced-deep`, `openrouter-online`, `openrouter-chat`, `exa` |
-| `native_tokens` (tokens reported; no cost field required) | `claude`, `openai-chat`, `gemini-chat`, `openai-deep`, `openai-deep-o3`, `gemini-deep`, `gemini-grounded`, `grok`* |
+| `native_tokens` (tokens reported; no cost field required) | `claude`, `openai-chat`, `gemini-chat`, `openai-research`, `gemini-deep`, `gemini-grounded`, `grok`* |
 | `request_priced` (flat/plan price per request) | `serpapi`, `searchapi`, `brave-search`, `kagi-fastgpt`, `perplexity-search` |
 | `credit_priced` (account credits per request) | `tavily`, `firecrawl-search`, `you-research` |
 | `api_unit_priced` (per token/unit, size known only after the call) | `jina-search`, `brave-answers`** |
@@ -116,6 +120,12 @@ So that the providers above (which report no native cost) can still be budgeted 
 `request_priced` and `credit_priced` providers can produce a **network-free pre-dispatch estimate** used by the [estimated budget](/docs/commands#metering-registry-and-the-estimated-budget) (`--max-estimated-cost`). Estimates are guesses, kept entirely separate from reported cost: flat request-priced providers carry a default USD figure (`costConfidence: estimated`), while plan-dependent credit/unit providers emit only unit metadata until you configure a price in their [`options`](/docs/configuration). This is metadata about the provider, not a pricing table applied to reported cost.
 
 ### Model overrides
+
+`openai-research` defaults to `gpt-5.6-sol` and accepts a `model` override plus
+the `reasoningEffort`, `maxToolCalls`, and `returnTokenBudget` options described
+in [Configuration](/docs/configuration#model-overrides). The return-token budget
+defaults to `default`; set it to `unlimited` only for high-effort research that
+needs unusually large amounts of returned web content.
 
 `gemini-deep` accepts a `model` config key to select the Deep Research agent. It defaults to the `deep-research-preview-04-2026` agent; set `model` to `deep-research-max-preview-04-2026` for the heavier (and more expensive) variant:
 
@@ -145,7 +155,7 @@ So that the providers above (which report no native cost) can still be budgeted 
 }
 ```
 
-The four llm-tier providers (`claude`, `openai-chat`, `gemini-chat`, `openrouter-chat`) also accept a per-provider `model` config override; see [the llm tier](#the-llm-tier-ungrounded-baseline--contrast) for their defaults. Aside from `grok` (above), no other built-in provider currently exposes a model override via config. The OpenRouter and Perplexity Agent-based grounded providers use fixed model identifiers in their adapter code.
+The four llm-tier providers (`claude`, `openai-chat`, `gemini-chat`, `openrouter-chat`) also accept a per-provider `model` config override; see [the llm tier](#the-llm-tier) for their defaults. Aside from `openai-research` and `grok` (above), no other built-in provider currently exposes a model override via config. The OpenRouter and Perplexity Agent-based grounded providers use fixed model identifiers in their adapter code.
 
 ### API key setup and signup links
 
@@ -167,11 +177,11 @@ The four llm-tier providers (`claude`, `openai-chat`, `gemini-chat`, `openrouter
 | Firecrawl | `FIRECRAWL_API_KEY` | [docs.firecrawl.dev](https://docs.firecrawl.dev/introduction) |
 | OpenRouter | `OPENROUTER_API_KEY` | [openrouter.ai](https://openrouter.ai/models) |
 
-Run `librarium init --auto` to discover which keys are already present in your environment and enable their matching providers automatically. Note that `init` never auto-enables llm-tier providers, even when their key is present -- see [the llm tier](#the-llm-tier-ungrounded-baseline--contrast).
+Run `librarium init --auto` to discover which keys are already present in your environment and enable their matching providers automatically. Note that `init` never auto-enables llm-tier providers, even when their key is present -- see [the llm tier](#the-llm-tier).
 
 ## Async behavior notes
 
-`perplexity-sonar-deep` uses Perplexity's Async Sonar API (`POST /v1/async/sonar`, polled via `GET /v1/async/sonar/{id}`). In `mixed` and `async` modes it submits and returns immediately; `librarium status --wait --retrieve` polls and retrieves results like `openai-deep` tasks.
+`perplexity-sonar-deep` uses Perplexity's Async Sonar API (`POST /v1/async/sonar`, polled via `GET /v1/async/sonar/{id}`). In `mixed` and `async` modes it submits and returns immediately; `librarium status --wait --retrieve` polls and retrieves results like `openai-research` tasks.
 
 `gemini-deep` uses Google's Interactions API (`POST /v1beta/interactions` with `background: true`). In `mixed` and `async` modes it submits and returns immediately; poll with `librarium status --wait --retrieve`.
 
@@ -179,10 +189,12 @@ Run `librarium init --auto` to discover which keys are already present in your e
 
 ## Legacy provider ID aliases
 
-Perplexity provider IDs were renamed to match current product names:
+These provider IDs were renamed to match current product names:
 
 - `perplexity-sonar` renamed to `perplexity-sonar-pro`
 - `perplexity-deep` renamed to `perplexity-sonar-deep`
+- `openai-deep` renamed to `openai-research`
+- `openai-deep-o3` renamed to `openai-research`
 
 For backward compatibility, librarium still accepts legacy IDs in:
 

@@ -57,7 +57,7 @@ The `dispatch()` function accepts an optional `tierQueries` parameter that overr
 ```ts
 const { results } = await dispatch({
   config,
-  providerIds: ['gemini-grounded', 'openrouter-online', 'openai-deep'],
+  providerIds: ['gemini-grounded', 'openrouter-online', 'openai-research'],
   query: 'How to scale postgres connections',
   mode: 'mixed',
   credentials,

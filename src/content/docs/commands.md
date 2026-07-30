@@ -72,7 +72,7 @@ $ librarium run "postgres pooling best practices"
   ✗ tavily                 raw-search         0.4s   HTTP 401 Unauthorized
     ↳ falling back to jina-search
   ✓ jina-search            raw-search         0.7s     8 results   (fallback for tavily)
-  ◷ openai-deep            deep-research   submitted
+  ◷ openai-research        deep-research   submitted
 
   5 succeeded, 0 failed, 1 async pending in 3.5s
   ▸ 74 unique sources after dedupe (74 total citations)
@@ -199,7 +199,7 @@ librarium status --wait --retrieve
 Retrieved results render with the same table line format as `run`, with the output file and word count appended:
 
 ```
-  ✓ openai-deep   deep-research     95.0s    14 sources   openai-deep.md, 2310 words
+  ✓ openai-research   deep-research     95.0s    14 sources   openai-research.md, 2310 words
 ```
 
 ## usage
@@ -225,7 +225,7 @@ Usage (last 30 days):
 
   provider       cost  est. cost  tokens  runs
   -----------  ------  ---------  ------  ----
-  openai-deep   $0.50          -    5.0k     1
+  openai-research   $0.50          -    5.0k     1
   exa          $0.020          -    1.5k     1
   serpapi           -    ~$0.015       -     1
 

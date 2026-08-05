@@ -220,7 +220,7 @@ All responses are validated. Invalid payloads fail the operation.
 ### Custom providers
 
 - **Reported cost works.** If your `execute`/`retrieve` result includes a `usage` object with `costUsd`, librarium surfaces it as `metering.actual` with `source: "provider_reported"`, counts it toward the `--max-cost` budget, and aggregates it in `librarium usage`. Token-only `usage` (no `costUsd`) is reported as tokens. This is the recommended way for a custom provider to expose cost -- it is taken from your response, never estimated.
-- **Custom providers are `manual_unmetered`.** The per-provider `metering_kind` and pre-dispatch *estimate* (`estimateMetering`) are a built-in registry concept; custom providers have no registry entry, so their `metering.kind` is always `manual_unmetered` and they produce no pre-dispatch estimate.
+- **Custom providers are `manual_unmetered`.** The per-provider metering declaration and pre-dispatch *estimate* (`estimateMetering`) come from built-in descriptors; custom providers have no descriptor entry, so their `metering.kind` is always `manual_unmetered` and they produce no pre-dispatch estimate.
 - **Estimated budget treats them as $0.** Because they have no estimate, custom providers reserve `0` against `--max-estimated-cost` and are never skipped by it. The honest `--max-cost` (reported) budget is what bounds their actual spend.
 
 In short: return `usage.costUsd` to participate in reported-cost tracking and `--max-cost`; pre-dispatch estimation and `--max-estimated-cost` apply to built-in providers only.

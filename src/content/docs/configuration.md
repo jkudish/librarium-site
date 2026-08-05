@@ -130,6 +130,12 @@ and defaults to `xhigh`. `maxToolCalls` must be a positive integer when set.
 Use `unlimited` only for high-effort research that needs to inspect unusually
 large amounts of web content; it can increase latency and token usage.
 
+Provider `options` are validated against the built-in descriptor schema during
+initialization. Invalid values produce a warning and block new `execute`,
+`submit`, and `test` work before HTTP. The provider remains registered so its
+ID cannot be claimed by a custom adapter and existing background tasks can
+still be polled and retrieved after a configuration mistake.
+
 Some providers support optional model overrides. Gemini Deep Research defaults to the `deep-research-preview-04-2026` agent; set `model` to `deep-research-max-preview-04-2026` for the heavier (and more expensive) variant:
 
 ```json

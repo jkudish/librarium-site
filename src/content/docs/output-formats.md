@@ -19,7 +19,6 @@ Each research run creates a timestamped output directory:
   brave-answers.md
   brave-answers.meta.json
   answer.md              # Present when the run was `librarium answer` or the wizard's synthesis toggle
-  async-tasks.json       # Present if any async tasks were submitted
 ```
 
 `summary.md` is generated at the end of every run. It includes the query, a deduplicated source count, a per-provider results table (status, duration, citation count, reported usage), and a combined unique-sources section. When a provider is still pending async, its row shows `pending` until `status --retrieve` updates it.
@@ -30,7 +29,9 @@ Each research run creates a timestamped output directory:
 
 ```json
 {
-  "version": 1,
+  "schemaVersion": 2,
+  "revision": 4,
+  "status": "completed",
   "timestamp": 1771500000,
   "slug": "postgresql-pooling",
   "query": "PostgreSQL connection pooling best practices",
@@ -38,14 +39,14 @@ Each research run creates a timestamped output directory:
   "outputDir": "/absolute/path/to/output",
   "providers": [
     {
-      "id": "perplexity-sonar-pro",
-      "tier": "ai-grounded",
+      "id": "openai-research",
+      "tier": "deep-research",
       "status": "success",
       "durationMs": 2340,
       "wordCount": 850,
       "citationCount": 12,
-      "outputFile": "perplexity-sonar-pro.md",
-      "metaFile": "perplexity-sonar-pro.meta.json",
+      "outputFile": "openai-research.md",
+      "metaFile": "openai-research.meta.json",
       "usage": {
         "inputTokens": 312,
         "outputTokens": 890,
@@ -55,6 +56,13 @@ Each research run creates a timestamped output directory:
       "metering": {
         "kind": "native_cost",
         "actual": { "costUsd": 0.0012, "source": "provider_reported" }
+      },
+      "task": {
+        "taskId": "response_abc123",
+        "submittedAt": 1771500000000,
+        "status": "completed",
+        "completedAt": 1771500120000,
+        "retrievedAt": 1771500125000
       }
     }
   ],
@@ -63,10 +71,20 @@ Each research run creates a timestamped output directory:
     "unique": 28,
     "file": "sources.json"
   },
-  "asyncTasks": [],
   "exitCode": 0
 }
 ```
+
+`run.json` is created before dispatch and is the run's only persisted source
+of truth. `revision` increases on every atomic mutation. `status` is
+`running`, `awaiting_async`, `completed`, `partial`, `failed`, or `cancelled`;
+`exitCode` remains `null` while the run is active or awaiting retrieval.
+
+Background task state lives directly on its provider entry. After retrieval,
+the compact task audit remains with `retrievedAt`. Librarium no longer creates
+or reads `async-tasks.json`, and schema v1 run directories are intentionally
+unsupported. Per-run locking serializes CLI and MCP reconciliation so task and
+provider state cannot overwrite each other.
 
 `usage` appears on providers whose API reported token or cost data -- it is taken from API responses only, never estimated from pricing tables.
 

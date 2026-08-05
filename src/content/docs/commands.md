@@ -153,7 +153,7 @@ Use `--max-cost` as a backstop against runaway synchronous fan-outs, not as a ha
 
 `--max-cost` is deliberately reported-only: it never guesses. The gap it leaves -- providers that report no cost (most raw-search APIs) run "for free" as far as the breaker is concerned -- is filled by a separate, opt-in **estimated** lane.
 
-Every provider declares a **metering kind** in a built-in registry, visible in [`librarium ls`](#ls) (and its `--json`):
+Every provider declares a **metering kind** in its built-in descriptor, visible in [`librarium ls`](#ls) (and its `--json`):
 
 | Kind | Meaning | Examples |
 |---|---|---|

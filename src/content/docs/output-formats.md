@@ -19,6 +19,7 @@ Each research run creates a timestamped output directory:
   brave-answers.md
   brave-answers.meta.json
   answer.md              # Present when the run was `librarium answer` or the wizard's synthesis toggle
+  verification.json      # Present after `librarium answer --verify`
 ```
 
 `summary.md` is generated at the end of every run. It includes the query, a deduplicated source count, a per-provider results table (status, duration, citation count, reported usage), and a combined unique-sources section. When a provider is still pending async, its row shows `pending` until `status --retrieve` updates it.
@@ -50,12 +51,10 @@ Each research run creates a timestamped output directory:
       "usage": {
         "inputTokens": 312,
         "outputTokens": 890,
-        "totalTokens": 1202,
-        "costUsd": 0.0012
+        "totalTokens": 1202
       },
       "metering": {
-        "kind": "native_cost",
-        "actual": { "costUsd": 0.0012, "source": "provider_reported" }
+        "kind": "native_tokens"
       },
       "task": {
         "taskId": "response_abc123",
@@ -88,6 +87,8 @@ provider state cannot overwrite each other.
 
 `usage` appears on providers whose API reported token or cost data -- it is taken from API responses only, never estimated from pricing tables.
 
+After `librarium answer --verify`, the manifest also contains a top-level `verification` object. It records verification status and reasons, the claim-support matrix, follow-up queries and provider attempts, verification LLM attempts, whether `answer.md` was revised, and verification-only usage. The same complete audit record is written to `verification.json`; an incomplete or failed verification preserves the original grounded answer.
+
 ## --json vs results.jsonl
 
 `--json` (the `run` flag) prints the `run.json` manifest to stdout. This is metadata only -- provider IDs, statuses, timing, citation counts -- not the full content.
@@ -101,6 +102,8 @@ Each line in a `results.jsonl` file has a `type` field:
 **Line 1 -- run header** (`"type":"run"`): query, slug, timestamp, mode, succeeded/failed/pending counts, unique source count, total citation count, and optional `refinedQueries` (only present when `--refine` was used).
 
 **Optional answer line** (`"type":"answer"`): emitted right after the run header when the run directory contains an `answer.md` (from [`librarium answer`](/docs/commands#answer) or the wizard's synthesis toggle). Carries optional `provider` and `model` (from `run.json`'s `answer` metadata) and `content` (the full `answer.md` body).
+
+**Optional verification line** (`"type":"verification"`): emitted after the answer line for `librarium answer --verify`. Carries the full claim-support matrix, follow-up attempts, actual LLM provider/model records, incomplete reasons, revision state, and verification-only usage and cost totals.
 
 **One line per provider** (`"type":"result"`): id, tier, status, durationMs, citationCount, optional usage object, optional error string, optional fallbackFor string, and `content` (the full markdown from the provider's `.md` file, or `null` when missing or pending).
 
@@ -129,7 +132,7 @@ Generate a self-contained `report.html` for a run directory (default: the most r
 librarium html [run-dir] [--open]
 ```
 
-The report contains the query, run metadata, the provider results table as tabs, with each provider's rendered markdown in a panel below, and the deduped source list with provider attribution. When the run directory contains an `answer.md` (from [`librarium answer`](/docs/commands#answer) or the wizard's synthesis toggle), an Answer section leads the report before the provider tabs, showing the synthesizing provider/model dimly. Answer and provider markdown are HTML-escaped with the same untrusted handling, so untrusted output cannot inject script. Results retrieved after the run (async deep research) fill in when the report is regenerated; `status --retrieve` regenerates an existing `report.html` automatically.
+The report contains the query, run metadata, the provider results table as tabs, with each provider's rendered markdown in a panel below, and the deduped source list with provider attribution. When the run directory contains an `answer.md` (from [`librarium answer`](/docs/commands#answer) or the wizard's synthesis toggle), an Answer section leads the report before the provider tabs, showing the synthesizing provider/model dimly. A verified answer also includes a human-readable verification section with claim status, evidence URLs, follow-up attempts, LLM calls, revision state, and usage. Answer and provider markdown are HTML-escaped with the same untrusted handling, so untrusted output cannot inject script. Results retrieved after the run (async deep research) fill in when the report is regenerated; `status --retrieve` regenerates an existing `report.html` automatically.
 
 ## jsonl command
 

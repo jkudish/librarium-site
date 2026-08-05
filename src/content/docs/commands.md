@@ -93,6 +93,16 @@ librarium answer <query> [options]
 
 `answer` runs the same fan-out as `run` (defaulting to the `quick` group, overridable with `-g`/`-p`/`-m` and the usual run flags), then makes one LLM synthesis call over the successful providers' content plus the deduped source list. The model is instructed to answer only from the findings, cite with inline `[n]` indices that map to the numbered source list, and state what is uncertain rather than invent. The answer is rendered in the terminal followed by a hyperlinked source list, and written to `answer.md` in the run directory.
 
+Pass `--verify` to add a bounded, opt-in evidence pass after synthesis:
+
+```bash
+librarium answer "what changed in postgres 17 logical replication" --verify
+```
+
+Librarium selects up to eight material factual claims and first checks the independent evidence already returned by the fan-out. For unresolved claims, it runs at most three successful targeted searches total, using only eligible `ai-grounded` and `raw-search` providers from the original run. Each selected claim gets at most one query and three provider attempts; deep-research providers are never used for these follow-ups. Verification inherits the original timeout, fallback policy, and both cost ceilings. If a ceiling is already exhausted, it makes no verification call.
+
+Verification fails open: incomplete evidence, exhausted budgets, provider failures, or LLM failures leave the original grounded `answer.md` intact. A fully supported pass may revise the answer. The complete audit record is stored in `verification.json` and the top-level `run.json` `verification` field; `results.jsonl` gains a `"type":"verification"` line, and `report.html` renders a human-readable verification section. Usage totals cover verification follow-ups and verification LLM calls only, with provider and LLM lanes kept separate.
+
 ```
 $ librarium answer "what changed in postgres 17 logical replication"
 

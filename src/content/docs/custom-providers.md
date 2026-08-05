@@ -30,14 +30,15 @@ Required fields:
 - `displayName`
 - `tier` (`deep-research`, `ai-grounded`, or `raw-search`)
 - `envVar` (string; may be empty only when `requiresApiKey` is `false`)
+- `execution` (`inline` or `background`)
 - `execute(query, options)`
 
-Optional methods:
+Execution is a discriminated contract:
 
-- `submit(query, options)`
-- `poll(handle)`
-- `retrieve(handle)`
-- `test()`
+- `execution: "inline"` completes work in `execute()` and must not expose task lifecycle hooks.
+- `execution: "background"` still implements `execute()` for synchronous callers and must also implement all of `submit(query, options)`, `poll(handle)`, and `retrieve(handle)`. A partial background lifecycle is rejected.
+
+`test()` is optional for either execution mode.
 
 Optional metadata:
 
@@ -178,6 +179,7 @@ Error:
     "id": "my-script-provider",
     "displayName": "My Script Provider",
     "tier": "deep-research",
+    "execution": "background",
     "envVar": "MY_PROVIDER_API_KEY",
     "requiresApiKey": true,
     "capabilities": {
@@ -194,7 +196,9 @@ Error:
 Rules:
 
 - `displayName` and `tier` are required.
-- `execute` is expected. If `capabilities.execute` is explicitly `false`, load fails.
+- `execution` must be `inline` or `background`.
+- `capabilities.execute` must be `true`.
+- Background scripts must declare `submit`, `poll`, and `retrieve` as `true`; inline scripts must not declare those hooks.
 - If `id` is returned, it must match the configured provider ID.
 
 ### Operation data shapes
@@ -220,23 +224,30 @@ All responses are validated. Invalid payloads fail the operation.
 ### Custom providers
 
 - **Reported cost works.** If your `execute`/`retrieve` result includes a `usage` object with `costUsd`, librarium surfaces it as `metering.actual` with `source: "provider_reported"`, counts it toward the `--max-cost` budget, and aggregates it in `librarium usage`. Token-only `usage` (no `costUsd`) is reported as tokens. This is the recommended way for a custom provider to expose cost -- it is taken from your response, never estimated.
-- **Custom providers are `manual_unmetered`.** The per-provider `metering_kind` and pre-dispatch *estimate* (`estimateMetering`) are a built-in registry concept; custom providers have no registry entry, so their `metering.kind` is always `manual_unmetered` and they produce no pre-dispatch estimate.
+- **Custom providers are `manual_unmetered`.** The per-provider metering declaration and pre-dispatch *estimate* (`estimateMetering`) come from built-in descriptors; custom providers have no descriptor entry, so their `metering.kind` is always `manual_unmetered` and they produce no pre-dispatch estimate.
 - **Estimated budget treats them as $0.** Because they have no estimate, custom providers reserve `0` against `--max-estimated-cost` and are never skipped by it. The honest `--max-cost` (reported) budget is what bounds their actual spend.
 
 In short: return `usage.costUsd` to participate in reported-cost tracking and `--max-cost`; pre-dispatch estimation and `--max-estimated-cost` apply to built-in providers only.
 
 ### Built-in adapters
 
-A built-in adapter declares its pricing model in the central registry (`src/core/metering.ts`). The metering kinds are `native_cost`, `native_tokens`, `request_priced`, `credit_priced`, `api_unit_priced`, and `manual_unmetered` -- see [Metering kinds](/docs/providers#metering-kinds) for the full mapping. Request- and credit-priced kinds can carry a network-free default estimate (request-priced may include a flat USD figure; plan-dependent credit/unit kinds emit unit metadata only, with a USD figure appearing only when the user configures pricing via provider `options`). Estimates never set `usage.costUsd`.
+A built-in adapter declares its pricing model in its typed provider descriptor. The metering kinds are `native_cost`, `native_tokens`, `request_priced`, `credit_priced`, `api_unit_priced`, and `manual_unmetered` -- see [Metering kinds](/docs/providers#metering-kinds) for the full mapping. Request- and credit-priced kinds can carry a network-free default estimate (request-priced may include a flat USD figure; plan-dependent credit/unit kinds emit unit metadata only, with a USD figure appearing only when the user configures pricing via provider `options`). Estimates never set `usage.costUsd`.
 
 ## Adding a built-in adapter
 
-Built-in adapters live in [core](/docs/library) and must stay runtime-portable (fetch-only HTTP, no `node:*`, no direct `process.env`; a workerd CI suite enforces this). To add one, update **all** of these in lockstep -- several are guarded by tests, so a partial change fails CI:
+Built-in adapters live in [core](/docs/library) and must stay runtime-portable (fetch-only HTTP, no `node:*`, no direct `process.env`; a workerd CI suite enforces this). Each built-in has one typed runtime descriptor composed from:
 
-1. **Adapter** -- `src/adapters/<id>.ts`, extending `BaseProvider` and implementing `execute` (plus `submit`/`poll`/`retrieve` for async deep research). Return `usage` when the API reports cost/tokens.
-2. **Registration** -- add an instance to the `builtIns` array in `src/adapters/index.ts` (`initializeProviders`).
-3. **Constants** (`src/constants.ts`) -- `PROVIDER_ENV_VARS`, `PROVIDER_DISPLAY_NAMES`, and at least one entry in `DEFAULT_GROUPS` (and `all`).
-4. **Metering registry** (`src/core/metering.ts`) -- add a `REGISTRY` entry with the provider's `kind` (and, for priced kinds, `defaultPerRequestUsd` / `defaultUnitsPerRequest` / `unit`). **Required:** the lockstep test in `tests/metering.test.ts` asserts every built-in has a registry entry, so a missing entry fails CI.
+- `src/core/provider-descriptor.ts`: portable metadata, aliases, credential name, tier, display/catalog copy, default model, metering, option schema, and discriminated execution capabilities.
+- `src/adapters/provider-descriptors.ts`: the adapter factory for each metadata definition.
+
+Runtime registration, constants, aliases, the onboarding catalog, and metering are derived from these descriptors. Default groups remain explicit product policy in `src/constants.ts`, but startup validation rejects unknown IDs, duplicates, tier mistakes, or a stale `all`/`llm` roster.
+
+To add one:
+
+1. **Adapter** -- `src/adapters/<id>.ts`, extending `BaseProvider` for inline execution or `BackgroundBaseProvider` for a complete remote-task lifecycle. Implement `execute` in both cases; background adapters also implement `submit`/`poll`/`retrieve`. Return `usage` when the API reports cost/tokens.
+2. **Descriptor definition** -- add the portable metadata entry in `src/core/provider-descriptor.ts`, including its metering declaration and a passthrough Zod schema for supported `options`.
+3. **Factory** -- add the constructor mapping in `src/adapters/provider-descriptors.ts`. `initializeProviders()` validates configured options, constructs adapters from this descriptor list, and checks that the runtime adapter matches its declared ID, tier, execution mode, display name, and credential. Invalid options warn but do not unregister the adapter: Librarium blocks new `execute`, `submit`, and `test` work before HTTP while retaining `poll`/`retrieve` for existing background tasks and preserving reserved built-in IDs.
+4. **Group policy** -- place the canonical ID in the intended explicit groups in `src/constants.ts`. Every non-LLM built-in must appear in `all`; every LLM built-in must appear in `llm`.
 5. **Core export** -- `export * from './adapters/<id>.js'` in `src/core-entry.ts`.
 6. **README** -- bump the "N built-in provider adapters" count; the README-drift test (`tests/readme-drift.test.ts`) tripwires on the provider count, tiers, and group names.
 

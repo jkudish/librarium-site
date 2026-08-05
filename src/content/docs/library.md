@@ -6,7 +6,7 @@ order: 8
 
 ## librarium/core
 
-Everything the CLI does with providers is importable. The `librarium/core` entry exposes the adapters, registry, dispatcher, normalizer, and types. It returns results in memory. Writing `run.json` and report files is a CLI concern; the core has no opinion about persistence.
+Everything the CLI does with providers is importable. The `librarium/core` entry exposes the adapters, registry, dispatcher, normalizer, descriptors, and types. It returns results in memory. Writing `run.json` and report files is a Node application-service concern; the core has no opinion about persistence.
 
 The core entry has zero Node-only dependencies: no `node:fs`, no `process.env` access, fetch-based HTTP only. It is tested in workerd (Cloudflare's runtime) on every CI run.
 
@@ -25,7 +25,7 @@ await initializeProviders({ credentials });
 
 const config: Config = {
   version: 1,
-  defaults: { outputDir: '', maxParallel: 4, timeout: 60, asyncTimeout: 600, asyncPollInterval: 5, mode: 'sync' },
+  defaults: { outputDir: '', maxParallel: 4, timeout: 60, asyncTimeout: 600, asyncPollInterval: 5, mode: 'sync', llmWebSearch: true },
   providers: {
     'gemini-grounded': { enabled: true },
     'openrouter-online': { enabled: true },
@@ -99,6 +99,70 @@ Each result in the `results` array includes an optional `usage` field populated 
 
 The `usage` field is also written to each provider's `.meta.json` file and included in `run.json` when running via the CLI.
 
+## Built-in provider descriptors
+
+`BUILTIN_PROVIDER_DESCRIPTORS` is the typed inventory behind initialization.
+Each entry combines its adapter factory with tier, display/catalog metadata,
+credential environment variable, metering declaration, option schema,
+aliases, model default, registration order, and discriminated execution
+capabilities.
+
+```ts
+import { BUILTIN_PROVIDER_DESCRIPTORS } from 'librarium/core';
+
+for (const descriptor of BUILTIN_PROVIDER_DESCRIPTORS) {
+  console.log({
+    id: descriptor.id,
+    model: descriptor.defaultModel,
+    execution: descriptor.capabilities.execution,
+    options: descriptor.optionsSchema,
+  });
+}
+```
+
+Registry initialization, provider names, credential lookup, aliases, catalog
+output, and metering derive from this inventory. Default groups remain explicit
+policy and are validated against it. Invalid configured options warn while the
+adapter remains registered: new `execute`, `submit`, and `test` work is blocked
+before HTTP, while background `poll` and `retrieve` remain available.
+
+## Headless durable runs (librarium/node)
+
+`executeResearchRun(request, overrides?)` is the shared application service
+behind the CLI and MCP server. It performs the durable lifecycle without
+spinners, prompts, or console output: create and reconcile `run.json`, dispatch
+providers, write provider artifacts, deduplicate citations, and write
+`prompt.md`, `sources.json`, and `summary.md`.
+
+```ts
+import { initializeProviders } from 'librarium/core';
+import { executeResearchRun } from 'librarium/node';
+
+const credentials = { env: process.env };
+await initializeProviders({ ...config, credentials });
+
+const run = await executeResearchRun({
+  query: 'Compare current deep-research APIs',
+  config,
+  providerIds: ['openai-research'],
+  outputDir: '/absolute/path/to/run',
+  slug: 'compare-current-deep-research-apis',
+  credentials,
+  onEvent(event) {
+    if (event.type === 'dispatch-progress') renderProgress(event.progress);
+  },
+});
+
+console.log(run.manifest.status, run.sources.length);
+```
+
+Production defaults are used when `overrides` is omitted. Tests and embedders
+may independently replace `providerRegistry`, `taskStore`, `httpClient`, or
+`dispatch`. `onEvent` is typed and observational: handler failures cannot
+interrupt dispatch or persistence. `postDispatch` may attach answer or
+verification metadata before terminalization; its failures become warning
+events without discarding the run.
+
 ## Custom providers (librarium/node)
 
 Hand-written providers work anywhere: implement the `Provider` interface (fetch-based) and call `registerProvider(provider)` from `librarium/core` -- edge runtimes included.
@@ -106,7 +170,7 @@ Hand-written providers work anywhere: implement the `Provider` interface (fetch-
 npm- and script-based custom providers need Node (module resolution, child processes), so they load through the dedicated `librarium/node` entry point -- the same loader the CLI uses. It exposes:
 
 - `loadCustomProviders(config, options?)` -- loads (but does not register) the npm/script providers declared in `config.customProviders`, applying the same `trustedProviderIds` gating and reserved-ID protection as the CLI. Returns `{ providers, loadedIds, skippedIds, warnings }`.
-- `registerCustomProviders(config, options?)` -- convenience that loads and registers them into the core registry. Call it after `initializeProviders()` so reserved-ID detection sees the built-ins. Same return shape.
+- `registerCustomProviders(config, options?)` -- convenience that loads and registers them into the core registry. Built-in IDs are reserved from the descriptor inventory even before initialization or when options are invalid. Same return shape.
 
 ```ts
 import { dispatch, initializeProviders, getProvider } from 'librarium/core';

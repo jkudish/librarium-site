@@ -160,6 +160,55 @@ Grok (xAI) also accepts a `model` key. It requires `XAI_API_KEY` and defaults to
 
 The llm-tier providers (`claude`, `openai-chat`, `gemini-chat`, `openrouter-chat`) each accept a per-provider `model` key the same way. See [Providers](/docs/providers#the-llm-tier) for their defaults.
 
+## Firecrawl Search options
+
+Firecrawl Search defaults to ten web results. Its `limit` applies **per
+source**, so enabling both web and news can return up to twice the configured
+number before cross-source URL deduplication.
+
+```json
+{
+  "providers": {
+    "firecrawl-search": {
+      "apiKey": "$FIRECRAWL_API_KEY",
+      "enabled": true,
+      "options": {
+        "sources": ["web", "news"],
+        "limit": 5,
+        "tbs": "qdr:w",
+        "country": "CA",
+        "location": "Toronto, Ontario, Canada",
+        "includeDomains": ["example.com"],
+        "categories": ["research", "pdf"],
+        "ignoreInvalidURLs": true
+      }
+    }
+  }
+}
+```
+
+Supported options:
+
+| Option | Accepted values |
+|---|---|
+| `sources` | A non-empty combination of `web` and `news`; defaults to `["web"]` |
+| `limit` | Integer from 1 to 100 per source; defaults to 10 |
+| `tbs` | `qdr:h`, `qdr:d`, `qdr:w`, `qdr:m`, `qdr:y`, `sbd:1`, or a complete custom range such as `cdr:1,cd_min:01/01/2026,cd_max:01/31/2026` |
+| `country` | Two-letter country code, normalized to uppercase |
+| `location` | Non-empty location string; set it with `country` for better geo-targeting |
+| `includeDomains` | Non-empty hostname list; mutually exclusive with `excludeDomains` |
+| `excludeDomains` | Non-empty hostname list; mutually exclusive with `includeDomains` |
+| `categories` | A non-empty combination of `github`, `research`, and `pdf` |
+| `ignoreInvalidURLs` | Boolean; excludes results Firecrawl cannot use with its other endpoints |
+
+Invalid values are rejected before an API request is made. Firecrawl's returned
+`creditsUsed` is recorded as provider-reported credit units; Librarium does not
+fabricate a USD cost. Images, `scrapeOptions`, and enterprise search controls
+are not exposed by this adapter.
+
+See the [Firecrawl Search API reference](https://docs.firecrawl.dev/api-reference/endpoint/search)
+for the upstream request and response contract.
+
 ## Query refinement config
 
 The `refine` key configures which provider and model are used when `librarium run --refine` or `librarium refine` rewrites a query into tier-tuned variants. By default the LLM call cascades through the first available of OpenAI, Gemini, or Perplexity by configured API key. Pin a specific provider and model with:

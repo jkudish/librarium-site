@@ -140,9 +140,11 @@ So that the providers above (which report no native cost) can still be budgeted 
 
 `openai-research` defaults to `gpt-5.6-sol` and accepts a `model` override plus
 the `reasoningEffort`, `maxToolCalls`, and `returnTokenBudget` options described
-in [Configuration](/docs/configuration#model-overrides). The return-token budget
-defaults to `default`; set it to `unlimited` only for high-effort research that
-needs unusually large amounts of returned web content.
+in [Configuration](/docs/configuration#model-overrides). Reasoning defaults to
+`high`; use `medium` for speed or `xhigh` as a quality-first override. Tool
+calls are uncapped by default. The return-token budget defaults to `default`;
+set it to `unlimited` only for high-effort research that needs unusually large
+amounts of returned web content.
 
 `gemini-deep` accepts a `model` config key to select the Deep Research agent. It defaults to the `deep-research-preview-04-2026` agent; set `model` to `deep-research-max-preview-04-2026` for the heavier (and more expensive) variant:
 

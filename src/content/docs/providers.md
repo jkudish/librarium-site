@@ -39,7 +39,7 @@ Librarium organizes its 24 built-in providers into four tiers based on capabilit
 | [SearchAPI](https://www.searchapi.io/docs/google) | `searchapi` | raw-search | `SEARCHAPI_API_KEY` |
 | [SerpAPI](https://serpapi.com/search-api) | `serpapi` | raw-search | `SERPAPI_API_KEY` |
 | [Tavily Search](https://docs.tavily.com/documentation/api-reference) | `tavily` | raw-search | `TAVILY_API_KEY` |
-| [Firecrawl Search](https://docs.firecrawl.dev/introduction) | `firecrawl-search` | raw-search | `FIRECRAWL_API_KEY` |
+| [Firecrawl Search](https://docs.firecrawl.dev/api-reference/endpoint/search) | `firecrawl-search` | raw-search | `FIRECRAWL_API_KEY` |
 | [Claude](https://platform.claude.com/docs/en/api/overview) | `claude` | llm | `ANTHROPIC_API_KEY` |
 | [OpenAI Chat](https://developers.openai.com/api/reference/overview) | `openai-chat` | llm | `OPENAI_API_KEY` |
 | [Gemini Chat](https://ai.google.dev/gemini-api/docs) | `gemini-chat` | llm | `GEMINI_API_KEY` |
@@ -101,6 +101,22 @@ normalized into Librarium citations and source records.
 
 **`brave-answers` (Brave AI Answers).** Uses Brave's Answers API -- the OpenAI-compatible `chat/completions` endpoint -- and streams the response. Answer content is the native Answers markdown (the adapter no longer fabricates `## AI Summary` / `## Web Results` headings). Citations arrive as inline stream metadata and are normalized and deduplicated; usage arrives as a trailing inline `<usage>` stream tag carrying token counts and Brave's own dollar cost breakdown, and `usage.costUsd` is set from the API-reported `X-Request-Total-Cost` figure (with the final stream chunk's token counts and legacy `x-request-*` response headers as fallbacks). The provider requires the Answers subscription on your Brave plan: a search-only key (no subscription) fails with a clear "not subscribed" error (`400 OPTION_NOT_IN_PLAN`, pointing at the plan upgrade), while an invalid key fails with `422 SUBSCRIPTION_TOKEN_INVALID` (pointing at `BRAVE_API_KEY`).
 
+### Raw-search behavior
+
+**`firecrawl-search` (Firecrawl Search).** Uses Firecrawl's v2 Search API and
+defaults to ten web results. It can search web results, news results, or both;
+mixed responses are rendered as labeled Web and News sections, with news dates
+preserved and citations deduplicated across sources. Configure per-source
+limits, freshness, country and location, domain filters, and GitHub, research,
+or PDF categories under the provider's `options`. See
+[Firecrawl Search options](/docs/configuration#firecrawl-search-options) for the
+complete example and validation rules.
+
+Firecrawl reports the actual credits consumed by each search. Librarium records
+that value as provider-reported `billableUnits` in credits without converting
+it into USD. Images, full-result scraping via `scrapeOptions`, and enterprise
+search controls are intentionally unsupported by this raw-search adapter.
+
 ### Usage and cost reporting
 
 *Reported* cost is never estimated from pricing tables: `usage.costUsd` comes only from what each provider's API actually returns. (A separate, clearly-labelled pre-dispatch *estimate* lane exists -- see [Metering kinds](#metering-kinds) below -- but it never touches reported cost.)
@@ -114,6 +130,7 @@ normalized into Librarium citations and source records.
 | `brave-answers` | Token counts and total USD cost from the inline `<usage>` stream tag (`X-Request-Total-Cost`) |
 | `gemini-grounded` | `usageMetadata` token counts (`promptTokenCount`, `candidatesTokenCount`) only; no cost field |
 | `gemini-deep` | Interactions API token counts (`total_input_tokens`, `total_output_tokens`) only; no cost field |
+| `firecrawl-search` | `creditsUsed`, surfaced as provider-reported credit units; no USD cost field |
 
 All other providers either return no usage data or return only token counts with no cost. The reported totals in `summary.md` and the live table cover only the providers that reported something -- the displayed cost is always sourced from the API, never calculated.
 

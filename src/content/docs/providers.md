@@ -45,6 +45,20 @@ Librarium organizes its 24 built-in providers into four tiers based on capabilit
 | [Gemini Chat](https://ai.google.dev/gemini-api/docs) | `gemini-chat` | llm | `GEMINI_API_KEY` |
 | [OpenRouter Chat](https://openrouter.ai/models) | `openrouter-chat` | llm | `OPENROUTER_API_KEY` |
 
+## Typed descriptor inventory
+
+Every built-in provider has one typed descriptor containing its factory, tier,
+display/catalog metadata, credential name, metering, validated option schema,
+aliases, default model, registration order, and inline/background capability
+contract. Runtime registration and catalog output derive from this inventory.
+Group membership remains explicit policy, but Librarium validates it so unknown
+IDs, duplicates, tier mistakes, and stale `all`/`llm` rosters fail immediately.
+
+Invalid provider options never silently trigger paid work. Initialization emits
+a warning and keeps the adapter registered; `execute`, `submit`, and `test` fail
+before HTTP, while `poll` and `retrieve` remain available for outstanding
+background tasks.
+
 ## The llm tier
 
 The `llm` tier is deliberately kept apart from the default grounded groups. Its adapters use their provider's web-search feature where available: Anthropic web search for `claude`, OpenAI `web_search` for `openai-chat`, Google Search grounding for `gemini-chat`, and OpenRouter's `openrouter:web_search` server tool for `openrouter-chat`. Disable web search globally with `defaults.llmWebSearch: false` or per provider with `options.webSearch: false`; a provider with search disabled contributes no citations or source URLs. Use the built-in `llm` group (`--group llm`) to run all four at once.
@@ -62,13 +76,16 @@ Default models per provider (each overridable with a per-provider `model` config
 
 ### Async submit/poll vs inline execution
 
-Four providers use a true background submit/poll/retrieve pattern and return immediately in `mixed` or `async` mode:
+Three providers use remotely resumable background submit/poll/retrieve APIs and return immediately in `mixed` or `async` mode:
 
 - `perplexity-sonar-deep` -- uses Perplexity's Async Sonar API (`POST /v1/async/sonar`, polled via `GET /v1/async/sonar/{id}`). Submits and returns a pending handle; poll with `librarium status --wait --retrieve`.
 - `openai-research` -- uses the OpenAI Responses API with GPT-5.6 Sol, `web_search`, and background execution. Same submit-and-poll flow.
 - `gemini-deep` -- uses Google's Interactions API (`POST /v1beta/interactions` with `background: true`). Submits and returns a pending handle; poll with `librarium status --wait --retrieve`.
 
-Two Perplexity providers use the Agent API, which has no background mode. They complete inline even in `mixed` or `async` mode:
+Two Perplexity providers expose the full lifecycle contract but use a
+process-local completed-result wrapper because the Agent API has no remote
+background mode. Their descriptors report `taskPersistence: "process-local"`,
+and they complete inline even in `mixed` or `async` mode:
 
 - `perplexity-deep-research`
 - `perplexity-advanced-deep`
@@ -119,7 +136,7 @@ All other providers either return no usage data or return only token counts with
 
 ### Metering kinds
 
-So that the providers above (which report no native cost) can still be budgeted *before* a call runs, every built-in provider declares a **metering kind** in a built-in registry, shown in `librarium ls`:
+So that the providers above (which report no native cost) can still be budgeted *before* a call runs, every built-in provider declares a **metering kind** in its descriptor, shown in `librarium ls`:
 
 | Kind | Providers |
 |---|---|
@@ -140,9 +157,11 @@ So that the providers above (which report no native cost) can still be budgeted 
 
 `openai-research` defaults to `gpt-5.6-sol` and accepts a `model` override plus
 the `reasoningEffort`, `maxToolCalls`, and `returnTokenBudget` options described
-in [Configuration](/docs/configuration#model-overrides). The return-token budget
-defaults to `default`; set it to `unlimited` only for high-effort research that
-needs unusually large amounts of returned web content.
+in [Configuration](/docs/configuration#model-overrides). Reasoning defaults to
+`high`; use `medium` for speed or `xhigh` as a quality-first override. Tool
+calls are uncapped by default. The return-token budget defaults to `default`;
+set it to `unlimited` only for high-effort research that needs unusually large
+amounts of returned web content.
 
 `gemini-deep` accepts a `model` config key to select the Deep Research agent. It defaults to the `deep-research-preview-04-2026` agent; set `model` to `deep-research-max-preview-04-2026` for the heavier (and more expensive) variant:
 

@@ -93,6 +93,16 @@ librarium answer <query> [options]
 
 `answer` runs the same fan-out as `run` (defaulting to the `quick` group, overridable with `-g`/`-p`/`-m` and the usual run flags), then makes one LLM synthesis call over the successful providers' content plus the deduped source list. The model is instructed to answer only from the findings, cite with inline `[n]` indices that map to the numbered source list, and state what is uncertain rather than invent. The answer is rendered in the terminal followed by a hyperlinked source list, and written to `answer.md` in the run directory.
 
+Pass `--verify` to add a bounded, opt-in evidence pass after synthesis:
+
+```bash
+librarium answer "what changed in postgres 17 logical replication" --verify
+```
+
+Librarium selects up to eight material factual claims and first checks the independent evidence already returned by the fan-out. For unresolved claims, it runs at most three successful targeted searches total. It starts with eligible successful `ai-grounded` and `raw-search` providers from the original run and may traverse their configured eligible fallback chains, including a fallback provider that was not part of the original result set. Each selected claim gets at most one query and three provider attempts; deep-research providers are never used for these follow-ups. Verification inherits the original timeout, fallback policy, and both cost ceilings. If a ceiling is already exhausted, it makes no verification call.
+
+Verification fails open: incomplete evidence, exhausted budgets, provider failures, or LLM failures leave the original grounded `answer.md` intact. A fully supported pass may revise the answer. The complete audit record is stored in `verification.json` and the top-level `run.json` `verification` field; `results.jsonl` gains a `"type":"verification"` line, and `report.html` renders a human-readable verification section. Usage totals cover verification follow-ups and verification LLM calls only, with provider and LLM lanes kept separate.
+
 ```
 $ librarium answer "what changed in postgres 17 logical replication"
 
@@ -153,7 +163,7 @@ Use `--max-cost` as a backstop against runaway synchronous fan-outs, not as a ha
 
 `--max-cost` is deliberately reported-only: it never guesses. The gap it leaves -- providers that report no cost (most raw-search APIs) run "for free" as far as the breaker is concerned -- is filled by a separate, opt-in **estimated** lane.
 
-Every provider declares a **metering kind** in a built-in registry, visible in [`librarium ls`](#ls) (and its `--json`):
+Every provider declares a **metering kind** in its built-in descriptor, visible in [`librarium ls`](#ls) (and its `--json`):
 
 | Kind | Meaning | Examples |
 |---|---|---|

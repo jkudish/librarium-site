@@ -6,7 +6,7 @@ order: 1
 
 ## What is librarium?
 
-Librarium fans out research queries to multiple search and deep-research APIs in parallel, then merges everything into one structured output. It ships with 24 built-in provider adapters spanning traditional search engines, AI-grounded answers, deep-research APIs, and an opt-in LLM tier. Librarium works both as a CLI and as an embeddable library via `librarium/core`, which runs in Cloudflare Workers and other edge runtimes.
+Librarium fans out research queries to multiple search and deep-research APIs in parallel, then merges everything into one structured output. It ships with 31 built-in provider adapters spanning traditional search engines, AI-grounded answers, answer-engine visibility surfaces, deep-research APIs, and an opt-in LLM tier. Librarium works both as a CLI and as an embeddable library via `librarium/core`, which runs in Cloudflare Workers and other edge runtimes.
 
 ## Installation
 
@@ -56,7 +56,10 @@ The easiest way to get started is to run `librarium` with no arguments in a term
 librarium
 ```
 
-Or run `init --auto` once to discover API keys already present in your environment and enable matching providers, then run a query directly:
+Or run `init --auto` once to discover API keys already present in your
+environment and enable eligible providers. Higher-cost LLM, SearchAPI answer,
+and Perplexity Pro Search adapters remain opt-in even when they share a
+discovered key.
 
 ```bash
 librarium init --auto
@@ -70,9 +73,16 @@ librarium answer "what changed in postgres 17 logical replication"
 # Use a specific group
 librarium run "React Server Components" --group quick
 
+# Compare nine answer-engine surfaces deliberately
+librarium run "How do AI assistants describe our product?" --group visibility
+
 # Check async deep research status
 librarium status --wait
 ```
+
+The six SearchAPI members of `visibility` share one collection vendor, so treat
+their agreement as correlated observation rather than independent
+corroboration. See [provider provenance and privacy](/docs/providers#ai-grounded-answer-behavior).
 
 ## Upgrade
 

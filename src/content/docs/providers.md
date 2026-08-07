@@ -1,12 +1,12 @@
 ---
 title: Providers
-description: The four provider tiers, all 24 built-in providers, API key setup, and behavioral notes.
+description: The four provider tiers, all 31 built-in providers, API key setup, and behavioral notes.
 order: 4
 ---
 
 ## Provider tiers
 
-Librarium organizes its 24 built-in providers into four tiers based on capabilities, latency, and depth.
+Librarium organizes its 31 built-in providers into four tiers based on capabilities, latency, and depth.
 
 **deep-research.** Async deep research providers that take minutes to complete but produce comprehensive, multi-source reports. These providers may use a submit/poll/retrieve pattern. Best for thorough research on important topics.
 
@@ -14,7 +14,7 @@ Librarium organizes its 24 built-in providers into four tiers based on capabilit
 
 **raw-search.** Traditional search engine results. Fast responses with many links and snippets, but no AI synthesis. Useful for broad link discovery and verifying specific facts.
 
-**llm.** Generic model answers from Claude, OpenAI, Gemini, or OpenRouter. These are provider-style model calls rather than dedicated research APIs. Web search and citations are on by default and can be disabled globally with `defaults.llmWebSearch: false` or per provider with `options.webSearch: false`. They remain excluded from every grounded default group (`quick`, `fast`, `raw`, `deep`, `comprehensive`, and `all`) so normal runs do not silently add extra model calls. Opt in explicitly via `-p claude,openai-chat,...`, a custom group, or `--group llm`. Each provider accepts a default model with a per-provider `model` override.
+**llm.** Generic model answers from Claude, OpenAI, Gemini, or OpenRouter. These are provider-style model calls rather than dedicated research APIs. Web search and citations are on by default and can be disabled globally with `defaults.llmWebSearch: false` or per provider with `options.webSearch: false`. They remain excluded from every grounded default group (`quick`, `fast`, `raw`, `deep`, `visibility`, `comprehensive`, and `all`) so normal runs do not silently add extra model calls. Opt in explicitly via `-p claude,openai-chat,...`, a custom group, or `--group llm`. Each provider accepts a default model with a per-provider `model` override.
 
 ## Provider list
 
@@ -26,6 +26,7 @@ Librarium organizes its 24 built-in providers into four tiers based on capabilit
 | [OpenAI Research (GPT-5.6 Sol)](https://developers.openai.com/api/docs/guides/deep-research) | `openai-research` | deep-research | `OPENAI_API_KEY` |
 | [Gemini Deep Research](https://ai.google.dev/gemini-api/docs) | `gemini-deep` | deep-research | `GEMINI_API_KEY` |
 | [Perplexity Sonar Pro](https://docs.perplexity.ai/home) | `perplexity-sonar-pro` | ai-grounded | `PERPLEXITY_API_KEY` |
+| [Perplexity Pro Search](https://docs.perplexity.ai/docs/sonar/pro-search/quickstart) | `perplexity-pro-search` | ai-grounded | `PERPLEXITY_API_KEY` |
 | [Gemini Grounded Search](https://ai.google.dev/gemini-api/docs) | `gemini-grounded` | ai-grounded | `GEMINI_API_KEY` |
 | [Grok (xAI)](https://console.x.ai) | `grok` | ai-grounded | `XAI_API_KEY` |
 | [ChatGPT Search (OpenRouter)](https://openrouter.ai/models) | `openrouter-online` | ai-grounded | `OPENROUTER_API_KEY` |
@@ -33,6 +34,12 @@ Librarium organizes its 24 built-in providers into four tiers based on capabilit
 | [Exa Search](https://exa.ai/docs/reference/search-api-guide) | `exa` | ai-grounded | `EXA_API_KEY` |
 | [You.com Research](https://you.com/docs/welcome) | `you-research` | ai-grounded | `YOU_COM_API_KEY` |
 | [Kagi FastGPT](https://help.kagi.com/kagi/api/fastgpt.html) | `kagi-fastgpt` | ai-grounded | `KAGI_API_KEY` |
+| [SearchAPI ChatGPT](https://www.searchapi.io/docs/chatgpt-api) | `searchapi-chatgpt` | ai-grounded | `SEARCHAPI_API_KEY` |
+| [SearchAPI Gemini](https://www.searchapi.io/) | `searchapi-gemini` | ai-grounded | `SEARCHAPI_API_KEY` |
+| [SearchAPI Perplexity](https://www.searchapi.io/) | `searchapi-perplexity` | ai-grounded | `SEARCHAPI_API_KEY` |
+| [SearchAPI Google AI Mode](https://www.searchapi.io/docs/google-ai-mode-api) | `searchapi-google-ai-mode` | ai-grounded | `SEARCHAPI_API_KEY` |
+| [SearchAPI Bing Copilot](https://www.searchapi.io/docs/bing-copilot-api) | `searchapi-bing-copilot` | ai-grounded | `SEARCHAPI_API_KEY` |
+| [SearchAPI Google AI Overview](https://www.searchapi.io/docs/google-ai-overview-api) | `searchapi-google-ai-overview` | ai-grounded | `SEARCHAPI_API_KEY` |
 | [Perplexity Search](https://docs.perplexity.ai/home) | `perplexity-search` | raw-search | `PERPLEXITY_API_KEY` |
 | [Brave Web Search](https://brave.com/search/api/) | `brave-search` | raw-search | `BRAVE_API_KEY` |
 | [Jina AI Search](https://jina.ai/) | `jina-search` | raw-search | `JINA_AI_API_KEY` |
@@ -92,6 +99,31 @@ and they complete inline even in `mixed` or `async` mode:
 
 ### AI-grounded answer behavior
 
+**SearchAPI consumer surfaces.** The six `searchapi-*` answer adapters observe
+consumer-facing ChatGPT, Gemini, Perplexity, Google AI Mode, Bing Copilot, and
+Google AI Overview output through SearchAPI. They do not represent the official
+first-party APIs or guarantee parity with a particular logged-in user,
+location, subscription, experiment cohort, or moment. Because all six share
+one collection vendor, agreement is correlated visibility evidence rather
+than six independent confirmations. Librarium uses bearer authentication,
+never places the key in the URL, and supports explicit `zeroRetention`, which
+SearchAPI documents for Enterprise accounts; rejection fails closed without an
+unprotected retry. The
+standard bearer-backed paths have been live-validated; zero-retention
+entitlement remains account-dependent and unverified.
+
+The existing raw `searchapi` Google adapter also preserves inline AI Overview,
+top stories, discussions, videos, and Knowledge Graph evidence from its single
+request. The dedicated `searchapi-google-ai-overview` adapter owns the separate
+two-stage page-token workflow.
+
+**`perplexity-pro-search` (Perplexity Pro Search).** Forces streaming Sonar Pro
+Search and validates its reasoning/completion lifecycle, model, terminal
+content, usage, and any returned classification metadata. It performs one
+attempt with no hidden fast-search downgrade and reports Perplexity's native
+cost when the API supplies it. Sharing `PERPLEXITY_API_KEY` does not auto-enable
+this higher-cost lane.
+
 **`openrouter-online` (ChatGPT Search).** Keeps its GPT-4o Mini/Exa-backed
 search profile but uses OpenRouter's current `openrouter:web_search` server
 tool rather than the deprecated `:online` model suffix. URL annotations are
@@ -102,6 +134,12 @@ normalized into Librarium citations and source records.
 **`brave-answers` (Brave AI Answers).** Uses Brave's Answers API -- the OpenAI-compatible `chat/completions` endpoint -- and streams the response. Answer content is the native Answers markdown (the adapter no longer fabricates `## AI Summary` / `## Web Results` headings). Citations arrive as inline stream metadata and are normalized and deduplicated; usage arrives as a trailing inline `<usage>` stream tag carrying token counts and Brave's own dollar cost breakdown, and `usage.costUsd` is set from the API-reported `X-Request-Total-Cost` figure (with the final stream chunk's token counts and legacy `x-request-*` response headers as fallbacks). The provider requires the Answers subscription on your Brave plan: a search-only key (no subscription) fails with a clear "not subscribed" error (`400 OPTION_NOT_IN_PLAN`, pointing at the plan upgrade), while an invalid key fails with `422 SUBSCRIPTION_TOKEN_INVALID` (pointing at `BRAVE_API_KEY`).
 
 ### Raw-search behavior
+
+**`perplexity-search` (Perplexity Search).** Returns ranked raw results without
+LLM synthesis. Configure country/language, domain allow or deny filters,
+result count, multiple queries, context size, or extraction-token budgets under
+the provider's strict `options`; invalid combinations fail before HTTP. See
+[Perplexity Search options](/docs/configuration#perplexity-search-options).
 
 **`firecrawl-search` (Firecrawl Search).** Uses Firecrawl's v2 Search API and
 defaults to ten web results. It can search web results, news results, or both;
@@ -123,7 +161,7 @@ search controls are intentionally unsupported by this raw-search adapter.
 
 | Provider | What the API reports |
 |---|---|
-| `perplexity-sonar-pro`, `perplexity-search`, `perplexity-sonar-deep` | Token counts (`prompt_tokens`, `completion_tokens`) and `cost.total_cost` (USD) when present |
+| `perplexity-sonar-pro`, `perplexity-pro-search`, `perplexity-sonar-deep` | Token counts (`prompt_tokens`, `completion_tokens`) and `cost.total_cost` (USD) when present |
 | `openrouter-online`, `openrouter-chat` | Token counts and a flat `cost` field (USD) |
 | `exa` | `costDollars.total` (USD); no token counts |
 | `grok` | Converted USD cost from xAI's `cost_in_usd_ticks`, surfaced as reported `costUsd` |
@@ -140,9 +178,9 @@ So that the providers above (which report no native cost) can still be budgeted 
 
 | Kind | Providers |
 |---|---|
-| `native_cost` (API returns real cost) | `perplexity-sonar-pro`, `perplexity-sonar-deep`, `perplexity-deep-research`, `perplexity-advanced-deep`, `openrouter-online`, `openrouter-chat`, `exa` |
+| `native_cost` (API returns real cost) | `perplexity-sonar-pro`, `perplexity-pro-search`, `perplexity-sonar-deep`, `perplexity-deep-research`, `perplexity-advanced-deep`, `openrouter-online`, `openrouter-chat`, `exa` |
 | `native_tokens` (tokens reported; no cost field required) | `claude`, `openai-chat`, `gemini-chat`, `openai-research`, `gemini-deep`, `gemini-grounded`, `grok`* |
-| `request_priced` (flat/plan price per request) | `serpapi`, `searchapi`, `brave-search`, `kagi-fastgpt`, `perplexity-search` |
+| `request_priced` (flat/plan price per request) | `serpapi`, `searchapi` and its six answer surfaces, `brave-search`, `kagi-fastgpt`, `perplexity-search` |
 | `credit_priced` (account credits per request) | `tavily`, `firecrawl-search`, `you-research` |
 | `api_unit_priced` (per token/unit, size known only after the call) | `jina-search`, `brave-answers`** |
 | `manual_unmetered` (no reliable per-call metering) | custom providers |
@@ -152,6 +190,14 @@ So that the providers above (which report no native cost) can still be budgeted 
 \*\* `brave-answers` is `api_unit_priced` for the estimate lane (cost depends on tokens consumed per call), but it likewise reports an actual dollar cost as `usage.costUsd`, taken from the `X-Request-Total-Cost` figure in Brave's inline `<usage>` stream tag.
 
 `request_priced` and `credit_priced` providers can produce a **network-free pre-dispatch estimate** used by the [estimated budget](/docs/commands#metering-registry-and-the-estimated-budget) (`--max-estimated-cost`). Estimates are guesses, kept entirely separate from reported cost: flat request-priced providers carry a default USD figure (`costConfidence: estimated`), while plan-dependent credit/unit providers emit only unit metadata until you configure a price in their [`options`](/docs/configuration). This is metadata about the provider, not a pricing table applied to reported cost.
+
+`perplexity-search` ships without a default per-request USD estimate and
+reserves `$0` until you configure `options.perRequestUsd`.
+
+Most SearchAPI adapters reserve one logical request unit. Dedicated Google AI
+Overview reserves two because it discovers and immediately fetches a page
+token; at the default `$0.004` per-unit estimate, one Overview operation
+reserves `$0.008`.
 
 ### Model overrides
 
@@ -213,7 +259,12 @@ The four llm-tier providers (`claude`, `openai-chat`, `gemini-chat`, `openrouter
 | Firecrawl | `FIRECRAWL_API_KEY` | [docs.firecrawl.dev](https://docs.firecrawl.dev/introduction) |
 | OpenRouter | `OPENROUTER_API_KEY` | [openrouter.ai](https://openrouter.ai/models) |
 
-Run `librarium init --auto` to discover which keys are already present in your environment and enable their matching providers automatically. Note that `init` never auto-enables llm-tier providers, even when their key is present -- see [the llm tier](#the-llm-tier).
+Run `librarium init --auto` to discover keys already present in your
+environment and enable eligible providers. Auto-enable policy is declared per
+provider: the four LLM adapters, six SearchAPI answer surfaces, and
+`perplexity-pro-search` remain opt-in even when their shared credential is
+available. Interactive setup lists them unchecked; select them directly or use
+an explicit group when you want the additional calls.
 
 ## Async behavior notes
 

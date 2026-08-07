@@ -72,7 +72,7 @@ To make estimates for request- or credit-priced providers exact instead of using
 
 ## API key resolution
 
-API keys use the `$ENV_VAR` pattern. The value `"$PERPLEXITY_API_KEY"` resolves to `process.env.PERPLEXITY_API_KEY` at runtime. Keys are never stored in plaintext.
+API keys use the `$ENV_VAR` pattern. The value `"$PERPLEXITY_API_KEY"` resolves to `process.env.PERPLEXITY_API_KEY` at runtime. Environment or OS-keychain references are preferred; literal config storage is supported as a fallback in the owner-only `0600` config file.
 
 ## Model overrides
 
@@ -168,6 +168,60 @@ Grok (xAI) also accepts a `model` key. It requires `XAI_API_KEY` and defaults to
 ```
 
 The llm-tier providers (`claude`, `openai-chat`, `gemini-chat`, `openrouter-chat`) each accept a per-provider `model` key the same way. See [Providers](/docs/providers#the-llm-tier) for their defaults.
+
+## SearchAPI options
+
+All seven SearchAPI adapters share `SEARCHAPI_API_KEY`, authenticate with a
+bearer header, and accept the same strict options:
+
+```json
+{
+  "providers": {
+    "searchapi-chatgpt": {
+      "apiKey": "$SEARCHAPI_API_KEY",
+      "enabled": false,
+      "options": {
+        "zeroRetention": true,
+        "perRequestUsd": 0.004
+      }
+    }
+  }
+}
+```
+
+`zeroRetention` is boolean and defaults to `false`. When enabled, Librarium
+sends `zero_retention=true`; an account-level rejection returns an actionable
+error, blocks fallback, and is never retried without the option. SearchAPI
+documents this as an Enterprise capability, so confirm entitlement first.
+This option controls Librarium's request and is not a broader compliance
+guarantee about the upstream service. `perRequestUsd` is an optional positive
+local pricing override used only for pre-dispatch estimates and is never sent
+upstream. Unknown options fail before HTTP.
+
+Google AI Overview uses an immediate two-stage page-token flow and reserves two
+logical request units. At the default `$0.004` per-unit estimate, one Overview
+operation reserves `$0.008`.
+
+## Perplexity Search options
+
+`perplexity-search` accepts these strict camelCase options:
+
+| Option | Accepted values |
+|---|---|
+| `maxResults` | Integer from 1 to 20 |
+| `country` | ISO 3166-1 alpha-2 country code |
+| `searchLanguageFilter` | 1–20 ISO 639-1 language codes |
+| `searchDomainAllowlist` / `searchDomainDenylist` | 1–20 domains; mutually exclusive |
+| `searchContextSize` | `low`, `medium`, or `high` |
+| `maxTokens` / `maxTokensPerPage` | Integer from 1 to 1,000,000 |
+| `additionalQueries` | Up to four non-empty queries; duplicates are removed |
+| `perRequestUsd` | Positive local USD estimate used only for pre-dispatch budgeting |
+
+`searchContextSize` conflicts with explicit token budgets. Invalid and unknown
+options fail before HTTP. Enhanced rendering remains bounded; omitting options
+preserves the legacy single-query request and rendering limits. Multiple
+queries share one POST estimate but may consume separate provider rate-limit
+capacity.
 
 ## Firecrawl Search options
 

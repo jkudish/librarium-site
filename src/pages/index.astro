@@ -15,7 +15,7 @@ const tiers = [
     id: "ai-grounded",
     latency: "seconds",
     description: "AI answers with inline citations. The middle ground between speed and depth.",
-    providers: ["perplexity-sonar-pro", "gemini-grounded", "exa", "kagi-fastgpt", "+3"],
+    providers: ["perplexity-pro-search", "searchapi-chatgpt", "gemini-grounded", "exa", "+11"],
   },
   {
     id: "raw-search",
@@ -139,7 +139,7 @@ const tiers = [
         <dl class="mt-12 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
           <div class="border-t border-neutral-950/10 pt-6">
             <dt class="text-base font-semibold text-neutral-950">Live fan-out table</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Every provider resolves in place with timing, source counts, and reported cost. Slow ones get highlighted; failures fall back to a configured backup.</dd>
+            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Every provider resolves in place with timing, source counts, and reported cost when available. Slow ones get highlighted; failures fall back to a configured backup.</dd>
           </div>
           <div class="border-t border-neutral-950/10 pt-6">
             <dt class="text-base font-semibold text-neutral-950">Grounded answers</dt>
@@ -148,6 +148,10 @@ const tiers = [
           <div class="border-t border-neutral-950/10 pt-6">
             <dt class="text-base font-semibold text-neutral-950">Reports for humans and machines</dt>
             <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">A tabbed HTML report for reading, <span class="font-mono text-amber-700">results.jsonl</span> with full content for pipelines, and a browsable run directory for everything else.</dd>
+          </div>
+          <div class="border-t border-neutral-950/10 pt-6">
+            <dt class="text-base font-semibold text-neutral-950">Answer-engine visibility</dt>
+            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6"><span class="font-mono text-amber-700">--group visibility</span> compares six correlated consumer observations with three first-party answer APIs, preserving provenance and citations.</dd>
           </div>
           <div class="border-t border-neutral-950/10 pt-6">
             <dt class="text-base font-semibold text-neutral-950">Tier-tuned queries</dt>
@@ -218,7 +222,7 @@ const tiers = [
             </div>
           ))}
         </div>
-        <p class="mt-10 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">Twenty-plus built-in providers. <a href="/docs/providers" class="font-medium text-amber-700 hover:text-amber-600">See the full catalog</a></p>
+        <p class="mt-10 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">31 built-in providers across four tiers. <a href="/docs/providers" class="font-medium text-amber-700 hover:text-amber-600">See the full catalog</a></p>
       </div>
     </section>
 

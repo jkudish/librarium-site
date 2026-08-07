@@ -6,7 +6,7 @@ order: 5
 
 ## Default groups
 
-Groups are named collections of provider IDs. Librarium ships with seven default groups:
+Groups are named collections of provider IDs. Librarium ships with eight default groups:
 
 | Group | Providers | Use case |
 |---|---|---|
@@ -14,11 +14,25 @@ Groups are named collections of provider IDs. Librarium ships with seven default
 | `quick` | gemini-grounded, openrouter-online, brave-answers, exa, kagi-fastgpt | Fast AI-grounded answers |
 | `raw` | perplexity-search, brave-search, jina-search, firecrawl-search, searchapi, serpapi, tavily | Traditional search results |
 | `fast` | perplexity-sonar-pro, gemini-grounded, openrouter-online, perplexity-search, brave-answers, exa, kagi-fastgpt, jina-search, brave-search, firecrawl-search, tavily | Quick results from multiple tiers |
-| `comprehensive` | All deep-research + all ai-grounded (13 providers, including Grok) | Deep + AI-grounded combined |
+| `visibility` | searchapi-chatgpt, searchapi-gemini, searchapi-perplexity, searchapi-google-ai-mode, searchapi-bing-copilot, searchapi-google-ai-overview, perplexity-sonar-pro, gemini-grounded, grok | Explicit nine-surface answer visibility comparison |
+| `comprehensive` | All deep-research + all ai-grounded (20 providers) | Deep + AI-grounded combined |
 | `llm` | claude, openai-chat, gemini-chat, openrouter-chat | Opt-in LLM answers; web search and citations on by default |
-| `all` | All 20 grounded providers (including Grok) | Maximum grounded coverage (excludes the `llm` tier) |
+| `all` | All 27 grounded providers (including Grok) | Maximum grounded coverage (excludes the `llm` tier) |
 
-Every grounded default group, including `all`, excludes the `llm` tier so normal runs do not silently add extra model calls. Opt in explicitly via `--group llm`, `-p claude,openai-chat,...`, or a custom group. See [the llm tier](/docs/providers#the-llm-tier) for details.
+`visibility`, `comprehensive`, and `all` are explicit cost boundaries. Choosing
+one may run credentialed opt-in members even when they are disabled for a
+bare/default run. The six SearchAPI answer surfaces remain absent from
+`quick`, `fast`, `raw`, `deep`, and `llm`; Pro Search joins
+`comprehensive`/`all`, not `visibility`.
+
+Every grounded default group, including `visibility` and `all`, excludes the
+`llm` tier. Opt in to direct model calls via `--group llm`,
+`-p claude,openai-chat,...`, or a custom group. See [the llm tier](/docs/providers#the-llm-tier) for details.
+
+Older stored `comprehensive` and `all` rosters are upgraded only when they
+exactly match a prior canonical roster after alias normalization. Customized,
+reordered, and project-level definitions are preserved. An absent stored roster
+is not migrated, but the effective configuration receives the current default.
 
 ## Custom groups
 
@@ -57,7 +71,12 @@ True background submission depends on the provider's API. `openai-research`, `pe
 
 ## Provider fallback
 
-When a provider fails for any reason (exception, error response, timeout), librarium can automatically try a lighter alternative. Add an optional `fallback` field to any provider's config:
+When a provider fails, librarium can automatically try a lighter alternative
+unless the result explicitly blocks fallback. When `zeroRetention` is
+configured, any SearchAPI answer-adapter failure blocks fallback so Librarium
+never retries with weaker privacy. The dedicated Google AI Overview adapter
+blocks fallback on every failure to preserve its two-stage surface semantics.
+Add an optional `fallback` field to any provider's config:
 
 ```json
 {
@@ -78,10 +97,14 @@ When a provider fails for any reason (exception, error response, timeout), libra
 ### Fallback behavior
 
 - Fallback triggers after the primary provider's execution fails (error or timeout).
+- Results marked `preventFallback` stop the chain; SearchAPI uses this to
+  preserve requested privacy, provenance, and product-surface semantics.
 - Only single-level fallback is supported. A fallback's own fallback is ignored.
 - The fallback provider must be configured with a valid API key but can be `enabled: false`. It will only activate as a backup.
 - If the fallback provider is already running in the same dispatch (for example, explicitly listed in `--providers`), it won't be triggered again.
 - Output files use the fallback provider's ID (for example, `openai-research.md`).
+- Pass `--no-fallback` when a run must preserve an exact provider or visibility
+  matrix.
 
 In `run.json`, both the original error report and the fallback result appear in the `providers` array. The fallback report includes a `fallbackFor` field indicating which provider it replaced:
 

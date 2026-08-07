@@ -70,9 +70,10 @@ Groups:
   quick          -- Fast AI-grounded answers (seconds)
   deep           -- Thorough async research (minutes)
   fast           -- Quick results from multiple tiers
+  visibility     -- Nine consumer and first-party answer surfaces
   comprehensive  -- Deep + AI-grounded combined
   llm            -- Opt-in LLM answers with web search and citations by default
-  all            -- All 20 grounded providers (excludes the llm tier)
+  all            -- All 27 grounded providers (excludes the llm tier)
 
 Output lands in ./agents/librarium/<timestamp>-<slug>/:
   summary.md     -- Synthesized overview with stats
@@ -83,7 +84,9 @@ Output lands in ./agents/librarium/<timestamp>-<slug>/:
 For async deep research, check status with:
   librarium status --wait
 
-Cross-reference sources appearing in multiple providers for higher confidence.
+Cross-reference underlying source URLs across genuinely independent provider
+families. The six SearchAPI visibility surfaces share one collection vendor,
+so agreement among them is correlated evidence rather than six confirmations.
 ```
 
 ## Option 4: CLAUDE.md project instructions
@@ -104,9 +107,9 @@ Use `librarium` for research queries. It's installed globally.
 The skill guides agents through:
 
 1. **Query analysis.** Classify the research question and pick the right provider group.
-2. **Provider selection.** Match query type to tier (`quick` for facts, `deep` for thorough research, `all` for max coverage).
+2. **Provider selection.** Match query type to tier (`quick` for facts, `deep` for thorough research, `visibility` for answer-engine comparison, `all` for max coverage).
 3. **Dispatch.** Run the query with appropriate flags.
 4. **Monitor.** Track async deep-research tasks.
 5. **Retrieve.** Fetch completed async results.
 6. **Analyze.** Read `summary.md`, `sources.json`, and per-provider output files.
-7. **Synthesize.** Cross-reference multi-provider findings, weight by citation frequency.
+7. **Synthesize.** Cross-reference source URLs and independent provider families; do not treat correlated surface adapters as separate corroboration.

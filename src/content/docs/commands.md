@@ -33,6 +33,7 @@ librarium run <query> [options]
 | `--max-cost <usd>` | Stop launching providers once API-reported cost crosses this budget (see [Spend guardrails](#spend-guardrails)) |
 | `--max-estimated-cost <usd>` | Reserve each provider's pre-dispatch *estimated* cost and skip launches once the estimate crosses this ceiling (see [Spend guardrails](#spend-guardrails)) |
 | `-y, --yes` | Skip the deep-research pre-flight confirm |
+| `--no-fallback` | Disable configured provider fallbacks for an exact matrix |
 | `--json` | Output `run.json` to stdout |
 | `--refine` | Rewrite the query into tier-tuned variants with one LLM call before dispatch |
 | `--html` | Generate a self-contained `report.html` in the run directory |
@@ -175,6 +176,11 @@ Every provider declares a **metering kind** in its built-in descriptor, visible 
 | `manual_unmetered` | No reliable per-call metering | custom providers |
 
 For request- and credit-priced providers, librarium can produce a **network-free estimate** *before* a call runs. Estimates are guesses, never facts: they live under each result's `metering.estimate` (never in `usage.costUsd`), carry a `costConfidence` (`estimated` from a built-in default snapshot, `configured` when you supply pricing, `unknown` when there's no basis) and a `pricingVersion`. Plan-dependent credit providers emit unit metadata (`billableUnits`, `unit`) **without** an invented dollar figure until you configure a price via provider `options` (`perRequestUsd`, or `creditUsd` + `creditsPerRequest`).
+
+Estimates account for logical request units. Most SearchAPI adapters reserve
+one unit; dedicated Google AI Overview reserves two because it discovers and
+immediately fetches a page token. With the default SearchAPI estimate, that is
+`$0.004` versus `$0.008` per provider operation.
 
 **Estimated budget (`--max-estimated-cost <usd>` or `defaults.maxEstimatedCostUsd`).** A pre-dispatch *reservation* ceiling, independent of `--max-cost` (the two never reconcile into one number). Before each provider launches, its estimated cost is reserved; once the reservation crosses the ceiling, not-yet-started providers are skipped with an estimated-budget reason. Providers with no estimable cost reserve `0`, so the reserved total is an honest lower bound. This gives products pre-call budget reservation that `--max-cost` (which only learns cost *after* a call) cannot. When it trips, the summary adds a line like:
 

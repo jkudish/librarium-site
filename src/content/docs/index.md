@@ -12,7 +12,7 @@ Librarium fans out research queries to multiple search and deep-research APIs in
 
 ### npm
 
-Requires Node.js 20.12 or later.
+Requires Node.js 22.12 or later.
 
 ```bash
 npm install -g librarium

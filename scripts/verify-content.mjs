@@ -46,6 +46,8 @@ const publicSources = [
   join(root, "src/layouts/Base.astro"),
 ];
 const publicCopy = publicSources.map((file) => readFileSync(file, "utf8")).join("\n");
+const gettingStarted = readFileSync(join(docsDir, "index.md"), "utf8");
+const outputFormats = readFileSync(join(docsDir, "output-formats.md"), "utf8");
 
 for (const stale of [
   "31 built-in",
@@ -54,10 +56,20 @@ for (const stale of [
   "perplexity-advanced-deep",
   "version: 1 as const",
   "schema v1 run directories",
+  "brew install jkudish/tap/librarium",
+  "raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh",
+  "  {provider}.md",
+  "  {provider}.meta.json",
 ]) {
   assert(!publicCopy.includes(stale), `stale public copy found: ${stale}`);
 }
 assert(!publicCopy.includes("—"), "public copy contains an em dash");
+assert(gettingStarted.includes("npm install -g librarium@2.0.0-rc.18"), "getting started must pin the RC npm package");
+assert(gettingStarted.includes('npx librarium@2.0.0-rc.18 run'), "getting started must pin the RC npx package");
+assert(gettingStarted.includes("RC18 has no published Homebrew formula or standalone release asset"), "getting started must not imply unpublished RC distribution assets exist");
+assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.md'), "output docs must describe collision-resistant provider markdown names");
+assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.meta.json'), "output docs must describe collision-resistant provider metadata names");
+assert(outputFormats.includes("`run.json` owns the concrete `outputFile` and `metaFile` names"), "output docs must make run.json authoritative for provider artifact names");
 
 for (const required of [
   PRODUCT_VERSION,

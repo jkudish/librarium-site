@@ -4,9 +4,9 @@ description: Cleanup, upgrade, and shell completions.
 order: 8
 ---
 
-## Upgrade the RC
+## Upgrade and pin
 
-Check first, then upgrade using the detected npm, pnpm, yarn, Homebrew, or standalone installation method.
+`librarium upgrade` follows the detected installation method and its published release channel. Check or preview that channel before changing an installed stable release:
 
 ```bash
 librarium upgrade --check
@@ -14,7 +14,7 @@ librarium upgrade --dry-run
 librarium upgrade
 ```
 
-Use `--force` only when you intend to bypass the normal version guard. `--target <version>` is restricted to local or fixture evaluation, requires `--dry-run`, and cannot be combined with `--check`. For npm evaluation, pin the authority version directly:
+These upgrade commands do not make RC18 available through Homebrew or standalone channels. RC18 has no published formula or standalone release asset. Use `--force` only when you intend to bypass the normal version guard. `--target <version>` is restricted to local or fixture evaluation, requires `--dry-run`, and cannot be combined with `--check`. For RC18 evaluation, pin the exact npm package directly:
 
 ```bash
 npm install -g librarium@2.0.0-rc.18

@@ -16,7 +16,7 @@ librarium doctor
 librarium run "a bounded review query" --group quick --max-cost 0.25
 ```
 
-Node package installs require Node.js 22.12.0 or newer. Homebrew and standalone binaries include their runtime. Provider calls may cost money and send the query upstream. `doctor` checks configured providers but does not prove account pricing, retention, or future behavior.
+The exact npm package is the public RC18 evaluation path and requires Node.js 22.12.0 or newer. RC18 has no published Homebrew formula or standalone release asset. Provider calls may cost money and send the query upstream. `doctor` checks configured providers but does not prove account pricing, retention, or future behavior.
 
 ## Review migration before saving
 

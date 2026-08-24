@@ -2,7 +2,7 @@
 
 Marketing and documentation website for [librarium](https://github.com/jkudish/librarium), the meta harness for research queries. Live at [librarium.agentsy.build](https://librarium.agentsy.build).
 
-Static site built with Astro 7 and Tailwind CSS v4. No JS framework. The landing page terminal card is a static, reviewed fixture rendering. The only client script copies the install command.
+Static site built with Astro 7 and Tailwind CSS v4. No JS framework. The landing page terminal card is a static, reviewed fixture rendering. Client scripts copy the install command and navigate between docs versions.
 
 ## Development
 

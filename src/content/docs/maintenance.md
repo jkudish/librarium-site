@@ -14,11 +14,7 @@ librarium upgrade --dry-run
 librarium upgrade
 ```
 
-These upgrade commands do not make RC18 available through Homebrew or standalone channels. RC18 has no published formula or standalone release asset. Use `--force` only when you intend to bypass the normal version guard. `--target <version>` is restricted to local or fixture evaluation, requires `--dry-run`, and cannot be combined with `--check`. For RC18 evaluation, pin the exact npm package directly:
-
-```bash
-npm install -g librarium@2.0.0-rc.18
-```
+These commands follow the current stable npm, pnpm, yarn, Homebrew, or standalone channel. None of those channels provides RC18. Review RC18 only through the [pinned source-checkout procedure](/docs/release-candidate#review-the-pinned-source-checkout). Use `--force` only when you intend to bypass the normal version guard. `--target <version>` is restricted to local or fixture evaluation, requires `--dry-run`, and cannot be combined with `--check`.
 
 Review [v1 migration](/docs/configuration#migrate-from-v1) separately. Upgrading the executable is not proof that a v1 config was saved as v2.
 

@@ -67,4 +67,4 @@ librarium live-validation --fixture /absolute/path/to/fixture.json
 
 Status waits for existing Node CLI async work and retrieves terminal durable results. Offline fixture replay is network denied. Paid validation additionally requires a frozen approval, matching fingerprint and environment approval, an immutable candidate checkout, and matching catalog, pricing, and artifact fingerprints.
 
-`upgrade --target <version>` exists only for an exact local or fixture target. It requires `--dry-run` and cannot be combined with `--check`. Use the package-manager pin in [Getting started](/docs) to install this release candidate.
+`upgrade --target <version>` exists only for an exact local or fixture target. It requires `--dry-run` and cannot be combined with `--check`. RC18 is not available from public package or standalone channels. Use the [pinned source-checkout procedure](/docs/release-candidate#review-the-pinned-source-checkout).

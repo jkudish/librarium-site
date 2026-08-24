@@ -26,7 +26,7 @@ export const GET: APIRoute = async ({ site }) => {
 
 Release-candidate facts: ${PROVIDER_COUNT} built-in providers, ${PROFILE_COUNT} implemented public profiles, and four built-in workflows: \`quick\`, \`deep\`, \`visibility\`, and \`all\`. Source authority: [jkudish/librarium@${SOURCE_SHA.slice(0, 12)}](https://github.com/jkudish/librarium/commit/${SOURCE_SHA}). This site does not state that v2 is released.
 
-Install the exact candidate with \`npm i -g librarium@${PRODUCT_VERSION}\` (Node >= ${NODE_FLOOR}). Review v1 migration output before any explicit save. Agents can install the skill with \`librarium install-skill\`, install the Amp plugin with \`librarium install-plugin\`, or connect over MCP with \`librarium mcp\`.
+RC18 is not available from npm, Homebrew, or standalone release channels. Review the exact source commit with Node >= ${NODE_FLOOR}: clone the repository, check out \`${SOURCE_SHA}\` in detached HEAD state, run \`npm ci\` and \`npm run build\`, then invoke the local build as \`node dist/cli.js\`. The network-denied \`node --experimental-strip-types art/demo/demo-run.mjs\` fixture and local \`config --json\`, \`ls --json\`, \`groups --json\`, and skipped-without-keys \`doctor --json\` checks are executable without provider credentials. A real provider run requires separately configured credentials, reviewed provider pricing, and explicit paid-call authority. See the release-candidate checklist for the verified procedure. Review v1 migration output before any explicit save.
 
 For answer-engine visibility work, \`--group visibility\` compares six SearchAPI-collected consumer surfaces with three first-party API baselines. The six surfaces share one collector. Agreement is correlated visibility evidence, not independent corroboration or parity with a particular account.
 
@@ -43,7 +43,7 @@ Legacy v1 documentation is preserved at ${base}/v1 and marked as legacy. Use the
 ## Source
 
 - [GitHub](https://github.com/jkudish/librarium): source, issues, releases
-- [npm](https://www.npmjs.com/package/librarium): package
+- [npm](https://www.npmjs.com/package/librarium): current stable package; RC18 is not published here
 - [Full docs as one file](${base}/llms-full.txt)
 `;
 

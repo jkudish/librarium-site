@@ -44,7 +44,7 @@ The terminal TypeScript and PHP snapshot, runtime artifacts, and custom-provider
 | Artifact schemas | `1.0.0` |
 | Node CLI canonical `run.json` manifest | `3.0.0` |
 | Custom-provider protocol | `1.0.0` |
-| npm package | `2.0.0-rc.18` |
+| Source package metadata | `2.0.0-rc.18` |
 
 The terminal snapshot version does not imply artifact or runtime compatibility. Artifact versions do not imply custom-provider compatibility.
 

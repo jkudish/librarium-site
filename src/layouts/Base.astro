@@ -36,7 +36,7 @@ const jsonLd = JSON.stringify([
     applicationCategory: "DeveloperApplication",
     operatingSystem: "macOS, Linux, Windows",
     softwareVersion: PRODUCT_VERSION,
-    runtimePlatform: `Node.js ${NODE_FLOOR}+ for package installs`,
+    runtimePlatform: `Node.js ${NODE_FLOOR}+ for the pinned source build`,
     featureList: [
       `${PROVIDER_COUNT} built-in providers and ${PROFILE_COUNT} public profiles`,
       "Four built-in workflows: quick, deep, visibility, and all",
@@ -46,11 +46,7 @@ const jsonLd = JSON.stringify([
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     license: "https://github.com/jkudish/librarium/blob/main/LICENSE",
     url: Astro.site?.href,
-    downloadUrl: "https://www.npmjs.com/package/librarium",
-    sameAs: [
-      "https://github.com/jkudish/librarium",
-      "https://www.npmjs.com/package/librarium",
-    ],
+    sameAs: ["https://github.com/jkudish/librarium"],
     author: { "@type": "Person", name: "Joey Kudish", url: "https://jkudish.com" },
     isBasedOn: `https://github.com/jkudish/librarium/commit/${SOURCE_SHA}`,
   }] : []),

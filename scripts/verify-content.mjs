@@ -44,10 +44,13 @@ const publicSources = [
   join(root, "src/pages/llms.txt.ts"),
   join(root, "src/pages/llms-full.txt.ts"),
   join(root, "src/layouts/Base.astro"),
+  join(root, "src/components/Footer.astro"),
 ];
 const publicCopy = publicSources.map((file) => readFileSync(file, "utf8")).join("\n");
 const gettingStarted = readFileSync(join(docsDir, "index.md"), "utf8");
+const releaseCandidate = readFileSync(join(docsDir, "release-candidate.md"), "utf8");
 const outputFormats = readFileSync(join(docsDir, "output-formats.md"), "utf8");
+const unpublishedRcInstallPattern = /(?:npm\s+(?:i|install)(?:\s+-g)?|npx)\s+librarium@2\.0\.0-rc\.18/;
 
 for (const stale of [
   "31 built-in",
@@ -64,9 +67,28 @@ for (const stale of [
   assert(!publicCopy.includes(stale), `stale public copy found: ${stale}`);
 }
 assert(!publicCopy.includes("—"), "public copy contains an em dash");
-assert(gettingStarted.includes("npm install -g librarium@2.0.0-rc.18"), "getting started must pin the RC npm package");
-assert(gettingStarted.includes('npx librarium@2.0.0-rc.18 run'), "getting started must pin the RC npx package");
-assert(gettingStarted.includes("RC18 has no published Homebrew formula or standalone release asset"), "getting started must not imply unpublished RC distribution assets exist");
+assert(!unpublishedRcInstallPattern.test(publicCopy), "public copy must not offer unpublished RC18 npm or npx commands");
+for (const text of [gettingStarted, releaseCandidate]) {
+  for (const command of [
+    "git fetch origin 417613e8922fbe74c5e3b239ec02afc0171891a2",
+    "git checkout --detach 417613e8922fbe74c5e3b239ec02afc0171891a2",
+    "npm ci",
+    "npm run build",
+    "node dist/cli.js --version",
+    "node --experimental-strip-types art/demo/demo-run.mjs",
+    "node dist/cli.js config --json",
+    "node dist/cli.js ls --json",
+    "node dist/cli.js groups --json",
+    "node dist/cli.js doctor --json",
+  ]) {
+    assert(text.includes(command), `source review procedure is missing: ${command}`);
+  }
+  assert(!/node dist\/cli\.js run /.test(text), "clean source review procedure must not present a provider run as candidate proof");
+  assert(text.includes("explicit paid-call authority"), "source review procedure must keep live provider calls behind a separate authority gate");
+}
+assert(gettingStarted.includes("RC18 is not available from npm, Homebrew, or standalone release channels"), "getting started must disclose that RC18 has no public distribution");
+assert(!publicCopy.includes('downloadUrl: "https://www.npmjs.com/package/librarium"'), "RC metadata must not advertise the stable npm package as its download");
+assert(publicCopy.includes('label: "npm (stable)"'), "the public npm link must identify the currently published channel as stable");
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.md'), "output docs must describe collision-resistant provider markdown names");
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.meta.json'), "output docs must describe collision-resistant provider metadata names");
 assert(outputFormats.includes("`run.json` owns the concrete `outputFile` and `metaFile` names"), "output docs must make run.json authoritative for provider artifact names");
@@ -105,6 +127,13 @@ function outputPathExists(pathname) {
 
 const htmlFiles = walk(distDir).filter((file) => extname(file) === ".html");
 assert(htmlFiles.length >= 22, "expected homepage, v2 docs, and legacy v1 docs HTML output");
+const generatedRcCopy = [
+  ...htmlFiles.filter((file) => !relative(distDir, file).startsWith("v1/")),
+  join(distDir, "llms.txt"),
+  join(distDir, "llms-full.txt"),
+].map((file) => readFileSync(file, "utf8")).join("\n");
+assert(!unpublishedRcInstallPattern.test(generatedRcCopy), "generated output must not offer unpublished RC18 npm or npx commands");
+assert(generatedRcCopy.includes("RC18 is not available from npm, Homebrew, or standalone release channels"), "generated output must disclose that RC18 has no public distribution");
 
 for (const file of htmlFiles) {
   const html = readFileSync(file, "utf8");

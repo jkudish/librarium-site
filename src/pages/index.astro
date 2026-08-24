@@ -37,14 +37,13 @@ import Base from "../layouts/Base.astro";
             </a>
           </div>
           <div class="mt-7 flex max-w-xl flex-col items-start justify-between gap-3 rounded-lg bg-neutral-950/3 p-3 ring-1 ring-neutral-950/10 sm:flex-row sm:items-center sm:py-2 sm:pr-2 sm:pl-4">
-            <code id="install-command" class="break-all font-mono text-base text-neutral-800 sm:text-sm">npm i -g librarium@{PRODUCT_VERSION}</code>
-            <button type="button" id="copy-install" class="relative shrink-0 rounded-md bg-white px-2.5 py-1 font-mono text-sm font-medium text-neutral-600 ring-1 ring-neutral-950/10 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-xs">
-              <span id="copy-install-label">copy</span>
-              <span class="pointer-fine:hidden absolute top-1/2 left-1/2 size-[max(100%,3rem)] -translate-1/2" aria-hidden="true"></span>
-            </button>
+            <p class="font-mono text-base text-neutral-800 sm:text-sm">RC18 review is pinned to source {SOURCE_SHA.slice(0, 12)}</p>
+            <a href="/docs/release-candidate" class="shrink-0 rounded-md bg-white px-2.5 py-1 font-mono text-sm font-medium text-neutral-600 ring-1 ring-neutral-950/10 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-xs">
+              build from source
+            </a>
           </div>
           <p class="mt-4 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">
-            Package installs require Node.js {NODE_FLOOR} or newer. This is {PRODUCT_VERSION}, not the stable v2 release.
+            RC18 is not available from npm, Homebrew, or standalone release channels. Its source build requires Node.js {NODE_FLOOR} or newer.
           </p>
         </div>
 
@@ -174,7 +173,7 @@ import Base from "../layouts/Base.astro";
             Evaluate the release candidate without treating it as released.
           </h2>
           <p class="mt-5 max-w-[66ch] text-base/7 text-pretty text-neutral-600">
-            The site facts are pinned to source commit <code class="font-mono text-sm text-neutral-950">{SOURCE_SHA.slice(0, 12)}</code>. Install the exact RC, review migration output before saving it, run <code class="font-mono text-sm text-neutral-950">doctor</code>, and start with a bounded workflow.
+            The site facts are pinned to source commit <code class="font-mono text-sm text-neutral-950">{SOURCE_SHA.slice(0, 12)}</code>. Build that exact checkout, inspect the catalog, and run the network-denied fixture. Live provider validation remains a separate paid-call gate.
           </p>
           <div class="mt-8 flex flex-wrap gap-4">
             <a href="/docs/release-candidate" class="rounded-lg bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">Review the RC checklist</a>
@@ -187,21 +186,3 @@ import Base from "../layouts/Base.astro";
 
   <Footer />
 </Base>
-
-<script>
-  const button = document.getElementById("copy-install");
-  const label = document.getElementById("copy-install-label");
-  const command = document.getElementById("install-command");
-  button?.addEventListener("click", async () => {
-    if (!command?.textContent || !label) return;
-    let copied = false;
-    try {
-      await navigator.clipboard.writeText(command.textContent.trim());
-      copied = true;
-    } catch {}
-    label.textContent = copied ? "copied" : "copy failed";
-    setTimeout(() => {
-      label.textContent = "copy";
-    }, 2000);
-  });
-</script>

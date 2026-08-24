@@ -4,90 +4,46 @@ description: Install librarium and run your first research query.
 order: 1
 ---
 
-## What is librarium?
+Librarium 2.0.0-rc.18 plans a request against explicit provider profiles, executes selected work, and records its provenance. The catalog contains 33 built-in providers and exactly 40 implemented public profiles.
 
-Librarium fans out research queries to multiple search and deep-research APIs in parallel, then merges everything into one structured output. It ships with 31 built-in provider adapters spanning traditional search engines, AI-grounded answers, answer-engine visibility surfaces, deep-research APIs, and an opt-in LLM tier. Librarium works both as a CLI and as an embeddable library via `librarium/core`, which runs in Cloudflare Workers and other edge runtimes.
+## Install the release candidate
 
-## Installation
-
-### npm
-
-Requires Node.js 22.12 or later.
+Node installs require Node.js 22.12.0 or newer. Homebrew and standalone binaries include their runtime.
 
 ```bash
-npm install -g librarium
+npm install -g librarium@2.0.0-rc.18
+# or
+npx librarium@2.0.0-rc.18 run "PostgreSQL connection pooling" --group quick
 ```
 
-### pnpm
-
-```bash
-pnpm install -g librarium
-```
-
-### yarn
-
-```bash
-yarn global add librarium
-```
-
-### Homebrew (macOS and Linux)
+Homebrew and standalone installs are also supported:
 
 ```bash
 brew install jkudish/tap/librarium
-```
-
-### Standalone binary
-
-```bash
 curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh
 ```
 
-### npx (no install required)
+For an existing install, pin the RC while evaluating v2:
 
 ```bash
-npx librarium run "your query"
+npm install -g librarium@2.0.0-rc.18
+librarium --version
+librarium config --json
+librarium doctor
 ```
 
-## Quick start
+Evaluating the candidate end to end? Follow the [release-candidate review checklist](/docs/release-candidate).
 
-The easiest way to get started is to run `librarium` with no arguments in a terminal. It launches an interactive wizard: enter your query, pick a provider group, choose a mode, and kick off the run -- all with guided prompts.
+Do not assume a v1 config was rewritten. Migration is pure until an explicit save. Read [Configuration](/docs/configuration#migrate-from-v1) before replacing a working v1 setup.
+
+## Run research
 
 ```bash
-librarium
+librarium init
+librarium run "PostgreSQL connection pooling" --group quick
+librarium answer "What changed in PostgreSQL 17?" --verify
 ```
 
-Or run `init --auto` once to discover API keys already present in your
-environment and enable eligible providers. Higher-cost LLM, SearchAPI answer,
-and Perplexity Pro Search adapters remain opt-in even when they share a
-discovered key.
+Only `quick`, `deep`, `visibility`, and `all` are built-in v2 workflows. User groups use `custom:<name>`. See [Groups and modes](/docs/groups-and-modes).
 
-```bash
-librarium init --auto
-
-# Fan out a research query across providers (live results table)
-librarium run "PostgreSQL connection pooling best practices"
-
-# Or get one grounded, cited answer synthesized from the results
-librarium answer "what changed in postgres 17 logical replication"
-
-# Use a specific group
-librarium run "React Server Components" --group quick
-
-# Compare nine answer-engine surfaces deliberately
-librarium run "How do AI assistants describe our product?" --group visibility
-
-# Check async deep research status
-librarium status --wait
-```
-
-The six SearchAPI members of `visibility` share one collection vendor, so treat
-their agreement as correlated observation rather than independent
-corroboration. See [provider provenance and privacy](/docs/providers#ai-grounded-answer-behavior).
-
-## Upgrade
-
-`librarium upgrade` auto-detects your install method (npm, pnpm, yarn, Homebrew, standalone) and runs the correct upgrade command.
-
-```bash
-librarium upgrade
-```
+`librarium run --json` writes JSON to stdout. Progress and diagnostics stay on stderr. A result records what an API or collected surface returned. It does not convert agreement or citation count into proof.

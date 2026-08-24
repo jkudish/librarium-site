@@ -1,210 +1,48 @@
 ---
 title: Library usage
 description: Use librarium/core as an embeddable library in Workers, edge runtimes, and Node.js.
-order: 8
+order: 9
 ---
 
-## librarium/core
+## Import boundaries
 
-Everything the CLI does with providers is importable. The `librarium/core` entry exposes the adapters, registry, dispatcher, normalizer, descriptors, and types. It returns results in memory. Writing `run.json` and report files is a Node application-service concern; the core has no opinion about persistence.
+| Import | Public boundary |
+| --- | --- |
+| `librarium` | Side-effect-free, Worker-safe schemas, terminal interchange types, config migration and validation, workflow types, and `BUILTIN_PROVIDER_CATALOG` |
+| `librarium/core` | Worker-safe catalog construction, planning, coordinator state, injected HTTP transport, execution ports, and `runPreparedExecution()` |
+| `librarium/node` | Node config-file load and atomic save, trusted custom-provider loading, credential context, and canonical validation helpers |
 
-The core entry has zero Node-only dependencies: no `node:fs`, no `process.env` access, fetch-based HTTP only. It is tested in workerd (Cloudflare's runtime) on every CI run.
+Importing `librarium` does not inspect the host, read files, access credentials, initialize adapters, start the CLI, or install process handlers. `librarium/core` does not construct concrete provider adapters or a global registry. `librarium/node` does not promise a general high-level runner or portable persistence layer. The complete Node application is the `librarium` executable.
 
-```bash
-npm install librarium
-```
-
-```ts
-import { dispatch, initializeProviders, type Config } from 'librarium/core';
-
-// Credentials are injected -- core never reads process.env itself.
-// Pass an env map (Workers: pass your `env` binding) or a resolveCredential fn.
-const credentials = { env: { GEMINI_API_KEY: '...', OPENROUTER_API_KEY: '...' } };
-
-await initializeProviders({ credentials });
-
-const config: Config = {
-  version: 1,
-  defaults: { outputDir: '', maxParallel: 4, timeout: 60, asyncTimeout: 600, asyncPollInterval: 5, mode: 'sync', llmWebSearch: true },
-  providers: {
-    'gemini-grounded': { enabled: true },
-    'openrouter-online': { enabled: true },
-  },
-  customProviders: {},
-  trustedProviderIds: [],
-  groups: {},
-};
-
-const { results, asyncTasks } = await dispatch({
-  config,
-  providerIds: ['gemini-grounded', 'openrouter-online'],
-  query: 'What is the best wholesale produce supplier in London?',
-  mode: 'sync',
-  credentials,
-});
-
-for (const r of results) {
-  // { provider, tier, status, text, sourceUrls, citations, durationMs,
-  //   model, tokenUsage, usage, error, fallbackFor }
-  console.log(r.provider, r.status, r.sourceUrls);
-}
-```
-
-## dispatch() parameters
-
-The `dispatch()` function accepts an optional `tierQueries` parameter that overrides the query sent to each tier. This is the same mechanism `run --refine` uses to dispatch tier-tuned variants from `librarium refine`:
+## Worker-safe planning
 
 ```ts
-const { results } = await dispatch({
-  config,
-  providerIds: ['gemini-grounded', 'openrouter-online', 'openai-research'],
-  query: 'How to scale postgres connections',
-  mode: 'mixed',
-  credentials,
-  tierQueries: {
-    'deep-research': 'Comprehensive analysis of PostgreSQL connection scaling strategies including pgBouncer, connection pooling architectures, and tuning recommendations for high-concurrency workloads',
-    'ai-grounded': 'Best practices for scaling PostgreSQL connections in production',
-    'raw-search': 'postgres connection pooling scaling pgbouncer',
-  },
-});
+import {
+  buildProviderCatalog,
+  prepareResearchExecution,
+  runPreparedExecution,
+  type HttpClient,
+} from 'librarium/core';
 ```
 
-`tierQueries` is additive -- providers whose tier has no entry fall back to the root `query`.
+The core API expects dependencies and adapter bindings to be injected. It provides planning and execution primitives, not a one-call provider runner. Fetch-based `httpRequest()` and `httpStreamRequest()` are Worker-compatible and accept caller cancellation signals.
 
-## Result shape
+HTTP retry behavior is explicit. GET defaults to bounded safe retries. Mutating requests do not retry unless the caller supplies an idempotency key and policy. Streaming submissions are one attempt only because replay could duplicate paid work. Timeouts, aborts, and response-size limits remain active while a stream is consumed.
 
-Each result in the `results` array includes an optional `usage` field populated from whatever each provider's API actually reports. Usage is never estimated from pricing tables -- it contains only data the API itself returned:
+## Node services
 
 ```ts
-{
-  provider: 'gemini-grounded',
-  tier: 'ai-grounded',
-  status: 'success',
-  text: '...',
-  sourceUrls: [...],
-  citations: [...],
-  durationMs: 1840,
-  model: 'gemini-2.5-flash',
-  usage: {
-    inputTokens: 312,
-    outputTokens: 890,
-    totalTokens: 1202,
-    costUsd: 0.0012,      // only present when the API reported cost
-    raw: { ... }          // raw provider usage object
-  },
-  error: undefined,
-  fallbackFor: undefined,
-}
+import {
+  loadConfigV2,
+  loadCustomProviders,
+  saveConfigV2,
+} from 'librarium/node';
 ```
 
-The `usage` field is also written to each provider's `.meta.json` file and included in `run.json` when running via the CLI.
+Use the Node boundary for filesystem and executable-code concerns. Callers own returned custom-provider instances and decide how to bind them into a client-scoped runtime.
 
-## Built-in provider descriptors
+## Shared TypeScript and PHP terminal boundary
 
-`BUILTIN_PROVIDER_DESCRIPTORS` is the typed inventory behind initialization.
-Each entry combines its adapter factory with tier, display/catalog metadata,
-credential environment variable, metering declaration, option schema,
-aliases, model default, registration order, and discriminated execution
-capabilities.
+`contracts/v1` is a terminal, language-neutral snapshot of exactly seven values: `ResearchResponse`, `ResearchResult`, `Citation`, `Source`, `ResultProvenance`, `Usage`, and `ResearchError`. It is generated from Zod and vendored from an exact reviewed Git snapshot with checksums.
 
-```ts
-import { BUILTIN_PROVIDER_DESCRIPTORS } from 'librarium/core';
-
-for (const descriptor of BUILTIN_PROVIDER_DESCRIPTORS) {
-  console.log({
-    id: descriptor.id,
-    model: descriptor.defaultModel,
-    execution: descriptor.capabilities.execution,
-    options: descriptor.optionsSchema,
-  });
-}
-```
-
-Registry initialization, provider names, credential lookup, aliases, catalog
-output, and metering derive from this inventory. Default groups remain explicit
-policy and are validated against it. Invalid configured options warn while the
-adapter remains registered: new `execute`, `submit`, and `test` work is blocked
-before HTTP, while background `poll` and `retrieve` remain available.
-
-## Headless durable runs (librarium/node)
-
-`executeResearchRun(request, overrides?)` is the shared application service
-behind the CLI and MCP server. It performs the durable lifecycle without
-spinners, prompts, or console output: create and reconcile `run.json`, dispatch
-providers, write provider artifacts, deduplicate citations, and write
-`prompt.md`, `sources.json`, and `summary.md`.
-
-```ts
-import { initializeProviders } from 'librarium/core';
-import { executeResearchRun } from 'librarium/node';
-
-const credentials = { env: process.env };
-await initializeProviders({ ...config, credentials });
-
-const run = await executeResearchRun({
-  query: 'Compare current deep-research APIs',
-  config,
-  providerIds: ['openai-research'],
-  outputDir: '/absolute/path/to/run',
-  slug: 'compare-current-deep-research-apis',
-  credentials,
-  onEvent(event) {
-    if (event.type === 'dispatch-progress') renderProgress(event.progress);
-  },
-});
-
-console.log(run.manifest.status, run.sources.length);
-```
-
-Production defaults are used when `overrides` is omitted. Tests and embedders
-may independently replace `providerRegistry`, `taskStore`, `httpClient`, or
-`dispatch`. `onEvent` is typed and observational: handler failures cannot
-interrupt dispatch or persistence. `postDispatch` may attach answer or
-verification metadata before terminalization; its failures become warning
-events without discarding the run.
-
-## Custom providers (librarium/node)
-
-Hand-written providers work anywhere: implement the `Provider` interface (fetch-based) and call `registerProvider(provider)` from `librarium/core` -- edge runtimes included.
-
-npm- and script-based custom providers need Node (module resolution, child processes), so they load through the dedicated `librarium/node` entry point -- the same loader the CLI uses. It exposes:
-
-- `loadCustomProviders(config, options?)` -- loads (but does not register) the npm/script providers declared in `config.customProviders`, applying the same `trustedProviderIds` gating and reserved-ID protection as the CLI. Returns `{ providers, loadedIds, skippedIds, warnings }`.
-- `registerCustomProviders(config, options?)` -- convenience that loads and registers them into the core registry. Built-in IDs are reserved from the descriptor inventory even before initialization or when options are invalid. Same return shape.
-
-```ts
-import { dispatch, initializeProviders, getProvider } from 'librarium/core';
-import { registerCustomProviders } from 'librarium/node';
-
-const credentials = { env: process.env };
-await initializeProviders({ credentials });
-
-const config = {
-  version: 1 as const,
-  defaults: { outputDir: '', maxParallel: 4, timeout: 60, asyncTimeout: 600, asyncPollInterval: 5, mode: 'sync' as const },
-  providers: { 'my-search': { enabled: true } },
-  customProviders: { 'my-search': { type: 'npm' as const, module: 'my-search-provider' } },
-  trustedProviderIds: ['my-search'], // untrusted IDs are skipped with a warning
-  groups: {},
-};
-
-const { warnings, loadedIds } = await registerCustomProviders(config);
-if (warnings.length) console.warn(warnings.join('\n'));
-
-// Now registered alongside the built-ins -- dispatch sees it.
-console.log(getProvider('my-search')?.source); // 'npm'
-```
-
-`librarium/core` stays Node-free: edge users never import `librarium/node` and keep using fetch-based `registerProvider()` providers. See [Custom providers](/docs/custom-providers) for the provider contract itself.
-
-## Key notes
-
-**Credential injection.** `CredentialContext` is `{ env?: Record<string, string | undefined>, resolveCredential?: (value: string) => string | undefined }`. `$ENV_VAR` references in provider config resolve against the injected `env`; literal keys pass through. In the CLI, this is backed by `process.env`. In a Worker, pass your env binding.
-
-**Custom providers from the library.** Hand-written providers register anywhere via `registerProvider()` (edge included); npm- and script-based ones load through `librarium/node` -- see [Custom providers (librarium/node)](#custom-providers-librariumnode) above.
-
-**Async deep-research from the library.** `dispatch` with `mode: 'async'` or `'mixed'` returns `asyncTasks` handles. Polling and retrieval are the caller's responsibility. In the CLI, `librarium status` handles this.
-
-**Cost metering and budgets.** Every result carries a `metering` object (`kind`, optional pre-dispatch `estimate`, and an `actual` lane derived from reported `usage.costUsd`) -- see [Metering](/docs/commands#metering-registry-and-the-estimated-budget). `librarium/core` exports `getMeteringKind()`, `estimateMetering()`, and `buildProviderMetering()` so a consumer can read a provider's pricing model and a network-free cost estimate *before* dispatching -- ideal for pre-call budget reservation. `dispatch()` accepts two optional, independent trackers: `budget` (from `createBudgetTracker`, reported-cost circuit breaker) and `estimatedBudget` (from `createEstimateBudgetTracker`, pre-dispatch reservation ceiling). Estimates never alter `usage.costUsd`.
-
-**Bring your own persistence.** Core returns data. Where it goes (D1, R2, files, or nowhere) is up to you. If you just want a machine-readable file rather than in-memory results, the CLI's `run --jsonl` (or `librarium jsonl`) writes a `results.jsonl` per run with the full provider content embedded - one independently parseable JSON object per line.
+It contains no request, attempt, lifecycle event, durable handle, coordinator state, config, persistence, manifest, JSONL, artifact schema, or custom-provider protocol. PHP `run()` and `queue()` and TypeScript runtime services are outside this boundary. Each terminal response carries `generator` and `generator_version`.

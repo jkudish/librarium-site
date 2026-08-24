@@ -1,249 +1,184 @@
 ---
-import Base from "../layouts/Base.astro";
-import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-
-const tiers = [
-  {
-    id: "deep-research",
-    latency: "minutes",
-    description:
-      "Async jobs that run for minutes and come back with comprehensive multi-source reports. Submit, keep working, retrieve later.",
-    providers: ["perplexity-sonar-deep", "openai-research", "gemini-deep", "+2"],
-  },
-  {
-    id: "ai-grounded",
-    latency: "seconds",
-    description: "AI answers with inline citations. The middle ground between speed and depth.",
-    providers: ["perplexity-pro-search", "searchapi-chatgpt", "gemini-grounded", "exa", "+11"],
-  },
-  {
-    id: "raw-search",
-    latency: "sub-second",
-    description: "Classic engine results. Broad link discovery and fact checks, in under a second.",
-    providers: ["brave-search", "tavily", "serpapi", "firecrawl-search", "+3"],
-  },
-];
-
+import Header from "../components/Header.astro";
+import {
+  NODE_FLOOR,
+  PRODUCT_VERSION,
+  PROFILE_COUNT,
+  PROVIDER_COUNT,
+  SOURCE_SHA,
+  WORKFLOWS,
+} from "../data/product";
+import Base from "../layouts/Base.astro";
 ---
 
-<Base title="librarium — the meta harness for research queries">
+<Base title="librarium | Evidence-aware, multi-provider research">
   <Header />
 
   <main>
-    <!-- Hero -->
-    <section class="py-20 sm:py-24">
-      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-x-8 gap-y-14 px-6 lg:grid-cols-2 lg:px-8">
+    <section class="border-b border-neutral-950/10 py-16 sm:py-24">
+      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 lg:grid-cols-[11fr_9fr] lg:px-8">
         <div>
-          <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Open source · MIT</p>
-          <h1 class="mt-5 max-w-[24ch] text-5xl font-semibold tracking-tight text-balance text-neutral-950 sm:text-6xl">The meta harness for research queries.</h1>
-          <p class="mt-6 max-w-[48ch] text-lg text-pretty text-neutral-600">Ask once. Librarium fans your query out to search engines, AI-grounded answers, and deep-research APIs in parallel, then merges everything into one structured output.</p>
+          <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">
+            Open source · MIT · v2 release candidate
+          </p>
+          <h1 class="mt-5 max-w-[22ch] text-5xl font-semibold tracking-tight text-balance text-neutral-950 sm:text-6xl">
+            Research across providers. Keep the evidence boundaries.
+          </h1>
+          <p class="mt-6 max-w-[58ch] text-lg text-pretty text-neutral-600">
+            Librarium plans one request against explicit provider profiles, runs the selected work, and records what happened. Use it for web search, cited answers, consumer-surface observations, and durable research jobs.
+          </p>
           <div class="mt-9 flex flex-wrap items-center gap-4">
-            <a href="/docs" class="rounded-lg bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">Get started</a>
-            <div class="flex items-center gap-x-3 rounded-lg bg-neutral-950/3 py-2 pr-2 pl-4 ring-1 ring-neutral-950/10">
-              <p class="font-mono text-base text-neutral-800 sm:text-sm"><span class="text-neutral-400 select-none">$ </span><span id="install-command">npm i -g librarium</span></p>
-              <button type="button" id="copy-install" class="relative rounded-md bg-white px-2.5 py-1 font-mono text-sm font-medium text-neutral-600 ring-1 ring-neutral-950/10 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-xs">
-                <span id="copy-install-label">copy</span>
-                <span class="pointer-fine:hidden absolute top-1/2 left-1/2 size-[max(100%,3rem)] -translate-1/2" aria-hidden="true"></span>
-              </button>
-            </div>
+            <a href="/docs" class="rounded-lg bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">
+              Evaluate v2
+            </a>
+            <a href="https://github.com/jkudish/librarium" class="rounded-lg px-4 py-2.5 text-base font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3 sm:text-sm">
+              Read the source
+            </a>
           </div>
-          <p class="mt-6 text-base/7 text-neutral-500 sm:text-sm/6">
-            Also available via
-            <span class="relative inline-block">
-              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">Homebrew</button>
-              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
-                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
-                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>brew install jkudish/tap/librarium</code>
-                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="brew install jkudish/tap/librarium">copy</button>
-                </span>
-              </span>
-            </span>,
-            <span class="relative inline-block">
-              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">curl</button>
-              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
-                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
-                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh</code>
-                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh">copy</button>
-                </span>
-              </span>
-            </span>,
-            <span class="relative inline-block">
-              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">npx</button>
-              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
-                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
-                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>npx librarium run "your query"</code>
-                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd={'npx librarium run "your query"'}>copy</button>
-                </span>
-              </span>
-            </span>, or
-            <span class="relative inline-block">
-              <button type="button" class="install-method font-mono underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">import 'librarium/core'</button>
-              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
-                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
-                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>npm install librarium</code>
-                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="npm install librarium">copy</button>
-                </span>
-              </span>
-            </span>.
+          <div class="mt-7 flex max-w-xl flex-col items-start justify-between gap-3 rounded-lg bg-neutral-950/3 p-3 ring-1 ring-neutral-950/10 sm:flex-row sm:items-center sm:py-2 sm:pr-2 sm:pl-4">
+            <code id="install-command" class="break-all font-mono text-base text-neutral-800 sm:text-sm">npm i -g librarium@{PRODUCT_VERSION}</code>
+            <button type="button" id="copy-install" class="relative shrink-0 rounded-md bg-white px-2.5 py-1 font-mono text-sm font-medium text-neutral-600 ring-1 ring-neutral-950/10 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-xs">
+              <span id="copy-install-label">copy</span>
+              <span class="pointer-fine:hidden absolute top-1/2 left-1/2 size-[max(100%,3rem)] -translate-1/2" aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="mt-4 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">
+            Package installs require Node.js {NODE_FLOOR} or newer. This is {PRODUCT_VERSION}, not the stable v2 release.
           </p>
         </div>
 
-        <!-- Terminal -->
-        <div class="rounded-xl bg-neutral-950 shadow-lg ring-1 ring-neutral-950/5">
-          <div class="flex items-center justify-between border-b border-white/10 px-5 py-3">
-            <p class="font-mono text-sm text-neutral-400 sm:text-xs">zsh — librarium</p>
-            <div class="flex gap-x-1.5">
-              <span class="size-2.5 rounded-full bg-white/15"></span>
-              <span class="size-2.5 rounded-full bg-white/15"></span>
-              <span class="size-2.5 rounded-full bg-white/15"></span>
-            </div>
+        <div class="overflow-hidden rounded-xl bg-neutral-950 shadow-lg ring-1 ring-neutral-950/10">
+          <div class="flex flex-col items-start gap-1 border-b border-white/10 px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+            <p class="font-mono text-sm text-neutral-400 sm:text-xs">offline canonical fixture replay</p>
+            <p class="font-mono text-sm text-amber-300 sm:text-xs">network denied</p>
           </div>
-          <div class="overflow-x-auto p-5 font-mono text-sm/7 sm:text-terminal/6" id="terminal-demo">
-            <pre
-              class="text-neutral-300"><code id="terminal-code"><span class="text-neutral-500">$ </span>librarium answer <span class="text-amber-300">"how to get cited in ai answers"</span>
+          <div class="p-5 font-mono text-sm/6 text-neutral-300">
+            <pre class="whitespace-pre-wrap break-words"><code><span class="text-neutral-500">$ </span>librarium live-validation \
+  --fixture /absolute/path/to/fixture.json
 
-  fanning out to <span class="text-white">5 providers</span>
-
-  <span class="text-emerald-400">✓</span> gemini-grounded    <span class="text-neutral-500">ai-grounded    </span> 1.1s   9 sources
-  <span class="text-emerald-400">✓</span> openrouter-online  <span class="text-neutral-500">ai-grounded    </span> 1.9s   7 sources
-  <span class="text-emerald-400">✓</span> brave-answers      <span class="text-neutral-500">ai-grounded    </span> 0.6s  20 sources
-  <span class="text-emerald-400">✓</span> exa                <span class="text-neutral-500">ai-grounded    </span> 1.4s  10 sources
-  <span class="text-emerald-400">✓</span> kagi-fastgpt       <span class="text-neutral-500">ai-grounded    </span> 4.7s   3 sources
-
-  AI engines cite pages they can parse and trust:
-  structured headings, direct answers high on the
-  page, and schema markup all raise citation rates
-  <span class="text-amber-300">[1]</span> <span class="text-amber-300">[2]</span>. Mentions on Reddit, reviews, and listicles
-  matter more than backlinks for LLM visibility <span class="text-amber-300">[3]</span>.
-
-  <span class="font-semibold text-white">Sources</span>
-  <span class="text-amber-300">[1]</span> How AI search engines pick citations
-  <span class="text-amber-300">[2]</span> Schema markup and LLM visibility
-  <span class="text-amber-300">[3]</span> Reddit's outsized role in AI answers
-
-  <span class="text-neutral-500">5 succeeded, 0 failed in 4.7s</span>
-  <span class="text-amber-300">▸</span> <span class="text-white">31 unique sources</span> after dedupe (49 total citations)
-  <span class="text-amber-300">▸</span> ./agents/librarium/1781136000-how-to-get-cited-in-ai/</code></pre>
+&#123;
+  <span class="text-sky-300">"status"</span>: <span class="text-emerald-300">"succeeded"</span>,
+  <span class="text-sky-300">"schema_version"</span>: 1,
+  <span class="text-sky-300">"artifact_name"</span>: <span class="text-amber-300">"run_manifest"</span>,
+  <span class="text-sky-300">"request_id"</span>: <span class="text-amber-300">"fixture-readme-durable-replay"</span>,
+  <span class="text-sky-300">"profile"</span>: <span class="text-amber-300">"exa/research"</span>,
+  <span class="text-sky-300">"binding_id"</span>: <span class="text-amber-300">"exa.research.exa-research"</span>,
+  <span class="text-sky-300">"materialize_count"</span>: 1,
+  <span class="text-sky-300">"resume_count"</span>: 1,
+  <span class="text-sky-300">"submit_count"</span>: 1,
+  <span class="text-sky-300">"poll_count"</span>: 1,
+  <span class="text-sky-300">"retrieve_count"</span>: 1
+&#125;</code></pre>
           </div>
+          <p class="border-t border-white/10 px-5 py-3 text-base/7 text-pretty text-neutral-400 sm:text-sm/6">
+            This is the reviewed, network-denied fixture path. It does not claim live provider behavior, account state, price, or privacy settings. <a href="/demo.gif" class="font-medium text-amber-300 hover:text-amber-200">Watch the source replay</a>.
+          </p>
         </div>
       </div>
-
     </section>
 
-    <!-- Features -->
-    <section class="py-20 sm:py-24" id="features">
+    <section class="py-16 sm:py-24" id="workflows">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Features</p>
-        <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">Built for serious research workflows.</h2>
-        <dl class="mt-12 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Live fan-out table</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Every provider resolves in place with timing, source counts, and reported cost when available. Slow ones get highlighted; failures fall back to a configured backup.</dd>
-          </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Grounded answers</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6"><span class="font-mono text-amber-700">librarium answer</span> fans out, then synthesizes one cited answer from what actually came back. Every claim maps to a real source.</dd>
-          </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Reports for humans and machines</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">A tabbed HTML report for reading, <span class="font-mono text-amber-700">results.jsonl</span> with full content for pipelines, and a browsable run directory for everything else.</dd>
-          </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Answer-engine visibility</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6"><span class="font-mono text-amber-700">--group visibility</span> compares six correlated consumer observations with three first-party answer APIs, preserving provenance and citations.</dd>
-          </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Tier-tuned queries</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6"><span class="font-mono text-amber-700">--refine</span> rewrites your query three ways with one LLM call: a brief for deep research, a question for AI answers, keywords for raw search.</dd>
-          </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Async deep research</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Submit long-running jobs and walk away. <span class="font-mono text-amber-700">status --wait --retrieve</span> collects the reports when they land.</dd>
-          </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <dt class="text-base font-semibold text-neutral-950">Built for agents</dt>
-            <dd class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">An agent skill, an MCP server, and an embeddable edge-safe core. Your agents fan out, browse, and cite without screen-scraping a terminal.</dd>
-          </div>
-        </dl>
-        <p class="mt-10 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">Plus provider groups, automatic fallbacks, and custom providers from npm or local scripts. <a href="/docs/commands" class="font-medium text-amber-700 hover:text-amber-600">Full command reference</a></p>
-      </div>
-    </section>
-
-    <!-- Library -->
-    <section class="py-20 sm:py-24" id="library">
-      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-x-8 gap-y-12 px-6 lg:grid-cols-2 lg:px-8">
-        <div>
-          <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">librarium/core</p>
-          <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">A CLI for you. A library for your agents.</h2>
-          <p class="mt-6 max-w-[56ch] text-base/7 text-pretty text-neutral-600">The same adapters and dispatcher behind the CLI ship as an embeddable core that returns structured results in memory. No filesystem, no Node-only dependencies; it runs in Cloudflare Workers and other edge runtimes. Wire it into agents, pipelines, or apps.</p>
-          <a href="/docs/library" class="mt-8 inline-flex items-center gap-x-2 text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">
-            Read the library docs
-            <svg viewBox="0 0 20 20" class="size-5 shrink-0 fill-amber-700" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd"/></svg>
-          </a>
-        </div>
-        <div class="rounded-xl bg-neutral-950 shadow-lg ring-1 ring-neutral-950/5">
-          <p class="border-b border-white/10 px-5 py-3 font-mono text-sm text-neutral-400 sm:text-xs">research.ts</p>
-          <div class="overflow-x-auto p-5 font-mono text-sm/7 sm:text-terminal/6">
-            <pre
-              class="text-neutral-300"><code><span class="text-violet-300">import</span> {"{"} dispatch {"}"} <span class="text-violet-300">from</span> <span class="text-amber-300">'librarium/core'</span>
-
-<span class="text-violet-300">const</span> run = <span class="text-violet-300">await</span> <span class="text-sky-300">dispatch</span>({"{"}
-  query: <span class="text-amber-300">'HTTP/3 adoption in 2026'</span>,
-  providers: [<span class="text-amber-300">'perplexity-sonar-pro'</span>, <span class="text-amber-300">'exa'</span>],
-{"}"})
-
-<span class="text-violet-300">for</span> (<span class="text-violet-300">const</span> result <span class="text-violet-300">of</span> run.results) {"{"}
-  console.<span class="text-sky-300">log</span>(result.provider, result.sources)
-{"}"}</code></pre>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Tiers -->
-    <section class="py-20 sm:py-24" id="providers">
-      <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Provider tiers</p>
-        <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">Depth when you need it, speed when you don't.</h2>
-        <div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {tiers.map((tier) => (
+        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">V2 catalog</p>
+        <h2 class="mt-4 max-w-[32ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">
+          Profiles are the public unit of selection and provenance.
+        </h2>
+        <p class="mt-5 max-w-[70ch] text-base/7 text-pretty text-neutral-600">
+          The catalog has {PROVIDER_COUNT} built-in providers and {PROFILE_COUNT} implemented public profiles. Select a profile as <code class="rounded bg-neutral-950/4 px-1.5 py-0.5 font-mono text-sm text-neutral-950">provider_id/profile_id</code>. Internal adapter IDs are not public configuration.
+        </p>
+        <dl class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2">
+          {WORKFLOWS.map((workflow) => (
             <div class="rounded-xl border border-neutral-950/10 p-6">
-              <div class="flex items-center justify-between">
-                <h3 class="font-mono text-base font-medium text-neutral-950 sm:text-sm">{tier.id}</h3>
-                <p class="font-mono text-sm text-neutral-400 sm:text-xs">{tier.latency}</p>
-              </div>
-              <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{tier.description}</p>
-              <ul role="list" class="mt-4 flex flex-wrap gap-1.5">
-                {tier.providers.map((provider) => (
-                  <li class="rounded-md bg-neutral-950/4 px-2 py-0.5 font-mono text-sm text-neutral-600 sm:text-xs">{provider}</li>
-                ))}
-              </ul>
+              <dt class="font-mono text-base font-medium text-neutral-950 sm:text-sm">{workflow.id}</dt>
+              <dd class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{workflow.summary}</dd>
+              {workflow.selection[0] !== "catalog-derived" && (
+                <dd class="mt-4 font-mono text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
+                  {workflow.selection.join(" · ")}
+                </dd>
+              )}
             </div>
           ))}
-        </div>
-        <p class="mt-10 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">31 built-in providers across four tiers. <a href="/docs/providers" class="font-medium text-amber-700 hover:text-amber-600">See the full catalog</a></p>
+        </dl>
+        <p class="mt-8 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">
+          These are the only four built-in v2 workflows. User-authored groups use <code class="font-mono">custom:&lt;name&gt;</code>.{" "}
+          <a href="/docs/groups-and-modes" class="font-medium text-amber-700 hover:text-amber-600">Read the workflow contract</a>.
+        </p>
       </div>
     </section>
 
-    <!-- CTA -->
-    <section class="py-20 sm:py-24" id="docs">
+    <section class="border-y border-neutral-950/10 bg-neutral-950/2 py-16 sm:py-24" id="evidence">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <div class="rounded-xl border border-neutral-950/10 bg-neutral-950/2 px-6 py-16 text-center sm:px-16">
-          <h2 class="mx-auto max-w-[30ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">Stop searching one engine at a time.</h2>
-          <p class="mx-auto mt-5 max-w-[48ch] text-lg text-pretty text-neutral-600">Install librarium and fire off your first deep research in under a minute.</p>
-          <div class="mx-auto mt-9 max-w-2xl rounded-lg bg-white text-left ring-1 ring-neutral-950/10">
-            <div class="flex items-center justify-between border-b border-neutral-950/10 py-2 pr-2 pl-4">
-              <p class="text-base/7 text-neutral-500 sm:text-sm/6">Paste this into your agent</p>
-              <button type="button" id="copy-prompt" class="relative rounded-md bg-white px-2.5 py-1 font-mono text-sm font-medium text-neutral-600 ring-1 ring-neutral-950/10 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-xs">
-                <span id="copy-prompt-label">copy</span>
-                <span class="pointer-fine:hidden absolute top-1/2 left-1/2 size-[max(100%,3rem)] -translate-1/2" aria-hidden="true"></span>
-              </button>
-            </div>
-            <p id="agent-prompt" class="p-4 font-mono text-base/7 text-neutral-800 sm:text-sm/6">Install librarium, the research fan-out CLI (npm i -g librarium), set it up with librarium init --auto and librarium install-skill, then use it to kick off a deep research on <span class="text-amber-700">[a topic of my choosing]</span>.</p>
+        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Evidence, not a confidence score</p>
+        <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">
+          Preserve what each result can and cannot establish.
+        </h2>
+        <div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div class="border-t border-neutral-950/10 pt-6">
+            <h3 class="text-lg font-semibold text-neutral-950">API output</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
+              A direct API response records what the named API returned. Provider-reported citations, usage, and cost remain labelled as reported facts, not Librarium estimates.
+            </p>
           </div>
-          <div class="mt-6 flex justify-center">
-            <a href="https://github.com/jkudish/librarium" class="rounded-lg px-4 py-2.5 text-base font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3 sm:text-sm">View on GitHub</a>
+          <div class="border-t border-neutral-950/10 pt-6">
+            <h3 class="text-lg font-semibold text-neutral-950">Collected surfaces</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
+              Six SearchAPI profiles observe consumer surfaces through one collector. Their agreement is correlated visibility evidence, not six independent confirmations or parity with a specific user.
+            </p>
+          </div>
+          <div class="border-t border-neutral-950/10 pt-6">
+            <h3 class="text-lg font-semibold text-neutral-950">Corpus provenance</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
+              Web, X-only, combined web and X, and specialized sources keep distinct profile identities. Shared URLs show overlap. They do not prove independent corroboration.
+            </p>
+          </div>
+        </div>
+        <a href="/docs/output-formats#provenance-is-descriptive" class="mt-8 inline-flex text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">
+          Read the provenance model
+        </a>
+      </div>
+    </section>
+
+    <section class="py-16 sm:py-24" id="library">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Three package boundaries</p>
+        <h2 class="mt-4 max-w-[33ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">
+          Import only the runtime responsibilities you own.
+        </h2>
+        <div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div class="rounded-xl border border-neutral-950/10 p-6">
+            <h3 class="font-mono text-base font-medium text-neutral-950 sm:text-sm">librarium</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Side-effect-free schemas, config migration, and the public catalog. Worker-safe.</p>
+          </div>
+          <div class="rounded-xl border border-neutral-950/10 p-6">
+            <h3 class="font-mono text-base font-medium text-neutral-950 sm:text-sm">librarium/core</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Injected catalog, planning, transport, coordination, and execution ports. It does not construct provider adapters or a global registry.</p>
+          </div>
+          <div class="rounded-xl border border-neutral-950/10 p-6">
+            <h3 class="font-mono text-base font-medium text-neutral-950 sm:text-sm">librarium/node</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Explicit config-file services, trusted custom-provider loading, and canonical validation helpers. The CLI remains the complete Node application.</p>
+          </div>
+        </div>
+        <p class="mt-8 max-w-[72ch] text-base/7 text-pretty text-neutral-500 sm:text-sm/6">
+          MCP, the agent skill, and the Amp plugin expose the same research jobs without pretending that Node persistence and the shared TypeScript/PHP terminal contract are the same architecture.{" "}
+          <a href="/docs/library" class="font-medium text-amber-700 hover:text-amber-600">Choose an import boundary</a>.
+        </p>
+      </div>
+    </section>
+
+    <section class="pb-16 sm:pb-24" id="review">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <div class="rounded-xl border border-neutral-950/10 bg-neutral-950/2 p-8 sm:p-12">
+          <p class="font-mono text-sm font-medium text-amber-700 sm:text-xs">{PRODUCT_VERSION}</p>
+          <h2 class="mt-4 max-w-[28ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">
+            Evaluate the release candidate without treating it as released.
+          </h2>
+          <p class="mt-5 max-w-[66ch] text-base/7 text-pretty text-neutral-600">
+            The site facts are pinned to source commit <code class="font-mono text-sm text-neutral-950">{SOURCE_SHA.slice(0, 12)}</code>. Install the exact RC, review migration output before saving it, run <code class="font-mono text-sm text-neutral-950">doctor</code>, and start with a bounded workflow.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-4">
+            <a href="/docs/release-candidate" class="rounded-lg bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">Review the RC checklist</a>
+            <a href="/docs/providers" class="rounded-lg px-4 py-2.5 text-base font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-white sm:text-sm">Inspect all profiles</a>
           </div>
         </div>
       </div>
@@ -254,190 +189,19 @@ const tiers = [
 </Base>
 
 <script>
-  // Animated terminal demo: typed command, parallel fan-out, providers
-  // resolving at their real relative speeds. Falls back to the static
-  // final frame when JS is off or the user prefers reduced motion.
-  type DemoProvider = {
-    id: string;
-    tier: string;
-    dur: number;
-    count: number;
-    unit: string;
-  };
-  const PROVIDERS: DemoProvider[] = [
-    { id: "gemini-grounded", tier: "ai-grounded", dur: 1.1, count: 9, unit: "sources" },
-    { id: "openrouter-online", tier: "ai-grounded", dur: 1.9, count: 7, unit: "sources" },
-    { id: "brave-answers", tier: "ai-grounded", dur: 0.6, count: 20, unit: "sources" },
-    { id: "exa", tier: "ai-grounded", dur: 1.4, count: 10, unit: "sources" },
-    { id: "kagi-fastgpt", tier: "ai-grounded", dur: 4.7, count: 3, unit: "sources" },
-  ];
-  const ANSWER_LINES: Array<Array<[string, string]>> = [
-    [["", "AI engines cite pages they can parse and trust:"]],
-    [["", "structured headings, direct answers high on the"]],
-    [["", "page, and schema markup all raise citation rates"]],
-    [["text-amber-300", "[1]"], ["", " "], ["text-amber-300", "[2]"], ["", ". Mentions on Reddit, reviews, and listicles"]],
-    [["", "matter more than backlinks for LLM visibility "], ["text-amber-300", "[3]"], ["", "."]],
-  ];
-  const ANSWER_SOURCES = [
-    "How AI search engines pick citations",
-    "Schema markup and LLM visibility",
-    "Reddit's outsized role in AI answers",
-  ];
-  const SPINNER = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-
-  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-  function span(text: string, cls = ""): HTMLSpanElement {
-    const el = document.createElement("span");
-    el.textContent = text;
-    if (cls) el.className = cls;
-    return el;
-  }
-
-  async function typeInto(el: HTMLElement, text: string) {
-    for (const char of text) {
-      el.textContent += char;
-      await sleep(28);
-    }
-  }
-
-  async function round(code: HTMLElement) {
-    code.replaceChildren();
-
-    // Typed command
-    const cmd = span("");
-    const query = span("", "text-amber-300");
-    const cursor = span("▍", "text-neutral-500");
-    code.append(span("$ ", "text-neutral-500"), cmd, query, cursor);
-    await sleep(600);
-    await typeInto(cmd, "librarium answer ");
-    await typeInto(query, '"how to get cited in ai answers"');
-    await sleep(350);
-    cursor.remove();
-    code.append("\n\n");
-
-    // Fan-out line
-    code.append("  fanning out to ", span("5 providers", "text-white"), "\n\n");
-    await sleep(400);
-
-    // All providers appear at once, each resolving on its own clock
-    const pending = new Set<HTMLSpanElement>();
-    for (const p of PROVIDERS) {
-      const glyph = span(SPINNER[0], "text-neutral-500");
-      const id = span(p.id.padEnd(19), "text-neutral-500");
-      const tier = span(p.tier.padEnd(15), "text-neutral-500");
-      const result = span("");
-      code.append("  ", glyph, " ", id, tier, result, "\n");
-      pending.add(glyph);
-      setTimeout(() => {
-        pending.delete(glyph);
-        id.className = "";
-        glyph.textContent = "✓";
-        glyph.className = "text-emerald-400";
-        result.textContent = `${p.dur.toFixed(1)}s`.padStart(5) + `  ${String(p.count).padStart(2)} ${p.unit}`;
-      }, p.dur * 1000);
-    }
-    let frame = 0;
-    const spinner = setInterval(() => {
-      frame = (frame + 1) % SPINNER.length;
-      for (const glyph of pending) glyph.textContent = SPINNER[frame];
-    }, 90);
-    const maxDur = Math.max(...PROVIDERS.map((p) => p.dur));
-    await sleep(maxDur * 1000 + 500);
-    clearInterval(spinner);
-
-    // Synthesis beat, then the grounded answer (matches the real answer output)
-    await sleep(900);
-    code.append("\n");
-    for (const lineParts of ANSWER_LINES) {
-      code.append("  ");
-      for (const [cls, text] of lineParts) code.append(span(text, cls));
-      code.append("\n");
-      await sleep(110);
-    }
-    code.append("\n  ", span("Sources", "font-semibold text-white"), "\n");
-    for (let i = 0; i < ANSWER_SOURCES.length; i++) {
-      code.append("  ", span(`[${i + 1}]`, "text-amber-300"), ` ${ANSWER_SOURCES[i]}\n`);
-      await sleep(90);
-    }
-    await sleep(250);
-    code.append("\n", span("  5 succeeded, 0 failed in 4.7s", "text-neutral-500"), "\n");
-    code.append("  ", span("▸", "text-amber-300"), " ", span("31 unique sources", "text-white"), " after dedupe (49 total citations)\n");
-    code.append("  ", span("▸", "text-amber-300"), " ./agents/librarium/1781136000-how-to-get-cited-in-ai/");
-    await sleep(7000);
-  }
-
-  const terminal = document.getElementById("terminal-demo");
-  const code = document.getElementById("terminal-code");
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  if (terminal && code && !reducedMotion.matches) {
-    // Lock the height to the static final frame so the loop never shifts layout
-    terminal.style.minHeight = `${terminal.offsetHeight}px`;
-    (async () => {
-      while (true) {
-        await round(code);
-      }
-    })();
-  }
-</script>
-
-<script>
-  function wireCopy(buttonId: string, labelId: string, sourceId: string) {
-    const button = document.getElementById(buttonId);
-    const label = document.getElementById(labelId);
-    const source = document.getElementById(sourceId);
-    button?.addEventListener("click", async () => {
-      if (!source?.textContent || !label) return;
-      await navigator.clipboard.writeText(source.textContent.trim());
-      label.textContent = "copied";
-      setTimeout(() => {
-        label.textContent = "copy";
-      }, 2000);
-    });
-  }
-  wireCopy("copy-install", "copy-install-label", "install-command");
-  wireCopy("copy-prompt", "copy-prompt-label", "agent-prompt");
-</script>
-
-<script>
-  // Install-method popovers: click a method to reveal its command.
-  const triggers = [...document.querySelectorAll<HTMLButtonElement>(".install-method")];
-
-  function closeAll(except?: HTMLButtonElement) {
-    for (const trigger of triggers) {
-      if (trigger === except) continue;
-      trigger.setAttribute("aria-expanded", "false");
-      trigger.parentElement?.querySelector(".install-pop")?.classList.add("hidden");
-    }
-  }
-
-  for (const trigger of triggers) {
-    trigger.addEventListener("click", (event) => {
-      event.stopPropagation();
-      const pop = trigger.parentElement?.querySelector(".install-pop");
-      const isOpen = trigger.getAttribute("aria-expanded") === "true";
-      closeAll(trigger);
-      trigger.setAttribute("aria-expanded", String(!isOpen));
-      pop?.classList.toggle("hidden", isOpen);
-    });
-  }
-
-  document.addEventListener("click", (event) => {
-    if (event.target instanceof Element && event.target.closest(".install-pop")) return;
-    closeAll();
+  const button = document.getElementById("copy-install");
+  const label = document.getElementById("copy-install-label");
+  const command = document.getElementById("install-command");
+  button?.addEventListener("click", async () => {
+    if (!command?.textContent || !label) return;
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(command.textContent.trim());
+      copied = true;
+    } catch {}
+    label.textContent = copied ? "copied" : "copy failed";
+    setTimeout(() => {
+      label.textContent = "copy";
+    }, 2000);
   });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeAll();
-  });
-
-  for (const button of document.querySelectorAll<HTMLButtonElement>(".install-copy")) {
-    button.addEventListener("click", async (event) => {
-      event.stopPropagation();
-      await navigator.clipboard.writeText(button.dataset.cmd ?? "");
-      button.textContent = "copied";
-      setTimeout(() => {
-        button.textContent = "copy";
-      }, 2000);
-    });
-  }
 </script>

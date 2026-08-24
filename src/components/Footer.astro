@@ -3,6 +3,7 @@ const links = [
   { href: "https://github.com/jkudish/librarium", label: "GitHub" },
   { href: "https://www.npmjs.com/package/librarium", label: "npm" },
   { href: "/docs", label: "Docs" },
+  { href: "/llms.txt", label: "llms.txt" },
   { href: "https://github.com/jkudish/librarium/blob/main/CHANGELOG.md", label: "Changelog" },
   { href: "https://github.com/jkudish/librarium/blob/main/LICENSE", label: "MIT License" },
 ];
@@ -11,7 +12,7 @@ const links = [
 <footer class="border-t border-neutral-950/10 py-12">
   <div class="mx-auto flex max-w-6xl flex-col items-start justify-between gap-y-6 px-6 sm:flex-row sm:items-center lg:px-8">
     <a href="/" aria-label="Homepage"><span class="font-mono text-base font-semibold text-neutral-950 sm:text-sm">librarium</span></a>
-    <nav class="flex flex-wrap gap-x-7 gap-y-2 text-base font-normal text-neutral-600 sm:text-sm">
+    <nav class="flex flex-wrap gap-x-7 gap-y-2 text-base font-normal text-neutral-600 sm:text-sm" aria-label="Footer navigation">
       {links.map((link) => (
         <a href={link.href} class="hover:text-neutral-950">{link.label}</a>
       ))}

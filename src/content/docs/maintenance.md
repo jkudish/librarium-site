@@ -1,75 +1,43 @@
 ---
 title: Maintenance
 description: Cleanup, upgrade, and shell completions.
-order: 7
+order: 8
 ---
 
-## cleanup
+## Upgrade the RC
 
-Remove output directories. By default deletes runs older than 30 days; `--all` deletes every run regardless of age.
-
-```bash
-# Delete directories older than 30 days (default)
-librarium cleanup
-
-# Custom age threshold
-librarium cleanup --days 7
-
-# Preview what would be deleted (count, total size, oldest/newest)
-librarium cleanup --dry-run
-
-# Delete every run directory (interactive confirm in a TTY)
-librarium cleanup --all
-
-# Pick exactly which runs to delete from a checklist
-librarium cleanup -i
-
-# JSON output and an alternate output base dir
-librarium cleanup --all --json -o ./agents/librarium
-```
-
-In a terminal, `--all` prompts for confirmation (showing run count and total size on disk) before deleting. In a non-interactive context (pipe, CI), pass `--yes` to confirm, otherwise the command refuses to delete. The `-i`/`--interactive` flag opens a multiselect of runs showing date, query, size, and a pending-async marker. Runs that still have pending async tasks are flagged in the list and confirm, since deleting them orphans the server-side task handle. After deleting, the command reports the disk space freed. It never deletes anything outside the resolved output base directory and refuses to operate if that directory resolves to your home directory or a filesystem root.
-
-## clear
-
-Alias for `librarium cleanup --all`: deletes every run directory. Same flags pass through (`--dry-run`, `-i`/`--interactive`, `--yes`, `-o`/`--output`, `--json`).
+Check first, then upgrade using the detected npm, pnpm, yarn, Homebrew, or standalone installation method.
 
 ```bash
-# Delete all runs (interactive confirm in a TTY, --yes required in non-TTY)
-librarium clear
-
-# Preview everything that would be removed
-librarium clear --dry-run
-
-# Interactively pick which runs to clear
-librarium clear -i
-```
-
-## upgrade
-
-Auto-detects your install method and runs the correct upgrade command.
-
-```bash
+librarium upgrade --check
+librarium upgrade --dry-run
 librarium upgrade
 ```
 
-Supports npm, pnpm, yarn, Homebrew, and standalone binary installs.
-
-## completions
-
-Print a static shell completion script covering commands, flags, and the builtin group names.
+Use `--force` only when you intend to bypass the normal version guard. `--target <version>` is restricted to local or fixture evaluation, requires `--dry-run`, and cannot be combined with `--check`. For npm evaluation, pin the authority version directly:
 
 ```bash
-# zsh
-eval "$(librarium completions zsh)"
-
-# bash
-eval "$(librarium completions bash)"
-
-# fish
-librarium completions fish > ~/.config/fish/completions/librarium.fish
+npm install -g librarium@2.0.0-rc.18
 ```
 
-## install-skill
+Review [v1 migration](/docs/configuration#migrate-from-v1) separately. Upgrading the executable is not proof that a v1 config was saved as v2.
 
-Installs the librarium skill for Claude Code. Documented with the rest of the agent integrations on [Using with AI agents](/docs/using-with-agents).
+## Cleanup
+
+```bash
+librarium cleanup --days 30 --dry-run
+librarium cleanup --all --yes
+librarium clear --dry-run
+```
+
+`cleanup` also accepts `--interactive`, `--output`, and `--json`. `clear` is the all-runs form and accepts `--interactive`, `--dry-run`, `--yes`, `--output`, and `--json`. Deleting a run with pending work removes local custody of its handle. It does not imply remote cancellation.
+
+## Completions and integrations
+
+```bash
+eval "$(librarium completions zsh)"
+librarium install-skill --dry-run
+librarium install-plugin --dry-run
+```
+
+Both installers accept `--force` and `--dry-run`.

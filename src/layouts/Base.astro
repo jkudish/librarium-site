@@ -1,29 +1,48 @@
 ---
 import "../styles/global.css";
+import {
+  NODE_FLOOR,
+  PRODUCT_VERSION,
+  PROFILE_COUNT,
+  PROVIDER_COUNT,
+  SOURCE_SHA,
+} from "../data/product";
 
 interface Props {
   title: string;
   description?: string;
+  robots?: string;
+  includeSoftwareMetadata?: boolean;
 }
 
 const {
   title,
-  description = "Librarium fans one research query out to search engines, AI-grounded answers, and deep-research APIs in parallel, then merges everything into one structured output.",
+  description = `Evidence-aware, multi-provider research for people and agents. Plan against ${PROFILE_COUNT} public profiles, run selected work, and keep the provenance needed to interpret each result.`,
+  robots,
+  includeSoftwareMetadata = true,
 } = Astro.props;
 
 const canonical = Astro.site
   ? new URL(Astro.url.pathname, Astro.site).href
   : undefined;
+const productDescription = "Evidence-aware, multi-provider research for people and agents.";
 
 const jsonLd = JSON.stringify([
-  {
+  ...(includeSoftwareMetadata ? [{
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "librarium",
-    description:
-      "The meta harness for research queries: a CLI, embeddable library, MCP server, and agent skill that fan one query out across 31 provider adapters in four tiers and merge the results into structured, deduplicated output.",
+    description: productDescription,
     applicationCategory: "DeveloperApplication",
     operatingSystem: "macOS, Linux, Windows",
+    softwareVersion: PRODUCT_VERSION,
+    runtimePlatform: `Node.js ${NODE_FLOOR}+ for package installs`,
+    featureList: [
+      `${PROVIDER_COUNT} built-in providers and ${PROFILE_COUNT} public profiles`,
+      "Four built-in workflows: quick, deep, visibility, and all",
+      "CLI, MCP server, agent skill, Amp plugin, and Worker-safe package boundaries",
+      "Provider, profile, collection, and source provenance",
+    ],
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     license: "https://github.com/jkudish/librarium/blob/main/LICENSE",
     url: Astro.site?.href,
@@ -33,7 +52,8 @@ const jsonLd = JSON.stringify([
       "https://www.npmjs.com/package/librarium",
     ],
     author: { "@type": "Person", name: "Joey Kudish", url: "https://jkudish.com" },
-  },
+    isBasedOn: `https://github.com/jkudish/librarium/commit/${SOURCE_SHA}`,
+  }] : []),
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -50,16 +70,24 @@ const jsonLd = JSON.stringify([
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {robots && <meta name="robots" content={robots} />}
     {canonical && <link rel="canonical" href={canonical} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Librarium: evidence-aware, multi-provider research" />
     {canonical && <meta property="og:url" content={canonical} />}
     <meta property="og:site_name" content="librarium" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />
+    <meta name="twitter:image:alt" content="Librarium: evidence-aware, multi-provider research" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <script type="application/ld+json" set:html={jsonLd} />
+    <script is:inline type="application/ld+json" set:html={jsonLd} />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

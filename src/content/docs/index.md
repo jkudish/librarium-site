@@ -8,7 +8,7 @@ Librarium 2.0.0-rc.18 plans a request against explicit provider profiles, execut
 
 ## Install the release candidate
 
-Node installs require Node.js 22.12.0 or newer. Homebrew and standalone binaries include their runtime.
+The public RC18 evaluation path is the exact npm package. Node installs require Node.js 22.12.0 or newer.
 
 ```bash
 npm install -g librarium@2.0.0-rc.18
@@ -16,12 +16,7 @@ npm install -g librarium@2.0.0-rc.18
 npx librarium@2.0.0-rc.18 run "PostgreSQL connection pooling" --group quick
 ```
 
-Homebrew and standalone installs are also supported:
-
-```bash
-brew install jkudish/tap/librarium
-curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh
-```
+Homebrew and the unversioned standalone installer target the published stable release. RC18 has no published Homebrew formula or standalone release asset. Do not use those channels to evaluate this candidate.
 
 For an existing install, pin the RC while evaluating v2:
 

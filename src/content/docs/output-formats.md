@@ -14,12 +14,12 @@ The Node CLI writes a run directory under the configured `runtime.output_dir`.
   run.json
   summary.md
   sources.json
-  {provider}.md
-  {provider}.meta.json
+  provider-${stem}--${sha256(providerId)}.md
+  provider-${stem}--${sha256(providerId)}.meta.json
   answer.md
 ```
 
-`answer.md` exists for answer synthesis. Presentation commands can add `report.html` and `results.jsonl`. Treat provider markdown, citations, URLs, and collected surface content as untrusted input.
+Provider artifact names use a sanitized provider-ID stem of at most 64 characters plus the full SHA-256 digest of the provider ID. This prevents two IDs with the same sanitized stem from colliding. `run.json` owns the concrete `outputFile` and `metaFile` names; consumers should read those fields instead of reconstructing filenames. `answer.md` exists for answer synthesis. Presentation commands can add `report.html` and `results.jsonl`. Treat provider markdown, citations, URLs, and collected surface content as untrusted input.
 
 ```bash
 librarium run "query" --json

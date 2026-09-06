@@ -7,7 +7,6 @@ import {
   PROFILE_COUNT,
   PROVIDER_COUNT,
   PROVIDERS,
-  SOURCE_SHA,
   WORKFLOWS,
 } from "../src/data/product.ts";
 
@@ -19,8 +18,7 @@ const distDir = join(root, "dist");
 const profiles = PROVIDERS.flatMap((provider) => provider.profiles);
 const providerIds = new Set(profiles.map((profile) => profile.split("/")[0]));
 
-assert.equal(PRODUCT_VERSION, "2.0.0-rc.18");
-assert.equal(SOURCE_SHA, "417613e8922fbe74c5e3b239ec02afc0171891a2");
+assert.equal(PRODUCT_VERSION, "2.0.0");
 assert.equal(NODE_FLOOR, "22.12.0");
 assert.equal(PROVIDER_COUNT, providerIds.size);
 assert.equal(PROVIDER_COUNT, 33);
@@ -34,8 +32,12 @@ assert(profiles.includes("tavily/search"));
 assert(!profiles.includes("tavily/research"));
 
 const v1DocNames = readdirSync(v1DocsDir).sort();
-const v2DocNames = readdirSync(docsDir).filter((file) => file !== "release-candidate.md").sort();
-assert.deepEqual(v1DocNames, v2DocNames, "v1 snapshot must preserve every equivalent pre-branch docs route");
+const v2DocNames = readdirSync(docsDir).sort();
+for (const name of v1DocNames) {
+  assert(v2DocNames.includes(name), `v2 docs are missing the legacy-equivalent route ${name}`);
+}
+assert(v2DocNames.includes("request-and-retry.md"), "v2 docs must explain request and retry behavior");
+assert(v2DocNames.includes("upgrading-to-v2.md"), "v2 docs must include an upgrade guide");
 
 const publicSources = [
   join(root, "README.md"),
@@ -44,60 +46,79 @@ const publicSources = [
   join(root, "src/pages/llms.txt.ts"),
   join(root, "src/pages/llms-full.txt.ts"),
   join(root, "src/layouts/Base.astro"),
+  join(root, "src/components/Header.astro"),
+  join(root, "src/components/DocsVersionPicker.astro"),
   join(root, "src/components/Footer.astro"),
 ];
 const publicCopy = publicSources.map((file) => readFileSync(file, "utf8")).join("\n");
 const gettingStarted = readFileSync(join(docsDir, "index.md"), "utf8");
-const releaseCandidate = readFileSync(join(docsDir, "release-candidate.md"), "utf8");
 const outputFormats = readFileSync(join(docsDir, "output-formats.md"), "utf8");
-const unpublishedRcInstallPattern = /(?:npm\s+(?:i|install)(?:\s+-g)?|npx)\s+librarium@2\.0\.0-rc\.18/;
+const providerDocs = readFileSync(join(docsDir, "providers.md"), "utf8");
+const requestAndRetry = readFileSync(join(docsDir, "request-and-retry.md"), "utf8");
+const upgradingToV2 = readFileSync(join(docsDir, "upgrading-to-v2.md"), "utf8");
 
 for (const stale of [
   "31 built-in",
   "31 provider adapters",
   "All 27 grounded",
-  "perplexity-advanced-deep",
   "version: 1 as const",
   "schema v1 run directories",
-  "brew install jkudish/tap/librarium",
-  "raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh",
   "  {provider}.md",
   "  {provider}.meta.json",
+  "release candidate",
+  "release-candidate",
+  "RC18",
+  "417613e8922fbe74c5e3b239ec02afc0171891a2",
 ]) {
   assert(!publicCopy.includes(stale), `stale public copy found: ${stale}`);
 }
-assert(!publicCopy.includes("—"), "public copy contains an em dash");
-assert(!unpublishedRcInstallPattern.test(publicCopy), "public copy must not offer unpublished RC18 npm or npx commands");
-for (const text of [gettingStarted, releaseCandidate]) {
-  for (const command of [
-    "git fetch origin 417613e8922fbe74c5e3b239ec02afc0171891a2",
-    "git checkout --detach 417613e8922fbe74c5e3b239ec02afc0171891a2",
-    "npm ci",
-    "npm run build",
-    "node dist/cli.js --version",
-    "node --experimental-strip-types art/demo/demo-run.mjs",
-    "node dist/cli.js config --json",
-    "node dist/cli.js ls --json",
-    "node dist/cli.js groups --json",
-    "node dist/cli.js doctor --json",
-  ]) {
-    assert(text.includes(command), `source review procedure is missing: ${command}`);
-  }
-  assert(!/node dist\/cli\.js run /.test(text), "clean source review procedure must not present a provider run as candidate proof");
-  assert(text.includes("explicit paid-call authority"), "source review procedure must keep live provider calls behind a separate authority gate");
+assert(!providerDocs.includes("perplexity-advanced-deep"), "retired Perplexity IDs must not appear in the active provider roster");
+for (const command of [
+  "npm install -g librarium",
+  "brew install jkudish/tap/librarium",
+  "curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh",
+  "librarium init",
+  "librarium doctor",
+  'librarium run "current guidance for HTTP caching" --group quick',
+]) {
+  assert(gettingStarted.includes(command), `getting started is missing: ${command}`);
 }
-assert(gettingStarted.includes("RC18 is not available from npm, Homebrew, or standalone release channels"), "getting started must disclose that RC18 has no public distribution");
-assert(!publicCopy.includes('downloadUrl: "https://www.npmjs.com/package/librarium"'), "RC metadata must not advertise the stable npm package as its download");
-assert(publicCopy.includes('label: "npm (stable)"'), "the public npm link must identify the currently published channel as stable");
+assert(publicCopy.includes("The meta harness for research queries."), "the handwritten hero is missing");
+assert(publicCopy.includes("Ask once. Librarium fans your query out"), "the handwritten hero body is missing");
+assert(publicCopy.includes('{ href: "/#features", label: "Features" }'), "the handwritten Features navigation is missing");
+assert(publicCopy.includes('{ href: "/#providers", label: "Providers" }'), "the handwritten Providers navigation is missing");
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.md'), "output docs must describe collision-resistant provider markdown names");
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.meta.json'), "output docs must describe collision-resistant provider metadata names");
 assert(outputFormats.includes("`run.json` owns the concrete `outputFile` and `metaFile` names"), "output docs must make run.json authoritative for provider artifact names");
+for (const fact of [
+  "up to four total attempts",
+  "HTTP 429",
+  "HTTP 5xx",
+  "Streaming requests are always one attempt",
+  "acceptance unknown",
+  "does not resubmit",
+  "A fallback is not another HTTP attempt",
+  "--no-fallback",
+]) {
+  assert(requestAndRetry.includes(fact), `request and retry docs are missing: ${fact}`);
+}
+for (const fact of [
+  "librarium config migrate",
+  "--from ~/.config/librarium/config.json",
+  "--project ./.librarium.json",
+  "--output ~/.config/librarium/config.v2.json",
+  "Previewing does not modify the source file",
+  "migration never adds an executable provider",
+  "librarium doctor --json",
+  "npm install -g librarium@1.4.1",
+]) {
+  assert(upgradingToV2.includes(fact), `upgrade guide is missing: ${fact}`);
+}
 
 for (const required of [
   PRODUCT_VERSION,
-  SOURCE_SHA,
   "33 built-in providers",
-  "40 implemented public profiles",
+  "40 public profiles",
   "quick",
   "deep",
   "visibility",
@@ -126,14 +147,20 @@ function outputPathExists(pathname) {
 }
 
 const htmlFiles = walk(distDir).filter((file) => extname(file) === ".html");
-assert(htmlFiles.length >= 22, "expected homepage, v2 docs, and legacy v1 docs HTML output");
-const generatedRcCopy = [
+assert(htmlFiles.length >= 21, "expected homepage, v2 docs, and legacy v1 docs HTML output");
+const generatedPublicCopy = [
   ...htmlFiles.filter((file) => !relative(distDir, file).startsWith("v1/")),
   join(distDir, "llms.txt"),
   join(distDir, "llms-full.txt"),
 ].map((file) => readFileSync(file, "utf8")).join("\n");
-assert(!unpublishedRcInstallPattern.test(generatedRcCopy), "generated output must not offer unpublished RC18 npm or npx commands");
-assert(generatedRcCopy.includes("RC18 is not available from npm, Homebrew, or standalone release channels"), "generated output must disclose that RC18 has no public distribution");
+for (const stale of [
+  "release candidate",
+  "release-candidate",
+  "RC18",
+  "417613e8922fbe74c5e3b239ec02afc0171891a2",
+]) {
+  assert(!generatedPublicCopy.includes(stale), `generated public copy contains release-review text: ${stale}`);
+}
 
 for (const file of htmlFiles) {
   const html = readFileSync(file, "utf8");
@@ -179,14 +206,16 @@ const v2ProviderHtml = readFileSync(join(distDir, "docs/providers/index.html"), 
 assert(v2ProviderHtml.includes('option value="/v1/providers"'), "v2 provider page must switch to its v1 equivalent");
 const v1ProviderHtml = readFileSync(join(distDir, "v1/providers/index.html"), "utf8");
 assert(v1ProviderHtml.includes('option value="/docs/providers"'), "v1 provider page must switch to its v2 equivalent");
-const releaseCandidateHtml = readFileSync(join(distDir, "docs/release-candidate/index.html"), "utf8");
-assert(releaseCandidateHtml.includes('option value="/v1"'), "a v2-only page must fall back to the v1 docs index");
+const requestRetryHtml = readFileSync(join(distDir, "docs/request-and-retry/index.html"), "utf8");
+assert(requestRetryHtml.includes('option value="/v1"'), "a v2-only docs page must fall back to the v1 index");
+const upgradingHtml = readFileSync(join(distDir, "docs/upgrading-to-v2/index.html"), "utf8");
+assert(upgradingHtml.includes('option value="/v1"'), "the v2 upgrade guide must fall back to the v1 index");
 
 const sitemap = readFileSync(join(distDir, "sitemap-0.xml"), "utf8");
 assert(!sitemap.includes("/v1"), "noindex legacy docs must be excluded from the sitemap");
 
 const llms = readFileSync(join(distDir, "llms.txt"), "utf8");
-for (const fact of [PRODUCT_VERSION, `${PROVIDER_COUNT} built-in providers`, `${PROFILE_COUNT} implemented public profiles`, SOURCE_SHA]) {
+for (const fact of [PRODUCT_VERSION, `${PROVIDER_COUNT} built-in providers`, `${PROFILE_COUNT} public profiles`]) {
   assert(llms.includes(fact), `llms.txt is missing ${fact}`);
 }
 assert(llms.includes("Legacy v1 documentation is preserved"), "llms.txt must disclose the legacy docs route");

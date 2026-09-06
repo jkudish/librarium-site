@@ -6,7 +6,7 @@ order: 5
 
 ## Public catalog
 
-Version 2.0.0-rc.18 has 33 built-in providers and exactly 40 public profiles. Selection, config, artifacts, and provenance use `provider_id/profile_id`.
+Librarium v2 has 33 built-in providers and exactly 40 public profiles. Selection, config, artifacts, and provenance use `provider_id/profile_id`.
 
 | Provider family | Public profiles |
 | --- | --- |

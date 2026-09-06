@@ -2,55 +2,78 @@
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 import {
-  NODE_FLOOR,
-  PRODUCT_VERSION,
   PROFILE_COUNT,
   PROVIDER_COUNT,
-  SOURCE_SHA,
   WORKFLOWS,
 } from "../data/product";
 import Base from "../layouts/Base.astro";
 ---
 
-<Base title="librarium | Evidence-aware, multi-provider research">
+<Base title="librarium — the meta harness for research queries">
   <Header />
 
   <main>
-    <section class="border-b border-neutral-950/10 py-16 sm:py-24">
-      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-6 lg:grid-cols-[11fr_9fr] lg:px-8">
+    <section class="py-20 sm:py-24">
+      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-x-8 gap-y-14 px-6 lg:grid-cols-2 lg:px-8">
         <div>
-          <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">
-            Open source · MIT · v2 release candidate
-          </p>
-          <h1 class="mt-5 max-w-[22ch] text-5xl font-semibold tracking-tight text-balance text-neutral-950 sm:text-6xl">
-            Research across providers. Keep the evidence boundaries.
-          </h1>
-          <p class="mt-6 max-w-[58ch] text-lg text-pretty text-neutral-600">
-            Librarium plans one request against explicit provider profiles, runs the selected work, and records what happened. Use it for web search, cited answers, consumer-surface observations, and durable research jobs.
-          </p>
+          <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Open source · MIT</p>
+          <h1 class="mt-5 max-w-[24ch] text-5xl font-semibold tracking-tight text-balance text-neutral-950 sm:text-6xl">The meta harness for research queries.</h1>
+          <p class="mt-6 max-w-[48ch] text-lg text-pretty text-neutral-600">Ask once. Librarium fans your query out to search engines, AI-grounded answers, and deep-research APIs in parallel, then merges everything into one structured output.</p>
           <div class="mt-9 flex flex-wrap items-center gap-4">
-            <a href="/docs" class="rounded-lg bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">
-              Evaluate v2
-            </a>
-            <a href="https://github.com/jkudish/librarium" class="rounded-lg px-4 py-2.5 text-base font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3 sm:text-sm">
-              Read the source
-            </a>
+            <a href="/docs" class="rounded-lg bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">Get started</a>
+            <div class="flex items-center gap-x-3 rounded-lg bg-neutral-950/3 py-2 pr-2 pl-4 ring-1 ring-neutral-950/10">
+              <p class="font-mono text-base text-neutral-800 sm:text-sm"><span class="text-neutral-400 select-none">$ </span><span id="install-command">npm i -g librarium</span></p>
+              <button type="button" id="copy-install" class="relative rounded-md bg-white px-2.5 py-1 font-mono text-sm font-medium text-neutral-600 ring-1 ring-neutral-950/10 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-xs">
+                <span id="copy-install-label">copy</span>
+                <span class="pointer-fine:hidden absolute top-1/2 left-1/2 size-[max(100%,3rem)] -translate-1/2" aria-hidden="true"></span>
+              </button>
+            </div>
           </div>
-          <div class="mt-7 flex max-w-xl flex-col items-start justify-between gap-3 rounded-lg bg-neutral-950/3 p-3 ring-1 ring-neutral-950/10 sm:flex-row sm:items-center sm:py-2 sm:pr-2 sm:pl-4">
-            <p class="font-mono text-base text-neutral-800 sm:text-sm">RC18 review is pinned to source {SOURCE_SHA.slice(0, 12)}</p>
-            <a href="/docs/release-candidate" class="shrink-0 rounded-md bg-white px-2.5 py-1 font-mono text-sm font-medium text-neutral-600 ring-1 ring-neutral-950/10 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-xs">
-              build from source
-            </a>
-          </div>
-          <p class="mt-4 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">
-            RC18 is not available from npm, Homebrew, or standalone release channels. Its source build requires Node.js {NODE_FLOOR} or newer.
+          <p class="mt-6 text-base/7 text-neutral-500 sm:text-sm/6">
+            Also available via{" "}
+            <span class="relative inline-block">
+              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">Homebrew</button>
+              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
+                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
+                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>brew install jkudish/tap/librarium</code>
+                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="brew install jkudish/tap/librarium">copy</button>
+                </span>
+              </span>
+            </span>,{" "}
+            <span class="relative inline-block">
+              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">curl</button>
+              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
+                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
+                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh</code>
+                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh">copy</button>
+                </span>
+              </span>
+            </span>,{" "}
+            <span class="relative inline-block">
+              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">npx</button>
+              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
+                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
+                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>npx librarium run "your query"</code>
+                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd={'npx librarium run "your query"'}>copy</button>
+                </span>
+              </span>
+            </span>, or{" "}
+            <span class="relative inline-block">
+              <button type="button" class="install-method font-mono underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">import 'librarium/core'</button>
+              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
+                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
+                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>npm install librarium</code>
+                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="npm install librarium">copy</button>
+                </span>
+              </span>
+            </span>.
           </p>
         </div>
 
         <div class="overflow-hidden rounded-xl bg-neutral-950 shadow-lg ring-1 ring-neutral-950/10">
           <div class="flex flex-col items-start gap-1 border-b border-white/10 px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-            <p class="font-mono text-sm text-neutral-400 sm:text-xs">offline canonical fixture replay</p>
-            <p class="font-mono text-sm text-amber-300 sm:text-xs">network denied</p>
+            <p class="font-mono text-sm text-neutral-400 sm:text-xs">Example async run</p>
+            <p class="font-mono text-sm text-amber-300 sm:text-xs">offline fixture</p>
           </div>
           <div class="p-5 font-mono text-sm/6 text-neutral-300">
             <pre class="whitespace-pre-wrap break-words"><code><span class="text-neutral-500">$ </span>librarium live-validation \
@@ -71,20 +94,20 @@ import Base from "../layouts/Base.astro";
 &#125;</code></pre>
           </div>
           <p class="border-t border-white/10 px-5 py-3 text-base/7 text-pretty text-neutral-400 sm:text-sm/6">
-            This is the reviewed, network-denied fixture path. It does not claim live provider behavior, account state, price, or privacy settings. <a href="/demo.gif" class="font-medium text-amber-300 hover:text-amber-200">Watch the source replay</a>.
+            This fixture runs without provider credentials or network access. <a href="/demo.gif" class="font-medium text-amber-300 hover:text-amber-200">Watch the replay</a>.
           </p>
         </div>
       </div>
     </section>
 
-    <section class="py-16 sm:py-24" id="workflows">
+    <section class="py-16 sm:py-24" id="features">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">V2 catalog</p>
+        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Features</p>
         <h2 class="mt-4 max-w-[32ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">
-          Profiles are the public unit of selection and provenance.
+          Pick a workflow, or choose the profiles yourself.
         </h2>
         <p class="mt-5 max-w-[70ch] text-base/7 text-pretty text-neutral-600">
-          The catalog has {PROVIDER_COUNT} built-in providers and {PROFILE_COUNT} implemented public profiles. Select a profile as <code class="rounded bg-neutral-950/4 px-1.5 py-0.5 font-mono text-sm text-neutral-950">provider_id/profile_id</code>. Internal adapter IDs are not public configuration.
+          Librarium ships with four workflows. For direct control, select any of its {PROFILE_COUNT} profiles as <code class="rounded bg-neutral-950/4 px-1.5 py-0.5 font-mono text-sm text-neutral-950">provider_id/profile_id</code>.
         </p>
         <dl class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2">
           {WORKFLOWS.map((workflow) => (
@@ -100,89 +123,124 @@ import Base from "../layouts/Base.astro";
           ))}
         </dl>
         <p class="mt-8 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">
-          These are the only four built-in v2 workflows. User-authored groups use <code class="font-mono">custom:&lt;name&gt;</code>.{" "}
-          <a href="/docs/groups-and-modes" class="font-medium text-amber-700 hover:text-amber-600">Read the workflow contract</a>.
+          Custom groups use <code class="font-mono">custom:&lt;name&gt;</code>.{" "}
+          <a href="/docs/groups-and-modes" class="font-medium text-amber-700 hover:text-amber-600">See how workflows are selected</a>.
         </p>
       </div>
     </section>
 
-    <section class="border-y border-neutral-950/10 bg-neutral-950/2 py-16 sm:py-24" id="evidence">
+    <section class="border-y border-neutral-950/10 bg-neutral-950/2 py-16 sm:py-24" id="providers">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Evidence, not a confidence score</p>
+        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Providers</p>
         <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">
-          Preserve what each result can and cannot establish.
+          {PROVIDER_COUNT} providers. {PROFILE_COUNT} ways to query them.
         </h2>
         <div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div class="border-t border-neutral-950/10 pt-6">
             <h3 class="text-lg font-semibold text-neutral-950">API output</h3>
             <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
-              A direct API response records what the named API returned. Provider-reported citations, usage, and cost remain labelled as reported facts, not Librarium estimates.
+              Direct API profiles record what the named API returned, including citations, usage, and reported cost when available.
             </p>
           </div>
           <div class="border-t border-neutral-950/10 pt-6">
             <h3 class="text-lg font-semibold text-neutral-950">Collected surfaces</h3>
             <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
-              Six SearchAPI profiles observe consumer surfaces through one collector. Their agreement is correlated visibility evidence, not six independent confirmations or parity with a specific user.
+              Six SearchAPI profiles show what consumer answer surfaces returned through one collector. They are useful for visibility checks, but they are not six independent sources.
             </p>
           </div>
           <div class="border-t border-neutral-950/10 pt-6">
             <h3 class="text-lg font-semibold text-neutral-950">Corpus provenance</h3>
             <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
-              Web, X-only, combined web and X, and specialized sources keep distinct profile identities. Shared URLs show overlap. They do not prove independent corroboration.
+              Web, X-only, combined web and X, and specialized sources keep separate profile identities so you can see where each result came from.
             </p>
           </div>
         </div>
-        <a href="/docs/output-formats#provenance-is-descriptive" class="mt-8 inline-flex text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">
-          Read the provenance model
+        <a href="/docs/providers" class="mt-8 inline-flex text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">
+          Browse all providers
         </a>
       </div>
     </section>
 
     <section class="py-16 sm:py-24" id="library">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Three package boundaries</p>
+        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Library</p>
         <h2 class="mt-4 max-w-[33ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">
-          Import only the runtime responsibilities you own.
+          Use the CLI, or embed the parts you need.
         </h2>
         <div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div class="rounded-xl border border-neutral-950/10 p-6">
             <h3 class="font-mono text-base font-medium text-neutral-950 sm:text-sm">librarium</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Side-effect-free schemas, config migration, and the public catalog. Worker-safe.</p>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Schemas, config migration, and the provider catalog. Safe for Workers.</p>
           </div>
           <div class="rounded-xl border border-neutral-950/10 p-6">
             <h3 class="font-mono text-base font-medium text-neutral-950 sm:text-sm">librarium/core</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Injected catalog, planning, transport, coordination, and execution ports. It does not construct provider adapters or a global registry.</p>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Planning, transport, coordination, and execution with injected adapters.</p>
           </div>
           <div class="rounded-xl border border-neutral-950/10 p-6">
             <h3 class="font-mono text-base font-medium text-neutral-950 sm:text-sm">librarium/node</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Explicit config-file services, trusted custom-provider loading, and canonical validation helpers. The CLI remains the complete Node application.</p>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Config files, trusted custom providers, credentials, and validation for Node.js.</p>
           </div>
         </div>
         <p class="mt-8 max-w-[72ch] text-base/7 text-pretty text-neutral-500 sm:text-sm/6">
-          MCP, the agent skill, and the Amp plugin expose the same research jobs without pretending that Node persistence and the shared TypeScript/PHP terminal contract are the same architecture.{" "}
-          <a href="/docs/library" class="font-medium text-amber-700 hover:text-amber-600">Choose an import boundary</a>.
+          The CLI, MCP server, agent skill, and Amp plugin use the same research jobs. The TypeScript/PHP snapshot covers terminal response types only.{" "}
+          <a href="/docs/library" class="font-medium text-amber-700 hover:text-amber-600">Read the library docs</a>.
         </p>
-      </div>
-    </section>
-
-    <section class="pb-16 sm:pb-24" id="review">
-      <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <div class="rounded-xl border border-neutral-950/10 bg-neutral-950/2 p-8 sm:p-12">
-          <p class="font-mono text-sm font-medium text-amber-700 sm:text-xs">{PRODUCT_VERSION}</p>
-          <h2 class="mt-4 max-w-[28ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">
-            Evaluate the release candidate without treating it as released.
-          </h2>
-          <p class="mt-5 max-w-[66ch] text-base/7 text-pretty text-neutral-600">
-            The site facts are pinned to source commit <code class="font-mono text-sm text-neutral-950">{SOURCE_SHA.slice(0, 12)}</code>. Build that exact checkout, inspect the catalog, and run the network-denied fixture. Live provider validation remains a separate paid-call gate.
-          </p>
-          <div class="mt-8 flex flex-wrap gap-4">
-            <a href="/docs/release-candidate" class="rounded-lg bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">Review the RC checklist</a>
-            <a href="/docs/providers" class="rounded-lg px-4 py-2.5 text-base font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-white sm:text-sm">Inspect all profiles</a>
-          </div>
-        </div>
       </div>
     </section>
   </main>
 
   <Footer />
 </Base>
+
+<script>
+  const installButton = document.getElementById("copy-install");
+  const installLabel = document.getElementById("copy-install-label");
+  const installCommand = document.getElementById("install-command");
+  installButton?.addEventListener("click", async () => {
+    if (!installCommand?.textContent || !installLabel) return;
+    await navigator.clipboard.writeText(installCommand.textContent.trim());
+    installLabel.textContent = "copied";
+    setTimeout(() => {
+      installLabel.textContent = "copy";
+    }, 2000);
+  });
+
+  const triggers = [...document.querySelectorAll<HTMLButtonElement>(".install-method")];
+  function closeInstallMenus(except?: HTMLButtonElement) {
+    for (const trigger of triggers) {
+      if (trigger === except) continue;
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.parentElement?.querySelector(".install-pop")?.classList.add("hidden");
+    }
+  }
+
+  for (const trigger of triggers) {
+    trigger.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const popover = trigger.parentElement?.querySelector(".install-pop");
+      const isOpen = trigger.getAttribute("aria-expanded") === "true";
+      closeInstallMenus(trigger);
+      trigger.setAttribute("aria-expanded", String(!isOpen));
+      popover?.classList.toggle("hidden", isOpen);
+    });
+  }
+
+  document.addEventListener("click", (event) => {
+    if (event.target instanceof Element && event.target.closest(".install-pop")) return;
+    closeInstallMenus();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeInstallMenus();
+  });
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>(".install-copy")) {
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await navigator.clipboard.writeText(button.dataset.cmd ?? "");
+      button.textContent = "copied";
+      setTimeout(() => {
+        button.textContent = "copy";
+      }, 2000);
+    });
+  }
+</script>

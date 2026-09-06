@@ -29,6 +29,8 @@ The core API expects dependencies and adapter bindings to be injected. It provid
 
 HTTP retry behavior is explicit. GET defaults to bounded safe retries. Mutating requests do not retry unless the caller supplies an idempotency key and policy. Streaming submissions are one attempt only because replay could duplicate paid work. Timeouts, aborts, and response-size limits remain active while a stream is consumed.
 
+See [Requests, retries, and fallbacks](/docs/request-and-retry) for the complete policy, defaults, durable-submission boundary, and recovery behavior.
+
 ## Node services
 
 ```ts
@@ -43,6 +45,6 @@ Use the Node boundary for filesystem and executable-code concerns. Callers own r
 
 ## Shared TypeScript and PHP terminal boundary
 
-`contracts/v1` is a terminal, language-neutral snapshot of exactly seven values: `ResearchResponse`, `ResearchResult`, `Citation`, `Source`, `ResultProvenance`, `Usage`, and `ResearchError`. It is generated from Zod and vendored from an exact reviewed Git snapshot with checksums.
+`contracts/v1` is a terminal, language-neutral snapshot of exactly seven values: `ResearchResponse`, `ResearchResult`, `Citation`, `Source`, `ResultProvenance`, `Usage`, and `ResearchError`. It is generated from Zod and vendored from an exact Git snapshot with checksums.
 
 It contains no request, attempt, lifecycle event, durable handle, coordinator state, config, persistence, manifest, JSONL, artifact schema, or custom-provider protocol. PHP `run()` and `queue()` and TypeScript runtime services are outside this boundary. Each terminal response carries `generator` and `generator_version`.

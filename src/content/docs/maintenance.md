@@ -14,9 +14,9 @@ librarium upgrade --dry-run
 librarium upgrade
 ```
 
-These commands follow the current stable npm, pnpm, yarn, Homebrew, or standalone channel. None of those channels provides RC18. Review RC18 only through the [pinned source-checkout procedure](/docs/release-candidate#review-the-pinned-source-checkout). Use `--force` only when you intend to bypass the normal version guard. `--target <version>` is restricted to local or fixture evaluation, requires `--dry-run`, and cannot be combined with `--check`.
+These commands follow the current npm, pnpm, yarn, Homebrew, or standalone release channel. Use `--force` only when you intend to bypass the normal version guard. `--target <version>` is restricted to local or fixture tests, requires `--dry-run`, and cannot be combined with `--check`.
 
-Review [v1 migration](/docs/configuration#migrate-from-v1) separately. Upgrading the executable is not proof that a v1 config was saved as v2.
+Follow [Upgrade from v1](/docs/upgrading-to-v2) separately. Upgrading the executable is not proof that a v1 config was migrated, reviewed, and activated as v2.
 
 ## Cleanup
 

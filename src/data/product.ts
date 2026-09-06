@@ -1,5 +1,4 @@
-export const PRODUCT_VERSION = "2.0.0-rc.18";
-export const SOURCE_SHA = "417613e8922fbe74c5e3b239ec02afc0171891a2";
+export const PRODUCT_VERSION = "2.0.0";
 export const NODE_FLOOR = "22.12.0";
 
 export const PROVIDERS = [

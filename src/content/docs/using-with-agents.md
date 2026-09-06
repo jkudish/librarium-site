@@ -1,6 +1,6 @@
 ---
 title: Using with AI agents
-description: The agent skill, the MCP server and its five tools, and the Amp plugin.
+description: The agent skill, the MCP server, and the Amp plugin.
 order: 11
 ---
 
@@ -44,6 +44,6 @@ This documentation is also published as [`llms.txt`](/llms.txt) and [`llms-full.
 librarium install-plugin
 ```
 
-The installer places the plugin at `~/.config/amp/plugins/librarium/`. It exposes the same five operations as native Amp tools and gates them behind the bundled skill. `librarium:set-agent-defaults` configures per-agent provider defaults. `librarium:research` dispatches a run from the command palette.
+The installer places the plugin at `~/.config/amp/plugins/librarium/`. It registers native Amp tools for research, result reads, async checks, providers, and groups, then gates them behind the bundled skill. These are Amp-specific interfaces rather than copies of the MCP schemas. Amp research accepts `query`, `group`, `providers`, `mode`, and `max_cost`; its async check operates on the most recent run. `librarium:set-agent-defaults` configures per-agent provider defaults. `librarium:research` dispatches a run from the command palette.
 
 Agents should preserve profile and collection provenance in their synthesis. Shared collectors, shared upstream providers, repeated URLs, and citation counts can create correlated evidence. They are not independent corroboration by themselves.

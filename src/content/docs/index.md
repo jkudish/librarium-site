@@ -1,43 +1,47 @@
 ---
 title: Getting started
-description: Build the pinned RC18 source and run zero-network review checks.
+description: Install Librarium, configure providers, and run your first query.
 order: 1
 ---
 
-Librarium 2.0.0-rc.18 plans a request against explicit provider profiles, executes selected work, and records its provenance. The catalog contains 33 built-in providers and exactly 40 implemented public profiles.
+Librarium is a meta harness for research queries. It sends one query to selected search, grounded-answer, and deep-research providers, then writes the results to one run directory.
 
-## Build the release candidate from source
+## Install
 
-RC18 is not available from npm, Homebrew, or standalone release channels. Review the exact source commit with Node.js 22.12.0 or newer:
-
-```bash
-git clone https://github.com/jkudish/librarium.git librarium-rc18
-cd librarium-rc18
-git fetch origin 417613e8922fbe74c5e3b239ec02afc0171891a2
-git checkout --detach 417613e8922fbe74c5e3b239ec02afc0171891a2
-npm ci
-npm run build
-node dist/cli.js --version
-node --experimental-strip-types art/demo/demo-run.mjs
-```
-
-The version command must print `2.0.0-rc.18`. The demo command runs the real built CLI through a checked-in, network-denied fixture and must report `"status": "succeeded"`. It does not read credentials, call a provider, or spend money. Keep the checkout detached so review work does not move a branch. Run RC commands through the local build:
+Librarium requires Node.js 22.12.0 or newer.
 
 ```bash
-node dist/cli.js config --json
-node dist/cli.js ls --json
-node dist/cli.js groups --json
-node dist/cli.js doctor --json
+npm install -g librarium
 ```
 
-These commands exit successfully in a clean checkout without provider credentials. `doctor` reports unconfigured providers as skipped. The catalog and group commands inspect the local source build only.
+You can also install it with Homebrew or the standalone installer:
 
-A real provider run is not candidate proof. It requires separately configured credentials, reviewed pricing for the selected profiles, and explicit paid-call authority. Follow the [release-candidate review checklist](/docs/release-candidate) before any live review.
+```bash
+brew install jkudish/tap/librarium
+curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh
+```
 
-Do not assume a v1 config was rewritten. Migration is pure until an explicit save. Read [Configuration](/docs/configuration#migrate-from-v1) before replacing a working v1 setup.
+## Configure providers
 
-## Plan a later live review
+Run the setup wizard, then check which providers are ready:
 
-Only `quick`, `deep`, `visibility`, and `all` are built-in v2 workflows. User groups use `custom:<name>`. See [Groups and modes](/docs/groups-and-modes) and [Commands](/docs/commands) before preparing an authorized provider run.
+```bash
+librarium init
+librarium doctor
+```
 
-`librarium run --json` writes JSON to stdout. Progress and diagnostics stay on stderr. A result records what an API or collected surface returned. It does not convert agreement or citation count into proof.
+Provider calls can incur charges. Check the selected providers' pricing before running a broad workflow. Missing cost data means the cost is unknown, not zero.
+
+## Run a query
+
+```bash
+librarium run "current guidance for HTTP caching" --group quick
+```
+
+The command prints progress to stderr and writes the results under `./agents/librarium/`. Add `--json` for machine-readable stdout. Use `librarium browse` to open previous runs.
+
+The built-in workflows are `quick`, `deep`, `visibility`, and `all`. User-defined groups use the `custom:<name>` prefix. See [Groups and modes](/docs/groups-and-modes) for their exact selection rules.
+
+## Moving from v1
+
+V2 configuration uses strict snake_case JSON. Migration previews without changing your v1 file and writes only to an explicit output path. Follow [Upgrade from v1](/docs/upgrading-to-v2) before replacing a working setup.

@@ -45,8 +45,12 @@ Node loads trusted custom providers through `librarium/node`. `loadCustomProvide
 
 A profile declaration states stable capability facts. It does not claim runtime success, correctness, cost, citations, independence, or a specific account experience.
 
-## Protocol 1.0.0
+## Runtime interfaces
 
-The custom-provider wire protocol version is `1.0.0`. Strict JSON envelopes cover `execute`, `submit`, `poll`, and `retrieve`. Inline `execute` requires an inline profile. `submit` requires a durable background profile. `retrieve` requires a successful handle. Request and attempt IDs must match in responses. Validate exchanges with the exported schemas.
+An npm source exports a provider object or a factory that receives the provider ID, config, and source options. Its returned provider ID must match the configured ID. Inline providers implement `execute`. Background providers also implement `submit`, `poll`, and `retrieve`.
+
+A script source reads one JSON request from stdin and writes one JSON response to stdout. The request uses integer `protocolVersion: 1` and an operation such as `describe`, `execute`, `submit`, `poll`, `retrieve`, or `test`. Return `{ "ok": true, "data": ... }` on success or `{ "ok": false, "error": "..." }` on failure. Librarium validates each operation's payload before using it.
+
+The separate custom-provider exchange schemas currently in the source tree are not package exports or the runtime transport for npm and script providers. Do not build against those schemas as a public protocol.
 
 Do not expose keys, authorization values, resume credentials, raw provider responses, or secret-shaped data in `provider_meta`. Allowlist public metadata before emission.

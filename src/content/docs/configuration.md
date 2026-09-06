@@ -35,6 +35,8 @@ The global root has `version`, `execution_defaults`, `providers`, `custom_provid
 
 `migrateConfig()` accepts v1 or v2 input. It returns an immutable v2 config with notices, or structured issues. It does not write a file. Authored groups that collide with reserved workflows migrate to `custom:<name>`. Migration never grants trust to executable custom providers.
 
+Most users should follow the CLI procedure in [Upgrade from v1](/docs/upgrading-to-v2). The programmatic boundary below is for applications that own config migration themselves.
+
 `loadConfigV2()` also has no write side effect and requires explicit paths. Persist only after reviewing the result:
 
 ```ts

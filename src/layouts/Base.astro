@@ -5,7 +5,6 @@ import {
   PRODUCT_VERSION,
   PROFILE_COUNT,
   PROVIDER_COUNT,
-  SOURCE_SHA,
 } from "../data/product";
 
 interface Props {
@@ -17,7 +16,7 @@ interface Props {
 
 const {
   title,
-  description = `Evidence-aware, multi-provider research for people and agents. Plan against ${PROFILE_COUNT} public profiles, run selected work, and keep the provenance needed to interpret each result.`,
+  description = "Librarium fans one research query out to search engines, AI-grounded answers, and deep-research APIs in parallel, then merges everything into one structured output.",
   robots,
   includeSoftwareMetadata = true,
 } = Astro.props;
@@ -25,7 +24,7 @@ const {
 const canonical = Astro.site
   ? new URL(Astro.url.pathname, Astro.site).href
   : undefined;
-const productDescription = "Evidence-aware, multi-provider research for people and agents.";
+const productDescription = "The meta harness for research queries.";
 
 const jsonLd = JSON.stringify([
   ...(includeSoftwareMetadata ? [{
@@ -36,7 +35,7 @@ const jsonLd = JSON.stringify([
     applicationCategory: "DeveloperApplication",
     operatingSystem: "macOS, Linux, Windows",
     softwareVersion: PRODUCT_VERSION,
-    runtimePlatform: `Node.js ${NODE_FLOOR}+ for the pinned source build`,
+    runtimePlatform: `Node.js ${NODE_FLOOR}+`,
     featureList: [
       `${PROVIDER_COUNT} built-in providers and ${PROFILE_COUNT} public profiles`,
       "Four built-in workflows: quick, deep, visibility, and all",
@@ -48,7 +47,6 @@ const jsonLd = JSON.stringify([
     url: Astro.site?.href,
     sameAs: ["https://github.com/jkudish/librarium"],
     author: { "@type": "Person", name: "Joey Kudish", url: "https://jkudish.com" },
-    isBasedOn: `https://github.com/jkudish/librarium/commit/${SOURCE_SHA}`,
   }] : []),
   {
     "@context": "https://schema.org",
@@ -73,7 +71,7 @@ const jsonLd = JSON.stringify([
     <meta property="og:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Librarium: evidence-aware, multi-provider research" />
+    <meta property="og:image:alt" content="Librarium: the meta harness for research queries" />
     {canonical && <meta property="og:url" content={canonical} />}
     <meta property="og:site_name" content="librarium" />
     <meta property="og:type" content="website" />
@@ -81,7 +79,7 @@ const jsonLd = JSON.stringify([
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />
-    <meta name="twitter:image:alt" content="Librarium: evidence-aware, multi-provider research" />
+    <meta name="twitter:image:alt" content="Librarium: the meta harness for research queries" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <script is:inline type="application/ld+json" set:html={jsonLd} />
     <link rel="icon" href="/favicon.png" type="image/png" />

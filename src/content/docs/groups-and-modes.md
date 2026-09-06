@@ -34,7 +34,9 @@ librarium run "query" --group custom:team
 
 ## Execution modes
 
-`sync` runs work synchronously. `async` submits eligible background work. `mixed` submits background work and runs inline profiles in the same request. A profile, not its marketing category, defines custody:
+The canonical v2 request has two modes. `sync` keeps the request active while selected work executes. `async` accepts only durable profiles whose provider-scoped handles can survive the current process. Legacy `mixed` input is migrated to `async` with a notice; it does not preserve a combined inline-and-background request, so any selected non-durable profile is rejected during preparation.
+
+A profile, not its marketing category, defines custody:
 
 * `inline/none` returns in the active call.
 * `background/process-local` can continue only while its owning process state survives.
@@ -43,3 +45,5 @@ librarium run "query" --group custom:team
 A durable lifecycle is `submit`, `poll`, then `retrieve`. Polling observes state. Retrieval converts an observed successful handle into a terminal result. Never persist or describe process-local work as durable.
 
 Fallbacks consume declared reserve candidates in order. `--no-fallback` requires the exact primary matrix. Cancellation is not universal. Only `valyu/research` advertises exact-profile remote cancellation in this catalog. Other background cancellation is reconciliation only.
+
+See [Requests, retries, and fallbacks](/docs/request-and-retry) for request deadlines, HTTP retry safety, acceptance-unknown submissions, fallback admission, and recovery steps.

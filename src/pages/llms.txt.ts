@@ -1,11 +1,9 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import {
-  NODE_FLOOR,
   PRODUCT_VERSION,
   PROFILE_COUNT,
   PROVIDER_COUNT,
-  SOURCE_SHA,
 } from "../data/product";
 
 export const GET: APIRoute = async ({ site }) => {
@@ -22,11 +20,11 @@ export const GET: APIRoute = async ({ site }) => {
 
   const body = `# librarium ${PRODUCT_VERSION}
 
-> Evidence-aware, multi-provider research for people and agents. Librarium plans a request against explicit provider profiles, runs selected work, and preserves the provenance needed to interpret each result.
+> The meta harness for research queries. Ask once, run the query across selected providers, and collect the results in one place.
 
-Release-candidate facts: ${PROVIDER_COUNT} built-in providers, ${PROFILE_COUNT} implemented public profiles, and four built-in workflows: \`quick\`, \`deep\`, \`visibility\`, and \`all\`. Source authority: [jkudish/librarium@${SOURCE_SHA.slice(0, 12)}](https://github.com/jkudish/librarium/commit/${SOURCE_SHA}). This site does not state that v2 is released.
+Librarium v2 has ${PROVIDER_COUNT} built-in providers, ${PROFILE_COUNT} public profiles, and four built-in workflows: \`quick\`, \`deep\`, \`visibility\`, and \`all\`.
 
-RC18 is not available from npm, Homebrew, or standalone release channels. Review the exact source commit with Node >= ${NODE_FLOOR}: clone the repository, check out \`${SOURCE_SHA}\` in detached HEAD state, run \`npm ci\` and \`npm run build\`, then invoke the local build as \`node dist/cli.js\`. The network-denied \`node --experimental-strip-types art/demo/demo-run.mjs\` fixture and local \`config --json\`, \`ls --json\`, \`groups --json\`, and skipped-without-keys \`doctor --json\` checks are executable without provider credentials. A real provider run requires separately configured credentials, reviewed provider pricing, and explicit paid-call authority. See the release-candidate checklist for the verified procedure. Review v1 migration output before any explicit save.
+Install it with \`npm install -g librarium\`, run \`librarium init\`, then use \`librarium doctor\` to check provider configuration. Provider calls can incur charges. Review provider pricing before running a broad workflow. Review v1 migration output before saving a v2 config.
 
 For answer-engine visibility work, \`--group visibility\` compares six SearchAPI-collected consumer surfaces with three first-party API baselines. The six surfaces share one collector. Agreement is correlated visibility evidence, not independent corroboration or parity with a particular account.
 
@@ -43,7 +41,7 @@ Legacy v1 documentation is preserved at ${base}/v1 and marked as legacy. Use the
 ## Source
 
 - [GitHub](https://github.com/jkudish/librarium): source, issues, releases
-- [npm](https://www.npmjs.com/package/librarium): current stable package; RC18 is not published here
+- [npm](https://www.npmjs.com/package/librarium): package
 - [Full docs as one file](${base}/llms-full.txt)
 `;
 

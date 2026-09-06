@@ -49,6 +49,7 @@ librarium answer <query> [options]
 | `init` | `--auto` |
 | `doctor` | `--json` |
 | `config` | `--json`, `--global`, `--menu` |
+| `config migrate` | `--from`, `--project`, `--output`, `--force` |
 | `cleanup` | `--days`, `--all`, `--interactive`, `--dry-run`, `--yes`, `--output`, `--json` |
 | `clear` | `--interactive`, `--dry-run`, `--yes`, `--output`, `--json` |
 | `upgrade` | `--check`, `--dry-run`, `--force`, `--target` |
@@ -58,6 +59,8 @@ librarium answer <query> [options]
 
 The public commands are `run`, `answer`, `live-validation`, `status`, `usage`, `browse`, `html`, `jsonl`, `refine`, `completions`, `ls`, `groups`, `init`, `doctor`, `config`, `cleanup`, `clear`, `upgrade`, `install-skill`, `install-plugin`, and `mcp`.
 
+`config migrate --from <global-path>` previews a v1-to-v2 migration. `--project <project-path>` adds an existing project layer to the effective preview and cannot be combined with `--output`. Writing requires an explicit `--output <new-path>` and a v1 global source. Existing destinations require `--force`; source files are never output targets. Follow [Upgrade from v1](/docs/upgrading-to-v2) before activating the result.
+
 ## Resume and validation
 
 ```bash
@@ -65,6 +68,8 @@ librarium status --wait --retrieve
 librarium live-validation --fixture /absolute/path/to/fixture.json
 ```
 
-Status waits for existing Node CLI async work and retrieves terminal durable results. Offline fixture replay is network denied. Paid validation additionally requires a frozen approval, matching fingerprint and environment approval, an immutable candidate checkout, and matching catalog, pricing, and artifact fingerprints.
+Use `status --wait --retrieve` to finish durable async work. Use `live-validation --fixture` for an offline fixture replay. Live validation can make paid provider calls, so review the selected targets and provider pricing before using `--paid`.
 
-`upgrade --target <version>` exists only for an exact local or fixture target. It requires `--dry-run` and cannot be combined with `--check`. RC18 is not available from public package or standalone channels. Use the [pinned source-checkout procedure](/docs/release-candidate#review-the-pinned-source-checkout).
+`upgrade --target <version>` exists only for local and fixture tests. It requires `--dry-run` and cannot be combined with `--check`.
+
+See [Requests, retries, and fallbacks](/docs/request-and-retry) before manually repeating a failed submission. HTTP retry, durable-task reconciliation, and provider fallback are separate mechanisms.

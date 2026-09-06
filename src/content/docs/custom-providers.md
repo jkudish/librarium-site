@@ -10,6 +10,8 @@ Custom npm modules and scripts are executable code. `trusted_provider_ids` is an
 
 Node loads trusted custom providers through `librarium/node`. `loadCustomProviders()` returns caller-owned instances and does not mutate a global registry. Built-in provider IDs are reserved.
 
+Execution admission checks an exact declared and trusted primary matrix and compatible enabled fallback reserve before loading executable custom code. Static discovery can show disabled declarations, but cannot make them executable. Standalone `loadCustomProviders()` skips explicitly disabled entries without importing their npm modules or spawning scripts; this does not weaken request preparation's exact-selection checks.
+
 ## Declare the exact profile
 
 ```json

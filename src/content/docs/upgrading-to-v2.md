@@ -22,7 +22,9 @@ Do not delete the backups until the migrated config passes the checks in this gu
 
 ## Upgrade the executable
 
-Preview the detected release channel, then upgrade:
+Before a matching v2 distribution is published, build a reviewed v2 source checkout using [Getting started](/docs). A `2.0.0` source version does not mean npm, Homebrew, or standalone release channels contain v2. Do not replace your working v1 install with an assumed v2 `latest`.
+
+Once v2 is published to your channel, preview it, then upgrade:
 
 ```bash
 librarium upgrade --check
@@ -84,7 +86,7 @@ The following cases require a decision rather than an automatic guess:
 - **Custom providers:** migration never adds an executable provider to `trusted_provider_ids`. Review its npm package or script and execution profile before granting trust.
 - **Name collisions:** if a migrated provider or `custom:<name>` would overwrite another authored value, migration returns an issue instead of discarding one side.
 - **Invalid fallback:** a fallback must resolve to an implemented, compatible profile. Unavailable or ambiguous replacements are reported.
-- **Project overrides:** global plus project input produces one effective preview. Keep project-specific values separate when rebuilding a v2 project layer.
+- **Project overrides:** the explicit library loader can merge native v2 layers, but the normal CLI `.librarium.json` still uses camelCase compatibility fields. Global plus project migration produces one effective preview, not a writable native project layer. Keep CLI project values on their supported contract; see [Configuration](/docs/configuration#cli-and-library-project-layers).
 - **Pending handles:** completed artifacts retain their recorded IDs, but an unfinished task cannot be resumed through a renamed provider.
 
 ## Activate and verify
@@ -106,10 +108,18 @@ Expected result:
 - The config file on disk has `version: 2` and snake_case fields.
 - `config --global --json` reads it without a schema error. The output remains v1-shaped because the current CLI projects native v2 config into its compatibility model.
 - `groups --json` lists the four built-ins and any migrated `custom:<name>` groups.
-- `doctor --json` reports missing credentials as skipped or unavailable without rewriting the config.
+- `doctor --json` separates credential presence from connectivity; offline connectivity stays `unchecked`, not authenticated. Enabled providers missing keys cause exit 1. Disabled/untrusted entries may be skipped. Inspect the rows rather than treating exit 0 as universal readiness.
 - No command reports a retired provider ID or a schema error.
 
-Only after those checks pass should you run a provider call. Choose one exact profile with reviewed credentials and pricing rather than starting with `all`:
+The config menu and onboarding refuse to overwrite an active native v2 file. Their legacy writer does not round-trip native v2 JSON. Keep the backup for rollback.
+
+Preview one exact profile offline before considering a provider call:
+
+```bash
+librarium plan "HTTP cache-control guidance" --providers exa/search --no-fallback --json
+```
+
+Only after reviewing that plan, credentials, and pricing should you run the selected provider rather than starting with `all`:
 
 ```bash
 librarium run "HTTP cache-control guidance" --providers exa/search --no-fallback
@@ -122,6 +132,8 @@ That command can incur provider charges. It is not required for the zero-network
 ### Provider selection and workflows
 
 V2 selects a public profile as `provider_id/profile_id`. A provider can expose multiple profiles with different evidence or custody semantics. The built-in workflows are now exactly `quick`, `deep`, `visibility`, and `all`.
+
+The default is `quick` in `sync` mode. `quick` includes raw `exa/search`; unavailable members are omitted rather than widening selection to all enabled providers. The catalog has 39 profiles; Parallel Chat is not supported.
 
 The old `raw`, `fast`, `llm`, `models`, `comprehensive`, `social`, and `xai` built-ins were removed. Recreate an authored selection as `custom:<name>` rather than reusing a reserved workflow name.
 
@@ -147,6 +159,12 @@ Durable work persists a provider-scoped handle. If submission acceptance is unkn
 New runs use canonical `run.json` schema version 3 and artifact version `3.0.0`. Provider output and metadata filenames include a sanitized stem and SHA-256 digest. Read the concrete `outputFile` and `metaFile` names from `run.json`; do not construct filenames from provider IDs.
 
 The separate provider metadata, source, and JSONL contracts are version `1.0.0`. The legacy `async-tasks.json` file is no longer an execution authority.
+
+Keep `paid-attempt-ledger.json` and its required marker with v3 runs. Resume restores prior spend and the original deadline rather than resetting either. Missing required ledger state blocks recovery. See [Run-wide budgets](/docs/request-and-retry#run-wide-budgets).
+
+### Agent interfaces
+
+MCP research and async checks return compact indexes, not inline evidence. Use `get_results` content/citation pages and follow cursors to retrieve complete results, including completed results while other providers remain pending. See [Using with AI agents](/docs/using-with-agents). Install the version-matched bundled skill offline; Amp needs a User Skill and the CLI, not a plugin.
 
 ### Package imports
 

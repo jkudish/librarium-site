@@ -16,6 +16,8 @@ The Node CLI writes a run directory under the configured `runtime.output_dir`.
   sources.json
   provider-${stem}--${sha256(providerId)}.md
   provider-${stem}--${sha256(providerId)}.meta.json
+  paid-attempt-ledger.json
+  paid-attempt-ledger.required
   answer.md
 ```
 
@@ -35,6 +37,8 @@ librarium jsonl [run-dir]
 The public TypeScript artifact contract version is `1.0.0` for `run_manifest`, `provider_metadata`, `sources`, and `jsonl_record`. Artifact objects are strict, carry `generated_at`, an artifact name and version, and reject unknown versions. Historical-reader policy is explicit and either `none` or `lossless_explicit`.
 
 The Node CLI canonical `run.json` manifest is a separate runtime format with `artifact_version: "3.0.0"`. Do not infer CLI run-directory compatibility from the public contract-layer `run_manifest` name.
+
+The v3 manifest is private custody state, not a public response: preserve it and the paid-attempt sidecar for recovery, but do not paste handles or private diagnostics into agent output. Committed canonical provider output is the authority for v3 MCP evidence. Derived Markdown can be regenerated; editing it does not alter `get_results`. Saved successful results can be read while sibling providers are still pending. MCP provides bounded indexes and complete content/citation paging rather than inlining the manifest; see [Using with AI agents](/docs/using-with-agents).
 
 The terminal TypeScript and PHP snapshot, runtime artifacts, and custom-provider protocol are separate versioned boundaries:
 

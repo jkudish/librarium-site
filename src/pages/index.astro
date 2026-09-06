@@ -29,9 +29,9 @@ import Base from "../layouts/Base.astro";
               </button>
             </div>
           </div>
-          <p class="mt-6 text-base/7 text-neutral-500 sm:text-sm/6">
+          <p class="relative mt-6 text-base/7 text-neutral-500 sm:text-sm/6">
             Also available via{" "}
-            <span class="relative inline-block">
+            <span class="inline-block">
               <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">Homebrew</button>
               <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
                 <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
@@ -40,7 +40,7 @@ import Base from "../layouts/Base.astro";
                 </span>
               </span>
             </span>,{" "}
-            <span class="relative inline-block">
+            <span class="inline-block">
               <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">curl</button>
               <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
                 <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
@@ -49,7 +49,7 @@ import Base from "../layouts/Base.astro";
                 </span>
               </span>
             </span>,{" "}
-            <span class="relative inline-block">
+            <span class="inline-block">
               <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">npx</button>
               <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
                 <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
@@ -58,7 +58,7 @@ import Base from "../layouts/Base.astro";
                 </span>
               </span>
             </span>, or{" "}
-            <span class="relative inline-block">
+            <span class="inline-block">
               <button type="button" class="install-method font-mono underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">import 'librarium/core'</button>
               <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
                 <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
@@ -182,7 +182,7 @@ import Base from "../layouts/Base.astro";
           </div>
         </div>
         <p class="mt-8 max-w-[72ch] text-base/7 text-pretty text-neutral-500 sm:text-sm/6">
-          The CLI, MCP server, agent skill, and Amp plugin use the same research jobs. The TypeScript/PHP snapshot covers terminal response types only.{" "}
+          The CLI, MCP server, and agent skill use the same research jobs. The TypeScript/PHP snapshot covers terminal response types only.{" "}
           <a href="/docs/library" class="font-medium text-amber-700 hover:text-amber-600">Read the library docs</a>.
         </p>
       </div>

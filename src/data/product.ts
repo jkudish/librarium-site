@@ -12,7 +12,7 @@ export const PROVIDERS = [
   { family: "Kagi", profiles: ["kagi-fastgpt/grounded"] },
   { family: "OpenAI", profiles: ["openai-research/research", "openai-chat/chat"] },
   { family: "OpenRouter", profiles: ["openrouter/grounded", "openrouter/chat"] },
-  { family: "Parallel", profiles: ["parallel/search", "parallel/turbo", "parallel/chat", "parallel/research"] },
+  { family: "Parallel", profiles: ["parallel/search", "parallel/turbo", "parallel/research"] },
   { family: "Perplexity", profiles: ["perplexity-search/search", "perplexity-sonar-pro/grounded", "perplexity-deep-research/research", "perplexity-sonar-deep/research"] },
   { family: "SearchAPI", profiles: ["searchapi/search", "searchapi-chatgpt/surface", "searchapi-gemini/surface", "searchapi-perplexity/surface", "searchapi-google-ai-mode/surface", "searchapi-bing-copilot/surface", "searchapi-google-ai-overview/surface"] },
   { family: "SerpAPI", profiles: ["serpapi/search"] },

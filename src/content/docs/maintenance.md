@@ -14,7 +14,7 @@ librarium upgrade --dry-run
 librarium upgrade
 ```
 
-These commands follow the current npm, pnpm, yarn, Homebrew, or standalone release channel. Use `--force` only when you intend to bypass the normal version guard. `--target <version>` is restricted to local or fixture tests, requires `--dry-run`, and cannot be combined with `--check`.
+These commands follow the current npm, pnpm, yarn, Homebrew, or standalone release channel. Use `--force` only when you intend to bypass the normal version guard. They do not turn an unpublished v2 source checkout into a published release. Until your channel contains v2, follow the reviewed-source installation in [Getting started](/docs).
 
 Follow [Upgrade from v1](/docs/upgrading-to-v2) separately. Upgrading the executable is not proof that a v1 config was migrated, reviewed, and activated as v2.
 
@@ -33,7 +33,6 @@ librarium clear --dry-run
 ```bash
 eval "$(librarium completions zsh)"
 librarium install-skill --dry-run
-librarium install-plugin --dry-run
 ```
 
-Both installers accept `--force` and `--dry-run`.
+The skill installer accepts `--force` and `--dry-run`. It uses version-matched text embedded in the npm or standalone build and needs no network access. Amp uses a User Skill and the CLI; no plugin installation is required.

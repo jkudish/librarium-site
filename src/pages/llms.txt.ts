@@ -24,7 +24,13 @@ export const GET: APIRoute = async ({ site }) => {
 
 Librarium v2 has ${PROVIDER_COUNT} built-in providers, ${PROFILE_COUNT} public profiles, and four built-in workflows: \`quick\`, \`deep\`, \`visibility\`, and \`all\`.
 
-Install it with \`npm install -g librarium\`, run \`librarium init\`, then use \`librarium doctor\` to check provider configuration. Provider calls can incur charges. Review provider pricing before running a broad workflow. Review v1 migration output before saving a v2 config.
+Until matching v2 distribution is published, build a reviewed source checkout with \`npm ci\`, \`npm run build\`, and \`npm install -g .\`; verify major version 2. Do not use the published v1 CLI for these instructions. Normal package channels apply after v2 publication.
+
+Run \`librarium init\`, then use offline \`librarium doctor\` and \`librarium plan\` before provider work. Credential presence is not authentication; only \`doctor --live\` tests connectivity and may incur charges. New requests default to concurrent, awaited \`quick\` / \`sync\`, including raw \`exa/search\`. Review provider pricing and v1 migration output before execution or saving config.
+
+Refinement, research, synthesis, and verification share a paid-attempt wallet. Known failure costs count; resume preserves prior spend and the original deadline. Neither budget flag guarantees the final bill.
+
+MCP research and async checks return compact indexes. Use \`get_results\` content/citation pages and follow \`nextCursor\` with unchanged filters for complete evidence. Completed evidence is readable while other providers remain pending. Static profile discovery does not execute custom code or authenticate. Amp uses a User Skill and the v2 CLI, not a plugin.
 
 For answer-engine visibility work, \`--group visibility\` compares six SearchAPI-collected consumer surfaces with three first-party API baselines. The six surfaces share one collector. Agreement is correlated visibility evidence, not independent corroboration or parity with a particular account.
 

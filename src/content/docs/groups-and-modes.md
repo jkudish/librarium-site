@@ -32,9 +32,11 @@ librarium run "query" --group custom:team
 
 `tavily/search` remains in the catalog. There is no `tavily/research` profile.
 
+Without explicit providers or a group, new requests select `quick`, not all enabled providers. Unavailable quick members are omitted with diagnostics. `quick` includes raw search from Exa; it is not restricted to AI answers. Explicit providers override `--group` with a notice. Saved mode and limits are honored, but there is no saved default workflow replacing implicit quick selection.
+
 ## Execution modes
 
-The canonical v2 request has two modes. `sync` keeps the request active while selected work executes. `async` accepts only durable profiles whose provider-scoped handles can survive the current process. Legacy `mixed` input is migrated to `async` with a notice; it does not preserve a combined inline-and-background request, so any selected non-durable profile is rejected during preparation.
+The canonical v2 request has two modes. `sync` is the factory default: it keeps the request active while selected providers execute concurrently and are awaited. `async` accepts only durable profiles whose provider-scoped handles can survive the current process. Legacy `mixed` input is migrated to `async` with a notice; it does not preserve a combined inline-and-background request, so any selected non-durable profile is rejected during preparation.
 
 A profile, not its marketing category, defines custody:
 

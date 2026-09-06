@@ -19,6 +19,18 @@ CLI and MCP input passes through the same preparation path before provider work 
 
 Preparation failures stop before provider dispatch. Issues include a phase, path, code, and message so callers can identify whether transport, migration, selection, validation, or compilation rejected the request.
 
+`librarium plan` previews this preparation without executing providers or helpers. The printed receipt is not an executable frozen plan or proof of authentication. See [Commands](/docs/commands#preview-before-paying).
+
+## Run-wide budgets
+
+Refinement, research, synthesis, and verification share one paid-attempt wallet in CLI and MCP research. With either hard-budget flag, each paid attempt needs a bounded network-free estimate. Primary and fallback-reserve estimates must be known and the complete primary plan must fit before admission. An unknown helper estimate can skip or block that helper; unknown never means free.
+
+`--max-estimated-cost` compares admission to committed estimates. `--max-cost` uses reported cost when known, retaining the estimate while actual cost is unknown, and stops new launches when the actual bound is reached. Known failure costs count too: failed/incomplete responses are not free. Known terminal usage survives failed, timed-out, or unpriced retrieval and cancellation responses. Late receipts fill previously unknown accounting without reopening the terminal outcome; repeated receipts do not add an already-recorded charge again.
+
+A known first synthesis attempt is reserved before refinement or research spends that capacity. This is not a reservation for every retry or verification request. In-flight work can exceed either bound, and upstream unreported charges remain unknown: neither flag guarantees the final bill.
+
+`paid-attempt-ledger.json` records paid stages, attempt identity/status, fingerprints, known/unknown estimates and reported costs, limits, reservations, and the original absolute deadline. `paid-attempt-ledger.required` marks runs that require the sidecar. Missing or invalid required state blocks recovery; deleting it does not reset the budget. Historical runs without a ledger remain readable without invented helper spending.
+
 ## Request and attempt limits
 
 A run has one absolute `request_deadline_ms`. Each provider attempt also receives the shorter of the remaining request time and its profile-specific limit:
@@ -78,6 +90,8 @@ librarium status --wait --retrieve
 
 Transient polling failures remain attached to the accepted attempt and can be retried by a later reconciliation pass. Completed retrieval is committed once, so a later status call reads the terminal result.
 
+Recovery restores prior spend, reservations, and the original deadline before admitting any fallback. It grants no fresh time window or budget and does not replay refinement, answer synthesis, or verification. Bounded GET-only reconciliation may still observe saved handles after a terminal deadline/cancellation without changing that terminal outcome or authorizing new paid launches. Completed committed evidence remains readable while other slots are pending.
+
 ## Fallback is a new provider attempt
 
 A fallback is not another HTTP attempt. It selects a different compatible profile from the request's frozen reserve after the primary attempt ends with `fallback_allowed: true`.
@@ -102,3 +116,5 @@ librarium run "query" --providers exa/search,parallel/turbo --no-fallback
 | The user cancels a run | Preserve the run directory. Local cancellation does not guarantee provider-side cancellation. |
 
 Run directories are custody records. Deleting one while work is pending removes Librarium's local handle and does not cancel the remote task.
+
+Ctrl-C stops new paid launches and requests local cancellation. Only `valyu/research` advertises exact-profile remote cancellation in the catalog; unsupported or failed cancellation preserves handles for reconciliation. Accepted upstream work may continue and incur charges. There is no general CLI cancel command or MCP cancel tool. A completion that wins a cancellation race remains successful.

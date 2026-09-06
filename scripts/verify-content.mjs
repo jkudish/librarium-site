@@ -23,13 +23,14 @@ assert.equal(NODE_FLOOR, "22.12.0");
 assert.equal(PROVIDER_COUNT, providerIds.size);
 assert.equal(PROVIDER_COUNT, 33);
 assert.equal(PROFILE_COUNT, profiles.length);
-assert.equal(PROFILE_COUNT, 40);
+assert.equal(PROFILE_COUNT, 39);
 assert.equal(new Set(profiles).size, profiles.length, "profile roster contains duplicates");
 assert.deepEqual(WORKFLOWS.map((workflow) => workflow.id), ["quick", "deep", "visibility", "all"]);
 assert.equal(WORKFLOWS.find((workflow) => workflow.id === "quick")?.selection.length, 6);
 assert.equal(WORKFLOWS.find((workflow) => workflow.id === "visibility")?.selection.length, 9);
 assert(profiles.includes("tavily/search"));
 assert(!profiles.includes("tavily/research"));
+assert(!profiles.includes("parallel/chat"));
 
 const v1DocNames = readdirSync(v1DocsDir).sort();
 const v2DocNames = readdirSync(docsDir).sort();
@@ -56,8 +57,16 @@ const outputFormats = readFileSync(join(docsDir, "output-formats.md"), "utf8");
 const providerDocs = readFileSync(join(docsDir, "providers.md"), "utf8");
 const requestAndRetry = readFileSync(join(docsDir, "request-and-retry.md"), "utf8");
 const upgradingToV2 = readFileSync(join(docsDir, "upgrading-to-v2.md"), "utf8");
+const agentDocs = readFileSync(join(docsDir, "using-with-agents.md"), "utf8");
+const commandDocs = readFileSync(join(docsDir, "commands.md"), "utf8");
+const configuration = readFileSync(join(docsDir, "configuration.md"), "utf8");
 
 for (const stale of [
+  "40 public profiles",
+  "parallel/chat",
+  "install-plugin",
+  "Amp plugin",
+  "--target <version>",
   "31 built-in",
   "31 provider adapters",
   "All 27 grounded",
@@ -74,6 +83,9 @@ for (const stale of [
 }
 assert(!providerDocs.includes("perplexity-advanced-deep"), "retired Perplexity IDs must not appear in the active provider roster");
 for (const command of [
+  "npm ci",
+  "npm run build",
+  "npm install -g .",
   "npm install -g librarium",
   "brew install jkudish/tap/librarium",
   "curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh",
@@ -91,6 +103,10 @@ assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.md'), "ou
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.meta.json'), "output docs must describe collision-resistant provider metadata names");
 assert(outputFormats.includes("`run.json` owns the concrete `outputFile` and `metaFile` names"), "output docs must make run.json authoritative for provider artifact names");
 for (const fact of [
+  "paid-attempt-ledger.json",
+  "paid-attempt-ledger.required",
+  "Known failure costs count",
+  "original deadline",
   "up to four total attempts",
   "HTTP 429",
   "HTTP 5xx",
@@ -101,6 +117,13 @@ for (const fact of [
   "--no-fallback",
 ]) {
   assert(requestAndRetry.includes(fact), `request and retry docs are missing: ${fact}`);
+}
+for (const [text, facts] of [
+  [agentDocs, ["resultId", "nextCursor", "UTF-16", "64,000", "16,000", "8,000", "256–12,000", "20 entries", "part: citations", "while sibling providers remain pending", "canonical output is authoritative", "without a release tag", "not-checked", "source fragments"]],
+  [commandDocs, ["librarium plan", "--answer", "--verify", "doctor --live", "credentialStatus", "connectivity", "Exit 1", "OS keychain"]],
+  [configuration, ["request_deadline_ms", "camelCase compatibility", "config --global --json", "refuse to overwrite", "not a save-ready"]],
+]) {
+  for (const fact of facts) assert(text.includes(fact), `reconciled interface fact missing: ${fact}`);
 }
 for (const fact of [
   "librarium config migrate",
@@ -118,7 +141,7 @@ for (const fact of [
 for (const required of [
   PRODUCT_VERSION,
   "33 built-in providers",
-  "40 public profiles",
+  "39 public profiles",
   "quick",
   "deep",
   "visibility",

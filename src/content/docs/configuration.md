@@ -16,6 +16,7 @@ V2 config is strict snake_case JSON. Unknown keys and camelCase v1 fields are no
     "max_concurrency": 4,
     "inline_attempt_deadline_ms": 30000,
     "background_attempt_deadline_ms": 1800000,
+    "request_deadline_ms": 1800000,
     "poll_interval_ms": 10000
   },
   "providers": { "exa": { "enabled": true } },
@@ -29,7 +30,15 @@ V2 config is strict snake_case JSON. Unknown keys and camelCase v1 fields are no
 }
 ```
 
-The global root has `version`, `execution_defaults`, `providers`, `custom_providers`, `trusted_provider_ids`, `groups`, and `runtime`. Project config may override only fields allowed by `LibrariumProjectConfigV2Schema`. Use `librarium config --json` to inspect resolved CLI configuration.
+The global root has `version`, `execution_defaults`, `providers`, `custom_providers`, `trusted_provider_ids`, `groups`, and `runtime`. Optional `request_deadline_ms` bounds the entire run from its original start, including helpers and fallbacks; without it, preflight derives a window from the selected work and configured timeouts.
+
+## CLI and library project layers
+
+The explicit Node library loader accepts global and project v1/native-v2 layers, merging project values over global ones. Native project config allows only fields in `LibrariumProjectConfigV2Schema`. Replacing custom code under an inherited ID removes inherited trust and requires project-layer trust. `saveConfigV2()` saves a complete validated global config, not a project override document.
+
+Normal CLI commands accept native v2 **global** config, but `.librarium.json` still uses the camelCase compatibility contract: `defaults`, `providers`, `customProviders`, `trustedProviderIds`, `groups`, `refine`, and `answer`. Do not place a native snake_case project document there and expect the normal CLI path to apply it. CLI flags override project settings, which override global settings and factory defaults.
+
+`config --json` shows the merged camelCase compatibility projection, not a save-ready native v2 document. `config --global --json` excludes the project layer. Both may include literal credentials: treat the output as sensitive. `config --menu` edits global settings only. Its legacy writer and onboarding refuse to overwrite an active native v2 file.
 
 ## Migrate from v1
 

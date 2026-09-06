@@ -31,6 +31,8 @@ Builds and ships `dist/` to Cloudflare as an assets-only Worker (`librarium-site
 
 There is no CI/CD. Deploys are manual after merging to `main`.
 
+**V2 deployment is held until matching v2 distribution channels exist.** This local draft is not permission to merge or deploy. Source version `2.0.0` and green offline checks do not establish package publication. Keep the handwritten release-neutral marketing design; source-only installation guidance belongs in the docs until v2 is published.
+
 ## Structure
 
 - `src/pages/index.astro`: landing page and offline fixture demo

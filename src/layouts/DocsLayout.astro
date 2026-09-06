@@ -45,7 +45,7 @@ const pageDescription = version === "v1"
 
   <div class="mx-auto max-w-6xl px-6 lg:px-8">
     <!-- Mobile nav -->
-    <div class="space-y-4 border-b border-neutral-950/10 py-4 lg:hidden">
+    <nav aria-label="Documentation controls" class="space-y-4 border-b border-neutral-950/10 py-4 lg:hidden">
       <DocsVersionPicker id="docs-version-mobile" version={version} v1Href={v1Href} v2Href={v2Href} />
       <details class="group border-t border-neutral-950/10 pt-4">
         <summary
@@ -64,7 +64,7 @@ const pageDescription = version === "v1"
           <DocsNav navItems={navItems} currentSlug={currentSlug} />
         </nav>
       </details>
-    </div>
+    </nav>
 
     <!-- Two-column layout -->
     <div class="flex gap-x-16 py-12">

@@ -2,7 +2,7 @@
 
 Marketing and documentation website for [librarium](https://github.com/jkudish/librarium), the meta harness for research queries. Live at [librarium.agentsy.build](https://librarium.agentsy.build).
 
-Static site built with Astro 7 and Tailwind CSS v4. No JS framework. The landing page terminal is an offline fixture replay. Client scripts power its copy controls, the mobile menu, and docs version navigation.
+Static site built with Astro 7 and Tailwind CSS v4. No JS framework. The landing page has a large centered hero, a full-width research example with readable and JSON views, and expandable prompts. Client scripts power the example tabs, install copy control, mobile menu, and docs version navigation.
 
 ## Development
 
@@ -31,19 +31,27 @@ Builds and ships `dist/` to Cloudflare as an assets-only Worker (`librarium-site
 
 There is no CI/CD. Deploys are manual after merging to `main`.
 
-**V2 deployment is held until matching v2 distribution channels exist.** This local draft is not permission to merge or deploy. Source version `2.0.0` and green offline checks do not establish package publication. Keep the handwritten release-neutral marketing design; source-only installation guidance belongs in the docs until v2 is published.
+**V2 deployment is held until JavaScript v2 distribution and the first-party PHP package are ready to publish.** This local draft is not permission to merge or deploy. Source version `2.0.0` and green offline checks do not establish package publication. Keep the handwritten release-neutral marketing design; source-only JavaScript and post-release Composer installation guidance belongs in the docs until the matching packages are published.
 
 ## Structure
 
-- `src/pages/index.astro`: landing page and offline fixture demo
-- `src/content/docs/*.md`: docs content
+- `src/pages/index.astro`: landing page, use cases, and illustrative research demo
+- `public/providers/`: provider marks from LobeHub and official brand sources; attribution and license boundaries in `SOURCES.md`. These identify integrations, not endorsements; trademarks belong to their respective owners.
+- `public/languages/`: JavaScript, TypeScript, PHP, and Laravel marks from Simple Icons (CC0; attribution included)
+- `src/content/docs/*.md`: JavaScript v2 docs content
+- `src/content/php-docs/*.md`: first-party PHP/Laravel docs, sourced from `jkudish/laravel-ai-librarium` README, configuration, public API, and tests
+- `src/content/pages/`: dedicated JavaScript, CLI/MCP, and Laravel pages, the direct-provider comparison, and the Agentsy Report development field note
+- `src/content/guides/`: first-query, coding-agent, and Laravel-queue guides; listed at `/guides`
 - `src/content/v1-docs/*.md`: legacy snapshot from site commit `54d73e99552fcdb43b9a772c49f483a5beea4582` (`origin/main` when the v2 hold branch began), with internal links namespaced under `/v1`
 - `src/data/product.ts`: version, roster, counts, and workflows
 - `src/pages/docs/`: docs routes and raw Markdown endpoints
-- `src/pages/llms.txt.ts`, `src/pages/llms-full.txt.ts`: LLM-readable site index and full docs dump
+- `src/pages/llms.txt.ts`, `src/pages/llms-full.txt.ts`: agent index and all current pages, guides, and both documentation sets
+- `src/lib/articles.ts`: shared routes and reading lists for product pages, guides, comparison, and field notes
 - `src/lib/docs.ts`: shared serializer for Markdown and llms endpoints
+- `src/lib/home-markdown.ts`: build-time rendering/conversion of the actual homepage (Astro container + node-html-markdown), without a second authored copy
 - `src/layouts/`: base and docs layouts
 - `src/components/`: header, footer, and docs navigation
+- `src/components/Icon.astro`: build-time individual SVG imports from `@phosphor-icons/core` (MIT); all UI icons use Phosphor. Provider/language marks stay authoritative brand assets, and literal CLI transcript symbols are preserved. The favicon is rasterized from Phosphor's regular magnifying glass.
 - `src/styles/global.css`: Tailwind theme tokens and prose styles
 - `scripts/verify-content.mjs`: factual, metadata, generated-output, and internal-link checks
 
@@ -51,8 +59,12 @@ There is no CI/CD. Deploys are manual after merging to `main`.
 
 - **Docs are sourced from the librarium repo** (its `README.md` and `docs/provider-development.md`). When CLI behavior changes, sync the affected pages here. Commands, flags, workflows, provider counts, and examples are the usual drift points.
 - **V2 is the default at `/docs`; v1 is preserved at `/v1`.** Keep route-equivalent pages where practical. Legacy pages are self-canonical, `noindex, follow`, and excluded from the sitemap so they remain accessible without competing with current docs in search.
+- **PHP is first-party, not a JavaScript wrapper.** `/docs/php` has its own navigation and a JavaScript/PHP switch that preserves equivalent topics, falling back to the destination index when absent. Do not imply matching provider coverage, concurrency, durable recovery, or an included PHP MCP server.
+- **Docs navigation is grouped by task.** Keep every collection entry in `DocsNav.astro`; generated-output checks catch omissions. The desktop outline and mobile disclosure use rendered headings. Copy controls progressively enhance static code and Markdown links; documentation remains readable without JavaScript.
+- **Every page has Markdown.** Homepage: `/index.md`. Docs: `/docs/<slug>.md`, `/docs/php/<slug>.md`, `/v1/<slug>.md` (`index.md` for each root). Product pages, guides, comparison, and stories append `.md` to their HTML path; the guides index is `/guides/index.md`. Complete docs bundles: `/docs/all.md`, `/docs/php/all.md`, `/v1/all.md`. `/llms.txt` indexes them; `/llms-full.txt` includes all current pages in full, with legacy linked separately. Each reading page has a visible Markdown link.
+- **Examples describe actual boundaries.** Laravel AI SDK tool/agent signatures are checked against upstream `laravel/ai` v0.10.3 and the PHP package API; examples are application-owned, not built-in agents. PHP examples have not been executed in this site orb. The Agentsy field note describes demonstrated backend dogfood evidence, not a deployed reporting product or measured customer outcome; revalidate that boundary before publication. It is grounded in the implementation review for `jkudish/agentsy-platform` PR #4. No PlanMode integration claim is inferred from this example.
 - **Product facts are centralized.** `src/data/product.ts` owns the version, counts, profile roster, and workflow summaries used by the site. `npm test` checks those facts against the docs and generated output.
-- **The terminal demo is an offline fixture replay.** `public/demo.gif` comes from the source repository. Do not present invented timing, citations, cost, or provider output as a live run.
+- **The homepage demo is currently an illustration, not captured provider output.** Both views derive from the same authored data in `index.astro`; its JSON is simplified display data, not the full API response schema. The Lisbon/Porto comparison links to official Visit Lisboa and Visit Portugal tourism pages. Replacing it with a saved real run is pending paid-call authorization; do not describe the current data as captured. The older offline fixture replay remains at `public/demo.gif`.
 - **`vite` is kept as a direct dev dependency.** Keep it aligned with Astro's supported Vite major so the Tailwind plugin and Astro use the same Vite line.
-- **Single light color scheme**, neutral palette with an amber accent (`amber-700` links/accents, `amber-300` in terminals). Product name is lowercase `librarium` except sentence-initial.
+- **Single color scheme**, warm ivory homepage, restrained framing, a dark first-party implementation section, and amber final setup CTA. Docs retain their white background. Product name is lowercase `librarium` except sentence-initial.
 - Page metadata, OG tags, and JSON-LD live in `src/layouts/Base.astro`.

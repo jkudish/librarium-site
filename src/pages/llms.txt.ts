@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
+import { getArticles } from "../lib/articles";
 import {
   PRODUCT_VERSION,
   PROFILE_COUNT,
@@ -8,9 +9,16 @@ import {
 
 export const GET: APIRoute = async ({ site }) => {
   const base = site?.href.replace(/\/$/, "") ?? "";
+  const articleLines = (await getArticles()).map(({ path, entry }) =>
+    `- [${entry.data.title}](${base}/${path}.md): ${entry.data.description}`,
+  ).join("\n");
   const docs = (await getCollection("docs")).sort(
     (a, b) => a.data.order - b.data.order,
   );
+  const phpDocs = (await getCollection("phpDocs")).sort((a, b) => a.data.order - b.data.order);
+  const phpLines = phpDocs.map((entry) =>
+    `- [${entry.data.title}](${base}/docs/php/${entry.id}.md): ${entry.data.description}`,
+  ).join("\n");
 
   const docLines = docs
     .map((entry) => {
@@ -22,7 +30,11 @@ export const GET: APIRoute = async ({ site }) => {
 
 > The meta harness for research queries. Ask once, run the query across selected providers, and collect the results in one place.
 
-Librarium v2 has ${PROVIDER_COUNT} built-in providers, ${PROFILE_COUNT} public profiles, and four built-in workflows: \`quick\`, \`deep\`, \`visibility\`, and \`all\`.
+Librarium has first-party JavaScript/TypeScript and PHP/Laravel implementations. They have distinct provider catalogs, setup, and execution behavior; do not assume feature parity.
+
+## JavaScript v2
+
+The JavaScript implementation has ${PROVIDER_COUNT} built-in providers, ${PROFILE_COUNT} public profiles, and four built-in workflows: \`quick\`, \`deep\`, \`visibility\`, and \`all\`.
 
 Until matching v2 distribution is published, build a reviewed source checkout with \`npm ci\`, \`npm run build\`, and \`npm install -g .\`; verify major version 2. Do not use the published v1 CLI for these instructions. Normal package channels apply after v2 publication.
 
@@ -36,7 +48,7 @@ For answer-engine visibility work, \`--group visibility\` compares six SearchAPI
 
 API output, provider-reported citations and usage, collected consumer observations, normalized source overlap, correlation, and independent corroboration are distinct claims. Librarium records provenance. It does not serialize a universal confidence score.
 
-## Docs
+## JavaScript docs
 
 ${docLines}
 
@@ -44,11 +56,32 @@ Each docs page is also available as raw markdown at the links above. The docs in
 
 Legacy v1 documentation is preserved at ${base}/v1 and marked as legacy. Use the v2 links above unless maintaining a v1 installation.
 
+## PHP / Laravel
+
+The first-party package is \`jkudish/laravel-ai-librarium\`, requiring PHP 8.4, Laravel 13, and Laravel AI SDK >=0.10.3 <0.12.0. It is not yet stably released; the Composer installation instructions apply after a compatible release. Website publication is held for both implementations' readiness.
+
+Use the Laravel facade's \`query()->using()->preview()\` before \`run()\` or \`queue()\`. PHP has 23 flat Profile IDs, sequential execution under a shared deadline, encrypted Laravel jobs, transient status, and application-owned persistence. \`php artisan librarium:query --agent\` is preview-only without explicit \`--run\` or \`--queue\`; it is not an MCP server. Hard cost ceilings require complete, current, conservative, single-currency quotes. The package fake retains Profile compilation and validation without provider calls.
+
+${phpLines}
+
+## Product pages, guides, and field notes
+
+- [Guides index](${base}/guides/index.md)
+${articleLines}
+
+## Markdown for agents
+
+- [Homepage](${base}/index.md)
+- [All JavaScript v2 docs](${base}/docs/all.md)
+- [All PHP docs](${base}/docs/php/all.md)
+- [All legacy JavaScript v1 docs](${base}/v1/all.md)
+- [All current pages and documentation](${base}/llms-full.txt)
+
 ## Source
 
 - [GitHub](https://github.com/jkudish/librarium): source, issues, releases
+- [PHP GitHub](https://github.com/jkudish/laravel-ai-librarium): Laravel package source and issues
 - [npm](https://www.npmjs.com/package/librarium): package
-- [Full docs as one file](${base}/llms-full.txt)
 `;
 
   return new Response(body, {

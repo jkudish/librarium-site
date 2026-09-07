@@ -1,0 +1,29 @@
+---
+interface Props {
+  language: "js" | "php";
+  jsHref: string;
+  phpHref: string;
+}
+const { language, jsHref, phpHref } = Astro.props;
+const options = [
+  { id: "js", name: "JavaScript", detail: "& TypeScript", logo: "javascript", href: jsHref },
+  { id: "php", name: "PHP", detail: "for Laravel", logo: "php", href: phpHref },
+];
+---
+
+<div class="grid grid-cols-2 gap-2" role="group" aria-label="Documentation language">
+  {options.map((option) => (
+    <a href={option.href} aria-label={option.name} aria-current={language === option.id ? "true" : undefined}
+      class="group min-w-0 rounded-lg border border-neutral-200 bg-white p-3 text-neutral-600 hover:border-neutral-400 hover:text-neutral-950 aria-current:border-amber-700/50 aria-current:bg-amber-50/60 aria-current:text-neutral-950">
+      <span class="flex items-center justify-between gap-2">
+        <span class="flex items-center gap-2">
+          <img src={`/languages/${option.logo}.svg`} alt="" width="24" height="24" class="size-6" />
+          {option.id === "php" && <img src="/languages/laravel.svg" alt="" width="24" height="24" class="size-6" />}
+        </span>
+        <span class="size-1.5 rounded-full bg-amber-700 opacity-0 group-aria-current:opacity-100" aria-hidden="true"></span>
+      </span>
+      <span class="mt-3 block text-base font-medium sm:text-sm">{option.name}</span>
+      <span class="mt-0.5 block text-base text-neutral-500 sm:text-sm">{option.detail}</span>
+    </a>
+  ))}
+</div>

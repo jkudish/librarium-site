@@ -21,6 +21,7 @@
   color: var(--color-neutral-600);
   font-size: var(--text-base);
   line-height: --spacing(7);
+  overflow-wrap: anywhere;
 
   & > * + * {
     margin-top: --spacing(5);
@@ -35,15 +36,16 @@
   & h3,
   & h4 {
     color: var(--color-neutral-950);
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-medium);
     letter-spacing: -0.025em;
-    text-wrap: balance;
+    text-wrap: pretty;
+    scroll-margin-top: --spacing(8);
   }
 
   & h2 {
-    margin-top: --spacing(12);
-    font-size: var(--text-2xl);
-    line-height: var(--text-2xl--line-height);
+    margin-top: --spacing(14);
+    font-size: var(--text-3xl);
+    line-height: var(--text-3xl--line-height);
   }
 
   & h3 {
@@ -61,6 +63,9 @@
   & a {
     color: var(--color-amber-700);
     font-weight: var(--font-weight-medium);
+    text-decoration: underline;
+    text-decoration-color: --alpha(var(--color-amber-700) / 30%);
+    text-underline-offset: 3px;
 
     @variant hover {
       color: var(--color-amber-600);
@@ -78,8 +83,8 @@
 
   & pre {
     background-color: var(--color-neutral-950) !important;
-    border-radius: var(--radius-xl);
-    padding: --spacing(5);
+    border-radius: var(--radius-lg);
+    padding: --spacing(6);
     overflow-x: auto;
     font-size: var(--text-sm);
     line-height: --spacing(6);
@@ -113,8 +118,9 @@
   }
 
   & blockquote {
-    border-left: 2px solid --alpha(var(--color-neutral-950) / 10%);
-    padding-left: --spacing(4);
+    border-left: 2px solid var(--color-amber-600);
+    background: var(--color-amber-50);
+    padding: --spacing(4) --spacing(5);
   }
 
   & table {
@@ -140,3 +146,29 @@
     border-bottom: 1px solid --alpha(var(--color-neutral-950) / 5%);
   }
 }
+
+.docs-code {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-neutral-950);
+}
+
+.docs-code-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: --spacing(4);
+  border-bottom: 1px solid --alpha(var(--color-white) / 10%);
+  padding: --spacing(3) --spacing(6);
+  color: var(--color-neutral-400);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.docs-code-toolbar button {
+  cursor: pointer;
+  color: var(--color-neutral-300);
+}
+
+.docs-code-toolbar button:hover { color: var(--color-amber-300); }
+.prose .docs-code pre { margin: 0; border-radius: 0; }

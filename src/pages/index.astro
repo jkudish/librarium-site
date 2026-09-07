@@ -1,246 +1,371 @@
 ---
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
+import Icon from "../components/Icon.astro";
 import {
   PROFILE_COUNT,
   PROVIDER_COUNT,
-  WORKFLOWS,
 } from "../data/product";
 import Base from "../layouts/Base.astro";
+
+const featuredProviders = [
+  { name: "Exa", logo: "exa" },
+  { name: "Perplexity", logo: "perplexity" },
+  { name: "Gemini", logo: "gemini" },
+  { name: "OpenAI", logo: "openai" },
+  { name: "Claude", logo: "claude" },
+  { name: "Brave", logo: "brave" },
+  { name: "Grok", logo: "grok" },
+  { name: "Tavily", logo: "tavily" },
+  { name: "Firecrawl", logo: "firecrawl" },
+  { name: "Jina", logo: "jina" },
+  { name: "Kagi", logo: "kagi" },
+  { name: "OpenRouter", logo: "openrouter" },
+  { name: "Parallel", logo: "parallel" },
+  { name: "SearchAPI", logo: "searchapi" },
+  { name: "SerpAPI", logo: "serpapi" },
+  { name: "Valyu", logo: "valyu" },
+  { name: "You.com", logo: "you" },
+];
+const useCases = [
+  {
+    title: "Research a technical decision.",
+    description: "Bring the options, tradeoffs, and source material into one place before you commit to an approach.",
+    prompt: "SQLite or Postgres for a small team app? Compare deployment, concurrent writes, and operational overhead.",
+    note: "Keep each provider’s findings and citations, so you can check the reasoning yourself.",
+    href: "/docs/groups-and-modes",
+    link: "Explore research workflows",
+  },
+  {
+    title: "See how answer engines describe your product.",
+    description: "Compare mentions, descriptions, and cited sources across collected answer surfaces and direct API results.",
+    prompt: "Which luxury villa rental services do AI answers recommend for a week on the Amalfi Coast? Does our service appear, how is it described, and which sources shape those recommendations?",
+    note: "The visibility workflow preserves which surface or API returned each result. A shared collector is not independent corroboration.",
+    href: "/docs/groups-and-modes",
+    link: "See the visibility workflow",
+  },
+  {
+    title: "Give your agent a research workflow.",
+    description: "Let your agent request research and read the evidence through the CLI or MCP. Embed the library when you need your own execution flow.",
+    prompt: "Before implementing this integration, research the API’s authentication, rate limits, and retry guidance. Include sources.",
+    note: "Use the agent skill for operating instructions, and keep the complete results available beyond the first response.",
+    href: "/docs/using-with-agents",
+    link: "Connect your agent",
+  },
+];
+
+// Authored illustration, not recorded provider output or the full API schema.
+// Both views use these same findings and source links.
+const example = {
+  illustrative: true,
+  query: "Lisbon or Porto for a long weekend?",
+  results: [
+    {
+      provider: "Exa",
+      profile: "exa/search",
+      title: "Lisbon for winding streets and views",
+      content: "Explore Alfama on foot, stopping at viewpoints and cafés. Pack comfortable shoes: those cobbled lanes are steep.",
+      citations: [{ title: "Visit Lisboa · Exploring Alfama", url: "https://www.visitlisboa.com/en/places/alfama" }],
+    },
+    {
+      provider: "Perplexity",
+      profile: "perplexity-sonar-pro/grounded",
+      title: "Porto for a weekend by the river",
+      content: "Wander down to Ribeira, then cross the Douro for the port wine lodges in Gaia. Build the day around the river, with time to linger.",
+      citations: [{ title: "Visit Portugal · Porto in a few days", url: "https://www.visitportugal.com/en/destinos/porto-e-norte/73735" }],
+    },
+    {
+      provider: "Gemini",
+      profile: "gemini-grounded/grounded",
+      title: "Want a day trip? Consider Sintra",
+      content: "Lisbon puts Sintra within reach by train. Set aside a day for its palaces and gardens, rather than squeezing them into an afternoon.",
+      citations: [{ title: "Visit Portugal · Discovering Sintra", url: "https://www.visitportugal.com/en/content/discovering-sintra" }],
+    },
+  ],
+};
 ---
 
-<Base title="librarium — the meta harness for research queries">
+<Base title="librarium — give your agent more than one source" description="Query search engines, AI answers, and deep-research APIs from one interface. Keep results and citations together with Librarium’s CLI, MCP server, and library.">
+  <div class="bg-[#faf9f6]">
   <Header />
 
   <main>
-    <section class="py-20 sm:py-24">
-      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-x-8 gap-y-14 px-6 lg:grid-cols-2 lg:px-8">
-        <div>
-          <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Open source · MIT</p>
-          <h1 class="mt-5 max-w-[24ch] text-5xl font-semibold tracking-tight text-balance text-neutral-950 sm:text-6xl">The meta harness for research queries.</h1>
-          <p class="mt-6 max-w-[48ch] text-lg text-pretty text-neutral-600">Ask once. Librarium fans your query out to search engines, AI-grounded answers, and deep-research APIs in parallel, then merges everything into one structured output.</p>
-          <div class="mt-9 flex flex-wrap items-center gap-4">
-            <a href="/docs" class="rounded-lg bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">Get started</a>
-            <div class="flex items-center gap-x-3 rounded-lg bg-neutral-950/3 py-2 pr-2 pl-4 ring-1 ring-neutral-950/10">
-              <p class="font-mono text-base text-neutral-800 sm:text-sm"><span class="text-neutral-400 select-none">$ </span><span id="install-command">npm i -g librarium</span></p>
-              <button type="button" id="copy-install" class="relative rounded-md bg-white px-2.5 py-1 font-mono text-sm font-medium text-neutral-600 ring-1 ring-neutral-950/10 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-xs">
-                <span id="copy-install-label">copy</span>
-                <span class="pointer-fine:hidden absolute top-1/2 left-1/2 size-[max(100%,3rem)] -translate-1/2" aria-hidden="true"></span>
+    <section class="hero-grid pt-14 sm:pt-24">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <div class="relative mx-auto max-w-4xl text-center">
+          <p class="text-base text-neutral-600 sm:text-sm">A meta harness for research queries</p>
+          <h1 class="mt-6 text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-7xl lg:text-[88px]">Give your agent more than one source.</h1>
+          <p class="mx-auto mt-7 max-w-[60ch] text-lg/8 text-pretty text-neutral-600">Query search engines, AI answers, and deep-research APIs from one interface. Keep the results and citations together, without building a separate integration for every provider.</p>
+          <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <a id="setup-primary" href="/docs#install" class="rounded-md bg-neutral-950 px-5 py-3 text-base font-medium text-white hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">Set up Librarium</a>
+            <a href="#research-example" class="px-3 py-3 text-base font-medium text-neutral-700 hover:text-neutral-950 sm:text-sm">See an example <Icon name="arrowUpRight" class="inline-block" /></a>
+          </div>
+          <div class="mx-auto mt-7 flex w-fit max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-md border border-neutral-200 bg-white p-2">
+            <label for="install-runtime" class="sr-only">Install for</label>
+            <div id="install-runtime-choice" data-runtime="javascript" class="group relative">
+              <img id="install-runtime-logo" src="/languages/javascript.svg" alt="" width="20" height="20" class="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2" />
+              <img src="/languages/laravel.svg" alt="" width="20" height="20" class="pointer-events-none absolute top-1/2 left-9 hidden size-5 -translate-y-1/2 group-data-[runtime=php]:block" />
+              <select id="install-runtime" class="min-h-11 cursor-pointer appearance-none rounded-md border border-neutral-200 bg-[#faf9f6] py-2 pr-9 pl-10 text-base font-medium text-neutral-800 hover:border-neutral-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 group-data-[runtime=php]:pl-16 sm:text-sm">
+                <option value="npm i -g librarium" data-logo="javascript" data-href="/docs#install">JavaScript</option>
+                <option value="composer require jkudish/laravel-ai-librarium" data-logo="php" data-href="/docs/php#install-after-release">PHP / Laravel</option>
+              </select>
+              <Icon name="caretDown" class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-neutral-500" />
+            </div>
+            <div class="flex max-w-full items-center gap-x-3 px-2 py-1">
+              <p class="min-w-0 break-words text-left font-mono text-base text-neutral-800 sm:text-sm"><span class="text-neutral-400 select-none">$ </span><span id="install-command">npm i -g librarium</span></p>
+              <button type="button" id="copy-install" aria-label="Copy install command" title="Copy install command" data-copy-state="idle" class="group relative flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
+                <Icon name="copy" class="size-5 group-data-[copy-state=success]:hidden" />
+                <Icon name="check" class="hidden size-5 text-amber-800 group-data-[copy-state=success]:block" />
               </button>
             </div>
           </div>
-          <p class="relative mt-6 text-base/7 text-neutral-500 sm:text-sm/6">
-            Also available via{" "}
-            <span class="inline-block">
-              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">Homebrew</button>
-              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
-                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
-                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>brew install jkudish/tap/librarium</code>
-                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="brew install jkudish/tap/librarium">copy</button>
-                </span>
-              </span>
-            </span>,{" "}
-            <span class="inline-block">
-              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">curl</button>
-              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
-                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
-                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh</code>
-                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh">copy</button>
-                </span>
-              </span>
-            </span>,{" "}
-            <span class="inline-block">
-              <button type="button" class="install-method underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">npx</button>
-              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
-                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
-                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>npx librarium run "your query"</code>
-                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd={'npx librarium run "your query"'}>copy</button>
-                </span>
-              </span>
-            </span>, or{" "}
-            <span class="inline-block">
-              <button type="button" class="install-method font-mono underline decoration-dotted decoration-neutral-400 underline-offset-4 hover:text-neutral-950" aria-expanded="false">import 'librarium/core'</button>
-              <span class="install-pop absolute top-full left-0 z-10 mt-2 hidden">
-                <span class="flex w-max max-w-72 items-start gap-x-3 rounded-lg bg-neutral-950 px-3 py-2 font-mono text-xs/5 text-neutral-100 shadow-lg sm:max-w-md">
-                  <code class="break-all"><span class="text-neutral-500 select-none">$ </span>npm install librarium</code>
-                  <button type="button" class="install-copy shrink-0 font-medium text-neutral-400 hover:text-white" data-cmd="npm install librarium">copy</button>
-                </span>
-              </span>
-            </span>.
-          </p>
+          <p id="copy-install-label" aria-live="polite" class="mt-1 min-h-6 text-base text-neutral-600 sm:min-h-5 sm:text-sm"></p>
+          <a id="install-methods" href="/docs#install" class="inline-block py-1 text-base text-neutral-500 underline decoration-neutral-300 underline-offset-4 hover:text-neutral-950 sm:text-sm">Installation guide</a>
+          <noscript><a href="/docs/php" class="mt-3 inline-block text-amber-700 underline">PHP / Laravel installation</a></noscript>
         </div>
 
-        <div class="overflow-hidden rounded-xl bg-neutral-950 shadow-lg ring-1 ring-neutral-950/10">
-          <div class="flex flex-col items-start gap-1 border-b border-white/10 px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-            <p class="font-mono text-sm text-neutral-400 sm:text-xs">Example async run</p>
-            <p class="font-mono text-sm text-amber-300 sm:text-xs">offline fixture</p>
-          </div>
-          <div class="p-5 font-mono text-sm/6 text-neutral-300">
-            <pre class="whitespace-pre-wrap break-words"><code><span class="text-neutral-500">$ </span>librarium live-validation \
-  --fixture /absolute/path/to/fixture.json
-
-&#123;
-  <span class="text-sky-300">"status"</span>: <span class="text-emerald-300">"succeeded"</span>,
-  <span class="text-sky-300">"schema_version"</span>: 1,
-  <span class="text-sky-300">"artifact_name"</span>: <span class="text-amber-300">"run_manifest"</span>,
-  <span class="text-sky-300">"request_id"</span>: <span class="text-amber-300">"fixture-readme-durable-replay"</span>,
-  <span class="text-sky-300">"profile"</span>: <span class="text-amber-300">"exa/research"</span>,
-  <span class="text-sky-300">"binding_id"</span>: <span class="text-amber-300">"exa.research.exa-research"</span>,
-  <span class="text-sky-300">"materialize_count"</span>: 1,
-  <span class="text-sky-300">"resume_count"</span>: 1,
-  <span class="text-sky-300">"submit_count"</span>: 1,
-  <span class="text-sky-300">"poll_count"</span>: 1,
-  <span class="text-sky-300">"retrieve_count"</span>: 1
-&#125;</code></pre>
-          </div>
-          <p class="border-t border-white/10 px-5 py-3 text-base/7 text-pretty text-neutral-400 sm:text-sm/6">
-            This fixture runs without provider credentials or network access. <a href="/demo.gif" class="font-medium text-amber-300 hover:text-amber-200">Watch the replay</a>.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section class="py-16 sm:py-24" id="features">
-      <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Features</p>
-        <h2 class="mt-4 max-w-[32ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">
-          Pick a workflow, or choose the profiles yourself.
-        </h2>
-        <p class="mt-5 max-w-[70ch] text-base/7 text-pretty text-neutral-600">
-          Librarium ships with four workflows. For direct control, select any of its {PROFILE_COUNT} profiles as <code class="rounded bg-neutral-950/4 px-1.5 py-0.5 font-mono text-sm text-neutral-950">provider_id/profile_id</code>.
-        </p>
-        <dl class="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2">
-          {WORKFLOWS.map((workflow) => (
-            <div class="rounded-xl border border-neutral-950/10 p-6">
-              <dt class="font-mono text-base font-medium text-neutral-950 sm:text-sm">{workflow.id}</dt>
-              <dd class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{workflow.summary}</dd>
-              {workflow.selection[0] !== "catalog-derived" && (
-                <dd class="mt-4 font-mono text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
-                  {workflow.selection.join(" · ")}
-                </dd>
-              )}
+        <div id="research-example" role="region" tabindex="-1" aria-label="Illustrative research example" class="mt-12 min-w-0 scroll-mt-6 overflow-hidden border-x border-t border-neutral-300 bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600 sm:mt-16">
+          <div class="flex flex-col justify-between gap-4 border-b border-neutral-200 px-5 pt-6 sm:flex-row sm:items-end sm:px-7 sm:pt-7">
+            <h2 class="max-w-[30ch] pb-5 text-2xl font-medium tracking-tight text-balance text-neutral-950 sm:pb-7">{example.query}</h2>
+            <div id="example-tabs" role="tablist" aria-label="Example format" hidden class="shrink-0">
+              <button id="example-readable-tab" type="button" role="tab" aria-selected="true" aria-controls="example-readable" class="min-h-12 cursor-pointer border-b-2 border-transparent px-1 py-3 text-base font-medium text-neutral-500 aria-selected:border-amber-700 aria-selected:text-amber-800 hover:text-neutral-950 sm:text-sm">Readable result</button>
+              <button id="example-json-tab" type="button" role="tab" aria-selected="false" aria-controls="example-json" tabindex="-1" class="ml-6 min-h-12 cursor-pointer border-b-2 border-transparent px-1 py-3 text-base text-neutral-500 aria-selected:border-amber-700 aria-selected:text-amber-800 hover:text-neutral-950 sm:text-sm">JSON</button>
             </div>
+          </div>
+          <div id="example-readable" role="tabpanel" aria-labelledby="example-readable-tab" tabindex="0" class="focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-700">
+            <ul class="grid grid-cols-1 divide-y divide-neutral-200 lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+              {example.results.map((result) => (
+                <li class="flex flex-col px-5 py-6 sm:px-7 sm:py-8">
+                  <div class="flex items-center gap-2 text-base text-neutral-500 sm:text-sm">
+                    <img src={`/providers/${result.provider.toLowerCase()}.svg`} alt="" width="20" height="20" class="size-5" />
+                    <span>{result.provider}</span>
+                  </div>
+                  <h3 class="mt-5 text-xl font-medium text-balance text-neutral-950">{result.title}</h3>
+                  <p class="mt-3 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{result.content}</p>
+                  {result.citations.map((citation) => (
+                    <a href={citation.url} target="_blank" rel="noopener noreferrer" class="mt-auto inline-block py-1 text-base text-neutral-600 underline decoration-neutral-300 underline-offset-4 hover:text-amber-800 sm:text-sm">
+                      {citation.title} <Icon name="arrowUpRight" class="inline-block" /><span class="sr-only"> (opens in a new tab)</span>
+                    </a>
+                  ))}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div id="example-json" role="tabpanel" aria-labelledby="example-json-tab" tabindex="0" hidden class="bg-neutral-950 px-5 py-5 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-300 sm:px-7">
+            <p class="mb-4 text-base text-neutral-400 sm:text-sm">Same example data, simplified for display. Not the full API response schema.</p>
+            <pre class="whitespace-pre-wrap break-words font-mono text-base/7 text-amber-100 sm:text-sm/6"><code>{JSON.stringify(example, null, 2)}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="border-t border-neutral-300 py-16 sm:py-28" id="features">
+      <div class="mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[1fr_1.35fr] lg:px-8">
+        <div>
+          <h2 class="max-w-[16ch] text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Good research starts with your question.</h2>
+          <p class="mt-6 max-w-[34ch] text-lg/8 text-pretty text-neutral-600">A decision to make. A market to understand. A better-informed agent.</p>
+          <p class="mt-8 max-w-[34ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
+            Start with quick, deep, visibility, or all. Choose exact profiles when you need more control.
+            <a href="/docs/groups-and-modes" class="mt-3 block w-fit font-medium text-amber-800 hover:text-amber-600">Explore the four workflows <Icon name="arrowUpRight" class="inline-block" /></a>
+          </p>
+        </div>
+        <div class="divide-y divide-neutral-300 border-y border-neutral-300">
+          {useCases.map((useCase) => (
+            <article class="py-8">
+              <h3 class="max-w-[30ch] text-2xl font-medium tracking-tight text-balance text-neutral-950">{useCase.title}</h3>
+              <p class="mt-3 text-base/7 text-pretty text-neutral-600">{useCase.description}</p>
+              <details class="group mt-4">
+                <summary class="flex w-fit cursor-pointer items-center gap-3 py-2 text-base text-neutral-700 sm:text-sm">Show the prompt <Icon name="plus" class="size-5 group-open:rotate-45" /></summary>
+                <blockquote class="mt-3 border-l-2 border-amber-700/40 pl-5 text-lg text-pretty text-neutral-800">“{useCase.prompt}”</blockquote>
+                <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{useCase.note}</p>
+              </details>
+              <a href={useCase.href} class="mt-3 inline-block py-1 text-base font-medium text-amber-800 hover:text-amber-600 sm:text-sm">{useCase.link} <Icon name="arrowUpRight" class="inline-block" /></a>
+            </article>
           ))}
-        </dl>
-        <p class="mt-8 text-base/7 text-pretty text-neutral-500 sm:text-sm/6">
-          Custom groups use <code class="font-mono">custom:&lt;name&gt;</code>.{" "}
-          <a href="/docs/groups-and-modes" class="font-medium text-amber-700 hover:text-amber-600">See how workflows are selected</a>.
-        </p>
+        </div>
       </div>
     </section>
 
-    <section class="border-y border-neutral-950/10 bg-neutral-950/2 py-16 sm:py-24" id="providers">
+    <section class="border-y border-neutral-300 bg-[#eeeae0] py-16 sm:py-24" aria-labelledby="controls-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Providers</p>
-        <h2 class="mt-4 max-w-[35ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">
-          {PROVIDER_COUNT} providers. {PROFILE_COUNT} ways to query them.
-        </h2>
-        <div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
-          <div class="border-t border-neutral-950/10 pt-6">
-            <h3 class="text-lg font-semibold text-neutral-950">API output</h3>
+        <h2 id="controls-heading" class="max-w-[24ch] text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Keep the evidence.<br />Keep control.</h2>
+        <div class="mt-12 grid grid-cols-1 gap-12 border-t border-neutral-950/15 pt-8 lg:grid-cols-3">
+          <div>
+            <h3 class="text-lg font-semibold text-neutral-950">See where each result came from.</h3>
             <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
-              Direct API profiles record what the named API returned, including citations, usage, and reported cost when available.
+              Keep provider identity and citations attached to the findings. Inspect the source material instead of treating agreement as proof.
             </p>
           </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <h3 class="text-lg font-semibold text-neutral-950">Collected surfaces</h3>
+          <div>
+            <h3 class="text-lg font-semibold text-neutral-950">Decide what can run.</h3>
             <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
-              Six SearchAPI profiles show what consumer answer surfaces returned through one collector. They are useful for visibility checks, but they are not six independent sources.
+              Preview locally before making paid calls. Set budget limits and track reported costs. Unknown costs stay unknown; a provider can still bill more than its estimate.
             </p>
           </div>
-          <div class="border-t border-neutral-950/10 pt-6">
-            <h3 class="text-lg font-semibold text-neutral-950">Corpus provenance</h3>
+          <div>
+            <h3 class="text-lg font-semibold text-neutral-950">Come back to a long-running job.</h3>
             <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
-              Web, X-only, combined web and X, and specialized sources keep separate profile identities so you can see where each result came from.
+              JavaScript supports durable async jobs and partial result reads. PHP runs research in encrypted Laravel queue jobs, with callbacks for your application.
             </p>
           </div>
         </div>
-        <a href="/docs/providers" class="mt-8 inline-flex text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">
-          Browse all providers
-        </a>
       </div>
     </section>
 
-    <section class="py-16 sm:py-24" id="library">
+    <section class="py-16 sm:py-28" id="providers">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <p class="font-mono text-sm font-medium tracking-wide text-amber-700 uppercase sm:text-xs">Library</p>
-        <h2 class="mt-4 max-w-[33ch] text-4xl font-semibold tracking-tight text-balance text-neutral-950">
-          Use the CLI, or embed the parts you need.
-        </h2>
-        <div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
-          <div class="rounded-xl border border-neutral-950/10 p-6">
-            <h3 class="font-mono text-base font-medium text-neutral-950 sm:text-sm">librarium</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Schemas, config migration, and the provider catalog. Safe for Workers.</p>
-          </div>
-          <div class="rounded-xl border border-neutral-950/10 p-6">
-            <h3 class="font-mono text-base font-medium text-neutral-950 sm:text-sm">librarium/core</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Planning, transport, coordination, and execution with injected adapters.</p>
-          </div>
-          <div class="rounded-xl border border-neutral-950/10 p-6">
-            <h3 class="font-mono text-base font-medium text-neutral-950 sm:text-sm">librarium/node</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Config files, trusted custom providers, credentials, and validation for Node.js.</p>
+        <h2 class="max-w-[25ch] text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Your sources.<br />One interface.</h2>
+        <p class="mt-5 max-w-[65ch] text-base/7 text-pretty text-neutral-600">Search engines, grounded answers, and research APIs. The JavaScript catalog includes {PROVIDER_COUNT} providers and {PROFILE_COUNT} profiles; each implementation documents its own coverage.</p>
+        <ul class="mt-12 grid grid-cols-2 border-t border-l border-neutral-200 sm:grid-cols-3 lg:grid-cols-6" aria-label="Supported provider families">
+          {featuredProviders.map((provider) => (
+            <li class="flex flex-col items-center justify-center gap-3 border-r border-b border-neutral-200 px-3 py-7">
+              <img src={`/providers/${provider.logo}.${provider.logo === "you" ? "png" : "svg"}`} alt="" width="28" height="28" loading="lazy" class="size-7 shrink-0 grayscale" />
+              <span class="text-base text-neutral-700 sm:text-sm">{provider.name}</span>
+            </li>
+          ))}
+          <li class="flex items-center justify-center border-r border-b border-neutral-200 bg-[#eeeae0] px-3 py-7 text-center"><a href="/docs/custom-providers" class="text-base text-neutral-800 hover:text-amber-800 sm:text-sm">Your own provider <Icon name="plus" class="mx-auto mt-2 block size-5" /></a></li>
+        </ul>
+        <div class="mt-6 flex flex-wrap items-baseline justify-between gap-4">
+          <p class="text-base text-neutral-600 sm:text-sm">Integrations, not endorsements. Bring your own provider keys.</p>
+          <div class="flex gap-5">
+            <a href="/docs/providers" class="text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">JavaScript providers <Icon name="arrowUpRight" class="inline-block" /></a>
+            <a href="/docs/php/providers" class="text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">PHP providers <Icon name="arrowUpRight" class="inline-block" /></a>
           </div>
         </div>
-        <p class="mt-8 max-w-[72ch] text-base/7 text-pretty text-neutral-500 sm:text-sm/6">
-          The CLI, MCP server, and agent skill use the same research jobs. The TypeScript/PHP snapshot covers terminal response types only.{" "}
-          <a href="/docs/library" class="font-medium text-amber-700 hover:text-amber-600">Read the library docs</a>.
-        </p>
+      </div>
+    </section>
+
+    <section class="bg-neutral-950 py-16 sm:py-24" id="library">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <p class="text-base text-amber-200 sm:text-sm">Two first-party implementations</p>
+        <h2 class="mt-4 max-w-[24ch] text-4xl font-medium tracking-tight text-balance text-white sm:text-5xl">
+          Use Librarium where you build.
+        </h2>
+        <div class="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-2">
+          <div class="border-t border-white/20 pt-8">
+            <div class="mb-5 flex items-center gap-4" aria-label="JavaScript and TypeScript">
+              <img src="/languages/javascript.svg" alt="JavaScript" width="32" height="32" class="size-8 invert" />
+              <img src="/languages/typescript.svg" alt="TypeScript" width="32" height="32" class="size-8 invert" />
+            </div>
+            <h3 class="text-2xl font-medium tracking-tight text-white">JavaScript / TypeScript</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-400">Use the CLI, connect an agent over MCP, or build with the typed library. Portable core modules support Workers; Node owns local configuration and artifacts.</p>
+            <pre class="mt-6 overflow-x-auto rounded-md border border-white/15 bg-white/5 p-5 font-mono text-base/7 text-amber-100 sm:text-sm/6"><code>npm i -g librarium</code></pre>
+            <a href="/javascript" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore JavaScript <Icon name="arrowUpRight" class="inline-block" /></a>
+            <a href="/cli-mcp" class="mt-2 block w-fit py-2 text-base font-medium text-amber-200 hover:text-white">Explore CLI & MCP <Icon name="arrowUpRight" class="inline-block" /></a>
+          </div>
+          <div class="border-t border-white/20 pt-8">
+            <div class="mb-5 flex items-center gap-4" aria-label="PHP and Laravel">
+              <img src="/languages/php.svg" alt="PHP" width="48" height="32" class="h-8 w-12 invert" />
+              <img src="/languages/laravel.svg" alt="Laravel" width="32" height="32" class="size-8 invert" />
+            </div>
+            <h3 class="text-2xl font-medium tracking-tight text-white">PHP / Laravel</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-400">A native Laravel package with a fluent research API, Artisan commands, pricing previews, encrypted queue jobs, and a testing fake. Your application owns storage and workflows.</p>
+            <pre class="mt-6 whitespace-pre-wrap break-words rounded-md border border-white/15 bg-white/5 p-5 font-mono text-base/7 text-amber-100 sm:text-sm/6"><code>composer require jkudish/laravel-ai-librarium</code></pre>
+            <a href="/laravel" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore Laravel <Icon name="arrowUpRight" class="inline-block" /></a>
+          </div>
+        </div>
+        <p class="mt-10 max-w-[72ch] text-base/7 text-pretty text-neutral-400 sm:text-sm/6">Both are first-party implementations. They share terminal response concepts, not identical provider coverage or execution behavior.</p>
+      </div>
+    </section>
+
+    <section class="border-y border-neutral-950/10 bg-[#efb86b] py-16 sm:py-24" aria-labelledby="setup-heading">
+      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-6 lg:grid-cols-2 lg:px-8">
+        <div>
+          <h2 id="setup-heading" class="max-w-[16ch] text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-6xl">Put your sources to work.</h2>
+          <p class="mt-6 max-w-[50ch] text-base/7 text-pretty text-neutral-800">Install Librarium, connect your providers, and preview your first query. Use it yourself or hand the research to your agent.</p>
+        </div>
+        <div class="lg:justify-self-end">
+          <a href="#library" class="inline-block rounded-md bg-neutral-950 px-5 py-3 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">Set up Librarium</a>
+        </div>
       </div>
     </section>
   </main>
 
   <Footer />
+  </div>
 </Base>
+
+<style>
+  .hero-grid {
+    position: relative;
+    isolation: isolate;
+    background-image: linear-gradient(to right, transparent calc(50% - 576px), #e5e2db calc(50% - 576px), #e5e2db calc(50% - 575px), transparent calc(50% - 575px), transparent calc(50% + 575px), #e5e2db calc(50% + 575px), #e5e2db calc(50% + 576px), transparent calc(50% + 576px));
+  }
+  .hero-grid::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: -1;
+    height: 640px;
+    pointer-events: none;
+    background-image: radial-gradient(circle, #a69b89 0.8px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.3;
+    mask-image: linear-gradient(#000, transparent);
+  }
+</style>
 
 <script>
   const installButton = document.getElementById("copy-install");
   const installLabel = document.getElementById("copy-install-label");
   const installCommand = document.getElementById("install-command");
+  const runtimePicker = document.querySelector<HTMLSelectElement>("#install-runtime");
+  let copyFeedbackTimeout: ReturnType<typeof setTimeout>;
+  runtimePicker?.addEventListener("change", () => {
+    if (installCommand) installCommand.textContent = runtimePicker.value;
+    clearTimeout(copyFeedbackTimeout);
+    if (installButton) installButton.dataset.copyState = "idle";
+    if (installLabel) installLabel.textContent = "";
+    const option = runtimePicker.selectedOptions[0];
+    document.getElementById("install-runtime-logo")?.setAttribute("src", `/languages/${option.dataset.logo}.svg`);
+    document.getElementById("install-runtime-choice")?.setAttribute("data-runtime", option.dataset.logo!);
+    const href = option.dataset.href!;
+    document.getElementById("setup-primary")?.setAttribute("href", href);
+    document.getElementById("install-methods")?.setAttribute("href", href);
+  });
   installButton?.addEventListener("click", async () => {
     if (!installCommand?.textContent || !installLabel) return;
-    await navigator.clipboard.writeText(installCommand.textContent.trim());
-    installLabel.textContent = "copied";
-    setTimeout(() => {
-      installLabel.textContent = "copy";
+    clearTimeout(copyFeedbackTimeout);
+    try {
+      await navigator.clipboard.writeText(installCommand.textContent.trim());
+      installLabel.textContent = "Copied";
+      installButton.dataset.copyState = "success";
+    } catch {
+      installLabel.textContent = "Select text to copy";
+      installButton.dataset.copyState = "error";
+    }
+    copyFeedbackTimeout = setTimeout(() => {
+      installButton.dataset.copyState = "idle";
+      installLabel.textContent = "";
     }, 2000);
   });
 
-  const triggers = [...document.querySelectorAll<HTMLButtonElement>(".install-method")];
-  function closeInstallMenus(except?: HTMLButtonElement) {
-    for (const trigger of triggers) {
-      if (trigger === except) continue;
-      trigger.setAttribute("aria-expanded", "false");
-      trigger.parentElement?.querySelector(".install-pop")?.classList.add("hidden");
+  const tablist = document.getElementById("example-tabs");
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>("#example-tabs [role=tab]")];
+  function selectExampleTab(selected: HTMLButtonElement) {
+    for (const tab of tabs) {
+      const active = tab === selected;
+      tab.setAttribute("aria-selected", String(active));
+      tab.tabIndex = active ? 0 : -1;
+      const panel = document.getElementById(tab.getAttribute("aria-controls")!);
+      if (panel) panel.hidden = !active;
     }
   }
-
-  for (const trigger of triggers) {
-    trigger.addEventListener("click", (event) => {
-      event.stopPropagation();
-      const popover = trigger.parentElement?.querySelector(".install-pop");
-      const isOpen = trigger.getAttribute("aria-expanded") === "true";
-      closeInstallMenus(trigger);
-      trigger.setAttribute("aria-expanded", String(!isOpen));
-      popover?.classList.toggle("hidden", isOpen);
+  for (const [index, tab] of tabs.entries()) {
+    tab.addEventListener("click", () => selectExampleTab(tab));
+    tab.addEventListener("keydown", (event) => {
+      let next: number;
+      switch (event.key) {
+        case "ArrowRight": next = (index + 1) % tabs.length; break;
+        case "ArrowLeft": next = (index + tabs.length - 1) % tabs.length; break;
+        case "Home": next = 0; break;
+        case "End": next = tabs.length - 1; break;
+        default: return;
+      }
+      event.preventDefault();
+      selectExampleTab(tabs[next]);
+      tabs[next].focus();
     });
   }
-
-  document.addEventListener("click", (event) => {
-    if (event.target instanceof Element && event.target.closest(".install-pop")) return;
-    closeInstallMenus();
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeInstallMenus();
-  });
-
-  for (const button of document.querySelectorAll<HTMLButtonElement>(".install-copy")) {
-    button.addEventListener("click", async (event) => {
-      event.stopPropagation();
-      await navigator.clipboard.writeText(button.dataset.cmd ?? "");
-      button.textContent = "copied";
-      setTimeout(() => {
-        button.textContent = "copy";
-      }, 2000);
-    });
-  }
+  if (tablist) tablist.hidden = false;
 </script>

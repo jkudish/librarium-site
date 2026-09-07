@@ -1,0 +1,27 @@
+---
+import Base from "../../layouts/Base.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import Icon from "../../components/Icon.astro";
+import { getReadingLists, guideTitle, guideDescription } from "../../lib/articles";
+const lists = await getReadingLists();
+---
+
+<Base title={`${guideTitle} | librarium`} description={guideDescription} includeSoftwareMetadata={false}>
+  <Header />
+  <main class="mx-auto max-w-6xl px-6 pt-12 pb-20 sm:pt-20 lg:px-8">
+    <h1 class="text-4xl font-medium tracking-tight text-pretty text-neutral-950 sm:text-6xl">{guideTitle}</h1>
+    <p class="mt-6 max-w-[50ch] text-lg/8 text-pretty text-neutral-600">{guideDescription}</p>
+    <a href="/guides/index.md" class="mt-6 inline-flex items-center gap-2 py-2 text-base text-amber-700 sm:text-sm"><Icon name="markdownLogo" class="size-5" /> Read as Markdown</a>
+    {lists.map((list) => <section class="mt-14 grid grid-cols-1 gap-8 border-t border-neutral-200 pt-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
+      <h2 class="text-xl font-medium text-neutral-950">{list.title}</h2>
+      <div class="divide-y divide-neutral-200">
+        {list.items.map(({ path, entry }) => <a href={`/${path}`} class="group flex items-start justify-between gap-6 py-7 first:pt-0">
+          <div><h3 class="max-w-[40ch] text-2xl/8 font-medium tracking-tight text-pretty text-neutral-950 group-hover:text-amber-700">{entry.data.title}</h3><p class="mt-3 max-w-[58ch] text-base/7 text-pretty text-neutral-500">{entry.data.description}</p></div>
+          <Icon name="arrowUpRight" class="mt-1 size-6 text-neutral-400 group-hover:text-amber-700" />
+        </a>)}
+      </div>
+    </section>)}
+  </main>
+  <Footer />
+</Base>

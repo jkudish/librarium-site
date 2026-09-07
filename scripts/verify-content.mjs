@@ -13,6 +13,7 @@ import {
 const root = resolve(import.meta.dirname, "..");
 const docsDir = join(root, "src/content/docs");
 const v1DocsDir = join(root, "src/content/v1-docs");
+const phpDocsDir = join(root, "src/content/php-docs");
 const distDir = join(root, "dist");
 
 const profiles = PROVIDERS.flatMap((provider) => provider.profiles);
@@ -95,8 +96,9 @@ for (const command of [
 ]) {
   assert(gettingStarted.includes(command), `getting started is missing: ${command}`);
 }
-assert(publicCopy.includes("The meta harness for research queries."), "the handwritten hero is missing");
-assert(publicCopy.includes("Ask once. Librarium fans your query out"), "the handwritten hero body is missing");
+assert(publicCopy.includes("A meta harness for research queries"), "the category positioning is missing");
+assert(publicCopy.includes("Give your agent more than one source."), "the approved agent-first hero is missing");
+assert(publicCopy.includes("without building a separate integration for every provider."), "the approved hero body is missing");
 assert(publicCopy.includes('{ href: "/#features", label: "Features" }'), "the handwritten Features navigation is missing");
 assert(publicCopy.includes('{ href: "/#providers", label: "Providers" }'), "the handwritten Providers navigation is missing");
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.md'), "output docs must describe collision-resistant provider markdown names");
@@ -219,6 +221,39 @@ for (const file of ["llms.txt", "llms-full.txt", "robots.txt", "sitemap-index.xm
   assert(existsSync(join(distDir, file)), `generated output is missing ${file}`);
 }
 
+const home = readFileSync(join(distDir, "index.html"), "utf8");
+assert(!home.includes('href="/v1'), "legacy navigation belongs in the docs version picker");
+assert(!home.includes("librarium live-validation"), "homepage must show research rather than validation internals");
+assert.equal((home.match(/>Set up Librarium<\/a>/g) ?? []).length, 2, "hero and final section must offer setup");
+assert(home.includes('href="#research-example"'), "the example CTA needs an on-page target");
+assert(home.includes('id="research-example"'), "the example target must exist");
+assert(readFileSync(join(distDir, "docs/index.html"), "utf8").includes('id="install"'), "setup must link to the installation section");
+assert(home.indexOf('id="features"') < home.indexOf('id="providers"'), "use cases must precede the provider catalog");
+assert(!home.includes("Sample findings, not captured provider responses."), "removed sample footer must stay absent");
+assert(!home.includes("A question worth exploring") && !home.includes("3 linked sources"), "removed example header labels must stay absent");
+assert(home.includes("Not the full API response schema."), "simplified demo JSON must be labelled");
+const exampleCode = home.match(/<pre[^>]*><code\b[^>]*>([\s\S]*?)<\/code><\/pre>/)?.[1];
+assert(exampleCode, "the JSON view must be statically rendered");
+const example = JSON.parse(exampleCode.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"));
+assert.equal(example.illustrative, true);
+assert.equal(example.results.length, 3);
+for (const result of example.results) {
+  assert(profiles.includes(result.profile), `example references unknown profile ${result.profile}`);
+  assert(home.includes(result.content), "readable and JSON views must share their findings");
+  for (const citation of result.citations) {
+    assert.equal(new URL(citation.url).protocol, "https:");
+    assert(home.includes(`href="${citation.url}"`), "each example citation must be inspectable");
+  }
+}
+const logoPaths = [...home.matchAll(/src="(\/providers\/[^\"]+\.(?:svg|png))"/g)].map((match) => match[1]);
+assert.equal(new Set(logoPaths).size, 17, "expected all seventeen provider brand marks");
+for (const path of logoPaths) assert(outputPathExists(path), `missing local provider mark ${path}`);
+for (const language of ["javascript", "typescript", "php", "laravel"]) {
+  const path = `/languages/${language}.svg`;
+  assert(home.includes(`src="${path}"`) && outputPathExists(path), `missing language mark ${path}`);
+}
+assert(!home.includes("Open source. Your provider accounts. Provider charges apply."), "removed final CTA disclaimer must stay absent");
+
 for (const name of v1DocNames) {
   const slug = name.replace(/\.md$/, "");
   const route = slug === "index" ? "v1/index.md" : `v1/${slug}.md`;
@@ -245,4 +280,112 @@ assert(llms.includes("Legacy v1 documentation is preserved"), "llms.txt must dis
 const llmsFull = readFileSync(join(distDir, "llms-full.txt"), "utf8");
 assert(llmsFull.includes("Legacy v1 documentation is preserved"), "llms-full.txt must disclose the legacy docs route");
 
+const phpDocNames = readdirSync(phpDocsDir).sort();
+assert.equal(phpDocNames.length, 9, "expected the complete first-party PHP documentation set");
+const articleSources = [
+  ...walk(join(root, "src/content/pages")),
+  ...walk(join(root, "src/content/guides")),
+].filter((file) => extname(file) === ".md");
+assert.equal(htmlFiles.length, 2 + v1DocNames.length + v2DocNames.length + phpDocNames.length + articleSources.length);
+for (const sourcePath of articleSources) {
+  const source = readFileSync(sourcePath, "utf8");
+  const body = source.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "").trim();
+  const route = relative(join(root, "src/content"), sourcePath).replace(/^pages\//, "").replace(/\.md$/, "");
+  const raw = readFileSync(join(distDir, `${route}.md`), "utf8");
+  const html = readFileSync(join(distDir, route, "index.html"), "utf8");
+  assert(raw.includes(body), `${route} Markdown must preserve its full source body`);
+  assert(llmsFull.includes(raw.trim()), `full agent bundle must contain ${route}`);
+  assert(llms.includes(`/${route}.md`), `agent index must contain ${route}`);
+  assert(html.includes(`href="/${route}.md"`), `${route} needs a visible Markdown link`);
+  assert(!html.includes('"@type":"SoftwareApplication"'), `${route} must not inherit JavaScript runtime claims`);
+}
+const guideIndex = readFileSync(join(distDir, "guides/index.html"), "utf8");
+const guideMarkdown = readFileSync(join(distDir, "guides/index.md"), "utf8");
+assert(llmsFull.includes(guideMarkdown.trim()), "full agent bundle must include the guides index");
+for (const route of ["guides/first-query", "guides/agent-research", "guides/laravel-queues", "compare/direct-provider-apis", "stories/agentsy-report"]) {
+  assert(guideIndex.includes(`href="/${route}"`), `guides index must link to ${route}`);
+  assert(guideMarkdown.includes(`/${route}.md`), `guides Markdown must link to ${route}`);
+}
+for (const route of ["javascript", "cli-mcp", "laravel"]) {
+  assert(home.includes(`href="/${route}"`), `homepage must link to dedicated ${route} page`);
+}
+assert(home.includes("Show the prompt") && !home.includes("See a research brief"));
+for (const eyebrow of ["Provenance", "Cost controls", "Long-running research"]) {
+  assert(!home.includes(`>${eyebrow}</p>`), `removed ${eyebrow} eyebrow must stay absent`);
+}
+for (const file of htmlFiles) {
+  const html = readFileSync(file, "utf8");
+  for (const svg of html.matchAll(/<svg\b[^>]*>/g)) {
+    assert(svg[0].includes("data-icon="), `${relative(distDir, file)} has a non-Phosphor UI icon`);
+  }
+  for (const link of html.matchAll(/href="(\/[^\"]*#[^\"]+)"/g)) {
+    const [path, anchor] = link[1].split("#");
+    const clean = path.replace(/^\//, "").replace(/\/$/, "");
+    if (extname(clean)) continue;
+    const target = readFileSync(join(distDir, clean, "index.html"), "utf8");
+    assert(target.includes(`id="${anchor}"`), `missing internal anchor ${link[1]}`);
+  }
+}
+for (const [directory, route, names] of [
+  [docsDir, "docs", v2DocNames], [phpDocsDir, "docs/php", phpDocNames], [v1DocsDir, "v1", v1DocNames],
+]) {
+  const bundle = readFileSync(join(distDir, route, "all.md"), "utf8");
+  for (const name of names) {
+    const slug = name.replace(/\.md$/, "");
+    const source = readFileSync(join(directory, name), "utf8");
+    const body = source.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "").trim();
+    const raw = readFileSync(join(distDir, route, name), "utf8");
+    const html = readFileSync(join(distDir, route, slug === "index" ? "index.html" : `${slug}/index.html`), "utf8");
+    assert(raw.includes(body), `${route}/${name} must preserve the complete source body`);
+    assert(bundle.includes(raw.trim()), `${route}/all.md must contain ${name} in full`);
+    assert(html.includes(`href="/${route}/${name}"`), `${route}/${slug} needs a visible Markdown link`);
+    assert(html.includes(`href="/${route}/all.md"`), `${route}/${slug} needs a complete bundle link`);
+    const navigation = html.match(/<nav aria-label="Documentation"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
+    assert(navigation, `${route}/${slug} needs grouped documentation navigation`);
+    for (const doc of names) {
+      const docSlug = doc.replace(/\.md$/, "");
+      const href = docSlug === "index" ? `/${route}` : `/${route}/${docSlug}`;
+      assert(navigation.includes(`href="${href}"`), `${route}/${slug} navigation omits ${doc}`);
+    }
+    for (const outline of html.matchAll(/<ul[^>]*data-docs-outline[^>]*>([\s\S]*?)<\/ul>/g)) {
+      for (const anchor of outline[1].matchAll(/href="#([^\"]+)"/g)) {
+        assert(html.includes(`id="${anchor[1]}"`), `${route}/${slug} outline has a missing heading ${anchor[1]}`);
+      }
+    }
+    for (const language of ["javascript", "php", "laravel"]) {
+      assert(html.includes(`src="/languages/${language}.svg"`), `${route}/${slug} picker needs ${language} mark`);
+    }
+    if (route !== "v1") {
+      assert(llmsFull.includes(raw.trim()), `combined docs must contain ${route}/${name} in full`);
+      assert(llms.includes(`/${route}/${name}`), `agent index must link to ${route}/${name}`);
+    }
+    const oppositeRoot = route === "docs/php" ? "docs" : "docs/php";
+    const oppositeNames = route === "docs/php" ? v2DocNames : phpDocNames;
+    const switchHref = slug === "index" || !oppositeNames.includes(name) ? `/${oppositeRoot}` : `/${oppositeRoot}/${slug}`;
+    assert(html.includes(`href="${switchHref}"`), `${route}/${slug} needs the equivalent language topic or index fallback`);
+    if (route === "docs/php") {
+      assert(!html.includes('"@type":"SoftwareApplication"'), "PHP must not inherit JavaScript runtime/version metadata");
+      assert(!html.includes('id="docs-version-'), "PHP must not invent JavaScript version navigation");
+      assert(html.includes('aria-current="true"'), "PHP needs an accessible current-language indicator");
+    }
+  }
+}
+const homeMarkdown = readFileSync(join(distDir, "index.md"), "utf8");
+assert(llmsFull.includes(homeMarkdown.trim()), "full agent document must include the homepage");
+for (const text of ["Give your agent more than one source.", "Two first-party implementations", "composer require jkudish/laravel-ai-librarium", "npm i -g librarium", "Amalfi Coast"]) {
+  assert(home.includes(text) && homeMarkdown.includes(text), `homepage HTML and Markdown must include ${text}`);
+}
+for (const result of example.results) {
+  assert(homeMarkdown.includes(result.content), "homepage Markdown must retain all example findings");
+  for (const citation of result.citations) assert(homeMarkdown.includes(citation.url), "homepage Markdown must retain citations");
+}
+assert(!/<(?:script|style|button)\b/.test(homeMarkdown), "homepage Markdown must not contain UI scripts or controls");
+assert(!/>0[1-9](?:\s*\/[^<]*)?</.test(home), "decorative numbered subheadings must be absent");
+assert(home.includes('data-href="/docs/php#install-after-release"'), "PHP setup must target its own installation guide");
+assert(readFileSync(join(distDir, "docs/php/index.html"), "utf8").includes('id="install-after-release"'));
+for (const route of ["/index.md", "/docs/all.md", "/docs/php/all.md", "/v1/all.md"]) {
+  assert(llms.includes(route), `agent index is missing ${route}`);
+}
+
 console.log(`Verified ${PROVIDER_COUNT} providers, ${PROFILE_COUNT} profiles, ${WORKFLOWS.length} workflows, ${htmlFiles.length} HTML pages, metadata, llms files, and internal links.`);
+console.log(`Verified ${phpDocNames.length} PHP pages, every page's complete Markdown, three language/version bundles, combined agent content, and language-switch destinations.`);

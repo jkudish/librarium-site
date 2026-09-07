@@ -1,0 +1,16 @@
+---
+import type { MarkdownHeading } from "astro";
+interface Props { headings: MarkdownHeading[]; }
+const { headings } = Astro.props;
+---
+
+<ul class="space-y-1 border-l border-neutral-200" data-docs-outline>
+  {headings.filter((heading) => heading.depth === 2 || heading.depth === 3).map((heading) => (
+    <li>
+      <a href={`#${heading.slug}`} class:list={[
+        "-ml-px block border-l py-1.5 pr-1 text-base text-neutral-500 hover:text-neutral-950 aria-current:border-amber-700 aria-current:text-amber-800 sm:text-sm",
+        heading.depth === 3 ? "pl-7" : "pl-4",
+      ]}>{heading.text}</a>
+    </li>
+  ))}
+</ul>

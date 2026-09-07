@@ -4,6 +4,10 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import DocsNav from "../components/DocsNav.astro";
 import DocsVersionPicker from "../components/DocsVersionPicker.astro";
+import DocsLanguagePicker from "../components/DocsLanguagePicker.astro";
+import DocsOutline from "../components/DocsOutline.astro";
+import Icon from "../components/Icon.astro";
+import type { MarkdownHeading } from "astro";
 import { getCollection } from "astro:content";
 
 interface Props {
@@ -11,12 +15,14 @@ interface Props {
   description?: string;
   currentSlug: string;
   version?: "v1" | "v2";
+  language?: "js" | "php";
+  headings: MarkdownHeading[];
 }
 
-const { title, description, currentSlug, version = "v2" } = Astro.props;
+const { title, description, currentSlug, version = "v2", language = "js", headings } = Astro.props;
 
-const collection = version === "v1" ? "v1Docs" : "docs";
-const root = version === "v1" ? "/v1" : "/docs";
+const collection = language === "php" ? "phpDocs" : version === "v1" ? "v1Docs" : "docs";
+const root = language === "php" ? "/docs/php" : version === "v1" ? "/v1" : "/docs";
 const allDocs = await getCollection(collection);
 const navItems = allDocs
   .sort((a, b) => a.data.order - b.data.order)
@@ -29,73 +35,157 @@ const v1Slugs = new Set((await getCollection("v1Docs")).map((entry) => entry.id)
 const v1Href = currentSlug === "index" || !v1Slugs.has(currentSlug)
   ? "/v1"
   : `/v1/${currentSlug}`;
-const v2Href = currentSlug === "index" ? "/docs" : `/docs/${currentSlug}`;
+const jsSlugs = new Set((await getCollection("docs")).map((entry) => entry.id));
+const phpSlugs = new Set((await getCollection("phpDocs")).map((entry) => entry.id));
+const v2Href = currentSlug === "index" || !jsSlugs.has(currentSlug) ? "/docs" : `/docs/${currentSlug}`;
+const phpHref = currentSlug === "index" || !phpSlugs.has(currentSlug) ? "/docs/php" : `/docs/php/${currentSlug}`;
+const markdownHref = `${root}/${currentSlug}.md`;
 const pageDescription = version === "v1"
   ? `Legacy v1 documentation. ${description ?? "Preserved for existing Librarium v1 users."}`
   : description;
+const currentIndex = allDocs.findIndex((entry) => entry.id === currentSlug);
+const previous = navItems[currentIndex - 1];
+const next = navItems[currentIndex + 1];
 ---
 
 <Base
-  title={version === "v1" ? `${title} | librarium v1 legacy docs` : `${title} | librarium docs`}
+  title={language === "php" ? `${title} | librarium PHP docs` : version === "v1" ? `${title} | librarium v1 legacy docs` : `${title} | librarium JavaScript docs`}
   description={pageDescription}
   robots={version === "v1" ? "noindex, follow" : undefined}
-  includeSoftwareMetadata={version !== "v1"}
+  includeSoftwareMetadata={version !== "v1" && language !== "php"}
 >
-  <Header />
+  <Header wide />
 
-  <div class="mx-auto max-w-6xl px-6 lg:px-8">
+  <div class="mx-auto max-w-[1440px] px-6 lg:px-10">
     <!-- Mobile nav -->
-    <nav aria-label="Documentation controls" class="space-y-4 border-b border-neutral-950/10 py-4 lg:hidden">
-      <DocsVersionPicker id="docs-version-mobile" version={version} v1Href={v1Href} v2Href={v2Href} />
+    <nav aria-label="Documentation controls" class="space-y-4 border-b border-neutral-950/10 py-6 lg:hidden">
+      <DocsLanguagePicker language={language} jsHref={v2Href} phpHref={phpHref} />
+      {language === "js" && <DocsVersionPicker id="docs-version-mobile" version={version} v1Href={v1Href} v2Href={v2Href} />}
       <details class="group border-t border-neutral-950/10 pt-4">
         <summary
-          class="flex cursor-pointer list-none items-center justify-between text-sm font-semibold text-neutral-950 tracking-tight"
+          class="flex cursor-pointer list-none items-center justify-between py-2 text-base font-medium text-neutral-950"
         >
-          <span>{title}</span>
-          <svg
-            viewBox="0 0 16 16"
-            class="size-4 shrink-0 fill-none stroke-neutral-600 stroke-[1.5] transition-transform group-open:rotate-180"
-            aria-hidden="true"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6l4 4 4-4" />
-          </svg>
+          <span>Browse documentation</span>
+          <Icon name="caretDown" class="size-4 text-neutral-600 transition-transform group-open:rotate-180" />
         </summary>
-        <nav class="mt-3 flex flex-col gap-y-0.5" aria-label="Documentation pages">
+        <nav class="mt-5 space-y-6" aria-label="Documentation pages">
           <DocsNav navItems={navItems} currentSlug={currentSlug} />
         </nav>
       </details>
     </nav>
 
-    <!-- Two-column layout -->
-    <div class="flex gap-x-16 py-12">
+    <div class="grid grid-cols-1 gap-10 py-10 lg:grid-cols-[232px_minmax(0,1fr)] lg:gap-12 lg:py-14 xl:grid-cols-[248px_minmax(0,1fr)_192px] xl:gap-14">
       <!-- Sidebar (desktop only) -->
-      <aside class="hidden w-52 shrink-0 lg:block">
-        <div class="sticky top-8 space-y-6">
-          <DocsVersionPicker id="docs-version-desktop" version={version} v1Href={v1Href} v2Href={v2Href} />
-          <nav aria-label="Documentation">
+      <aside class="hidden lg:block">
+        <div class="sticky top-8 max-h-[calc(100dvh-4rem)] space-y-7 overflow-y-auto pr-2 pb-2">
+          <DocsLanguagePicker language={language} jsHref={v2Href} phpHref={phpHref} />
+          {language === "js" && <DocsVersionPicker id="docs-version-desktop" version={version} v1Href={v1Href} v2Href={v2Href} />}
+          <nav aria-label="Documentation" class="space-y-7">
           <DocsNav navItems={navItems} currentSlug={currentSlug} />
           </nav>
         </div>
       </aside>
 
       <!-- Main content -->
-      <main class="min-w-0 flex-1">
+      <main class="min-w-0" id="docs-content">
+        <p class="mb-4 text-base text-amber-700 sm:text-sm">Documentation <span class="mx-2 text-neutral-300" aria-hidden="true">/</span> {language === "php" ? "PHP & Laravel" : "JavaScript & TypeScript"}</p>
         {version === "v1" && (
           <div class="mb-8 rounded-lg border border-amber-700/20 bg-amber-50 px-4 py-3 text-sm/6 text-amber-950">
             <strong>Legacy v1 documentation.</strong> These pages preserve the pre-v2 interfaces for existing users. <a href={v2Href} class="font-medium underline underline-offset-2">Switch to the current v2 docs.</a>
           </div>
         )}
         <h1
-          class="text-3xl sm:text-4xl font-semibold tracking-tight text-balance text-neutral-950"
+          class="max-w-[30ch] text-3xl font-medium tracking-tight text-pretty text-neutral-950 sm:text-4xl"
         >
           {title}
         </h1>
-        <div class="prose max-w-[75ch] mt-2">
+        {description && <p class="mt-5 max-w-[60ch] text-base/7 text-pretty text-neutral-500">{description}</p>}
+        <div class="mt-6 mb-10 flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-neutral-200 pb-6 text-base text-neutral-500 sm:text-sm">
+          <a href={markdownHref} class="underline decoration-neutral-300 underline-offset-4 hover:text-amber-700">View as Markdown</a>
+          <button hidden data-copy-page={markdownHref} class="cursor-pointer hover:text-amber-700" aria-live="polite">Copy page</button>
+          <a href={`${root}/all.md`} class="hover:text-amber-700">All {language === "php" ? "PHP" : "JavaScript"} docs</a>
+          <a href="/llms.txt" class="hover:text-amber-700">Agent index</a>
+        </div>
+        <details class="mb-10 border-b border-neutral-200 pb-5 xl:hidden">
+          <summary class="cursor-pointer text-base font-medium text-neutral-950">On this page</summary>
+          <nav class="mt-4" aria-label="On this page"><DocsOutline headings={headings} /></nav>
+        </details>
+        <div class="prose max-w-[75ch]" data-docs-prose>
           <slot />
         </div>
+        <nav aria-label="Previous and next pages" class="mt-16 grid grid-cols-2 gap-6 border-t border-neutral-200 pt-8">
+          <div>{previous && <a href={previous.href} class="block text-base sm:text-sm"><span class="flex items-center gap-2 text-neutral-500"><Icon name="arrowLeft" /> Previous</span><span class="mt-2 block font-medium text-neutral-950 hover:text-amber-700">{previous.title}</span></a>}</div>
+          <div class="text-right">{next && <a href={next.href} class="block text-base sm:text-sm"><span class="flex items-center justify-end gap-2 text-neutral-500">Next <Icon name="arrowRight" /></span><span class="mt-2 block font-medium text-neutral-950 hover:text-amber-700">{next.title}</span></a>}</div>
+        </nav>
       </main>
+      <aside class="hidden xl:block">
+        <nav aria-label="On this page" class="sticky top-8 max-h-[calc(100dvh-4rem)] overflow-y-auto pb-2">
+          <p class="mb-5 text-sm font-medium text-neutral-950">On this page</p>
+          <DocsOutline headings={headings} />
+        </nav>
+      </aside>
     </div>
   </div>
 
   <Footer />
 </Base>
+
+<script>
+  async function copy(button: HTMLButtonElement, text: string) {
+    const label = button.textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      button.textContent = "Copied";
+    } catch {
+      button.textContent = "Select text to copy";
+    }
+    setTimeout(() => { button.textContent = label; }, 2000);
+  }
+  for (const pre of document.querySelectorAll<HTMLPreElement>("[data-docs-prose] pre")) {
+    const code = pre.querySelector("code");
+    if (!code) continue;
+    const wrapper = document.createElement("div");
+    wrapper.className = "docs-code";
+    const toolbar = document.createElement("div");
+    toolbar.className = "docs-code-toolbar";
+    const label = document.createElement("span");
+    label.textContent = pre.dataset.language ?? "Code";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "Copy code";
+    button.setAttribute("aria-live", "polite");
+    button.addEventListener("click", () => copy(button, code.textContent ?? ""));
+    pre.before(wrapper);
+    toolbar.append(label, button);
+    wrapper.append(toolbar, pre);
+  }
+  const pageCopy = document.querySelector<HTMLButtonElement>("[data-copy-page]");
+  if (pageCopy) {
+    pageCopy.hidden = false;
+    pageCopy.addEventListener("click", async () => {
+      try {
+        const response = await fetch(pageCopy.dataset.copyPage!);
+        if (!response.ok) throw new Error("Markdown unavailable");
+        await copy(pageCopy, await response.text());
+      } catch {
+        pageCopy.textContent = "Use Markdown link";
+      }
+    });
+  }
+  const sections = [...document.querySelectorAll<HTMLElement>("[data-docs-prose] h2, [data-docs-prose] h3")];
+  const outlineLinks = [...document.querySelectorAll<HTMLAnchorElement>("[data-docs-outline] a")];
+  let queued = false;
+  function updateOutline() {
+    const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+    const current = atBottom ? sections.at(-1) : sections.filter((heading) => heading.getBoundingClientRect().top <= 140).at(-1) ?? sections[0];
+    for (const link of outlineLinks) {
+      if (decodeURIComponent(link.hash.slice(1)) === current?.id) link.setAttribute("aria-current", "location");
+      else link.removeAttribute("aria-current");
+    }
+    queued = false;
+  }
+  window.addEventListener("scroll", () => {
+    if (!queued) { queued = true; requestAnimationFrame(updateOutline); }
+  }, { passive: true });
+  updateOutline();
+</script>

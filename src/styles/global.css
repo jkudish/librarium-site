@@ -127,6 +127,7 @@
     /* display: block so wide flag tables scroll instead of forcing page overflow on mobile */
     display: block;
     overflow-x: auto;
+    overflow-wrap: normal;
     width: 100%;
     text-align: left;
     font-size: var(--text-sm);

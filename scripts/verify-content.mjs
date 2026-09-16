@@ -18,6 +18,82 @@ const distDir = join(root, "dist");
 
 const profiles = PROVIDERS.flatMap((provider) => provider.profiles);
 const providerIds = new Set(profiles.map((profile) => profile.split("/")[0]));
+const phpBaselineProfiles = [
+  "gemini-grounded",
+  "openrouter-grounded",
+  "openrouter-chat",
+  "claude-chat",
+  "openai-chat",
+  "gemini-chat",
+  "brave-answers",
+  "exa",
+  "kagi-fastgpt",
+  "you-answer",
+  "you-research-grounded",
+  "you-research-research",
+  "perplexity-sonar-pro",
+  "grok",
+  "openai-research",
+  "perplexity-sonar-deep",
+  "searchapi",
+  "searchapi-chatgpt",
+  "searchapi-gemini",
+  "searchapi-perplexity",
+  "searchapi-google-ai-mode",
+  "searchapi-bing-copilot",
+  "searchapi-google-ai-overview",
+];
+const phpDataForSeoProfiles = [
+  "dataforseo-chatgpt",
+  "dataforseo-chatgpt-live",
+  "dataforseo-gemini",
+  "dataforseo-gemini-live",
+  "dataforseo-google-ai-mode",
+  "dataforseo-google-ai-mode-live",
+];
+const phpJavaScriptEquivalents = [
+  "gemini-grounded/grounded",
+  "openrouter/grounded",
+  "openrouter/chat",
+  "claude/chat",
+  "openai-chat/chat",
+  "gemini-chat/chat",
+  "brave-answers/grounded",
+  "exa/search",
+  "kagi-fastgpt/grounded",
+  "you-answer/grounded",
+  "you-research/grounded",
+  "you-research/research",
+  "perplexity-sonar-pro/grounded",
+  "grok/web",
+  "openai-research/research",
+  "perplexity-sonar-deep/research",
+  "searchapi/search",
+  "searchapi-chatgpt/surface",
+  "searchapi-gemini/surface",
+  "searchapi-perplexity/surface",
+  "searchapi-google-ai-mode/surface",
+  "searchapi-bing-copilot/surface",
+  "searchapi-google-ai-overview/surface",
+];
+const phpJavaScriptHoldbacks = [
+  "brave-search/search",
+  "exa/research",
+  "firecrawl-search/search",
+  "gemini-deep/research",
+  "grok-x-only/x",
+  "grok-combined/combined",
+  "jina-search/search",
+  "parallel/search",
+  "parallel/turbo",
+  "parallel/research",
+  "perplexity-search/search",
+  "perplexity-deep-research/research",
+  "serpapi/search",
+  "tavily/search",
+  "valyu/search",
+  "valyu/research",
+];
 
 assert.equal(PRODUCT_VERSION, "2.0.0");
 assert.equal(NODE_FLOOR, "22.12.0");
@@ -61,6 +137,57 @@ const upgradingToV2 = readFileSync(join(docsDir, "upgrading-to-v2.md"), "utf8");
 const agentDocs = readFileSync(join(docsDir, "using-with-agents.md"), "utf8");
 const commandDocs = readFileSync(join(docsDir, "commands.md"), "utf8");
 const configuration = readFileSync(join(docsDir, "configuration.md"), "utf8");
+const phpProviders = readFileSync(join(phpDocsDir, "providers.md"), "utf8");
+const phpConfiguration = readFileSync(join(phpDocsDir, "configuration.md"), "utf8");
+const phpGroups = readFileSync(join(phpDocsDir, "groups-and-modes.md"), "utf8");
+
+assert.equal(phpBaselineProfiles.length, 23);
+assert.equal(phpDataForSeoProfiles.length, 6);
+assert.equal(new Set([...phpBaselineProfiles, ...phpDataForSeoProfiles]).size, 29);
+assert.deepEqual(
+  profiles.filter((profile) => !phpJavaScriptEquivalents.includes(profile)),
+  phpJavaScriptHoldbacks,
+  "known PHP holdbacks must track the current JavaScript profile roster",
+);
+const documentedPhpProfiles = [...phpProviders.matchAll(/^\| `([^`]+)` \|/gm)].map((match) => match[1]);
+assert.deepEqual(
+  documentedPhpProfiles,
+  [...phpBaselineProfiles, ...phpDataForSeoProfiles],
+  "PHP provider tables must document the exact 23 enabled-baseline and six disabled-by-default Profiles",
+);
+const documentedHoldbackBlock = phpProviders.match(
+  /known coverage differences and\nare not registered by the core PHP package:\n\n([\s\S]*?)\n\nThis is an inventory boundary/,
+)?.[1];
+assert(documentedHoldbackBlock, "PHP provider docs must include the known holdback roster");
+assert.deepEqual(
+  [...documentedHoldbackBlock.matchAll(/^- `([^`]+)`$/gm)].map((match) => match[1]),
+  phpJavaScriptHoldbacks,
+  "PHP provider docs must list every current JavaScript holdback exactly",
+);
+for (const stale of ["parallel/chat", "tavily/research"]) {
+  assert(!phpProviders.includes(stale), `PHP coverage differences contain removed JavaScript profile ${stale}`);
+}
+for (const fact of [
+  "29 flat Profile IDs",
+  "23 baseline Profiles",
+  "six DataForSEO Profiles",
+  "Paid live acceptance remains pending",
+]) {
+  assert(phpProviders.includes(fact), `PHP provider docs are missing: ${fact}`);
+}
+for (const fact of [
+  "DATAFORSEO_LOGIN",
+  "DATAFORSEO_PASSWORD",
+  "'enabled' => true",
+  "'location_code' => 2840",
+  "'language_code' => 'en'",
+  "Paid live acceptance",
+]) {
+  assert(phpConfiguration.includes(fact), `PHP configuration docs are missing: ${fact}`);
+}
+for (const fact of ["29 configured Profiles", "Six are DataForSEO", "remaining 23 baseline Profiles"]) {
+  assert(phpGroups.includes(fact), `PHP group docs are missing: ${fact}`);
+}
 
 for (const stale of [
   "40 public profiles",
@@ -275,6 +402,17 @@ assert(!sitemap.includes("/v1"), "noindex legacy docs must be excluded from the 
 const llms = readFileSync(join(distDir, "llms.txt"), "utf8");
 for (const fact of [PRODUCT_VERSION, `${PROVIDER_COUNT} built-in providers`, `${PROFILE_COUNT} public profiles`]) {
   assert(llms.includes(fact), `llms.txt is missing ${fact}`);
+}
+for (const fact of [
+  "PHP configures 29 flat Profile IDs",
+  "23 baseline entries with `enabled: true`",
+  "six disabled-by-default DataForSEO entries",
+  ...phpDataForSeoProfiles.map((profile) => `\`${profile}\``),
+  "DATAFORSEO_LOGIN",
+  "DATAFORSEO_PASSWORD",
+  "paid live acceptance remains pending",
+]) {
+  assert(llms.includes(fact), `llms.txt is missing PHP fact ${fact}`);
 }
 assert(llms.includes("Legacy v1 documentation is preserved"), "llms.txt must disclose the legacy docs route");
 const llmsFull = readFileSync(join(distDir, "llms-full.txt"), "utf8");

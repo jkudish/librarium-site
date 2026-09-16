@@ -67,6 +67,8 @@ librarium config migrate \
 
 An existing destination is refused unless you add `--force`. Prefer a new path over `--force`. The write uses the same validated atomic, owner-only boundary as `saveConfigV2()`. On Windows it fails before writing unless Librarium can establish and verify an owner-only ACL.
 
+With `--output`, stdout contains a sanitized write receipt, not the migrated config. Read the destination file to inspect the config; preview mode without `--output` still emits sensitive config JSON.
+
 ## Review migration notices
 
 The migrator handles mechanical changes, including:

@@ -92,6 +92,8 @@ Transient polling failures remain attached to the accepted attempt and can be re
 
 Recovery restores prior spend, reservations, and the original deadline before admitting any fallback. It grants no fresh time window or budget and does not replay refinement, answer synthesis, or verification. Bounded GET-only reconciliation may still observe saved handles after a terminal deadline/cancellation without changing that terminal outcome or authorizing new paid launches. Completed committed evidence remains readable while other slots are pending.
 
+When refinement is requested, Librarium saves `run.json` before the paid call. The refinement state is `not_started`, `in_progress`, `completed` (with saved per-slot queries), or `failed_or_interrupted`. Status shows this stage, and cannot launch research while refinement is incomplete. A crash can leave `in_progress` until the original deadline: the remote call may still finish and charge, so Librarium never automatically replays it. A recorded refinement failure can continue with the original query; cancellation and deadline expiry stop new research.
+
 ## Fallback is a new provider attempt
 
 A fallback is not another HTTP attempt. It selects a different compatible profile from the request's frozen reserve after the primary attempt ends with `fallback_allowed: true`.

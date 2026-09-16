@@ -56,9 +56,16 @@ $queued = Librarium::query($query)
 | `usage` | optional aggregate usage |
 
 Each result includes `id`, `content_format`, `content`, `requested_profile`,
-effective `provider` and `profile`, `provenance`, `citations`, and
+the effective `provider`, executed `profile`, `provenance`, `citations`, and
 `completed_at`. Optional fields are `model`, `fallback_reason`, `usage`, and
 allowlisted `provider_meta`. Content formats are `markdown`, `text`, or `json`.
+
+Built-in Profiles require the reported provider to match the configured provider;
+an unexpected mismatch fails rather than silently relabeling the result. A custom
+Profile can explicitly permit routing with top-level `allow_provider_routing: true`.
+Only then can a different effective provider be retained. Requested/executed
+Profile attribution and the provider-reported model remain intact. This option
+does not add routing itself; the Driver or SDK must implement it.
 
 Provenance records result kind, retrieval methods, corpora, observation time,
 and, where applicable, observation mode, collector, surface, and bounded

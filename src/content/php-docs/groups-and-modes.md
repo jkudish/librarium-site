@@ -39,6 +39,13 @@ not require a provider/profile path syntax.
 configured Profile. Disabled or unavailable members are reported and omitted
 from execution.
 
+The shipped catalog contains 29 configured Profiles. Six are DataForSEO
+surface collectors with `enabled: false`; they are not members of `quick` or
+`visibility`, and join derived `all` only after explicit enablement and the
+other eligibility checks pass. The remaining 23 baseline Profiles have
+`enabled: true` in shipped configuration, which does not make missing
+credentials or invalid options available.
+
 Application groups are ordered Profile ID lists under `librarium.groups` and
 are selected as `custom:<name>`:
 

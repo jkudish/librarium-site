@@ -46,6 +46,6 @@ A profile, not its marketing category, defines custody:
 
 A durable lifecycle is `submit`, `poll`, then `retrieve`. Polling observes state. Retrieval converts an observed successful handle into a terminal result. Never persist or describe process-local work as durable.
 
-Fallbacks consume declared reserve candidates in order. `--no-fallback` requires the exact primary matrix. Cancellation is not universal. Only `valyu/research` advertises exact-profile remote cancellation in this catalog. Other background cancellation is reconciliation only.
+Fallbacks consume declared reserve candidates in order. `--no-fallback` requires the exact primary matrix. Cancellation is not universal. Only `valyu/research` advertises exact-profile remote cancellation in this catalog. New runs freeze each exact profile's policy as `supported_exact_profile` or `reconcile_only`; the runtime requires the saved permission before invoking a cancellation method. No historical backfill is performed. Unsupported or failed cancellation preserves handles for reconciliation.
 
 See [Requests, retries, and fallbacks](/docs/request-and-retry) for request deadlines, HTTP retry safety, acceptance-unknown submissions, fallback admission, and recovery steps.

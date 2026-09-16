@@ -8,6 +8,10 @@ Librarium for PHP is a Laravel-native research package. It provides Profiles,
 cost previews, synchronous and queued execution, normalized responses, Artisan
 commands, and a test fake through `jkudish/laravel-ai-librarium`.
 
+The current source configures 29 flat Profile IDs. The 23 baseline entries ship
+enabled but remain credential- and configuration-gated; six DataForSEO entries
+ship disabled for explicit opt-in and still await paid live acceptance.
+
 ## Current status
 
 The package source requires PHP 8.4, Laravel 13, and Laravel AI SDK versions
@@ -31,7 +35,9 @@ php artisan vendor:publish --tag=librarium-config
 ```
 
 Add the credential required by the Profile you plan to use. Laravel AI Profiles
-read Laravel AI configuration; focused HTTP Profiles read `config/services.php`.
+read Laravel AI configuration; most focused HTTP Profiles read
+`config/services.php`, while DataForSEO reads provider login/password values
+from the published `config/librarium.php`.
 See [Configuration](/docs/php/configuration).
 
 ## Preview before dispatch

@@ -40,8 +40,9 @@ return [
 ```
 
 You.com uses `YOU_COM_API_KEY`, with `YDC_API_KEY` as a fallback when the
-canonical variable is blank. The OpenAI webhook secret is read from
-`services.openai.webhook_secret`.
+canonical variable is blank. DataForSEO is the exception to the service-path
+pattern: its login and password are read from `librarium.providers.dataforseo`.
+The OpenAI webhook secret is read from `services.openai.webhook_secret`.
 
 Credentials are resolved into in-memory Profile objects. They are excluded
 from previews, serialized Profiles, terminal responses, provider metadata, and
@@ -56,6 +57,47 @@ preflight according to the selected Driver's rules.
 
 Add application groups under `librarium.groups`. Built-in `quick`, `visibility`,
 `deep`, and `all` remain available. See [Groups and modes](/docs/php/groups-and-modes).
+
+## Opt in DataForSEO
+
+All six DataForSEO Profiles ship in `config/librarium.php` with `enabled: false`.
+First set the provider credentials:
+
+```dotenv
+DATAFORSEO_LOGIN=your-api-login
+DATAFORSEO_PASSWORD=your-api-password
+```
+
+Publish the package config, then edit the complete shipped entry for each
+Profile the application intends to use. Retain its Driver, provider, result,
+provenance, prompt, credential, and pricing fields; the excerpt below shows only
+the values an application normally changes:
+
+```php
+// Inside the shipped librarium.profiles.dataforseo-chatgpt entry:
+'enabled' => true,
+'options' => [
+    'location_code' => 2840,
+    'language_code' => 'en',
+    'force_web_search' => true,
+],
+```
+
+Every DataForSEO Profile requires a positive `location_code` and a non-empty
+`language_code`. ChatGPT also requires boolean `force_web_search`. Gemini
+accepts no additional surface control. Google AI Mode may omit both device
+fields, or use `device: desktop` with `os: windows|macos`, or `device: mobile`
+with `os: android|ios`. Unknown and incompatible options fail preflight.
+
+The exact Standard/Live pairs are `dataforseo-chatgpt` /
+`dataforseo-chatgpt-live`, `dataforseo-gemini` /
+`dataforseo-gemini-live`, and `dataforseo-google-ai-mode` /
+`dataforseo-google-ai-mode-live`. They remain outside `quick` and `visibility`.
+An enabled and otherwise eligible entry joins derived `all`.
+
+Preview the exact flat Profile ID before authorizing a run. Paid live acceptance
+has not been completed for any of these six Profiles, so neither a valid preview
+nor offline tests establish live readiness.
 
 ## Queue
 

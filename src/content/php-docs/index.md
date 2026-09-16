@@ -8,9 +8,9 @@ Librarium for PHP is a Laravel-native research package. It provides Profiles,
 cost previews, synchronous and queued execution, normalized responses, Artisan
 commands, and a test fake through `jkudish/laravel-ai-librarium`.
 
-The current source configures 29 flat Profile IDs. The 23 baseline entries ship
-enabled but remain credential- and configuration-gated; six DataForSEO entries
-ship disabled for explicit opt-in and still await paid live acceptance.
+The current source configures 47 flat Profile IDs. Forty-one ship enabled but
+remain credential- and configuration-gated. Six DataForSEO Profiles ship
+disabled for explicit opt-in.
 
 ## Current status
 

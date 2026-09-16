@@ -106,20 +106,20 @@ const example = {
               <img id="install-runtime-logo" src="/languages/javascript.svg" alt="" width="20" height="20" class="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2" />
               <img src="/languages/laravel.svg" alt="" width="20" height="20" class="pointer-events-none absolute top-1/2 left-9 hidden size-5 -translate-y-1/2 group-data-[runtime=php]:block" />
               <select id="install-runtime" class="min-h-11 cursor-pointer appearance-none rounded-md border border-neutral-200 bg-[#faf9f6] py-2 pr-9 pl-10 text-base font-medium text-neutral-800 hover:border-neutral-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 group-data-[runtime=php]:pl-16 sm:text-sm">
-                <option value="npm i -g librarium" data-logo="javascript" data-href="/docs#install">JavaScript</option>
+                <option value="npm ci && npm run build && npm install -g ." data-logo="javascript" data-href="/docs#install">JavaScript</option>
                 <option value="composer require jkudish/laravel-ai-librarium" data-logo="php" data-href="/docs/php#install-after-release">PHP / Laravel</option>
               </select>
               <Icon name="caretDown" class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-neutral-500" />
             </div>
             <div class="flex max-w-full items-center gap-x-3 px-2 py-1">
-              <p class="min-w-0 break-words text-left font-mono text-base text-neutral-800 sm:text-sm"><span class="text-neutral-400 select-none">$ </span><span id="install-command">npm i -g librarium</span></p>
+              <p class="min-w-0 break-words text-left font-mono text-base text-neutral-800 sm:text-sm"><span class="text-neutral-400 select-none">$ </span><span id="install-command">npm ci &amp;&amp; npm run build &amp;&amp; npm install -g .</span></p>
               <button type="button" id="copy-install" aria-label="Copy install command" title="Copy install command" data-copy-state="idle" class="group relative flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
                 <Icon name="copy" class="size-5 group-data-[copy-state=success]:hidden" />
                 <Icon name="check" class="hidden size-5 text-amber-800 group-data-[copy-state=success]:block" />
               </button>
             </div>
           </div>
-          <p id="copy-install-label" aria-live="polite" class="mt-1 min-h-6 text-base text-neutral-600 sm:min-h-5 sm:text-sm"></p>
+          <p id="copy-install-label" aria-live="polite" class="mt-1 min-h-6 text-base text-neutral-600 sm:min-h-5 sm:text-sm">Build from a reviewed v2 checkout. npm latest is still v1.</p>
           <a id="install-methods" href="/docs#install" class="inline-block py-1 text-base text-neutral-500 underline decoration-neutral-300 underline-offset-4 hover:text-neutral-950 sm:text-sm">Installation guide</a>
           <noscript><a href="/docs/php" class="mt-3 inline-block text-amber-700 underline">PHP / Laravel installation</a></noscript>
         </div>
@@ -249,7 +249,8 @@ const example = {
             </div>
             <h3 class="text-2xl font-medium tracking-tight text-white">JavaScript / TypeScript</h3>
             <p class="mt-3 text-base/7 text-pretty text-neutral-400">Use the CLI, connect an agent over MCP, or build with the typed library. Portable core modules support Workers; Node owns local configuration and artifacts.</p>
-            <pre class="mt-6 overflow-x-auto rounded-md border border-white/15 bg-white/5 p-5 font-mono text-base/7 text-amber-100 sm:text-sm/6"><code>npm i -g librarium</code></pre>
+            <pre class="mt-6 overflow-x-auto rounded-md border border-white/15 bg-white/5 p-5 font-mono text-base/7 text-amber-100 sm:text-sm/6"><code>npm ci &amp;&amp; npm run build &amp;&amp; npm install -g .</code></pre>
+            <p class="mt-3 text-base/7 text-neutral-400 sm:text-sm/6">Build a reviewed v2 checkout. npm latest is still v1.</p>
             <a href="/javascript" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore JavaScript <Icon name="arrowUpRight" class="inline-block" /></a>
             <a href="/cli-mcp" class="mt-2 block w-fit py-2 text-base font-medium text-amber-200 hover:text-white">Explore CLI & MCP <Icon name="arrowUpRight" class="inline-block" /></a>
           </div>
@@ -261,6 +262,7 @@ const example = {
             <h3 class="text-2xl font-medium tracking-tight text-white">PHP / Laravel</h3>
             <p class="mt-3 text-base/7 text-pretty text-neutral-400">A native Laravel package with a fluent research API, Artisan commands, pricing previews, encrypted queue jobs, and a testing fake. Your application owns storage and workflows.</p>
             <pre class="mt-6 whitespace-pre-wrap break-words rounded-md border border-white/15 bg-white/5 p-5 font-mono text-base/7 text-amber-100 sm:text-sm/6"><code>composer require jkudish/laravel-ai-librarium</code></pre>
+            <p class="mt-3 text-base/7 text-neutral-400 sm:text-sm/6">Use this command after a compatible package release.</p>
             <a href="/laravel" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore Laravel <Icon name="arrowUpRight" class="inline-block" /></a>
           </div>
         </div>
@@ -311,11 +313,14 @@ const example = {
   const installCommand = document.getElementById("install-command");
   const runtimePicker = document.querySelector<HTMLSelectElement>("#install-runtime");
   let copyFeedbackTimeout: ReturnType<typeof setTimeout>;
+  const installStatus = () => runtimePicker?.value.startsWith("composer")
+    ? "Use this command after a compatible package release."
+    : "Build from a reviewed v2 checkout. npm latest is still v1.";
   runtimePicker?.addEventListener("change", () => {
     if (installCommand) installCommand.textContent = runtimePicker.value;
     clearTimeout(copyFeedbackTimeout);
     if (installButton) installButton.dataset.copyState = "idle";
-    if (installLabel) installLabel.textContent = "";
+    if (installLabel) installLabel.textContent = installStatus();
     const option = runtimePicker.selectedOptions[0];
     document.getElementById("install-runtime-logo")?.setAttribute("src", `/languages/${option.dataset.logo}.svg`);
     document.getElementById("install-runtime-choice")?.setAttribute("data-runtime", option.dataset.logo!);
@@ -336,7 +341,7 @@ const example = {
     }
     copyFeedbackTimeout = setTimeout(() => {
       installButton.dataset.copyState = "idle";
-      installLabel.textContent = "";
+      installLabel.textContent = installStatus();
     }, 2000);
   });
 

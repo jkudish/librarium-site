@@ -29,22 +29,21 @@ not require a provider/profile path syntax.
 3. `brave-answers`
 4. `exa`
 5. `kagi-fastgpt`
+6. `parallel-turbo`
 
 `visibility` contains the six SearchAPI surface Profiles followed by
 `perplexity-sonar-pro`, `gemini-grounded`, and `grok`.
 
-`deep` is derived from all configured Profiles whose result kind is
-`research_report`; currently these are `you-research-research`,
-`openai-research`, and `perplexity-sonar-deep`. `all` is derived from every
-configured Profile. Disabled or unavailable members are reported and omitted
-from execution.
+`deep` is derived from configured `research_report` Profiles. `all` is derived
+from every configured Profile. Disabled or unavailable members are reported
+and omitted from execution.
 
-The shipped catalog contains 29 configured Profiles. Six are DataForSEO
+The shipped catalog contains 47 configured Profiles. Six are DataForSEO
 surface collectors with `enabled: false`; they are not members of `quick` or
 `visibility`, and join derived `all` only after explicit enablement and the
-other eligibility checks pass. The remaining 23 baseline Profiles have
-`enabled: true` in shipped configuration, which does not make missing
-credentials or invalid options available.
+other eligibility checks pass. The remaining 41 Profiles have `enabled: true`
+in shipped configuration. Missing credentials or invalid options still make an
+enabled Profile unavailable.
 
 Application groups are ordered Profile ID lists under `librarium.groups` and
 are selected as `custom:<name>`:

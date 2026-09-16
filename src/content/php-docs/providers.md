@@ -1,17 +1,15 @@
 ---
 title: Providers and Profiles
-description: Reference 23 baseline Profiles and six disabled-by-default DataForSEO Profiles.
+description: Reference 41 enabled Profiles and six disabled-by-default DataForSEO Profiles.
 order: 4
 ---
 
-The current PHP source configures 29 flat Profile IDs: 23 baseline Profiles
-whose shipped configuration has `enabled: true`, plus six DataForSEO Profiles
-with `enabled: false`. A Profile is the public Laravel selector; it binds a
-provider target to result and provenance semantics. Enabled state is only one
-eligibility condition: availability also depends on credentials and valid
-configuration.
+The current PHP source configures 47 flat Profile IDs. Forty-one have
+`enabled: true`; six DataForSEO Profiles have `enabled: false`. A Profile is the
+public Laravel selector. Enabled state alone does not make it available:
+credentials and configuration must also pass preflight.
 
-## Baseline Profiles
+## Enabled Profiles
 
 | Profile | Provider target | Result | Execution |
 | --- | --- | --- | --- |
@@ -38,6 +36,24 @@ configuration.
 | `searchapi-google-ai-mode` | SearchAPI Google AI Mode | surface observation | inline |
 | `searchapi-bing-copilot` | SearchAPI Bing Copilot | surface observation | inline |
 | `searchapi-google-ai-overview` | SearchAPI Google AI Overview | surface observation | two-stage inline |
+| `perplexity-low-frozen` | Perplexity Agent, frozen low configuration | grounded answer | inline |
+| `brave-search` | Brave Web Search | search results | inline |
+| `tavily-search` | Tavily Search | search results | inline |
+| `perplexity-search` | Perplexity Search | search results | inline |
+| `jina-search` | Jina Search | search results | inline |
+| `serpapi` | SerpAPI Google Search | search results | inline |
+| `serpbase-search` | SerpBase Google Search | search results | inline |
+| `serpbase-news` | SerpBase Google News | search results | inline |
+| `exa-research` | Exa Research | research report | background provider task |
+| `gemini-deep-research` | Gemini Deep Research | research report | background provider task |
+| `perplexity-deep-research` | Perplexity Agent, medium preset | research report | background provider task |
+| `grok-x-only` | xAI Grok with X Search | grounded answer | inline |
+| `grok-combined` | xAI Grok with web and X Search | grounded answer | inline |
+| `parallel-search` | Parallel Search | search results | inline |
+| `parallel-turbo` | Parallel Search, turbo mode | search results | inline |
+| `parallel-research` | Parallel Research | research report | background provider task |
+| `valyu-search` | Valyu Search | search results | inline |
+| `valyu-research` | Valyu Research | research report | background provider task |
 
 Run `php artisan librarium:profiles` for the application-specific eligibility
 view. Missing credentials make a Profile unavailable; they do not remove its
@@ -64,10 +80,9 @@ language controls, and changing only the intended Profile's `enabled` value to
 in the derived `all` group. See [Configuration](/docs/php/configuration#opt-in-dataforseo)
 for the exact configuration boundary.
 
-The source and offline provider-boundary tests cover these six integrations.
-Paid live acceptance remains pending for every DataForSEO Profile; credentials,
-offline coverage, and an admitted preview are not evidence of live account or
-provider readiness.
+The source and offline provider-boundary tests cover these integrations. They
+do not authorize a paid canary or prove current account availability. See the
+package's live-canary inventory for dated evidence.
 
 The optional-search chat Profiles use Laravel AI's native `WebSearch`, enabled
 by default. Setting their `options.web_search` to `false` truthfully changes the
@@ -81,33 +96,10 @@ an application-configured pricing rate before a hard cost ceiling is available.
 
 ## Optional integrations
 
-Firecrawl is designed as a separate optional adapter package and is not
-registered by the core package. Install and document that adapter independently
-when it is released.
-
-The following current JavaScript v2 profiles are known coverage differences and
-are not registered by the core PHP package:
-
-- `brave-search/search`
-- `exa/research`
-- `firecrawl-search/search`
-- `gemini-deep/research`
-- `grok-x-only/x`
-- `grok-combined/combined`
-- `jina-search/search`
-- `parallel/search`
-- `parallel/turbo`
-- `parallel/research`
-- `perplexity-search/search`
-- `perplexity-deep-research/research`
-- `serpapi/search`
-- `tavily/search`
-- `valyu/search`
-- `valyu/research`
-
-This is an inventory boundary, not a readiness claim or implementation
-commitment. The six PHP-only DataForSEO Profiles above do not erase these
-differences.
+Firecrawl remains a separate optional adapter package and is not registered by
+core. The PHP-only `perplexity-low-frozen` and DataForSEO Profiles also have no
+JavaScript catalog equivalent. The accepted 39-row cross-language release
+snapshot is historical compatibility evidence, not the current catalog count.
 
 This roster describes the current PHP implementation only. It does not claim
 the provider count, execution behavior, or feature parity of the

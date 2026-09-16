@@ -18,7 +18,7 @@ const distDir = join(root, "dist");
 
 const profiles = PROVIDERS.flatMap((provider) => provider.profiles);
 const providerIds = new Set(profiles.map((profile) => profile.split("/")[0]));
-const phpBaselineProfiles = [
+const phpEnabledProfiles = [
   "gemini-grounded",
   "openrouter-grounded",
   "openrouter-chat",
@@ -42,6 +42,24 @@ const phpBaselineProfiles = [
   "searchapi-google-ai-mode",
   "searchapi-bing-copilot",
   "searchapi-google-ai-overview",
+  "perplexity-low-frozen",
+  "brave-search",
+  "tavily-search",
+  "perplexity-search",
+  "jina-search",
+  "serpapi",
+  "serpbase-search",
+  "serpbase-news",
+  "exa-research",
+  "gemini-deep-research",
+  "perplexity-deep-research",
+  "grok-x-only",
+  "grok-combined",
+  "parallel-search",
+  "parallel-turbo",
+  "parallel-research",
+  "valyu-search",
+  "valyu-research",
 ];
 const phpDataForSeoProfiles = [
   "dataforseo-chatgpt",
@@ -51,56 +69,12 @@ const phpDataForSeoProfiles = [
   "dataforseo-google-ai-mode",
   "dataforseo-google-ai-mode-live",
 ];
-const phpJavaScriptEquivalents = [
-  "gemini-grounded/grounded",
-  "openrouter/grounded",
-  "openrouter/chat",
-  "claude/chat",
-  "openai-chat/chat",
-  "gemini-chat/chat",
-  "brave-answers/grounded",
-  "exa/search",
-  "kagi-fastgpt/grounded",
-  "you-answer/grounded",
-  "you-research/grounded",
-  "you-research/research",
-  "perplexity-sonar-pro/grounded",
-  "grok/web",
-  "openai-research/research",
-  "perplexity-sonar-deep/research",
-  "searchapi/search",
-  "searchapi-chatgpt/surface",
-  "searchapi-gemini/surface",
-  "searchapi-perplexity/surface",
-  "searchapi-google-ai-mode/surface",
-  "searchapi-bing-copilot/surface",
-  "searchapi-google-ai-overview/surface",
-];
-const phpJavaScriptHoldbacks = [
-  "brave-search/search",
-  "exa/research",
-  "firecrawl-search/search",
-  "gemini-deep/research",
-  "grok-x-only/x",
-  "grok-combined/combined",
-  "jina-search/search",
-  "parallel/search",
-  "parallel/turbo",
-  "parallel/research",
-  "perplexity-search/search",
-  "perplexity-deep-research/research",
-  "serpapi/search",
-  "tavily/search",
-  "valyu/search",
-  "valyu/research",
-];
-
 assert.equal(PRODUCT_VERSION, "2.0.0");
 assert.equal(NODE_FLOOR, "22.12.0");
 assert.equal(PROVIDER_COUNT, providerIds.size);
-assert.equal(PROVIDER_COUNT, 33);
+assert.equal(PROVIDER_COUNT, 34);
 assert.equal(PROFILE_COUNT, profiles.length);
-assert.equal(PROFILE_COUNT, 39);
+assert.equal(PROFILE_COUNT, 41);
 assert.equal(new Set(profiles).size, profiles.length, "profile roster contains duplicates");
 assert.deepEqual(WORKFLOWS.map((workflow) => workflow.id), ["quick", "deep", "visibility", "all"]);
 assert.equal(WORKFLOWS.find((workflow) => workflow.id === "quick")?.selection.length, 6);
@@ -141,37 +115,20 @@ const phpProviders = readFileSync(join(phpDocsDir, "providers.md"), "utf8");
 const phpConfiguration = readFileSync(join(phpDocsDir, "configuration.md"), "utf8");
 const phpGroups = readFileSync(join(phpDocsDir, "groups-and-modes.md"), "utf8");
 
-assert.equal(phpBaselineProfiles.length, 23);
+assert.equal(phpEnabledProfiles.length, 41);
 assert.equal(phpDataForSeoProfiles.length, 6);
-assert.equal(new Set([...phpBaselineProfiles, ...phpDataForSeoProfiles]).size, 29);
-assert.deepEqual(
-  profiles.filter((profile) => !phpJavaScriptEquivalents.includes(profile)),
-  phpJavaScriptHoldbacks,
-  "known PHP holdbacks must track the current JavaScript profile roster",
-);
+assert.equal(new Set([...phpEnabledProfiles, ...phpDataForSeoProfiles]).size, 47);
 const documentedPhpProfiles = [...phpProviders.matchAll(/^\| `([^`]+)` \|/gm)].map((match) => match[1]);
 assert.deepEqual(
   documentedPhpProfiles,
-  [...phpBaselineProfiles, ...phpDataForSeoProfiles],
-  "PHP provider tables must document the exact 23 enabled-baseline and six disabled-by-default Profiles",
+  [...phpEnabledProfiles, ...phpDataForSeoProfiles],
+  "PHP provider tables must document the exact 41 enabled and six disabled-by-default Profiles",
 );
-const documentedHoldbackBlock = phpProviders.match(
-  /known coverage differences and\nare not registered by the core PHP package:\n\n([\s\S]*?)\n\nThis is an inventory boundary/,
-)?.[1];
-assert(documentedHoldbackBlock, "PHP provider docs must include the known holdback roster");
-assert.deepEqual(
-  [...documentedHoldbackBlock.matchAll(/^- `([^`]+)`$/gm)].map((match) => match[1]),
-  phpJavaScriptHoldbacks,
-  "PHP provider docs must list every current JavaScript holdback exactly",
-);
-for (const stale of ["parallel/chat", "tavily/research"]) {
-  assert(!phpProviders.includes(stale), `PHP coverage differences contain removed JavaScript profile ${stale}`);
-}
 for (const fact of [
-  "29 flat Profile IDs",
-  "23 baseline Profiles",
+  "47 flat Profile IDs",
+  "Forty-one have",
   "six DataForSEO Profiles",
-  "Paid live acceptance remains pending",
+  "historical compatibility evidence",
 ]) {
   assert(phpProviders.includes(fact), `PHP provider docs are missing: ${fact}`);
 }
@@ -181,11 +138,11 @@ for (const fact of [
   "'enabled' => true",
   "'location_code' => 2840",
   "'language_code' => 'en'",
-  "Paid live acceptance",
+  "live-canary inventory",
 ]) {
   assert(phpConfiguration.includes(fact), `PHP configuration docs are missing: ${fact}`);
 }
-for (const fact of ["29 configured Profiles", "Six are DataForSEO", "remaining 23 baseline Profiles"]) {
+for (const fact of ["47 configured Profiles", "Six are DataForSEO", "remaining 41 Profiles"]) {
   assert(phpGroups.includes(fact), `PHP group docs are missing: ${fact}`);
 }
 
@@ -269,8 +226,8 @@ for (const fact of [
 
 for (const required of [
   PRODUCT_VERSION,
-  "33 built-in providers",
-  "39 public profiles",
+  "34 built-in providers",
+  "41 public profiles",
   "quick",
   "deep",
   "visibility",
@@ -510,9 +467,11 @@ for (const [directory, route, names] of [
 }
 const homeMarkdown = readFileSync(join(distDir, "index.md"), "utf8");
 assert(llmsFull.includes(homeMarkdown.trim()), "full agent document must include the homepage");
-for (const text of ["Give your agent more than one source.", "Two first-party implementations", "composer require jkudish/laravel-ai-librarium", "npm i -g librarium", "Amalfi Coast"]) {
+for (const text of ["Give your agent more than one source.", "Two first-party implementations", "composer require jkudish/laravel-ai-librarium", "Amalfi Coast"]) {
   assert(home.includes(text) && homeMarkdown.includes(text), `homepage HTML and Markdown must include ${text}`);
 }
+assert(home.includes("npm ci &amp;&amp; npm run build &amp;&amp; npm install -g ."), "homepage HTML must include the v2 source install command");
+assert(homeMarkdown.includes("npm ci && npm run build && npm install -g ."), "homepage Markdown must include the v2 source install command");
 for (const result of example.results) {
   assert(homeMarkdown.includes(result.content), "homepage Markdown must retain all example findings");
   for (const citation of result.citations) assert(homeMarkdown.includes(citation.url), "homepage Markdown must retain citations");

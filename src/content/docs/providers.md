@@ -1,12 +1,12 @@
 ---
 title: Providers
-description: All 33 built-in providers, 39 public profiles, custody, credentials, and evidence boundaries.
+description: All 34 built-in providers, 41 public profiles, custody, credentials, and evidence boundaries.
 order: 5
 ---
 
 ## Public catalog
 
-Librarium v2 has 33 built-in providers and exactly 39 public profiles. Selection, config, artifacts, and provenance use `provider_id/profile_id`.
+Librarium v2 has 34 built-in providers and exactly 41 public profiles. Selection, config, artifacts, and provenance use `provider_id/profile_id`.
 
 | Provider family | Public profiles |
 | --- | --- |
@@ -24,6 +24,7 @@ Librarium v2 has 33 built-in providers and exactly 39 public profiles. Selection
 | Perplexity | `perplexity-search/search`, `perplexity-sonar-pro/grounded`, `perplexity-deep-research/research`, `perplexity-sonar-deep/research` |
 | SearchAPI | `searchapi/search`, `searchapi-chatgpt/surface`, `searchapi-gemini/surface`, `searchapi-perplexity/surface`, `searchapi-google-ai-mode/surface`, `searchapi-bing-copilot/surface`, `searchapi-google-ai-overview/surface` |
 | SerpAPI | `serpapi/search` |
+| SerpBase | `serpbase/search`, `serpbase/news` |
 | Tavily | `tavily/search` |
 | Valyu | `valyu/search`, `valyu/research` |
 | You.com | `you-research/grounded`, `you-research/research`, `you-answer/grounded` |

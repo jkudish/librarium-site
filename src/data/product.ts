@@ -16,12 +16,17 @@ export const PROVIDERS = [
   { family: "Perplexity", profiles: ["perplexity-search/search", "perplexity-sonar-pro/grounded", "perplexity-deep-research/research", "perplexity-sonar-deep/research"] },
   { family: "SearchAPI", profiles: ["searchapi/search", "searchapi-chatgpt/surface", "searchapi-gemini/surface", "searchapi-perplexity/surface", "searchapi-google-ai-mode/surface", "searchapi-bing-copilot/surface", "searchapi-google-ai-overview/surface"] },
   { family: "SerpAPI", profiles: ["serpapi/search"] },
+  { family: "SerpBase", profiles: ["serpbase/search", "serpbase/news"] },
   { family: "Tavily", profiles: ["tavily/search"] },
   { family: "Valyu", profiles: ["valyu/search", "valyu/research"] },
   { family: "You.com", profiles: ["you-research/grounded", "you-research/research", "you-answer/grounded"] },
 ] as const;
 
-export const PROVIDER_COUNT = 33;
+export const PROVIDER_COUNT = new Set(
+  PROVIDERS.flatMap((provider) =>
+    provider.profiles.map((profile) => profile.split("/")[0]),
+  ),
+).size;
 export const PROFILE_COUNT = PROVIDERS.reduce(
   (count, provider) => count + provider.profiles.length,
   0,

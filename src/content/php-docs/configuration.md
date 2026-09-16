@@ -33,9 +33,15 @@ Focused HTTP Profiles use service configuration:
 return [
     'brave' => ['key' => env('BRAVE_API_KEY')],
     'exa' => ['key' => env('EXA_API_KEY')],
+    'jina' => ['key' => env('JINA_API_KEY')],
     'kagi' => ['key' => env('KAGI_API_KEY')],
+    'parallel' => ['key' => env('PARALLEL_API_KEY')],
     'perplexity' => ['key' => env('PERPLEXITY_API_KEY')],
     'searchapi' => ['key' => env('SEARCHAPI_KEY')],
+    'serpapi' => ['key' => env('SERPAPI_API_KEY')],
+    'serpbase' => ['key' => env('SERPBASE_API_KEY')],
+    'tavily' => ['key' => env('TAVILY_API_KEY')],
+    'valyu' => ['key' => env('VALYU_API_KEY')],
 ];
 ```
 
@@ -95,9 +101,9 @@ The exact Standard/Live pairs are `dataforseo-chatgpt` /
 `dataforseo-google-ai-mode-live`. They remain outside `quick` and `visibility`.
 An enabled and otherwise eligible entry joins derived `all`.
 
-Preview the exact flat Profile ID before authorizing a run. Paid live acceptance
-has not been completed for any of these six Profiles, so neither a valid preview
-nor offline tests establish live readiness.
+Preview the exact flat Profile ID before authorizing a run. The source and
+offline tests do not authorize a new paid canary or establish current account
+availability. See the package's live-canary inventory for dated evidence.
 
 ## Queue
 

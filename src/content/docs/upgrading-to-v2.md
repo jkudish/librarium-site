@@ -135,7 +135,7 @@ That command can incur provider charges. It is not required for the zero-network
 
 V2 selects a public profile as `provider_id/profile_id`. A provider can expose multiple profiles with different evidence or custody semantics. The built-in workflows are now exactly `quick`, `deep`, `visibility`, and `all`.
 
-The default is `quick` in `sync` mode. `quick` includes raw `exa/search`; unavailable members are omitted rather than widening selection to all enabled providers. The catalog has 39 profiles; Parallel Chat is not supported.
+The default is `quick` in `sync` mode. `quick` includes raw `exa/search`; unavailable members are omitted rather than widening selection to all enabled providers. The catalog has 41 profiles; Parallel Chat is not supported.
 
 The old `raw`, `fast`, `llm`, `models`, `comprehensive`, `social`, and `xai` built-ins were removed. Recreate an authored selection as `custom:<name>` rather than reusing a reserved workflow name.
 

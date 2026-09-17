@@ -330,12 +330,16 @@ for (const result of example.results) {
   }
 }
 const logoPaths = [...home.matchAll(/src="(\/providers\/[^\"]+\.(?:svg|png))"/g)].map((match) => match[1]);
-assert.equal(new Set(logoPaths).size, 17, "expected all seventeen provider brand marks");
+assert.equal(new Set(logoPaths).size, 19, "expected every JS brand plus PHP's DataForSEO mark");
+for (const provider of PROVIDERS) {
+  assert(home.includes(`>${provider.family.replace(" (xAI)", "")}<`), `missing provider brand ${provider.family}`);
+}
 for (const path of logoPaths) assert(outputPathExists(path), `missing local provider mark ${path}`);
-for (const language of ["javascript", "typescript", "php", "laravel"]) {
+for (const language of ["javascript", "typescript", "laravel"]) {
   const path = `/languages/${language}.svg`;
   assert(home.includes(`src="${path}"`) && outputPathExists(path), `missing language mark ${path}`);
 }
+assert(!home.includes('/languages/php.svg'), "homepage must use the Laravel mark without a PHP logo");
 assert(!home.includes("Open source. Your provider accounts. Provider charges apply."), "removed final CTA disclaimer must stay absent");
 
 for (const name of v1DocNames) {
@@ -447,9 +451,10 @@ for (const [directory, route, names] of [
         assert(html.includes(`id="${anchor[1]}"`), `${route}/${slug} outline has a missing heading ${anchor[1]}`);
       }
     }
-    for (const language of ["javascript", "php", "laravel"]) {
+    for (const language of ["javascript", "laravel"]) {
       assert(html.includes(`src="/languages/${language}.svg"`), `${route}/${slug} picker needs ${language} mark`);
     }
+    assert(!html.includes('/languages/php.svg'), `${route}/${slug} must use only the Laravel mark for PHP`);
     if (route !== "v1") {
       assert(llmsFull.includes(raw.trim()), `combined docs must contain ${route}/${name} in full`);
       assert(llms.includes(`/${route}/${name}`), `agent index must link to ${route}/${name}`);

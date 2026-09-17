@@ -7,7 +7,7 @@ interface Props {
 const { language, jsHref, phpHref } = Astro.props;
 const options = [
   { id: "js", name: "JavaScript", detail: "& TypeScript", logo: "javascript", href: jsHref },
-  { id: "php", name: "PHP", detail: "for Laravel", logo: "php", href: phpHref },
+  { id: "php", name: "PHP", detail: "for Laravel", logo: "laravel", href: phpHref },
 ];
 ---
 
@@ -18,7 +18,6 @@ const options = [
       <span class="flex items-center justify-between gap-2">
         <span class="flex items-center gap-2">
           <img src={`/languages/${option.logo}.svg`} alt="" width="24" height="24" class="size-6" />
-          {option.id === "php" && <img src="/languages/laravel.svg" alt="" width="24" height="24" class="size-6" />}
         </span>
         <span class="size-1.5 rounded-full bg-amber-700 opacity-0 group-aria-current:opacity-100" aria-hidden="true"></span>
       </span>

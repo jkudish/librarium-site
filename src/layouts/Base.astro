@@ -62,6 +62,24 @@ const jsonLd = JSON.stringify([
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // Theme default follows the OS; a stored choice from the header toggle
+      // overrides it. Runs before first paint to avoid a flash.
+      (() => {
+        const root = document.documentElement;
+        const media = window.matchMedia("(prefers-color-scheme: dark)");
+        const storedChoice = () => {
+          try { return localStorage.getItem("librarium-theme"); } catch { return null; }
+        };
+        const apply = (dark) => { root.dataset.theme = dark ? "dark" : "light"; };
+        const stored = storedChoice();
+        apply(stored === "dark" || stored === "light" ? stored === "dark" : media.matches);
+        media.addEventListener("change", (event) => {
+          const current = storedChoice();
+          if (current !== "dark" && current !== "light") apply(event.matches);
+        });
+      })();
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     {robots && <meta name="robots" content={robots} />}

@@ -35,6 +35,16 @@ const links = [
       </a>
       <button
         type="button"
+        id="theme-toggle"
+        aria-label="Dark theme"
+        aria-pressed="false"
+        class="flex size-9 cursor-pointer items-center justify-center rounded text-neutral-600 hover:bg-neutral-950/3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+      >
+        <Icon name="moon" class="size-4 dark:hidden" />
+        <Icon name="sun" class="hidden size-4 dark:block" />
+      </button>
+      <button
+        type="button"
         id="menu-toggle"
         class="relative -mr-2 rounded-lg p-2 text-neutral-600 hover:bg-neutral-950/3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 md:hidden"
         aria-label="Open menu"
@@ -136,4 +146,17 @@ const links = [
     if (menu) menu.hidden = isOpen;
     toggle.setAttribute("aria-expanded", String(!isOpen));
   });
+  const themeToggle = document.querySelector<HTMLButtonElement>("#theme-toggle");
+  const syncThemeToggle = () => {
+    const dark = document.documentElement.dataset.theme === "dark";
+    themeToggle?.setAttribute("aria-pressed", String(dark));
+  };
+  themeToggle?.addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme !== "dark";
+    root.dataset.theme = dark ? "dark" : "light";
+    try { localStorage.setItem("librarium-theme", dark ? "dark" : "light"); } catch { /* storage unavailable */ }
+    syncThemeToggle();
+  });
+  syncThemeToggle();
 </script>

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* The OS preference is the default; the header toggle stores an explicit
+   choice on <html data-theme>. Both paths drive this one variant. */
+@custom-variant dark (&:where(:root[data-theme="dark"] *));
+
 @theme {
   --font-sans: "Geist", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
@@ -178,10 +182,14 @@
 body { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
 #page-format-control { bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
 
-/* Follow the OS in CSS, including changes while a page is open and without JS.
-   Existing near-black code panels retain their syntax-highlighting palette. */
-@media (prefers-color-scheme: dark) {
-  :root { color-scheme: dark; }
+/* Follow the OS by default (the inline script in Base.astro mirrors the
+   preference onto data-theme) and follow the header toggle once a visitor
+   chooses explicitly. Existing near-black code panels retain their
+   syntax-highlighting palette. */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
   body, .bg-white, [class~="bg-[#faf9f6]"] { background-color: #191a19; }
   [class~="bg-[#eeeae0]"], [class~="bg-[#efb86b]"], .bg-neutral-50,
   .bg-neutral-100, .bg-amber-50, [class~="bg-amber-50/50"] { background-color: #222321; }

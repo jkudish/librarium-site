@@ -8,7 +8,10 @@ const markdownHref = ["", "/docs", "/docs/php", "/v1", "/guides"].includes(path)
   : `${path}.md`;
 const links = [
   { href: "/#features", label: "Features" },
-  { href: "/#library", label: "Library" },
+  { href: "/agents", label: "Agents & MCP" },
+  { href: "/cli", label: "CLI" },
+  { href: "/javascript", label: "JavaScript" },
+  { href: "/laravel", label: "Laravel" },
   { href: "/#providers", label: "Providers" },
   { href: "/guides", label: "Guides" },
   { href: "/docs", label: "Docs" },
@@ -21,7 +24,7 @@ const links = [
       <span class="font-mono text-base font-semibold text-neutral-950">librarium</span>
     </a>
     <nav class="flex items-center gap-x-7" aria-label="Primary navigation">
-      <div class="flex items-center gap-x-5 text-sm text-neutral-600 max-md:hidden lg:gap-x-7">
+      <div class="flex items-center gap-x-5 text-sm text-neutral-600 max-lg:hidden lg:gap-x-7">
         {links.map((link) => (
           <a href={link.href} class="hover:text-neutral-950">{link.label}</a>
         ))}
@@ -46,7 +49,7 @@ const links = [
       <button
         type="button"
         id="menu-toggle"
-        class="relative -mr-2 rounded p-2 text-neutral-600 hover:bg-neutral-950/3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 md:hidden"
+        class="relative -mr-2 rounded p-2 text-neutral-600 hover:bg-neutral-950/3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 lg:hidden"
         aria-label="Open menu"
         aria-expanded="false"
         aria-controls="mobile-menu"
@@ -56,7 +59,7 @@ const links = [
       </button>
     </nav>
   </div>
-  <div id="mobile-menu" hidden class="border-t border-neutral-950/10 md:hidden!">
+  <div id="mobile-menu" hidden class="border-t border-neutral-950/10 lg:hidden!">
     <nav class="mx-auto flex max-w-6xl flex-col gap-y-1 px-4 py-3" aria-label="Mobile navigation">
       {links.map((link) => (
         <a href={link.href} class="rounded-sm px-2 py-2 text-base text-neutral-700 hover:bg-neutral-950/3 hover:text-neutral-950">{link.label}</a>

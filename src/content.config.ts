@@ -41,6 +41,7 @@ const pages = defineCollection({
     description: z.string(),
     kind: z.enum(["product", "comparison", "story"]),
     runtime: z.enum(["javascript", "laravel", "cli"]).optional(),
+    redirect: z.string().optional(),
     ctaHref: z.string(),
     ctaLabel: z.string(),
   }),

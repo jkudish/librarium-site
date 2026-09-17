@@ -12,6 +12,6 @@ const page = entry.collection === "pages" ? entry.data : undefined;
 ---
 
 <ArticleLayout title={entry.data.title} description={entry.data.description} headings={headings}
-  kind={page?.kind ?? "guide"} runtime={page?.runtime} ctaHref={page?.ctaHref} ctaLabel={page?.ctaLabel}>
+  kind={page?.kind ?? "guide"} redirect={page?.redirect} ctaHref={page?.ctaHref} ctaLabel={page?.ctaLabel}>
   <Content />
 </ArticleLayout>

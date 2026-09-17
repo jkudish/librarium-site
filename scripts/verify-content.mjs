@@ -9,6 +9,7 @@ import {
   PROVIDERS,
   WORKFLOWS,
 } from "../src/data/product.ts";
+import { AGENT_SETUP_PROMPT } from "../src/data/setup-prompt.ts";
 
 const root = resolve(import.meta.dirname, "..");
 const docsDir = join(root, "src/content/docs");
@@ -101,6 +102,9 @@ const publicSources = [
   join(root, "src/components/Header.astro"),
   join(root, "src/components/DocsVersionPicker.astro"),
   join(root, "src/components/Footer.astro"),
+  join(root, "src/content/pages/agents.md"),
+  join(root, "src/content/pages/cli.md"),
+  join(root, "src/content/pages/cli-mcp.md"),
 ];
 const publicCopy = publicSources.map((file) => readFileSync(file, "utf8")).join("\n");
 const gettingStarted = readFileSync(join(docsDir, "index.md"), "utf8");
@@ -202,6 +206,9 @@ assert(publicCopy.includes("Give your agent more than one source."), "the approv
 assert(publicCopy.includes("without building a separate integration for every provider."), "the approved hero body is missing");
 assert(publicCopy.includes('{ href: "/#features", label: "Features" }'), "the handwritten Features navigation is missing");
 assert(publicCopy.includes('{ href: "/#providers", label: "Providers" }'), "the handwritten Providers navigation is missing");
+assert(publicCopy.includes('{ href: "/agents", label: "Agents & MCP" }'), "the handwritten Agents & MCP navigation is missing");
+assert(publicCopy.includes('{ href: "/cli", label: "CLI" }'), "the handwritten CLI navigation is missing");
+assert(readFileSync(join(root, "src/content/pages/agents.md"), "utf8").includes(AGENT_SETUP_PROMPT), "the Agents & MCP page must embed the canonical setup prompt verbatim");
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.md'), "output docs must describe collision-resistant provider markdown names");
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.meta.json'), "output docs must describe collision-resistant provider metadata names");
 assert(outputFormats.includes("`run.json` owns the concrete `outputFile` and `metaFile` names"), "output docs must make run.json authoritative for provider artifact names");
@@ -426,9 +433,12 @@ for (const route of ["guides/first-query", "guides/agent-research", "guides/lara
   assert(guideIndex.includes(`href="/${route}"`), `guides index must link to ${route}`);
   assert(guideMarkdown.includes(`/${route}.md`), `guides Markdown must link to ${route}`);
 }
-for (const route of ["javascript", "cli-mcp", "laravel"]) {
+for (const route of ["agents", "cli", "javascript", "laravel"]) {
   assert(home.includes(`href="/${route}"`), `homepage must link to dedicated ${route} page`);
 }
+const cliMcpHtml = readFileSync(join(distDir, "cli-mcp/index.html"), "utf8");
+assert(cliMcpHtml.includes('http-equiv="refresh" content="0; url=/cli"'), "the preserved /cli-mcp route must redirect to /cli");
+assert(cliMcpHtml.includes('rel="canonical" href="https://librarium.agentsy.build/cli"'), "the /cli-mcp redirect must canonicalize to /cli");
 assert(home.includes("Show the prompt") && !home.includes("See a research brief"));
 for (const eyebrow of ["Provenance", "Cost controls", "Long-running research"]) {
   assert(!home.includes(`>${eyebrow}</p>`), `removed ${eyebrow} eyebrow must stay absent`);

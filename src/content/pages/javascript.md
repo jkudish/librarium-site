@@ -11,7 +11,7 @@ ctaLabel: Explore the JavaScript API
 
 Research a technical decision, compare answer surfaces, or collect evidence for an application feature. Librarium gives those results a shared shape without pretending that a search result, a grounded answer, and a deep-research report are the same thing.
 
-For a ready-made provider runtime, use the [CLI or MCP server](/cli-mcp). For an application-specific runtime, build on the package's explicit import boundaries. There is no one-call `research()` client hidden behind the examples below.
+For a ready-made provider runtime, use the [CLI](/cli) or the [MCP server](/agents). For an application-specific runtime, build on the package's explicit import boundaries. There is no one-call `research()` client hidden behind the examples below.
 
 ## Typed boundaries, without a Node dependency everywhere
 

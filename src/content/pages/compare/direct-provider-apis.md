@@ -45,7 +45,7 @@ You can also mix approaches. Use Librarium for research and a native provider SD
 
 ## Choose the runtime, not just the package name
 
-The [JavaScript CLI/MCP runtime](/cli-mcp) includes built-in adapters, concurrent research, paid-attempt accounting, saved evidence, and durable async recovery. The [JavaScript core](/javascript) offers Worker-safe primitives with caller-injected bindings and execution dependencies, not a one-call runner.
+The [JavaScript CLI runtime](/cli) includes built-in adapters, concurrent research, paid-attempt accounting, saved evidence, and durable async recovery. The [JavaScript core](/javascript) offers Worker-safe primitives with caller-injected bindings and execution dependencies, not a one-call runner.
 
 The [Laravel package](/laravel) is native PHP: sequential Profile execution, Laravel AI SDK integration, encrypted queue jobs, and application-owned persistence. It is not a Node wrapper and does not include the JavaScript MCP server.
 

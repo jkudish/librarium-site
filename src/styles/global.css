@@ -182,10 +182,12 @@
 body { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
 #page-format-control { bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
 
-/* Follow the OS by default (the inline script in Base.astro mirrors the
-   preference onto data-theme) and follow the header toggle once a visitor
-   chooses explicitly. Existing near-black code panels retain their
-   syntax-highlighting palette. */
+/* Two synchronized gates apply the dark palette: an explicit
+   <html data-theme="dark"> chosen with the header toggle, and the OS
+   preference when no data-theme attribute exists — script-free visitors,
+   and the instant before the pre-paint script mirrors the OS choice.
+   scripts/verify-content.mjs fails the build if the two blocks drift.
+   Existing near-black code panels retain their syntax-highlighting palette. */
 :root[data-theme="light"] { color-scheme: light; }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -236,5 +238,67 @@ body { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
     background: none;
     outline: none;
     filter: invert(1);
+  }
+}
+
+/* Script-free twin of the block above: same palette, gated on the OS
+   preference and the absence of an explicit data-theme choice. The body
+   must stay byte-identical to the :root[data-theme="dark"] block;
+   verify-content.mjs enforces that. */
+@media (prefers-color-scheme: dark) {
+  /* Tailwind's dark: variant keys on data-theme, so the two shadow-less
+     surfaces are spelled out here for the script-free path. */
+  :root:not([data-theme]) #setup-menu,
+  :root:not([data-theme]) #page-format-control nav { box-shadow: none; }
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    body, .bg-white, [class~="bg-[#faf9f6]"] { background-color: #191a19; }
+    [class~="bg-[#eeeae0]"], [class~="bg-[#efb86b]"], .bg-neutral-50,
+    .bg-neutral-100, .bg-amber-50, [class~="bg-amber-50/50"] { background-color: #222321; }
+    #install-output, #install-runtime, #page-format-control nav { background-color: #242522; }
+    [class~="bg-[#efb86b]"] { border-top: 1px solid #393b36; }
+
+    .text-neutral-950, .text-neutral-900, .text-neutral-800 { color: #f2f2ed; }
+    .text-neutral-700, .text-neutral-600 { color: #c9cbc4; }
+    .text-neutral-500 { color: #adb0a6; }
+    .text-amber-950, .text-amber-800, .text-amber-700, .text-amber-600 { color: #efc184; }
+    [class*="hover:text-neutral-"]:hover { color: #fff; }
+    [class*="hover:bg-neutral-"]:hover { background-color: #33352f; }
+    #page-format-control [aria-current="page"] { background: #e8e9e1; color: #191a19; }
+
+    .border-neutral-200, .border-neutral-300,
+    [class~="border-neutral-950/10"], [class~="divide-neutral-200"] > :not(:last-child) {
+      border-color: #3e403a;
+    }
+    [class~="ring-neutral-950/15"] { --tw-ring-color: #53564c; }
+    [class~="bg-neutral-950/4"], [class~="bg-neutral-950/3"] { background-color: #292b25; }
+
+    .prose { color: #c9cbc4; }
+    .prose :is(h1, h2, h3, h4, strong, th) { color: #f2f2ed; }
+    .prose a { color: #efc184; text-decoration-color: #a58151; }
+    .prose :not(pre) > code { background: #2e302a; color: #f2f2ed; }
+    .prose blockquote { background: #242522; }
+    .prose :is(th, td) { border-color: #3e403a; }
+
+    /* Preserve original brand assets on small light tiles, not filtered images.
+       The integration grid stays monochrome in both themes (#3797). */
+    img[src^="/providers/"].logo-mono {
+      background: #faf9f6;
+      border-radius: 3px;
+      outline: 4px solid #faf9f6;
+      filter: grayscale(1);
+    }
+    img[src^="/providers/"]:not(.agent-stack img):not(.logo-mono) {
+      background: #faf9f6;
+      border-radius: 3px;
+      outline: 4px solid #faf9f6;
+      filter: none;
+    }
+    img[src^="/languages/"]:not(.invert), .agent-stack img {
+      background: none;
+      outline: none;
+      filter: invert(1);
+    }
   }
 }

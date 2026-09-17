@@ -209,6 +209,20 @@ assert(publicCopy.includes('{ href: "/#providers", label: "Providers" }'), "the 
 assert(publicCopy.includes('{ href: "/agents", label: "Agents & MCP" }'), "the handwritten Agents & MCP navigation is missing");
 assert(publicCopy.includes('{ href: "/cli", label: "CLI" }'), "the handwritten CLI navigation is missing");
 assert(readFileSync(join(root, "src/content/pages/agents.md"), "utf8").includes(AGENT_SETUP_PROMPT), "the Agents & MCP page must embed the canonical setup prompt verbatim");
+// The dark palette has two synchronized gates: explicit <html data-theme="dark">
+// and the script-free OS-preference fallback. Fail if their bodies drift.
+const globalCss = readFileSync(join(root, "src/styles/global.css"), "utf8");
+const darkGateBody = (opener, closer) => {
+  const start = globalCss.indexOf(opener);
+  assert(start !== -1, `global.css is missing the dark gate ${opener}`);
+  const end = globalCss.indexOf(closer, start);
+  assert(end !== -1, `global.css dark gate ${opener} is not closed`);
+  return globalCss.slice(start + opener.length, end).split("\n").map((line) => line.trim()).filter(Boolean).join("\n");
+};
+assert(
+  darkGateBody(':root[data-theme="dark"] {', "\n}") === darkGateBody(":root:not([data-theme]) {", "\n  }"),
+  "the explicit and no-JS dark gates in global.css must carry identical bodies; update both blocks together",
+);
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.md'), "output docs must describe collision-resistant provider markdown names");
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.meta.json'), "output docs must describe collision-resistant provider metadata names");
 assert(outputFormats.includes("`run.json` owns the concrete `outputFile` and `metaFile` names"), "output docs must make run.json authoritative for provider artifact names");

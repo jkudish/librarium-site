@@ -2,6 +2,10 @@
 import Icon from "./Icon.astro";
 interface Props { wide?: boolean; }
 const { wide = false } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, "");
+const markdownHref = ["", "/docs", "/docs/php", "/v1", "/guides"].includes(path)
+  ? `${path}/index.md`
+  : `${path}.md`;
 const links = [
   { href: "/#features", label: "Features" },
   { href: "/#library", label: "Library" },
@@ -49,9 +53,82 @@ const links = [
       ))}
     </nav>
   </div>
+  <div id="page-format-control" class="fixed bottom-5 left-1/2 z-50 -translate-x-1/2">
+    <nav aria-label="Page format" class="flex rounded-md border border-neutral-300 bg-white p-1 font-mono text-xs shadow-lg dark:shadow-none">
+      <a id="human-view" href={Astro.url.pathname} aria-current="page" class="rounded px-3 py-2 text-neutral-600 hover:text-neutral-950 aria-[current=page]:bg-neutral-950 aria-[current=page]:text-white">Human</a>
+      <a id="machine-view" href={markdownHref} class="rounded px-3 py-2 text-neutral-600 hover:text-neutral-950 aria-[current=page]:bg-neutral-950 aria-[current=page]:text-white">Machine</a>
+    </nav>
+  </div>
 </header>
 
+<section id="machine-panel" hidden class="mx-auto max-w-6xl px-6 py-10 lg:px-8" aria-label="Markdown view">
+  <div class="mb-6 flex items-center justify-between gap-4">
+    <h1 class="font-mono text-lg font-medium text-neutral-950">Markdown</h1>
+    <a href={markdownHref} class="text-sm text-amber-800 underline underline-offset-4">Open raw Markdown</a>
+  </div>
+  <p id="machine-status" role="status" class="text-sm text-neutral-600"></p>
+  <pre id="machine-content" class="whitespace-pre-wrap break-words font-mono text-sm/7 text-neutral-800"></pre>
+</section>
+
+<style>
+  :global(html[data-page-view="machine"] header ~ *:not(#machine-panel)) {
+    display: none !important;
+  }
+</style>
+
 <script>
+  // Mobile browser chrome and pinch zoom can make the visible viewport smaller
+  // than the layout viewport used by position: fixed.
+  const formatControl = document.getElementById("page-format-control");
+  const viewport = window.visualViewport;
+  function positionFormatControl() {
+    if (!formatControl || !viewport) return;
+    formatControl.style.left = `${viewport.offsetLeft + viewport.width / 2}px`;
+    const inset = Math.max(0, window.innerHeight - viewport.offsetTop - viewport.height);
+    formatControl.style.bottom = `calc(${inset}px + 1.25rem + env(safe-area-inset-bottom))`;
+  }
+  viewport?.addEventListener("resize", positionFormatControl);
+  viewport?.addEventListener("scroll", positionFormatControl);
+  window.addEventListener("resize", positionFormatControl);
+  positionFormatControl();
+  const human = document.querySelector<HTMLAnchorElement>("#human-view");
+  const machine = document.querySelector<HTMLAnchorElement>("#machine-view");
+  const panel = document.querySelector<HTMLElement>("#machine-panel");
+  const content = document.querySelector<HTMLElement>("#machine-content");
+  const status = document.querySelector<HTMLElement>("#machine-status");
+  let request: AbortController | undefined;
+  human?.addEventListener("click", (event) => {
+    event.preventDefault();
+    request?.abort();
+    delete document.documentElement.dataset.pageView;
+    if (panel) panel.hidden = true;
+    human.setAttribute("aria-current", "page");
+    machine?.removeAttribute("aria-current");
+  });
+  machine?.addEventListener("click", async (event) => {
+    event.preventDefault();
+    if (!panel || !content || !status) return;
+    request?.abort();
+    const current = new AbortController();
+    request = current;
+    document.documentElement.dataset.pageView = "machine";
+    window.scrollTo({ top: 0, behavior: "instant" });
+    panel.hidden = false;
+    machine.setAttribute("aria-current", "page");
+    human?.removeAttribute("aria-current");
+    content.textContent = "";
+    status.textContent = "Loading Markdown…";
+    try {
+      const response = await fetch(machine.href, { signal: current.signal });
+      if (!response.ok) throw new Error("Markdown unavailable");
+      const text = await response.text();
+      if (current.signal.aborted) return;
+      content.textContent = text;
+      status.textContent = "";
+    } catch {
+      if (!current.signal.aborted) status.textContent = "Could not load Markdown. Try again or open the raw Markdown link.";
+    }
+  });
   const toggle = document.getElementById("menu-toggle");
   const menu = document.getElementById("mobile-menu");
   toggle?.addEventListener("click", () => {

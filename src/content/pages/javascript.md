@@ -32,7 +32,7 @@ import { loadConfigV2, loadCustomProviders } from 'librarium/node';
 
 The root and core boundaries are Worker-safe. Core callers supply adapter bindings, transport, persistence, and execution dependencies; core does not construct a global registry or initialize concrete providers. The Node boundary handles host-specific concerns, not a general high-level runner.
 
-Until matching v2 packages are published, build from a reviewed v2 source checkout. See [installation](/docs#install) before following v2 examples.
+Install the v2 library in your project with `npm install librarium@^2`. For the command-line tool, see [CLI installation](/docs#install).
 
 ## Turn a terminal response into an application feature
 

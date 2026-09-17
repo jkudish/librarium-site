@@ -22,16 +22,17 @@ Do not delete the backups until the migrated config passes the checks in this gu
 
 ## Upgrade the executable
 
-Before a matching v2 distribution is published, build a reviewed v2 source checkout using [Getting started](/docs). A `2.0.0` source version does not mean npm, Homebrew, or standalone release channels contain v2. Do not replace your working v1 install with an assumed v2 `latest`.
-
-Once v2 is published to your channel, preview it, then upgrade:
+Version 2 is published. Preview the release channel detected for your current installation, then upgrade and verify the installed major version:
 
 ```bash
 librarium upgrade --check
 librarium upgrade --dry-run
 librarium upgrade
 librarium --version
+# Must report major version 2
 ```
+
+For an npm installation, you can explicitly stay on the v2 major with `npm install -g librarium@^2`.
 
 Upgrading the executable does not rewrite a v1 config.
 

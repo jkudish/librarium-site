@@ -31,7 +31,7 @@ Builds and ships `dist/` to Cloudflare as an assets-only Worker (`librarium-site
 
 There is no CI/CD. Deploys are manual after merging to `main`.
 
-**V2 deployment is held until JavaScript v2 distribution and the first-party PHP package are ready to publish.** This local draft is not permission to merge or deploy. Source version `2.0.0` and green offline checks do not establish package publication. Keep the handwritten release-neutral marketing design; source-only JavaScript and post-release Composer installation guidance belongs in the docs until the matching packages are published.
+**The public JavaScript copy is release-ready and treats v2 as published.** That content state and green local checks do not authorize a merge or deployment; deployment remains a separate manual action. The first-party PHP package and its separate optional Firecrawl adapter retain their own unpublished/post-release status, which does not qualify the JavaScript v2 launch copy.
 
 ## Structure
 
@@ -42,7 +42,7 @@ There is no CI/CD. Deploys are manual after merging to `main`.
 - `src/content/php-docs/*.md`: first-party PHP/Laravel docs, sourced from `jkudish/laravel-ai-librarium` README, configuration, public API, and tests
 - `src/content/pages/`: dedicated JavaScript, CLI/MCP, and Laravel pages, the direct-provider comparison, and the Agentsy Report development field note
 - `src/content/guides/`: first-query, coding-agent, and Laravel-queue guides; listed at `/guides`
-- `src/content/v1-docs/*.md`: legacy snapshot from site commit `54d73e99552fcdb43b9a772c49f483a5beea4582` (`origin/main` when the v2 hold branch began), with internal links namespaced under `/v1`
+- `src/content/v1-docs/*.md`: legacy snapshot from site commit `54d73e99552fcdb43b9a772c49f483a5beea4582` (`origin/main` when the v2 work began), with internal links namespaced under `/v1`
 - `src/data/product.ts`: version, roster, counts, and workflows
 - `src/pages/docs/`: docs routes and raw Markdown endpoints
 - `src/pages/llms.txt.ts`, `src/pages/llms-full.txt.ts`: agent index and all current pages, guides, and both documentation sets

@@ -10,7 +10,7 @@ order: 11
 librarium install-skill
 ```
 
-The shipped skill teaches the v2 profile catalog, workflow selection, durable monitoring, artifact reading, and evidence-aware synthesis. Its triggers include `/librarium`, `/research`, and `/deep-research`. npm and standalone builds embed the authoritative root skill at build time, so installation works offline without a release tag and uses version-matched instructions. It does not upgrade the CLI.
+The shipped skill teaches the v2 profile catalog, workflow selection, durable monitoring, artifact reading, and evidence-aware synthesis. Its triggers include `/librarium`, `/research`, and `/deep-research`. Published npm and standalone builds embed the authoritative root skill, so skill installation works offline without a release tag download and uses version-matched instructions. It does not upgrade the CLI.
 
 ## MCP server
 
@@ -60,6 +60,14 @@ This documentation is also published as [`llms.txt`](/llms.txt) and [`llms-full.
 
 ## Amp orbs
 
-Amp needs the Librarium User Skill and v2 CLI, not a plugin. Global User Skills sync into orbs automatically. In this repository, orb setup builds the checked-out source and installs it with `npm install -g .`, checking major version 2. Other projects can use `librarium@^2` after v2 is published; never silently use npm's v1 `latest` for a v2 workflow. See [Getting started](/docs) for the current source-install boundary.
+Amp needs the Librarium User Skill and v2 CLI, not a plugin. Global User Skills sync into orbs automatically. Install and verify the published v2 CLI before registering or using the skill:
+
+```bash
+npm install -g librarium@^2
+librarium --version
+# Must report major version 2
+```
+
+See [Getting started](/docs) for the other supported installation channels.
 
 Agents should preserve profile and collection provenance in their synthesis. Shared collectors, shared upstream providers, repeated URLs, and citation counts can create correlated evidence. They are not independent corroboration by themselves.

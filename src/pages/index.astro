@@ -2,10 +2,6 @@
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 import Icon from "../components/Icon.astro";
-import {
-  PROFILE_COUNT,
-  PROVIDER_COUNT,
-} from "../data/product";
 import Base from "../layouts/Base.astro";
 
 const featuredProviders = [
@@ -102,26 +98,43 @@ const example = {
             <a id="setup-primary" href="/docs#install" class="rounded-md bg-neutral-950 px-5 py-3 text-base font-medium text-white hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">Set up Librarium</a>
             <a href="#research-example" class="px-3 py-3 text-base font-medium text-neutral-700 hover:text-neutral-950 sm:text-sm">See an example <Icon name="arrowUpRight" class="inline-block" /></a>
           </div>
-          <div class="mx-auto mt-7 flex w-fit max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-md border border-neutral-200 bg-white p-2">
-            <label for="install-runtime" class="sr-only">Install for</label>
-            <div id="install-runtime-choice" data-runtime="javascript" class="group relative">
-              <img id="install-runtime-logo" src="/languages/javascript.svg" alt="" width="20" height="20" class="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2" />
-              <select id="install-runtime" class="min-h-11 cursor-pointer appearance-none rounded-md border border-neutral-200 bg-[#faf9f6] py-2 pr-9 pl-10 text-base font-medium text-neutral-800 hover:border-neutral-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">
-                <option value="npm ci && npm run build && npm install -g ." data-logo="javascript" data-href="/docs#install">JavaScript</option>
-                <option value="composer require jkudish/laravel-ai-librarium" data-logo="laravel" data-href="/docs/php#install-after-release">PHP / Laravel</option>
-              </select>
-              <Icon name="caretDown" class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-neutral-500" />
-            </div>
-            <div class="flex max-w-full items-center gap-x-3 px-2 py-1">
-              <p class="min-w-0 break-words text-left font-mono text-base text-neutral-800 sm:text-sm"><span class="text-neutral-400 select-none">$ </span><span id="install-command">npm ci &amp;&amp; npm run build &amp;&amp; npm install -g .</span></p>
-              <button type="button" id="copy-install" aria-label="Copy install command" title="Copy install command" data-copy-state="idle" class="group relative flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
-                <Icon name="copy" class="size-5 group-data-[copy-state=success]:hidden" />
-                <Icon name="check" class="hidden size-5 text-amber-800 group-data-[copy-state=success]:block" />
+          <div class="mx-auto mt-7 max-w-2xl">
+            <div class="relative inline-flex items-stretch rounded-md border border-neutral-200 bg-white text-neutral-700">
+              <button type="button" id="copy-install" aria-label="Copy setup prompt" title="Copy setup prompt" data-copy-state="idle" class="group flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-l-md px-4 text-sm hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
+                <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" />
+                <Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]:block" />
+                <span id="copy-action-label">Copy setup prompt</span>
               </button>
+              <div id="setup-menu-container" class="border-l border-neutral-200">
+                <button id="setup-menu-toggle" type="button" aria-label="Setup and install options" aria-haspopup="menu" aria-expanded="false" aria-controls="setup-menu" class="flex h-full min-h-11 w-11 cursor-pointer items-center justify-center rounded-r-md hover:bg-neutral-100"><Icon name="caretDown" class="size-4" /></button>
+                <div id="setup-menu" role="menu" aria-label="Setup and install options" hidden class="absolute top-full left-1/2 z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-lg border border-neutral-200 bg-white p-1.5 text-left shadow-lg dark:shadow-none">
+                  {[
+                    { id: "agent", label: "Agent setup prompt", copy: "Copy setup prompt", value: "agent", href: "/docs/using-with-agents#mcp-server" },
+                    { id: "cli", label: "CLI install", copy: "Copy CLI install", value: "npm install -g librarium", href: "/docs#install" },
+                    { id: "javascript", label: "JavaScript / TypeScript", copy: "Copy JavaScript install", value: "npm install librarium@^2", href: "/javascript" },
+                    { id: "laravel", label: "Laravel install", copy: "Copy Laravel install", value: "composer require jkudish/laravel-ai-librarium", href: "/docs/php#install-after-release" },
+                  ].map((choice) => (
+                    <button type="button" role="menuitemradio" aria-checked={choice.id === "agent" ? "true" : "false"} tabindex="-1" data-logo={choice.id} data-value={choice.value} data-copy-label={choice.copy} data-href={choice.href} class="group flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100">
+                      <span class="flex shrink-0 items-center">
+                      {choice.id === "agent" ? (
+                        <span class="agent-stack flex shrink-0 -space-x-2" role="img" aria-label="Claude, Codex, and Cursor" title="Claude, Codex, and Cursor">
+                          {["claude", "codex", "cursor"].map((name) => (
+                            <span class="relative rounded-full border border-neutral-200 bg-white p-1"><img src={`/${name === "claude" ? "providers" : "agents"}/${name}.svg`} alt="" width="16" height="16" class="size-4" /></span>
+                          ))}
+                        </span>
+                      ) : choice.id === "cli" ? <Icon name="terminal" class="size-5" /> : <img src={`/languages/${choice.id}.svg`} alt="" width="20" height="20" class="size-5" />}
+                      </span>
+                      <span class="flex-1 whitespace-nowrap">{choice.label}</span><Icon name="check" class="invisible size-4 group-aria-checked:visible" />
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
+            <div><button id="view-setup-prompt" type="button" aria-expanded="false" aria-controls="install-output" class="mt-1 cursor-pointer py-2 text-xs text-neutral-500 underline underline-offset-4">View prompt</button></div>
+            <p id="install-output" hidden tabindex="0" class="mt-3 whitespace-pre-wrap break-words rounded border border-neutral-200 bg-[#faf9f6] p-4 text-left font-mono text-sm/7 text-neutral-800"><span id="install-prefix" hidden class="text-neutral-400 select-none">$ </span><span id="install-command"></span></p>
           </div>
-          <p id="copy-install-label" aria-live="polite" class="mt-1 min-h-6 text-base text-neutral-600 sm:min-h-5 sm:text-sm">Build from a reviewed v2 checkout. npm latest is still v1.</p>
-          <a id="install-methods" href="/docs#install" class="inline-block py-1 text-base text-neutral-500 underline decoration-neutral-300 underline-offset-4 hover:text-neutral-950 sm:text-sm">Installation guide</a>
+          <p id="copy-install-label" aria-live="polite" class="mt-1 text-base text-neutral-600 empty:sr-only sm:text-sm"></p>
+          <a id="install-methods" href="/docs#install" class="mt-2 inline-block py-1 text-base text-neutral-500 underline decoration-neutral-300 underline-offset-4 hover:text-neutral-950 sm:text-sm">Installation guide</a>
           <noscript><a href="/docs/php" class="mt-3 inline-block text-amber-700 underline">PHP / Laravel installation</a></noscript>
         </div>
 
@@ -216,7 +229,7 @@ const example = {
     <section class="py-16 sm:py-28" id="providers">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 class="max-w-[25ch] text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Many sources.<br />One interface.</h2>
-        <p class="mt-5 max-w-[65ch] text-base/7 text-pretty text-neutral-600">A mix of search engines, grounded answers, and research APIs. The Librarium catalog includes {PROVIDER_COUNT} providers and {PROFILE_COUNT} profiles. Add your own with <a href="/docs/custom-providers" class="underline decoration-neutral-300 underline-offset-4 hover:text-amber-800">our easy guide</a>.</p>
+        <p class="mt-5 max-w-[65ch] text-base/7 text-pretty text-neutral-600">A mix of search engines, grounded answers, and research APIs. The Librarium catalog includes {featuredProviders.length} integrations. Add your own with <a href="/docs/custom-providers" class="underline decoration-neutral-300 underline-offset-4 hover:text-amber-800">our easy guide</a>.</p>
         <ul class="mt-12 grid grid-cols-2 border-t border-l border-neutral-200 sm:grid-cols-3 lg:grid-cols-6" aria-label="Supported provider families">
           {featuredProviders.map((provider) => (
             <li class="flex flex-col items-center justify-center gap-3 border-r border-b border-neutral-200 px-3 py-7">
@@ -242,18 +255,23 @@ const example = {
         <h2 class="mt-4 max-w-[24ch] text-4xl font-medium tracking-tight text-balance text-white sm:text-5xl">
           Use Librarium where you build.
         </h2>
-        <div class="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-2">
+        <div class="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-3">
+          <div class="border-t border-white/20 pt-8">
+            <div class="mb-5 text-white"><Icon name="terminal" class="size-8" /></div>
+            <h3 class="text-2xl font-medium tracking-tight text-white">CLI &amp; MCP</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-400">Run research from your terminal or connect an agent over MCP. Configure your providers, preview a query, and keep the results.</p>
+            <pre class="mt-6 whitespace-pre-wrap break-words rounded-md border border-white/15 bg-white/5 p-5 font-mono text-base/7 text-amber-100 sm:text-sm/6"><code>npm install -g librarium</code></pre>
+            <a href="/cli-mcp" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore CLI &amp; MCP <Icon name="arrowUpRight" class="inline-block" /></a>
+          </div>
           <div class="border-t border-white/20 pt-8">
             <div class="mb-5 flex items-center gap-4" aria-label="JavaScript and TypeScript">
               <img src="/languages/javascript.svg" alt="JavaScript" width="32" height="32" class="size-8 invert" />
               <img src="/languages/typescript.svg" alt="TypeScript" width="32" height="32" class="size-8 invert" />
             </div>
             <h3 class="text-2xl font-medium tracking-tight text-white">JavaScript / TypeScript</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-400">Use the CLI, connect an agent over MCP, or build with the typed library. Portable core modules support Workers; Node owns local configuration and artifacts.</p>
-            <pre class="mt-6 overflow-x-auto rounded-md border border-white/15 bg-white/5 p-5 font-mono text-base/7 text-amber-100 sm:text-sm/6"><code>npm ci &amp;&amp; npm run build &amp;&amp; npm install -g .</code></pre>
-            <p class="mt-3 text-base/7 text-neutral-400 sm:text-sm/6">Build a reviewed v2 checkout. npm latest is still v1.</p>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-400">Build research into your application with the typed library. Use portable core modules in Workers or Node services for local configuration and artifacts.</p>
+            <pre class="mt-6 whitespace-pre-wrap break-words rounded-md border border-white/15 bg-white/5 p-5 font-mono text-base/7 text-amber-100 sm:text-sm/6"><code>npm install librarium@^2</code></pre>
             <a href="/javascript" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore JavaScript <Icon name="arrowUpRight" class="inline-block" /></a>
-            <a href="/cli-mcp" class="mt-2 block w-fit py-2 text-base font-medium text-amber-200 hover:text-white">Explore CLI & MCP <Icon name="arrowUpRight" class="inline-block" /></a>
           </div>
           <div class="border-t border-white/20 pt-8">
             <div class="mb-5 flex items-center gap-4" aria-label="Laravel">
@@ -262,11 +280,10 @@ const example = {
             <h3 class="text-2xl font-medium tracking-tight text-white">PHP / Laravel</h3>
             <p class="mt-3 text-base/7 text-pretty text-neutral-400">A native Laravel package with a fluent research API, Artisan commands, pricing previews, encrypted queue jobs, and a testing fake. Your application owns storage and workflows.</p>
             <pre class="mt-6 whitespace-pre-wrap break-words rounded-md border border-white/15 bg-white/5 p-5 font-mono text-base/7 text-amber-100 sm:text-sm/6"><code>composer require jkudish/laravel-ai-librarium</code></pre>
-            <p class="mt-3 text-base/7 text-neutral-400 sm:text-sm/6">Use this command after a compatible package release.</p>
             <a href="/laravel" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore Laravel <Icon name="arrowUpRight" class="inline-block" /></a>
           </div>
         </div>
-        <p class="mt-10 max-w-[72ch] text-base/7 text-pretty text-neutral-400 sm:text-sm/6">Both are first-party implementations. They share terminal response concepts, not identical provider coverage or execution behavior.</p>
+        <p class="mt-10 max-w-[72ch] text-base/7 text-pretty text-neutral-400 sm:text-sm/6">The CLI and JavaScript library share one implementation. Laravel is a separate native package. They share terminal response concepts, not identical provider coverage or execution behavior.</p>
       </div>
     </section>
 
@@ -304,6 +321,13 @@ const example = {
     background-size: 24px 24px;
     opacity: 0.3;
     mask-image: linear-gradient(#000, transparent);
+    animation: background-drift 24s linear infinite;
+  }
+  @keyframes background-drift {
+    to { background-position: 24px 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-grid::before { animation: none; }
   }
 </style>
 
@@ -311,37 +335,97 @@ const example = {
   const installButton = document.getElementById("copy-install");
   const installLabel = document.getElementById("copy-install-label");
   const installCommand = document.getElementById("install-command");
-  const runtimePicker = document.querySelector<HTMLSelectElement>("#install-runtime");
+  const menuToggle = document.querySelector<HTMLButtonElement>("#setup-menu-toggle");
+  const menu = document.getElementById("setup-menu");
+  const choices = [...document.querySelectorAll<HTMLButtonElement>("#setup-menu [role=menuitemradio]")];
+  let selected = choices[0];
+  function closeSetupMenu() {
+    if (menu) menu.hidden = true;
+    menuToggle?.setAttribute("aria-expanded", "false");
+  }
+  function openSetupMenu() {
+    if (menu) menu.hidden = false;
+    menuToggle?.setAttribute("aria-expanded", "true");
+    selected?.focus();
+  }
+  menuToggle?.addEventListener("click", () => menu?.hidden ? openSetupMenu() : closeSetupMenu());
+  menuToggle?.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); openSetupMenu(); }
+  });
+  menu?.addEventListener("keydown", (event) => {
+    const index = choices.indexOf(document.activeElement as HTMLButtonElement);
+    if (event.key === "Escape") { closeSetupMenu(); menuToggle?.focus(); }
+    else if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+      event.preventDefault();
+      const next = event.key === "Home" ? 0 : event.key === "End" ? choices.length - 1 : (index + (event.key === "ArrowDown" ? 1 : -1) + choices.length) % choices.length;
+      choices[next].focus();
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!document.getElementById("setup-menu-container")?.contains(event.target as Node)) closeSetupMenu();
+  });
+  document.addEventListener("focusin", (event) => {
+    if (!document.getElementById("setup-menu-container")?.contains(event.target as Node)) closeSetupMenu();
+  });
+  const promptToggle = document.getElementById("view-setup-prompt");
+  const installOutput = document.getElementById("install-output");
+  function showPrompt(show: boolean) {
+    if (installOutput) installOutput.hidden = !show;
+    promptToggle?.setAttribute("aria-expanded", String(show));
+    if (promptToggle) promptToggle.textContent = show ? "Hide prompt" : "View prompt";
+  }
+  promptToggle?.addEventListener("click", () => showPrompt(installOutput?.hidden === true));
+  const setupPrompt = "Install Librarium v2 as a CLI and MCP tool for my coding agent. Read https://librarium.agentsy.build/docs/index.md and https://librarium.agentsy.build/docs/using-with-agents.md. Check that Node.js is at least 22.12, then run `npm install -g librarium@^2` and confirm `librarium --version` reports major version 2. Ask which MCP client and configuration scope I use. Preserve existing servers and register a stdio server named librarium with command `librarium` and args `[\"mcp\"]`; for Claude Code, use `claude mcp add librarium -- librarium mcp` with the agreed scope. Ask which providers I want and guide me through `librarium init` without exposing credentials in chat or source control. Run `librarium doctor` without --live and verify MCP discovery with list_providers and list_groups. Do not run research or make paid provider calls without my approval. Summarize the installation, client configuration, and any remaining credential setup.";
   let copyFeedbackTimeout: ReturnType<typeof setTimeout>;
-  const installStatus = () => runtimePicker?.value.startsWith("composer")
-    ? "Use this command after a compatible package release."
-    : "Build from a reviewed v2 checkout. npm latest is still v1.";
-  runtimePicker?.addEventListener("change", () => {
-    if (installCommand) installCommand.textContent = runtimePicker.value;
+  function selectSetup(option: HTMLButtonElement) {
+    selected = option;
+    const agent = option.dataset.value === "agent";
+    for (const choice of choices) choice.setAttribute("aria-checked", String(choice === option));
+    if (promptToggle) promptToggle.hidden = !agent;
+    showPrompt(!agent);
+    if (installCommand) installCommand.textContent = agent ? setupPrompt : option.dataset.value!;
+    const prefix = document.getElementById("install-prefix");
+    if (prefix) prefix.hidden = agent;
+    installButton?.setAttribute("aria-label", agent ? "Copy setup prompt" : "Copy install command");
+    installButton?.setAttribute("title", agent ? "Copy setup prompt" : "Copy install command");
+    const actionLabel = document.getElementById("copy-action-label");
+    if (actionLabel) actionLabel.textContent = option.dataset.copyLabel!;
     clearTimeout(copyFeedbackTimeout);
     if (installButton) installButton.dataset.copyState = "idle";
-    if (installLabel) installLabel.textContent = installStatus();
-    const option = runtimePicker.selectedOptions[0];
-    document.getElementById("install-runtime-logo")?.setAttribute("src", `/languages/${option.dataset.logo}.svg`);
-    document.getElementById("install-runtime-choice")?.setAttribute("data-runtime", option.dataset.logo!);
+    if (installLabel) installLabel.textContent = "";
     const href = option.dataset.href!;
     document.getElementById("setup-primary")?.setAttribute("href", href);
     document.getElementById("install-methods")?.setAttribute("href", href);
+  }
+  for (const choice of choices) choice.addEventListener("click", () => {
+    selectSetup(choice);
+    closeSetupMenu();
+    menuToggle?.focus();
   });
+  if (selected) selectSetup(selected);
   installButton?.addEventListener("click", async () => {
     if (!installCommand?.textContent || !installLabel) return;
+    const copied = installCommand.textContent.trim();
     clearTimeout(copyFeedbackTimeout);
     try {
-      await navigator.clipboard.writeText(installCommand.textContent.trim());
-      installLabel.textContent = "Copied";
+      await navigator.clipboard.writeText(copied);
+      if (installCommand.textContent.trim() !== copied) return;
+      installLabel.textContent = selected?.dataset.value === "agent" ? "Copied. Paste into your coding agent." : "Copied";
       installButton.dataset.copyState = "success";
     } catch {
+      if (installCommand.textContent.trim() !== copied) return;
+      showPrompt(true);
+      document.getElementById("install-output")?.focus();
+      const range = document.createRange();
+      range.selectNodeContents(installCommand);
+      window.getSelection()?.removeAllRanges();
+      window.getSelection()?.addRange(range);
       installLabel.textContent = "Select text to copy";
       installButton.dataset.copyState = "error";
     }
     copyFeedbackTimeout = setTimeout(() => {
       installButton.dataset.copyState = "idle";
-      installLabel.textContent = installStatus();
+      installLabel.textContent = "";
     }, 2000);
   });
 

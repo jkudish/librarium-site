@@ -146,6 +146,21 @@ for (const fact of ["47 configured Profiles", "Six are DataForSEO", "remaining 4
   assert(phpGroups.includes(fact), `PHP group docs are missing: ${fact}`);
 }
 
+const v2AvailabilityHedges = [
+  /\b(?:until|before|after|once|if|when)\b[^\n.]{0,120}\bv2\b[^\n.]{0,120}\b(?:available|publish(?:ed|ing)?|release)\b/i,
+  /\bv2\b[^\n.]{0,120}\b(?:until|before|after|once|if|when)\b[^\n.]{0,120}\b(?:available|publish(?:ed|ing)?|release)\b/i,
+  /\b(?:reviewed|unpublished) (?:v2 )?source checkout\b/i,
+  /\bsource-(?:only|install(?:ation)?)\b/i,
+  /\bsource installation boundary\b/i,
+  /\b(?:check|confirm|verify|see) (?:whether|if) [^\n.]{0,80}\bv2\b[^\n.]{0,80}\b(?:available|published)\b/i,
+  /npm install -g \.(?:\s|`|<|$)/i,
+];
+function assertNoV2AvailabilityHedges(copy, label) {
+  for (const pattern of v2AvailabilityHedges) {
+    assert(!pattern.test(copy), `${label} contains a v2 availability hedge: ${pattern}`);
+  }
+}
+
 for (const stale of [
   "40 public profiles",
   "parallel/chat",
@@ -166,12 +181,11 @@ for (const stale of [
 ]) {
   assert(!publicCopy.includes(stale), `stale public copy found: ${stale}`);
 }
+assertNoV2AvailabilityHedges(publicCopy, "public source copy");
 assert(!providerDocs.includes("perplexity-advanced-deep"), "retired Perplexity IDs must not appear in the active provider roster");
 for (const command of [
-  "npm ci",
-  "npm run build",
-  "npm install -g .",
-  "npm install -g librarium",
+  "npm install -g librarium@^2",
+  "librarium --version",
   "brew install jkudish/tap/librarium",
   "curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh",
   "librarium init",
@@ -179,6 +193,9 @@ for (const command of [
   'librarium run "current guidance for HTTP caching" --group quick',
 ]) {
   assert(gettingStarted.includes(command), `getting started is missing: ${command}`);
+}
+for (const sourceInstallCommand of ["npm ci", "npm run build", "npm install -g ."]) {
+  assert(!gettingStarted.includes(sourceInstallCommand), `getting started must use the published v2 package, not: ${sourceInstallCommand}`);
 }
 assert(publicCopy.includes("A meta harness for research queries"), "the category positioning is missing");
 assert(publicCopy.includes("Give your agent more than one source."), "the approved agent-first hero is missing");
@@ -270,10 +287,14 @@ for (const stale of [
 ]) {
   assert(!generatedPublicCopy.includes(stale), `generated public copy contains release-review text: ${stale}`);
 }
+assertNoV2AvailabilityHedges(generatedPublicCopy, "generated public copy");
 
 for (const file of htmlFiles) {
   const html = readFileSync(file, "utf8");
   const label = relative(distDir, file);
+  const machineHref = html.match(/id="machine-view" href="([^"]+)"/)?.[1];
+  assert(machineHref?.endsWith(".md"), `${label} needs a Machine Markdown destination`);
+  assert(existsSync(join(distDir, machineHref)), `${label} Machine destination must exist`);
   for (const marker of [
     "<title>",
     'name="description"',
@@ -475,8 +496,9 @@ assert(llmsFull.includes(homeMarkdown.trim()), "full agent document must include
 for (const text of ["Give your agent more than one source.", "Two first-party implementations", "composer require jkudish/laravel-ai-librarium", "Amalfi Coast"]) {
   assert(home.includes(text) && homeMarkdown.includes(text), `homepage HTML and Markdown must include ${text}`);
 }
-assert(home.includes("npm ci &amp;&amp; npm run build &amp;&amp; npm install -g ."), "homepage HTML must include the v2 source install command");
-assert(homeMarkdown.includes("npm ci && npm run build && npm install -g ."), "homepage Markdown must include the v2 source install command");
+assert(home.includes("npm install -g librarium"), "homepage HTML must include the npm CLI install command");
+assert(homeMarkdown.includes("npm install -g librarium"), "homepage Markdown must include the npm CLI install command");
+assert(!home.includes("npm install -g ."), "homepage install must not assume a source checkout");
 for (const result of example.results) {
   assert(homeMarkdown.includes(result.content), "homepage Markdown must retain all example findings");
   for (const citation of result.citations) assert(homeMarkdown.includes(citation.url), "homepage Markdown must retain citations");
@@ -484,6 +506,13 @@ for (const result of example.results) {
 assert(!/<(?:script|style|button)\b/.test(homeMarkdown), "homepage Markdown must not contain UI scripts or controls");
 assert(!/>0[1-9](?:\s*\/[^<]*)?</.test(home), "decorative numbered subheadings must be absent");
 assert(home.includes('data-href="/docs/php#install-after-release"'), "PHP setup must target its own installation guide");
+for (const choice of ["cli", "javascript", "laravel", "agent"]) {
+  assert(home.includes(`data-logo="${choice}"`), `setup must offer ${choice} separately`);
+}
+assert(home.includes("19 integrations"), "homepage brand count must use integrations wording");
+assert(home.includes('id="copy-install"') && home.includes('id="install-output"'), "setup needs a shared visible output and copy control");
+assert(home.includes('data-href="/docs/using-with-agents#mcp-server"'), "agent setup must link to MCP instructions");
+assert(home.includes('id="page-format-control" class="fixed '), "page format control must float");
 assert(readFileSync(join(distDir, "docs/php/index.html"), "utf8").includes('id="install-after-release"'));
 for (const route of ["/index.md", "/docs/all.md", "/docs/php/all.md", "/v1/all.md"]) {
   assert(llms.includes(route), `agent index is missing ${route}`);

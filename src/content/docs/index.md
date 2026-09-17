@@ -8,21 +8,12 @@ Librarium is a meta harness for research queries. It sends one query to selected
 
 ## Install
 
-The v2 source instructions below are not instructions for the published v1 CLI. Until matching v2 packages are published, use a reviewed v2 source checkout with Node.js 22.12.0 or newer:
+The published v2 CLI requires Node.js 22.12.0 or newer when installed from npm. Install the v2 major, then confirm the executable version:
 
 ```bash
-# From a reviewed v2 checkout
-npm ci
-npm run build
-npm install -g .
+npm install -g librarium@^2
 librarium --version
 # Must report major version 2
-```
-
-After v2 is published, the normal package channels apply:
-
-```bash
-npm install -g librarium
 ```
 
 Homebrew and standalone binaries include their own runtime; npm installs require Node.js 22.12.0 or newer:

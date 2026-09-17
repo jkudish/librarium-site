@@ -95,26 +95,28 @@ const example = {
           <h1 class="mt-6 text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-7xl lg:text-[88px]">Give your agent more than one source.</h1>
           <p class="mx-auto mt-7 max-w-[60ch] text-lg/8 text-pretty text-neutral-600">Query search engines, AI answers, and deep-research APIs from one interface. Keep the results and citations together, without building a separate integration for every provider.</p>
           <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <a id="setup-primary" href="/docs#install" class="rounded-md bg-neutral-950 px-5 py-3 text-base font-medium text-white hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">Set up Librarium</a>
+            <a id="setup-primary" href="/docs#install" class="rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">Set up Librarium</a>
             <a href="#research-example" class="px-3 py-3 text-base font-medium text-neutral-700 hover:text-neutral-950 sm:text-sm">See an example <Icon name="arrowUpRight" class="inline-block" /></a>
           </div>
           <div class="mx-auto mt-7 max-w-2xl">
-            <div class="relative inline-flex items-stretch rounded-md border border-neutral-200 bg-white text-neutral-700">
-              <button type="button" id="copy-install" aria-label="Copy setup prompt" title="Copy setup prompt" data-copy-state="idle" class="group flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-l-md px-4 text-sm hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
+            <div class="relative inline-flex items-stretch rounded border border-neutral-200 bg-white text-neutral-700">
+              <button type="button" id="copy-install" aria-label="Copy setup prompt" title="Copy setup prompt" data-copy-state="idle" class="group flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-l px-3.5 text-sm hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
                 <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" />
                 <Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]:block" />
                 <span id="copy-action-label">Copy setup prompt</span>
               </button>
               <div id="setup-menu-container" class="border-l border-neutral-200">
-                <button id="setup-menu-toggle" type="button" aria-label="Setup and install options" aria-haspopup="menu" aria-expanded="false" aria-controls="setup-menu" class="flex h-full min-h-11 w-11 cursor-pointer items-center justify-center rounded-r-md hover:bg-neutral-100"><Icon name="caretDown" class="size-4" /></button>
-                <div id="setup-menu" role="menu" aria-label="Setup and install options" hidden class="absolute top-full left-1/2 z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-lg border border-neutral-200 bg-white p-1.5 text-left shadow-lg dark:shadow-none">
+                <button id="setup-menu-toggle" type="button" aria-label="Setup and install options" aria-haspopup="menu" aria-expanded="false" aria-controls="setup-menu" class="flex h-full min-h-10 w-10 cursor-pointer items-center justify-center rounded-r hover:bg-neutral-100"><Icon name="caretDown" class="size-4" /></button>
+                <div id="setup-menu" role="menu" aria-label="Setup and install options" hidden class="absolute top-full left-1/2 z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded border border-neutral-200 bg-white p-1 text-left shadow-lg dark:shadow-none">
                   {[
                     { id: "agent", label: "Agent setup prompt", copy: "Copy setup prompt", value: "agent", href: "/docs/using-with-agents#mcp-server" },
                     { id: "cli", label: "CLI install", copy: "Copy CLI install", value: "npm install -g librarium", href: "/docs#install" },
                     { id: "javascript", label: "JavaScript / TypeScript", copy: "Copy JavaScript install", value: "npm install librarium@^2", href: "/javascript" },
                     { id: "laravel", label: "Laravel install", copy: "Copy Laravel install", value: "composer require jkudish/laravel-ai-librarium", href: "/docs/php#install-after-release" },
-                  ].map((choice) => (
-                    <button type="button" role="menuitemradio" aria-checked={choice.id === "agent" ? "true" : "false"} tabindex="-1" data-logo={choice.id} data-value={choice.value} data-copy-label={choice.copy} data-href={choice.href} class="group flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100">
+                  ].map((choice, index) => (
+                    <>
+                      {index === 1 && <hr class="mx-2 my-1 border-neutral-200" />}
+                      <button type="button" role="menuitemradio" aria-checked={choice.id === "agent" ? "true" : "false"} tabindex="-1" data-logo={choice.id} data-value={choice.value} data-copy-label={choice.copy} data-href={choice.href} class="group flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-sm px-3 py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100">
                       <span class="flex shrink-0 items-center">
                       {choice.id === "agent" ? (
                         <span class="agent-stack flex shrink-0 -space-x-2" role="img" aria-label="Claude, Codex, and Cursor" title="Claude, Codex, and Cursor">
@@ -126,6 +128,7 @@ const example = {
                       </span>
                       <span class="flex-1 whitespace-nowrap">{choice.label}</span><Icon name="check" class="invisible size-4 group-aria-checked:visible" />
                     </button>
+                    </>
                   ))}
                 </div>
               </div>
@@ -294,7 +297,7 @@ const example = {
           <p class="mt-6 max-w-[50ch] text-base/7 text-pretty text-neutral-800">Install Librarium, connect your providers, and preview your first query. Use it yourself or hand the research to your agent.</p>
         </div>
         <div class="lg:justify-self-end">
-          <a href="#library" class="inline-block rounded-md bg-neutral-950 px-5 py-3 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">Set up Librarium</a>
+          <a href="#library" class="inline-block rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">Set up Librarium</a>
         </div>
       </div>
     </section>

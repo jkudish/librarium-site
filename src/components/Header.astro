@@ -28,7 +28,7 @@ const links = [
       </div>
       <a
         href="https://github.com/jkudish/librarium"
-        class="flex items-center gap-x-2 rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3"
+        class="flex items-center gap-x-2 rounded px-3 py-1.5 text-sm font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3"
       >
         <Icon name="githubLogo" class="size-4" />
         GitHub
@@ -46,7 +46,7 @@ const links = [
       <button
         type="button"
         id="menu-toggle"
-        class="relative -mr-2 rounded-lg p-2 text-neutral-600 hover:bg-neutral-950/3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 md:hidden"
+        class="relative -mr-2 rounded p-2 text-neutral-600 hover:bg-neutral-950/3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 md:hidden"
         aria-label="Open menu"
         aria-expanded="false"
         aria-controls="mobile-menu"
@@ -59,7 +59,7 @@ const links = [
   <div id="mobile-menu" hidden class="border-t border-neutral-950/10 md:hidden!">
     <nav class="mx-auto flex max-w-6xl flex-col gap-y-1 px-4 py-3" aria-label="Mobile navigation">
       {links.map((link) => (
-        <a href={link.href} class="rounded-lg px-2 py-2 text-base text-neutral-700 hover:bg-neutral-950/3 hover:text-neutral-950">{link.label}</a>
+        <a href={link.href} class="rounded-sm px-2 py-2 text-base text-neutral-700 hover:bg-neutral-950/3 hover:text-neutral-950">{link.label}</a>
       ))}
     </nav>
   </div>

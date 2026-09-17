@@ -12,6 +12,9 @@ interface Props {
   description?: string;
   robots?: string;
   includeSoftwareMetadata?: boolean;
+  /** Homepage passes its ivory page color so the hero's negative-z dotted
+      background can paint above the canvas and below all page content. */
+  bodyClass?: string;
 }
 
 const {
@@ -19,6 +22,7 @@ const {
   description = "Librarium fans one research query out to search engines, AI-grounded answers, and deep-research APIs in parallel, then merges everything into one structured output.",
   robots,
   includeSoftwareMetadata = true,
+  bodyClass = "bg-white",
 } = Astro.props;
 
 const canonical = Astro.site
@@ -108,7 +112,7 @@ const jsonLd = JSON.stringify([
       rel="stylesheet"
     />
   </head>
-  <body class="bg-white font-sans text-neutral-600">
+  <body class:list={["font-sans text-neutral-600", bodyClass]}>
     <div class="isolate">
       <slot />
     </div>

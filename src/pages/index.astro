@@ -83,8 +83,8 @@ const example = {
 };
 ---
 
-<Base title="librarium — give your agent more than one source" description="Query search engines, AI answers, and deep-research APIs from one interface. Keep results and citations together with Librarium’s CLI, MCP server, and library.">
-  <div class="bg-[#faf9f6]">
+<Base title="librarium — give your agent more than one source" description="Query search engines, AI answers, and deep-research APIs from one interface. Keep results and citations together with Librarium’s CLI, MCP server, and library." bodyClass="bg-[#faf9f6]">
+  <div>
   <Header />
 
   <main>
@@ -107,7 +107,7 @@ const example = {
               </button>
               <div id="setup-menu-container" class="border-l border-neutral-200">
                 <button id="setup-menu-toggle" type="button" aria-label="Setup and install options" aria-haspopup="menu" aria-expanded="false" aria-controls="setup-menu" class="flex h-full min-h-10 w-10 cursor-pointer items-center justify-center rounded-r hover:bg-neutral-100"><Icon name="caretDown" class="size-4" /></button>
-                <div id="setup-menu" role="menu" aria-label="Setup and install options" hidden class="absolute top-full left-1/2 z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded border border-neutral-200 bg-white p-1 text-left shadow-lg dark:shadow-none">
+                <div id="setup-menu" role="menu" aria-label="Setup and install options" hidden class="absolute top-full left-1/2 z-60 mt-2 w-80 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded border border-neutral-200 bg-white p-1 text-left shadow-lg dark:shadow-none">
                   {[
                     { id: "agent", label: "Agent setup prompt", copy: "Copy setup prompt", value: "agent", href: "/docs/using-with-agents#mcp-server" },
                     { id: "cli", label: "CLI install", copy: "Copy CLI install", value: "npm install -g librarium", href: "/docs#install" },
@@ -308,9 +308,12 @@ const example = {
 </Base>
 
 <style>
+  /* No isolation here: the setup menu needs its z-index to reach the page
+     stacking context so it can layer above the floating page-format control.
+     The dotted ::before stays at z-index -1, above the body canvas and below
+     all page content. */
   .hero-grid {
     position: relative;
-    isolation: isolate;
     background-image: linear-gradient(to right, transparent calc(50% - 576px), #e5e2db calc(50% - 576px), #e5e2db calc(50% - 575px), transparent calc(50% - 575px), transparent calc(50% + 575px), #e5e2db calc(50% + 575px), #e5e2db calc(50% + 576px), transparent calc(50% + 576px));
   }
   .hero-grid::before {

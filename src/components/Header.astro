@@ -164,12 +164,18 @@ const links = [
     const dark = document.documentElement.dataset.theme === "dark";
     themeToggle?.setAttribute("aria-pressed", String(dark));
   };
+  // Every theme change goes through <html data-theme>: the toggle above,
+  // and the OS-preference listener in Base.astro. Watching the attribute
+  // keeps the accessible state correct no matter which path changed it.
+  new MutationObserver(syncThemeToggle).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
   themeToggle?.addEventListener("click", () => {
     const root = document.documentElement;
     const dark = root.dataset.theme !== "dark";
     root.dataset.theme = dark ? "dark" : "light";
     try { localStorage.setItem("librarium-theme", dark ? "dark" : "light"); } catch { /* storage unavailable */ }
-    syncThemeToggle();
   });
   syncThemeToggle();
 </script>

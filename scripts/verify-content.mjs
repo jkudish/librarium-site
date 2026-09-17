@@ -493,9 +493,10 @@ for (const [directory, route, names] of [
 }
 const homeMarkdown = readFileSync(join(distDir, "index.md"), "utf8");
 assert(llmsFull.includes(homeMarkdown.trim()), "full agent document must include the homepage");
-for (const text of ["Give your agent more than one source.", "Two first-party implementations", "composer require jkudish/laravel-ai-librarium", "Amalfi Coast"]) {
+for (const text of ["Give your agent more than one source.", "composer require jkudish/laravel-ai-librarium", "Amalfi Coast"]) {
   assert(home.includes(text) && homeMarkdown.includes(text), `homepage HTML and Markdown must include ${text}`);
 }
+assert(!home.includes("Two first-party implementations"), "the removed first-party eyebrow must stay absent");
 assert(home.includes("npm install -g librarium"), "homepage HTML must include the npm CLI install command");
 assert(homeMarkdown.includes("npm install -g librarium"), "homepage Markdown must include the npm CLI install command");
 assert(!home.includes("npm install -g ."), "homepage install must not assume a source checkout");

@@ -218,8 +218,15 @@ body { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
   .prose blockquote { background: #242522; }
   .prose :is(th, td) { border-color: #3e403a; }
 
-  /* Preserve original brand assets on small light tiles, not filtered images. */
-  img[src^="/providers/"]:not(.agent-stack img) {
+  /* Preserve original brand assets on small light tiles, not filtered images.
+     The integration grid stays monochrome in both themes (#3797). */
+  img[src^="/providers/"].logo-mono {
+    background: #faf9f6;
+    border-radius: 3px;
+    outline: 4px solid #faf9f6;
+    filter: grayscale(1);
+  }
+  img[src^="/providers/"]:not(.agent-stack img):not(.logo-mono) {
     background: #faf9f6;
     border-radius: 3px;
     outline: 4px solid #faf9f6;

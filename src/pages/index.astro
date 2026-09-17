@@ -93,7 +93,7 @@ const example = {
         <div class="relative mx-auto max-w-4xl text-center">
           <p class="text-base text-neutral-600 sm:text-sm">A meta harness for research queries</p>
           <h1 class="mt-6 text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-7xl lg:text-[88px]">Give your agent more than one source.</h1>
-          <p class="mx-auto mt-7 max-w-[60ch] text-lg/8 text-pretty text-neutral-600">Query search engines, AI answers, and deep-research APIs from one interface. Keep the results and citations together, without building a separate integration for every provider.</p>
+          <p class="mx-auto mt-7 max-w-[60ch] text-lg/8 text-pretty text-neutral-600">Use librarium to query search engines, check AI answers, and deep-research APIs. Review the results and citations together, without building a separate integration for every provider.</p>
           <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
             <a id="setup-primary" href="/docs#install" class="rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">Set up Librarium</a>
             <a href="#research-example" class="px-3 py-3 text-base font-medium text-neutral-700 hover:text-neutral-950 sm:text-sm">See an example <Icon name="arrowUpRight" class="inline-block" /></a>
@@ -133,11 +133,14 @@ const example = {
                 </div>
               </div>
             </div>
-            <div><button id="view-setup-prompt" type="button" aria-expanded="false" aria-controls="install-output" class="mt-1 cursor-pointer py-2 text-xs text-neutral-500 underline underline-offset-4">View prompt</button></div>
+            <div class="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-base sm:text-sm">
+              <button id="view-setup-prompt" type="button" aria-expanded="false" aria-controls="install-output" class="cursor-pointer py-1 text-neutral-500 underline underline-offset-4 hover:text-neutral-950">View prompt</button>
+              <span id="view-prompt-separator" aria-hidden="true" class="text-neutral-400">·</span>
+              <a id="install-methods" href="/docs#install" class="py-1 text-neutral-500 underline decoration-neutral-300 underline-offset-4 hover:text-neutral-950">Installation guide</a>
+            </div>
             <p id="install-output" hidden tabindex="0" class="mt-3 whitespace-pre-wrap break-words rounded border border-neutral-200 bg-[#faf9f6] p-4 text-left font-mono text-sm/7 text-neutral-800"><span id="install-prefix" hidden class="text-neutral-400 select-none">$ </span><span id="install-command"></span></p>
           </div>
           <p id="copy-install-label" aria-live="polite" class="mt-1 text-base text-neutral-600 empty:sr-only sm:text-sm"></p>
-          <a id="install-methods" href="/docs#install" class="mt-2 inline-block py-1 text-base text-neutral-500 underline decoration-neutral-300 underline-offset-4 hover:text-neutral-950 sm:text-sm">Installation guide</a>
           <noscript><a href="/docs/php" class="mt-3 inline-block text-amber-700 underline">PHP / Laravel installation</a></noscript>
         </div>
 
@@ -236,14 +239,13 @@ const example = {
         <ul class="mt-12 grid grid-cols-2 border-t border-l border-neutral-200 sm:grid-cols-3 lg:grid-cols-6" aria-label="Supported provider families">
           {featuredProviders.map((provider) => (
             <li class="flex flex-col items-center justify-center gap-3 border-r border-b border-neutral-200 px-3 py-7">
-              <img src={`/providers/${provider.logo}.${["you", "serpapi", "dataforseo"].includes(provider.logo) ? "png" : "svg"}`} alt="" width="28" height="28" loading="lazy" class="size-7 shrink-0 grayscale" />
+              <img src={`/providers/${provider.logo}.${["you", "serpapi", "dataforseo"].includes(provider.logo) ? "png" : "svg"}`} alt="" width="28" height="28" loading="lazy" class="logo-mono size-7 shrink-0 grayscale" />
               <span class="text-base text-neutral-700 sm:text-sm">{provider.name}</span>
             </li>
           ))}
           <li class="flex items-center justify-center border-r border-b border-neutral-200 bg-[#eeeae0] px-3 py-7 text-center"><a href="/docs/custom-providers" class="text-base text-neutral-800 hover:text-amber-800 sm:text-sm">Your own provider <Icon name="plus" class="mx-auto mt-2 block size-5" /></a></li>
         </ul>
-        <div class="mt-6 flex flex-wrap items-baseline justify-between gap-4">
-          <p class="text-base text-neutral-600 sm:text-sm">Integrations, not endorsements. Bring your own provider keys.</p>
+        <div class="mt-6 flex flex-wrap items-baseline justify-end gap-4">
           <div class="flex gap-5">
             <a href="/docs/providers" class="text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">JavaScript providers <Icon name="arrowUpRight" class="inline-block" /></a>
             <a href="/docs/php/providers" class="text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">PHP providers <Icon name="arrowUpRight" class="inline-block" /></a>
@@ -254,8 +256,7 @@ const example = {
 
     <section class="bg-neutral-950 py-16 sm:py-24" id="library">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <p class="text-base text-amber-200 sm:text-sm">Two first-party implementations</p>
-        <h2 class="mt-4 max-w-[24ch] text-4xl font-medium tracking-tight text-balance text-white sm:text-5xl">
+        <h2 class="max-w-[24ch] text-4xl font-medium tracking-tight text-balance text-white sm:text-5xl">
           Use Librarium where you build.
         </h2>
         <div class="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-3">
@@ -388,6 +389,7 @@ const example = {
     const agent = option.dataset.value === "agent";
     for (const choice of choices) choice.setAttribute("aria-checked", String(choice === option));
     if (promptToggle) promptToggle.hidden = !agent;
+    document.getElementById("view-prompt-separator")?.toggleAttribute("hidden", !agent);
     showPrompt(!agent);
     if (installCommand) installCommand.textContent = agent ? setupPrompt : option.dataset.value!;
     const prefix = document.getElementById("install-prefix");

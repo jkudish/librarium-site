@@ -36,7 +36,7 @@ Librarium has first-party JavaScript/TypeScript and PHP/Laravel implementations.
 
 The JavaScript implementation has ${PROVIDER_COUNT} built-in providers, ${PROFILE_COUNT} public profiles, and four built-in workflows: \`quick\`, \`deep\`, \`visibility\`, and \`all\`.
 
-Until matching v2 distribution is published, build a reviewed source checkout with \`npm ci\`, \`npm run build\`, and \`npm install -g .\`; verify major version 2. Do not use the published v1 CLI for these instructions. Normal package channels apply after v2 publication.
+The v2 distribution is published. npm installs require Node.js 22.12.0 or newer: run \`npm install -g librarium@^2\`, then verify that \`librarium --version\` reports major version 2. Homebrew and standalone binaries include their own runtime.
 
 Run \`librarium init\`, then use offline \`librarium doctor\` and \`librarium plan\` before provider work. Credential presence is not authentication; only \`doctor --live\` tests connectivity and may incur charges. New requests default to concurrent, awaited \`quick\` / \`sync\`, including raw \`exa/search\`. Review provider pricing and v1 migration output before execution or saving config.
 
@@ -58,7 +58,7 @@ Legacy v1 documentation is preserved at ${base}/v1 and marked as legacy. Use the
 
 ## PHP / Laravel
 
-The first-party package is \`jkudish/laravel-ai-librarium\`, requiring PHP 8.4, Laravel 13, and Laravel AI SDK >=0.10.3 <0.12.0. It is not yet stably released; the Composer installation instructions apply after a compatible release. Website publication is held for both implementations' readiness.
+The first-party package is \`jkudish/laravel-ai-librarium\`, requiring PHP 8.4, Laravel 13, and Laravel AI SDK >=0.10.3 <0.12.0. It is not yet stably released; the Composer installation instructions apply after a compatible release. Its release status is independent of the published JavaScript v2 package and documentation.
 
 Use the Laravel facade's \`query()->using()->preview()\` before \`run()\` or \`queue()\`. PHP configures 29 flat Profile IDs: 23 baseline entries with \`enabled: true\`, plus six disabled-by-default DataForSEO entries: \`dataforseo-chatgpt\`, \`dataforseo-chatgpt-live\`, \`dataforseo-gemini\`, \`dataforseo-gemini-live\`, \`dataforseo-google-ai-mode\`, and \`dataforseo-google-ai-mode-live\`. DataForSEO opt-in requires \`DATAFORSEO_LOGIN\`, \`DATAFORSEO_PASSWORD\`, explicit enablement of an exact Profile ID, and required location/language controls. These six do not join \`quick\` or \`visibility\`; paid live acceptance remains pending. PHP uses sequential execution under a shared deadline, encrypted Laravel jobs, transient status, and application-owned persistence. \`php artisan librarium:query --agent\` is preview-only without explicit \`--run\` or \`--queue\`; it is not an MCP server. Hard cost ceilings require complete, current, conservative, single-currency quotes. The package fake retains Profile compilation and validation without provider calls.
 

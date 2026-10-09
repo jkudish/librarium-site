@@ -9,6 +9,22 @@ import {
   PROVIDERS,
   WORKFLOWS,
 } from "../src/data/product.ts";
+import { AGENT_SETUP_PROMPT } from "../src/data/setup-prompt.ts";
+import { RESEARCH_DEMO, renderCapturedMarkdown } from "../src/data/research-demo.ts";
+
+assert.equal(
+  renderCapturedMarkdown('[source](https://example.test/"onmouseover="alert`1`)'),
+  '<p><a href="https://example.test/&quot;onmouseover=&quot;alert`1`" target="_blank" rel="noopener noreferrer">source</a></p>',
+  "provider link quotes must stay inside the href, never become HTML attributes",
+);
+assert.equal(
+  renderCapturedMarkdown('[source](javascript:alert`1`) <img src=x onerror=alert`1`>'),
+  '<p>[source](javascript:alert`1`) &lt;img src=x onerror=alert`1`&gt;</p>',
+  "provider HTML and non-HTTP links must remain inert text",
+);
+for (const result of RESEARCH_DEMO.results.filter((result) => result.title)) {
+  assert.notEqual(result.displayContent.trimStart().split("\n")[0].replace(/^#{1,2} /, ""), result.title, "the readable report must not repeat its title");
+}
 
 const root = resolve(import.meta.dirname, "..");
 const docsDir = join(root, "src/content/docs");
@@ -101,6 +117,9 @@ const publicSources = [
   join(root, "src/components/Header.astro"),
   join(root, "src/components/DocsVersionPicker.astro"),
   join(root, "src/components/Footer.astro"),
+  join(root, "src/content/pages/agents.md"),
+  join(root, "src/content/pages/cli.md"),
+  join(root, "src/content/pages/cli-mcp.md"),
 ];
 const publicCopy = publicSources.map((file) => readFileSync(file, "utf8")).join("\n");
 const gettingStarted = readFileSync(join(docsDir, "index.md"), "utf8");
@@ -146,6 +165,21 @@ for (const fact of ["47 configured Profiles", "Six are DataForSEO", "remaining 4
   assert(phpGroups.includes(fact), `PHP group docs are missing: ${fact}`);
 }
 
+const v2AvailabilityHedges = [
+  /\b(?:until|before|after|once|if|when)\b[^\n.]{0,120}\bv2\b[^\n.]{0,120}\b(?:available|publish(?:ed|ing)?|release)\b/i,
+  /\bv2\b[^\n.]{0,120}\b(?:until|before|after|once|if|when)\b[^\n.]{0,120}\b(?:available|publish(?:ed|ing)?|release)\b/i,
+  /\b(?:reviewed|unpublished) (?:v2 )?source checkout\b/i,
+  /\bsource-(?:only|install(?:ation)?)\b/i,
+  /\bsource installation boundary\b/i,
+  /\b(?:check|confirm|verify|see) (?:whether|if) [^\n.]{0,80}\bv2\b[^\n.]{0,80}\b(?:available|published)\b/i,
+  /npm install -g \.(?:\s|`|<|$)/i,
+];
+function assertNoV2AvailabilityHedges(copy, label) {
+  for (const pattern of v2AvailabilityHedges) {
+    assert(!pattern.test(copy), `${label} contains a v2 availability hedge: ${pattern}`);
+  }
+}
+
 for (const stale of [
   "40 public profiles",
   "parallel/chat",
@@ -166,12 +200,11 @@ for (const stale of [
 ]) {
   assert(!publicCopy.includes(stale), `stale public copy found: ${stale}`);
 }
+assertNoV2AvailabilityHedges(publicCopy, "public source copy");
 assert(!providerDocs.includes("perplexity-advanced-deep"), "retired Perplexity IDs must not appear in the active provider roster");
 for (const command of [
-  "npm ci",
-  "npm run build",
-  "npm install -g .",
-  "npm install -g librarium",
+  "npm install -g librarium@^2",
+  "librarium --version",
   "brew install jkudish/tap/librarium",
   "curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh",
   "librarium init",
@@ -180,11 +213,31 @@ for (const command of [
 ]) {
   assert(gettingStarted.includes(command), `getting started is missing: ${command}`);
 }
+for (const sourceInstallCommand of ["npm ci", "npm run build", "npm install -g ."]) {
+  assert(!gettingStarted.includes(sourceInstallCommand), `getting started must use the published v2 package, not: ${sourceInstallCommand}`);
+}
 assert(publicCopy.includes("A meta harness for research queries"), "the category positioning is missing");
 assert(publicCopy.includes("Give your agent more than one source."), "the approved agent-first hero is missing");
 assert(publicCopy.includes("without building a separate integration for every provider."), "the approved hero body is missing");
-assert(publicCopy.includes('{ href: "/#features", label: "Features" }'), "the handwritten Features navigation is missing");
+assert(!readFileSync(join(root, "src/components/Header.astro"), "utf8").includes('href: "/#features"'), "Features must not appear in the header navigation");
 assert(publicCopy.includes('{ href: "/#providers", label: "Providers" }'), "the handwritten Providers navigation is missing");
+assert(publicCopy.includes('{ href: "/agents", label: "Agents & MCP" }'), "the handwritten Agents & MCP navigation is missing");
+assert(publicCopy.includes('{ href: "/cli", label: "CLI" }'), "the handwritten CLI navigation is missing");
+assert(readFileSync(join(root, "src/content/pages/agents.md"), "utf8").includes(AGENT_SETUP_PROMPT), "the Agents & MCP page must embed the canonical setup prompt verbatim");
+// The dark palette has two synchronized gates: explicit <html data-theme="dark">
+// and the script-free OS-preference fallback. Fail if their bodies drift.
+const globalCss = readFileSync(join(root, "src/styles/global.css"), "utf8");
+const darkGateBody = (opener, closer) => {
+  const start = globalCss.indexOf(opener);
+  assert(start !== -1, `global.css is missing the dark gate ${opener}`);
+  const end = globalCss.indexOf(closer, start);
+  assert(end !== -1, `global.css dark gate ${opener} is not closed`);
+  return globalCss.slice(start + opener.length, end).split("\n").map((line) => line.trim()).filter(Boolean).join("\n");
+};
+assert(
+  darkGateBody(':root[data-theme="dark"] {', "\n}") === darkGateBody(":root:not([data-theme]) {", "\n  }"),
+  "the explicit and no-JS dark gates in global.css must carry identical bodies; update both blocks together",
+);
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.md'), "output docs must describe collision-resistant provider markdown names");
 assert(outputFormats.includes('provider-${stem}--${sha256(providerId)}.meta.json'), "output docs must describe collision-resistant provider metadata names");
 assert(outputFormats.includes("`run.json` owns the concrete `outputFile` and `metaFile` names"), "output docs must make run.json authoritative for provider artifact names");
@@ -270,10 +323,14 @@ for (const stale of [
 ]) {
   assert(!generatedPublicCopy.includes(stale), `generated public copy contains release-review text: ${stale}`);
 }
+assertNoV2AvailabilityHedges(generatedPublicCopy, "generated public copy");
 
 for (const file of htmlFiles) {
   const html = readFileSync(file, "utf8");
   const label = relative(distDir, file);
+  const machineHref = html.match(/id="machine-view" href="([^"]+)"/)?.[1];
+  assert(machineHref?.endsWith(".md"), `${label} needs a Machine Markdown destination`);
+  assert(existsSync(join(distDir, machineHref)), `${label} Machine destination must exist`);
   for (const marker of [
     "<title>",
     'name="description"',
@@ -306,6 +363,8 @@ for (const file of ["llms.txt", "llms-full.txt", "robots.txt", "sitemap-index.xm
 }
 
 const home = readFileSync(join(distDir, "index.html"), "utf8");
+// Entity-decoded homepage text for comparing against captured fixture wording.
+const homeText = home.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 assert(!home.includes('href="/v1'), "legacy navigation belongs in the docs version picker");
 assert(!home.includes("librarium live-validation"), "homepage must show research rather than validation internals");
 assert.equal((home.match(/>Set up Librarium<\/a>/g) ?? []).length, 2, "hero and final section must offer setup");
@@ -315,20 +374,101 @@ assert(readFileSync(join(distDir, "docs/index.html"), "utf8").includes('id="inst
 assert(home.indexOf('id="features"') < home.indexOf('id="providers"'), "use cases must precede the provider catalog");
 assert(!home.includes("Sample findings, not captured provider responses."), "removed sample footer must stay absent");
 assert(!home.includes("A question worth exploring") && !home.includes("3 linked sources"), "removed example header labels must stay absent");
-assert(home.includes("Not the full API response schema."), "simplified demo JSON must be labelled");
+assert(home.includes("not the full API response schema"), "simplified demo JSON must be labelled");
 const exampleCode = home.match(/<pre[^>]*><code\b[^>]*>([\s\S]*?)<\/code><\/pre>/)?.[1];
 assert(exampleCode, "the JSON view must be statically rendered");
 const example = JSON.parse(exampleCode.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"));
 assert.equal(example.illustrative, true);
-assert.equal(example.results.length, 3);
-for (const result of example.results) {
-  assert(profiles.includes(result.profile), `example references unknown profile ${result.profile}`);
-  assert(home.includes(result.content), "readable and JSON views must share their findings");
-  for (const citation of result.citations) {
-    assert.equal(new URL(citation.url).protocol, "https:");
-    assert(home.includes(`href="${citation.url}"`), "each example citation must be inspectable");
+assert.equal(example.query, "What are the best alternatives to Google Analytics?", "the approved demo question is missing");
+assert.equal(example.results.length, 5, "the demo must cover Exa, Perplexity, Gemini, Parallel, and You.com");
+assert.deepEqual(example.results.map((result) => result.provider), ["Exa", "Perplexity Research (Agent API)", "Gemini", "Parallel", "You.com"]);
+// The capture roster fixed by the collector's preflight: deep-research profiles only.
+assert.equal(example.mode, "deep-research", "the demo must be labeled as captured deep-research examples");
+assert.deepEqual(
+  example.results.map((result) => result.profile),
+  ["exa/research", "perplexity-sonar-deep/research", "gemini-deep/research", "parallel/research", "you-research/research"],
+  "demo profiles must match the authorized capture roster exactly",
+);
+// The capture is complete: all five providers succeeded (Exa via exactly one
+// authorized fresh submission after a credential refresh).
+assert.equal(example.fixture, "captured", "the demo must carry the captured fixture marker");
+assert.equal(example.results.filter((result) => result.status === "ok").length, 5, "all five providers succeeded in the final capture");
+const capturedFixture = JSON.parse(readFileSync(join(root, "src/data/provider-display-fixture.json"), "utf8"));
+const hostname = (url) => new URL(url).hostname;
+for (const captured of capturedFixture.results) {
+  if (captured.status !== "succeeded") continue;
+  const rendered = example.results.find((result) => result.profile === captured.profile);
+  assert(rendered && rendered.content === captured.content, `captured ${captured.provider} wording must ship verbatim in the demo data`);
+  // Readable cards may drop a leading H1 that duplicates the card title and
+  // render markdown structurally; compare on flattened text and require the
+  // rendering to leave no raw markdown syntax in the readable panel.
+  const displayed = captured.title && (captured.content.startsWith(`# ${captured.title}`) || captured.content.startsWith(`## ${captured.title}`))
+    ? captured.content.split("\n").slice(1).join("\n")
+    : captured.content;
+  const flattenAll = (text) => text.replace(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g, " $2 $1 ").replace(/<[^>]*>/g, " ").replace(/[\\`#*>\-[\]()|]/g, " ").replace(/\s+/g, " ");
+  assert(flattenAll(homeText).includes(flattenAll(displayed)), `captured ${captured.provider} wording must be displayed`);
+  for (const citation of captured.citations.slice(0, 3)) {
+    const label = citation.title ?? hostname(citation.url);
+    assert(rendered.citations.some((shown) => shown.title === label && shown.url === citation.url), `citation ${label} must keep its captured title or hostname label`);
+    assert(homeText.includes(citation.url), `citation ${citation.url} must be inspectable`);
   }
 }
+const readablePanel = home.slice(home.indexOf('id="example-readable"'), home.indexOf('id="example-json"'));
+assert(readablePanel.includes("<strong>") && readablePanel.includes("<table>"), "captured markdown must render structurally in the readable panel");
+assert(!readablePanel.includes("**"), "no raw markdown bold syntax may remain in the readable panel");
+assert(homeText.includes(">matomo.org<") || homeText.includes("matomo.org"), "null citation titles must display derived hostnames, never invented titles");
+// Perplexity provenance: Agent API label with the provider-reported observed model; never a "Sonar" model claim.
+assert(homeText.includes("Perplexity Research (Agent API)"), "Perplexity must carry the honest Agent API label");
+assert(homeText.includes("observed model openai/gpt-5.6-sol (provider-reported)"), "the observed model must appear in metadata as provider-reported");
+assert(!homeText.includes("Sonar model") && !homeText.includes("Sonar Deep Research"), "the observed model must never be called Sonar");
+// Real wall-clock timings and the no-speed-claim boundary.
+// Real wall-clock durations pinned to the capture; dates and profile/model
+// metadata stay in the JSON provenance, not the readable header.
+assert(homeText.includes(">1m 01s<") && homeText.includes(">5m 07s<") && homeText.includes(">2m 02s<"), "per-card wall-clock timings must be pinned to the capture");
+assert(!homeText.includes("captured 2026-09-18"), "the readable header shows duration only, not the captured date");
+assert(!readablePanel.includes("processor pro") && !readablePanel.includes("observed model"), "profile and model metadata stay out of the readable panel");
+assert(!home.includes("hero-canvas"), "the hero backdrop must stay removed");
+assert(!home.includes("Put the evidence to work."), "the removed slogan must stay absent");
+assert(!home.includes("Captured deep-research examples from one authorized run"), "the removed demo caption paragraph must stay absent");
+// Agent prompts stay portable ("the Librarium skill") and shell-free; CLI
+// commands stay separate rows, each an offline preview matching its
+// research question, with verified execution syntax described separately.
+const promptButtons = [...home.matchAll(/<textarea[^>]*data-copy-value="[^"]*"[^>]*>/g)].map((match) => match[0]);
+const agentPromptValues = promptButtons
+  .filter((tag) => tag.includes('aria-label="Agent prompt'))
+  .map((tag) => /data-copy-value="([^"]*)"/.exec(tag)?.[1]?.replace(/&quot;/g, '"').replace(/&amp;/g, "&"))
+  .filter(Boolean);
+assert.equal(agentPromptValues.length, 3, "each use case needs a copyable agent prompt");
+for (const prompt of agentPromptValues) {
+  assert(!/librarium (plan|run|install-skill)/.test(prompt), "agent prompts must not embed shell commands");
+  assert(/Librarium(’s)? (skill|MCP tools|visibility workflow)/.test(prompt), "agent prompts must use the portable Librarium phrasing");
+}
+assert(agentPromptValues.some((prompt) => prompt.includes("within the scope and budget I already authorized")), "the staged-escalation prompt must keep authorized-scope escalation approval-free");
+assert(agentPromptValues.some((prompt) => prompt.includes("come from librarium configuration")), "the MCP prompt must state budgets and fallbacks come from configuration, not the research tool");
+const commandValues = promptButtons
+  .filter((tag) => tag.includes('aria-label="Offline preview command"'))
+  .map((tag) => /data-copy-value="([^"]*)"/.exec(tag)?.[1]?.replace(/&quot;/g, '"').replace(/&amp;/g, "&"))
+  .filter(Boolean);
+assert.equal(commandValues.length, 3, "each use case needs a copyable CLI command");
+for (const command of commandValues) {
+  assert(/^librarium plan ".*" --group (deep|visibility|quick) --json$/.test(command), `every use-case command must be a matching offline plan preview: ${command.slice(0, 60)}`);
+}
+assert(homeText.includes('librarium run "SQLite or Postgres for a small team app?" --group deep --mode async'), "the deep use case must show its own verified run command");
+assert(homeText.includes('run "Which luxury villa rental services'), "the visibility use case must show its own run command");
+assert(homeText.includes('librarium run "Research the API’s authentication, rate limits, and retry guidance" --group quick --mode sync'), "the quick use case must show its own verified run command");
+assert(!homeText.includes('librarium run "…"'), "run examples must carry each question's real group, not a generic quick placeholder");
+// Provider tabs: compact logo+name selectors with one result panel at a time.
+assert.equal((home.match(/role="tab" id="demo-tab-/g) ?? []).length, 5, "the demo needs five provider tabs");
+assert.equal((home.match(/role="tabpanel"[^>]*data-demo-panel=/g) ?? []).length, 5, "the demo needs one panel per provider");
+assert(home.includes('aria-label="Provider results"'), "the provider tabs need their tablist label");
+assert(home.includes("<noscript><style>[data-demo-panel]"), "script-free visitors must get every provider panel");
+// Excerpt honesty: the JSON view labels prefixes and claims no archive access.
+assert(home.includes("Excerpts of the captured reports"), "the JSON view must label its content as excerpts");
+assert(home.includes("faithful prefixes"), "the JSON view must say the excerpts are faithful prefixes, not full reports");
+assert(!home.includes("provider-demo archive"), "no reference to the internal collector archive may appear");
+assert(!home.includes("Captured deep-research examples"), "the removed demo caption must stay absent");
+assert(!home.includes("nothing about other profiles"), "the removed demo caption paragraph must stay absent");
+assert(home.includes('aria-label="Captured research demo'), "the demo region must still be labeled as captured playback, not live");
 const logoPaths = [...home.matchAll(/src="(\/providers\/[^\"]+\.(?:svg|png))"/g)].map((match) => match[1]);
 assert.equal(new Set(logoPaths).size, 19, "expected every JS brand plus PHP's DataForSEO mark");
 for (const provider of PROVIDERS) {
@@ -405,9 +545,42 @@ for (const route of ["guides/first-query", "guides/agent-research", "guides/lara
   assert(guideIndex.includes(`href="/${route}"`), `guides index must link to ${route}`);
   assert(guideMarkdown.includes(`/${route}.md`), `guides Markdown must link to ${route}`);
 }
-for (const route of ["javascript", "cli-mcp", "laravel"]) {
+for (const route of ["agents", "cli", "javascript", "laravel"]) {
   assert(home.includes(`href="/${route}"`), `homepage must link to dedicated ${route} page`);
 }
+const cliMcpHtml = readFileSync(join(distDir, "cli-mcp/index.html"), "utf8");
+assert(cliMcpHtml.includes('http-equiv="refresh" content="0; url=/cli"'), "the preserved /cli-mcp route must redirect to /cli");
+assert(cliMcpHtml.includes('rel="canonical" href="https://librarium.agentsy.build/cli"'), "the /cli-mcp redirect must canonicalize to /cli");
+// The agents page documents host-specific MCP registration from authoritative
+// host docs, all five tools with their effects, and no jargon in the intro.
+const agentsHtml = readFileSync(join(distDir, "agents/index.html"), "utf8");
+const agentsText = agentsHtml.replace(/<[^>]*>/g, "");
+for (const spelling of [
+  "claude mcp add librarium -- librarium mcp",
+  "codex mcp add librarium -- librarium mcp",
+  "[mcp_servers.librarium]",
+  "mcpServers",
+  "amp mcp add librarium -- librarium mcp",
+  "mcp_servers:",
+  "opencode.json",
+]) {
+  assert(agentsText.includes(spelling), `the agents page must include the host-specific registration for ${spelling.slice(0, 24)}`);
+}
+for (const tool of ["research", "get_results", "check_async", "list_providers", "list_groups"]) {
+  assert(agentsText.includes(tool), `the agents page must document the ${tool} tool`);
+}
+assert(agentsText.includes("no `plan` tool".replace(/`/g, "")) || agentsText.includes("no plan tool"), "the agents page must state plan is CLI-only");
+assert(agentsText.includes("Input:") && agentsText.includes("Output:"), "each tool needs inputs and outputs");
+assert(!agentsText.includes("verified against"), "host sections must link authoritative docs, not narrate verification");
+for (const link of ["code.claude.com/docs/en/mcp", "developers.openai.com/codex/mcp", "cursor.com/docs/mcp", "opencode.ai/docs/mcp-servers/", "v2.opencode.ai/mcp", "ampcode.com/manual/mcp", "hermes-agent.nousresearch.com/docs/user-guide/features/mcp"]) {
+  assert(agentsHtml.includes(link), `the agents page must inline-link the authoritative host docs at ${link}`);
+}
+assert(!agentsText.includes("already paid for"), "check_async must not promise prior payment; pending charges stay unknown");
+assert(!agentsText.includes("runs no code"), "get_results must state narrowed guarantees, not the removed blanket claim");
+assert(!agentsText.includes("or `mixed`"), "the research mode list must not present mixed as coequal");
+assert(!agentsText.includes("after a person approves the spend"), "research use must reference the authorized scope, not mandatory per-call approval");
+assert(!agentsText.includes("canonical setup prompt"), "the removed jargon phrase must stay absent from the agents page");
+assert(!agentsText.includes("compact index"), "the removed jargon phrase must stay absent from the agents page");
 assert(home.includes("Show the prompt") && !home.includes("See a research brief"));
 for (const eyebrow of ["Provenance", "Cost controls", "Long-running research"]) {
   assert(!home.includes(`>${eyebrow}</p>`), `removed ${eyebrow} eyebrow must stay absent`);
@@ -472,18 +645,31 @@ for (const [directory, route, names] of [
 }
 const homeMarkdown = readFileSync(join(distDir, "index.md"), "utf8");
 assert(llmsFull.includes(homeMarkdown.trim()), "full agent document must include the homepage");
-for (const text of ["Give your agent more than one source.", "Two first-party implementations", "composer require jkudish/laravel-ai-librarium", "Amalfi Coast"]) {
+for (const text of ["Give your agent more than one source.", "composer require jkudish/laravel-ai-librarium", "Amalfi Coast"]) {
   assert(home.includes(text) && homeMarkdown.includes(text), `homepage HTML and Markdown must include ${text}`);
 }
-assert(home.includes("npm ci &amp;&amp; npm run build &amp;&amp; npm install -g ."), "homepage HTML must include the v2 source install command");
-assert(homeMarkdown.includes("npm ci && npm run build && npm install -g ."), "homepage Markdown must include the v2 source install command");
+assert(!home.includes("Two first-party implementations"), "the removed first-party eyebrow must stay absent");
+assert(home.includes("npm install -g librarium"), "homepage HTML must include the npm CLI install command");
+assert(homeMarkdown.includes("npm install -g librarium"), "homepage Markdown must include the npm CLI install command");
+assert(!home.includes("npm install -g ."), "homepage install must not assume a source checkout");
 for (const result of example.results) {
-  assert(homeMarkdown.includes(result.content), "homepage Markdown must retain all example findings");
+  // Captured provider wording is markdown-formatted; the Markdown endpoint
+  // escapes/rewrites markdown syntax, so compare on flattened text.
+  const flatten = (text) => text.replace(/[\\`#*|>\-[\]()]/g, " ").replace(/\s+/g, " ");
+  const flatMarkdown = flatten(homeMarkdown);
+  assert(flatMarkdown.includes(flatten(result.content)), "homepage Markdown must retain all example findings");
   for (const citation of result.citations) assert(homeMarkdown.includes(citation.url), "homepage Markdown must retain citations");
 }
 assert(!/<(?:script|style|button)\b/.test(homeMarkdown), "homepage Markdown must not contain UI scripts or controls");
 assert(!/>0[1-9](?:\s*\/[^<]*)?</.test(home), "decorative numbered subheadings must be absent");
 assert(home.includes('data-href="/docs/php#install-after-release"'), "PHP setup must target its own installation guide");
+for (const choice of ["cli", "javascript", "laravel", "agent"]) {
+  assert(home.includes(`data-logo="${choice}"`), `setup must offer ${choice} separately`);
+}
+assert(home.includes("19 integrations"), "homepage brand count must use integrations wording");
+assert(home.includes('id="copy-install"') && home.includes('id="install-output"'), "setup needs a shared visible output and copy control");
+assert(home.includes('data-href="/docs/using-with-agents#mcp-server"'), "agent setup must link to MCP instructions");
+assert(home.includes('id="page-format-control" class="fixed '), "page format control must float");
 assert(readFileSync(join(distDir, "docs/php/index.html"), "utf8").includes('id="install-after-release"'));
 for (const route of ["/index.md", "/docs/all.md", "/docs/php/all.md", "/v1/all.md"]) {
   assert(llms.includes(route), `agent index is missing ${route}`);

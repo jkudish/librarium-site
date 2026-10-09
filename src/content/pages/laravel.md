@@ -1,17 +1,17 @@
 ---
-title: Give your Laravel agents a research layer.
-description: Bring search, grounded answers, and deep research into the Laravel AI SDK. Keep your agents, tools, and queues—and give them evidence worth inspecting.
+title: Research inside your Laravel app.
+description: Bring search, AI answers, and deep research into the Laravel AI SDK. Preview before spending, queue the long runs, keep every source.
 kind: product
 runtime: laravel
 ctaHref: /docs/php
 ctaLabel: Explore Laravel setup
 ---
 
-## Laravel-native, not a JavaScript wrapper
+## Laravel-native, not a wrapper
 
-Librarium is a first-party Laravel package built on the Laravel AI SDK. Use the facade to collect research, expose the evidence through an agent tool, and move longer work into encrypted Laravel jobs. No Node process or CLI bridge is required.
+This is a first-party Laravel package built on the Laravel AI SDK, not a Node process in disguise. Collect research through the facade, hand it to your agents as a tool, and move long runs into encrypted queue jobs. Your app owns storage and workflows.
 
-It complements the SDK: the SDK owns your agent and model interaction; Librarium supplies research results with citations and provenance. Your application decides what that evidence supports.
+It complements the SDK: the SDK owns your agent and model interaction; librarium supplies research results with their citations attached. Your application decides what that evidence supports.
 
 Requires PHP 8.4, Laravel 13, and Laravel AI SDK `>=0.10.3 <0.12.0`. Composer setup applies after a compatible package release; see [the installation boundary](/docs/php#install-after-release).
 

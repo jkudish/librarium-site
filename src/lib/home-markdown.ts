@@ -13,7 +13,10 @@ export async function serializeHome(): Promise<string> {
   const linked = main.replace(/href="([/#][^"]*)"/g, (_, href: string) =>
     `href="${new URL(href, "https://librarium.agentsy.build/").href}"`,
   ).replaceAll("</a>", "</a> ");
-  return NodeHtmlMarkdown.translate(linked, {
+  // Copyable install controls still carry useful content in Machine view.
+  const withCommands = linked.replace(/<button\b[^>]*data-copy-command="[^"]*"[^>]*>[\s\S]*?<code\b[^>]*>([\s\S]*?)<\/code>\s*<\/button>/g,
+    "<pre><code>$1</code></pre>");
+  return NodeHtmlMarkdown.translate(withCommands, {
     ignore: ["script", "style", "button", "select", "label", "noscript", "img"],
   }) + "\n";
 }

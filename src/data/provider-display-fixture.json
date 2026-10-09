@@ -1,0 +1,634 @@
+{
+  "query": "What are the best alternatives to Google Analytics?",
+  "collectedAt": "2026-09-18T04:11:29.322Z",
+  "scope": {
+    "tier": "deep-research",
+    "note": "Representative deep-research examples: each provider was queried once via its background/durable research-report profile. These are multi-minute research runs, not quick-search responses; do not present retrieval or animation timing as quick-search speed. Other profile types (grounded answers, raw search lists) exist in the catalog and could also be displayed; this selection is a demo scope choice, not a claim they are unsuitable.",
+    "date": "2026-09-18",
+    "tool": "librarium 2.0.0 (built from source snapshot sha256 603212c1be183b2358a544ab1d88c28255e1ede1c2f465dc3881eee2496f6857)"
+  },
+  "results": [
+    {
+      "provider": "exa",
+      "profile": "exa/research",
+      "title": "Best Google Analytics alternatives",
+      "content": "## Best Google Analytics alternatives\n\nThere is no single winner: the right replacement depends on whether you need simple website reporting, privacy/data control, product analytics, UX replay, or enterprise customer-journey analysis.\n\n| Best choice | Choose it when | Why it stands out | Main trade-off |\n|---|---|---|---|\n| **Plausible Analytics** | You want the best default for a content, marketing, SaaS landing, or small-to-medium business site | A deliberately simple, privacy-first web dashboard with goals, funnels, revenue tracking, journeys, scroll depth, custom properties, scheduled reports, and shareable dashboards. It is the strongest general replacement when GA4 feels overcomplicated. [Plausible features](https://plausible.io/features) | It is not designed for person-level behavioral analysis, ad-audience building, or a highly custom raw-event warehouse workflow. |\n…",
+      "citations": [
+        {
+          "title": "What you can do with Plausible",
+          "url": "https://plausible.io/features"
+        },
+        {
+          "title": "Cookieless web analytics",
+          "url": "https://plausible.io/cookieless-web-analytics"
+        },
+        {
+          "title": "List of Features in Matomo Analytics",
+          "url": "https://matomo.org/features/"
+        },
+        {
+          "title": "Self-Hosted Web Analytics On Your Servers",
+          "url": "https://matomo.org/matomo-on-premise/"
+        },
+        {
+          "title": "Product Analytics – Understand your product with PostHog",
+          "url": "https://posthog.com/product-analytics"
+        },
+        {
+          "title": "Self-host PostHog",
+          "url": "https://posthog.com/docs/self-host"
+        },
+        {
+          "title": "Website Analytics Features - Fathom Analytics",
+          "url": "https://usefathom.com/features"
+        },
+        {
+          "title": "Data Collection - Simple Analytics",
+          "url": "https://www.simpleanalytics.com/data-collection"
+        },
+        {
+          "title": "Cloudflare Web Analytics",
+          "url": "https://www.cloudflare.com/web-analytics/"
+        },
+        {
+          "title": "Microsoft Clarity - Free Heatmaps & Session Recordings",
+          "url": "https://clarity.microsoft.com/"
+        },
+        {
+          "title": "Platform - Piwik PRO",
+          "url": "https://piwik.pro/platform/"
+        },
+        {
+          "title": "Adobe Customer Journey Analytics",
+          "url": "https://business.adobe.com/products/customer-journey-analytics/adobe-customer-journey-analytics.html"
+        },
+        {
+          "title": "Amplitude | Product Analytics & Event Tracking Platform",
+          "url": "https://amplitude.com/a"
+        },
+        {
+          "title": "Reports Overview - Mixpanel Docs",
+          "url": "https://docs.mixpanel.com/docs/reports"
+        }
+      ],
+      "status": "succeeded",
+      "content_format": "markdown",
+      "full_response_file": "full-responses/exa-research.md",
+      "full_citations_file": "full-responses/exa-research.citations.json",
+      "collected_at": "2026-09-18T05:11:33.424Z",
+      "wall_clock_ms": 121731,
+      "model": null,
+      "cost_usd": 0.3547,
+      "cost_state": "provider-reported",
+      "history": {
+        "first_submission": {
+          "date": "2026-09-18T04:06:21Z",
+          "attempt_id": "attempt-b1bcedb8-4647-4813-9eda-2a0c0794ad59",
+          "outcome": "failed",
+          "error": {
+            "code": "provider_authentication_failed",
+            "provider_code": "http_401"
+          },
+          "retried": false
+        },
+        "diagnosis": "Provider rejected the then-configured credential (HTTP 401 INVALID_API_KEY class). A trailing newline observed in the old env value was ruled out as the wire-level cause (fetch strips HTTP whitespace; verified by loopback reproduction through the snapshot transport). Root cause: rejected credential/account.",
+        "resolution": "Owner re-provisioned EXA_API_KEY; one fresh submission was explicitly authorized and executed on 2026-09-18T05:09:32Z with the identical query and profile (input fingerprint 08d9a639c4929ea9…, matching the failed attempt) and no retries/fallback."
+      }
+    },
+    {
+      "provider": "perplexity-sonar-deep",
+      "profile": "perplexity-sonar-deep/research",
+      "title": null,
+      "content": "**Best overall:** **Plausible** for most small and midsize websites—it is simple, cookieless, privacy-focused and starts at $9/month. **Matomo** is the closest full-featured GA4 replacement, while **PostHog** is the strongest choice for SaaS and product analytics. [web:16][web:62][web:49]\n\n| Alternative | Best for | Why choose it | Pricing snapshot | Main limitation |\n|---|---|---|---|---|\n| **Plausible Analytics** | Most marketing sites, blogs and small businesses | Clean dashboard, goals and campaigns without cookies, persistent identifiers or cross-site tracking | From **$9/month** | Less granular user-level and product analysis than GA4 [web:16][web:28] |\n…",
+      "citations": [
+        {
+          "title": "Plausible Analytics",
+          "url": "https://plausible.io/"
+        },
+        {
+          "title": "Pricing - Simple Analytics",
+          "url": "https://www.simpleanalytics.com/pricing"
+        },
+        {
+          "title": "Plausible Analytics Pricing 2026: Plans, Costs & Breakdown",
+          "url": "https://checkthat.ai/brands/plausible-analytics/pricing"
+        },
+        {
+          "title": "Compare Pricing Plans - Matomo Ethical Web Analytics",
+          "url": "https://matomo.org/pricing/"
+        },
+        {
+          "title": "Matomo Review 2026 | EuropeanStack",
+          "url": "https://europeanstack.com/software/matomo"
+        },
+        {
+          "title": "Pricing",
+          "url": "https://piwik.pro/pricing/"
+        },
+        {
+          "title": "More analytics value and privacy compliance as you grow - Piwik PRO",
+          "url": "https://piwik.pro/blog/introducing-new-pricing/"
+        },
+        {
+          "title": "Self-Host Web Analytics On-Premise - Matomo",
+          "url": "https://matomo.org/what-is-on-premise/"
+        },
+        {
+          "title": "Pricing - Umami",
+          "url": "https://umami.is/pricing"
+        },
+        {
+          "title": "PostHog pricing – Start free, scale when you need",
+          "url": "https://posthog.com/pricing"
+        },
+        {
+          "title": "PostHog – We make your product self-driving",
+          "url": "https://posthog.com/"
+        },
+        {
+          "title": "pricing.md",
+          "url": "https://posthog.com/pricing.md"
+        },
+        {
+          "title": "Product analytics with autocapture",
+          "url": "https://posthog.com/product-analytics"
+        },
+        {
+          "title": "Pricing",
+          "url": "https://amplitude.com/pricing"
+        },
+        {
+          "title": "Pricing | Amplitude Docs",
+          "url": "https://amplitude.com/docs/pricing"
+        },
+        {
+          "title": "Adobe Analytics | Product Description",
+          "url": "https://helpx.adobe.com/legal/product-descriptions/adobe-analytics.html"
+        },
+        {
+          "title": "Pricing - Clarity",
+          "url": "https://clarity.microsoft.com/pricing"
+        },
+        {
+          "title": "Clarity Overview | Microsoft Learn",
+          "url": "https://learn.microsoft.com/en-us/clarity/setup-and-installation/about-clarity"
+        },
+        {
+          "title": "Adobe CX Analytics Catalog Pricing Guide",
+          "url": "https://business.adobe.com/products/adobe-analytics/pricing.html"
+        },
+        {
+          "title": "Pricing",
+          "url": "https://www.heap.io/pricing"
+        },
+        {
+          "title": "Heap Analytics Pricing: Plans and Real Costs | UserInsight",
+          "url": "https://userinsight.ai/blog/heap-analytics-pricing"
+        },
+        {
+          "title": "Simple and sustainable pricing - Fathom Analytics",
+          "url": "https://usefathom.com/pricing"
+        },
+        {
+          "title": "Tracking Overview - Documentation - Fathom Analytics",
+          "url": "https://usefathom.com/"
+        },
+        {
+          "title": "Website analytics for agencies",
+          "url": "https://usefathom.com/why-fathom-analytics/agency-analytics"
+        },
+        {
+          "title": "Pricing",
+          "url": "https://mixpanel.com/pricing/"
+        },
+        {
+          "title": "Pricing",
+          "url": "https://docs.mixpanel.com/docs/pricing"
+        },
+        {
+          "title": "analytics, less money: Introducing simpler, better pricing from Mixpanel",
+          "url": "https://mixpanel.com/blog/mixpanel-pricing-1m-free-events-autocapture/"
+        },
+        {
+          "title": "Cloudflare's privacy-first Web Analytics is now available for everyone",
+          "url": "https://blog.cloudflare.com/privacy-first-web-analytics/"
+        },
+        {
+          "title": "Cloudflare Web Analytics docs",
+          "url": "https://developers.cloudflare.com/web-analytics/about/"
+        },
+        {
+          "title": "Discovering what's slowing down your website with Web Analytics",
+          "url": "https://blog.cloudflare.com/web-analytics-vitals-explorer/"
+        }
+      ],
+      "content_format": "markdown",
+      "full_response_file": "full-responses/perplexity-sonar-deep.md",
+      "full_citations_file": "full-responses/perplexity-sonar-deep.citations.json",
+      "collected_at": "2026-09-18T04:07:23.162Z",
+      "wall_clock_ms": 61199,
+      "model": "openai/gpt-5.6-sol",
+      "cost_usd": 0.16908,
+      "cost_state": "provider-reported",
+      "status": "succeeded",
+      "provider_product": "Perplexity Research (Agent API, api.perplexity.ai/v1/agent)",
+      "preset": "high",
+      "model_source": "provider-reported (Agent API response root.model; no model override was sent)"
+    },
+    {
+      "provider": "gemini-deep",
+      "profile": "gemini-deep/research",
+      "title": "The Post-GA4 Landscape: Evaluating the Best Alternatives to Google Analytics in 2026",
+      "content": "# The Post-GA4 Landscape: Evaluating the Best Alternatives to Google Analytics in 2026\n\n## The Strategic Shift in Digital Measurement Architecture\n\nThe transition from Universal Analytics to Google Analytics 4 (GA4) represents a foundational restructuring of digital measurement, shifting the industry from a session-based architecture to an event-driven data model [cite: 1, 2]. While this modernization successfully unified cross-platform data collection across web and mobile applications, it introduced profound operational and compliance challenges that have forced organizations to reevaluate their reliance on the Google ecosystem [cite: 3, 4]. By 2026, web analytics has evolved from a narrow technical function into a board-level infrastructure decision intersecting with legal compliance, data sovereignty, and customer acquisition cost calculations [cite: 5]. \n\n…",
+      "citations": [
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFB6aN5kRmb5HxL2DzOwXo0T6FU61rHr9jhcVWSMztYjfNOzjY_J7I2cTiTsGTqEbrVDJLWIu8e57iZwZBYfZhOvcqMHWbJ_1E6sapZvT4FFe8wxtbA1j9T2t8kvw29D9VgabOVpt03tpfXoTS4x7WiTo9Hvxvj2ITtaJ-bmuPwsHBqNAhXB0zE"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG8U8VV2tFPz12PxkC30n0U92Z4_RCrArUPwPVQZV_5sYQBXpuHBnHzon9q-Bo8f4icZkn2p4z0Sqt1XrUjqalPqm3AJGAHIeJ_UrJdgKPkXVpv5w9d1lXPGKAxxbMR10mPhZF7Hvzk9oRA"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQG0QhUrAwro7h6dOW3RoUp5wf1TspqSLmE4_z0b602uZHVJ18phZm5HJUHtjhs0-Vek3iUCc6mwMAUZF7QjyQFzpDmBQ3uJJRodtrtuf4UQPxi-7OrMgndcAhJvpUORXNrGCCFwe-Y1QY1utcD5GLY="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHL6taoQHB7Qidu0QGBXkw315nSckoSrHC-UkftuXTP_Dudlfp44EUN85AJ3pdYOruSIh0PPygpRqiYUPDIZcDuOLbCqn_LROYUlR_aWe3saLSCN35Fk7sQXOI8eCnfRksQfp3lASUhA4KoQAAviU_mQfhKNFNoVRkhT3aoFb-mwDMd0yEtrdS91zjCLaLnr-U5oJJAla9IQVwbPw=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGgCU354IwawGvxRgsdEcQxiFar6x4t9EpgGWdBanMrj86sIkEa6k54HmxbDhm_2cM8BJrEFr6sfBKlA6eHWY6bXVpEjw6_Z5y0Q9igbUnuU33-YevEiEKyUua4MOhND8cArWiYOMPWnB-RWPcDFyp3Jho2cVcMlxzTTGif05QQ2mK5b9NmZOaeEKhrpNq5rj0fyapzoLVxByJ4"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEA3jpZm2mKDFJOuNkliczhSlb4vHx-_Vz38ILzi41UOOPF3K4rjwNDAmzS6cd8-GHHlBhOGDxy3_PEhJ05Ib3M3mwX1xLyISon5OxebBodUtyvEPnw9ieUG3Ugz1nlV34lR0CZlsRCqxj3oQ=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEoJFd_uEJ5ZM912TbbOZTAmClvCX2s1SA5as75Iu_d5IiqM-AsLWdacA8Qyzax6hUT_SB3Kqi2aOtV4YbRkcCdc9M61U99vBd6VPO3EEaPwbD9IyFyqz_WkU_VsvczriFKtHPlk1ZH1n6mHiHpXY5EmD7Th2M8-C_-STMRTxpthrt0w4d_Lcz8WKNWyd9U6Ri0hhRupw=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH4ZM8y-tfWSeU08TmYhSpblrdxZR83rlDrLddXwjQRvsswYHQp6d082Bgd1EquMYyXA8nJ2y_f7b92CQ5Hm5wMQJ0JC7nOfHiuUTO79aBgku3KoPQ1Y3CAvj4W0ZuNKGUCx9djl9OfxJY="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHeYHK1VqNtsuvSrYBWiZGnJIasgvEx8Rka1mWZXMC7F1hRhORe4Mtiaf08H2pqMDDwxNn-m_n9GboYsoNOO3tBQrmYTQowk5e0mBDesO1uvOhBE1q9_f7fiDvb0aPbbgrsIO1AOVt8WGni8gaxdklJ3uGuhvORhwKHeSYQV4CeAKvxkDoWdmJoRWmNafjOyV1zgWSERbAG"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGVUwDCZhnFDY7lLtcA1jAcvAIovPyMY6qlSguxXXTio9_caI0k8uOMAtU1GswyurAQjxfqVkv9zfywdXSskWV41-DcmmC-d4bCVVo5FMaftWD1WprZMdzWUpp8G1Y-KtivGQdLWzkOrEM="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHvyQu3SIz5MVetQ4HTeCna8M2jgnCKwLC6usjRnmLWxdcrrPoP9t0jPDMFY3u8_HnRj4ldvW4cqSdIKzd2RHarJ1i4FHoyk2Rml-80611m0LfXWhgvdo1PPI90q5b037JQaAM-Lat5af5FXEoUmcoCMaF6ftC8gq0fp3VoWu_CAai-VepLTXwFTDHyVQ=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEf58oa4kXcyQ-e90F310_CZVGICopYd2GMScYN8RNdrbwsXmNfJqFVhbR0ttsVwpKnWuptD9vTqRSNKUhlKh2KDq4Cx-ePmq5ELulVriDNA7J_GE0Kt_WtZApD7JYT_qs-IU7sgAyyH04dbmmYmhrMiKr3"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFe46kS3W9pJoMo_awsUBs9J738yLw2K083EUjoFaZxL42QpjK3TwPXq8ys0rLC8RmK0WykQdWYDzQ7UK2Wh_5AEuzXc-g9SilFRoq0mgyWqd6si3hGLc5VpMAp-HdSH-ZAx-Pgj9Be0Lta73HhJOs="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGthoav3N7h5FcYf1VBdPq9E5ULo_K6RDHKU4sWS0BPD7FE8mmmyXfY6DCRwJMX8pUaAJz3ozdh7ugJ8TmIxk8k8sqBzSp9WeXEsgOWeWs8GKDlbqdBLGU6sY_8cHNYPz5Y3_s6fUTo_3AqQ-4="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFPM4jXLyx14MMPwkdGCm_vUay1qPobUGitUQJjOI58rpX76iRp8RZ-k6yaINmd9nIgpuvyBUGfWBn7a-aulqZlDY91UOGNym72z0mcR4bk-7sVXN_Z6PNzROAlIqMB"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHEMChZ2LEUToLiciyhL6BbWn0qnUfL8AzQX7XqN6ONF7FlEWv6e6RWK6FFDjIZcJst3I3dw5kqKN0ZJAO2ttmpsymhsOtybf1j9WcvU6F9JUn27Qr1uiYvGdDrmSCeCns13ilMlTLVbGeeepqGlTI8ytDw9fgDlQ=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE93rO6DN3fx3k7JxoxE6RhZZMN1zNaN_T33G0U9DXOZfoQmMaSfsedveNm-W78MYCiMu96DuYg8jbCNSTQ_xBfI_4pQndootbgNVFregxVFwKpUHSqjXBnblfqfYdW_YAqCs9YjjvhqnASCpv8YA=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEoGftMwzhhoWHQzjOxh5YFEZMNqiwpt9z2mHNA1mTSRJNbHsCFKsdAdquNMUa6a-X3JAbam5xz0QcCIcg9azqcfQ3JIdXe4oMPVm3V7sBVa8CHLWu3-XuKc8ayUPzbg_JPzWR-kvYNcTZbXXT5bFWkp3PVHf2N"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGd1yuo4xCyS_TaxHW378-mW6G3R2pOLNJy6KQXXQrFx44VwaLBAjJ4gOiJo58R3-Paw0sUa08bkhkxnUyjrT2_LmdW_9757bKGi63lLZhwOoA11WXi1CNabYWer6WI3P4v2M9f_Om1mz1MSgna83E="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGUax1D8e-6-e4Tv8iO541K2h0uAvdPA8vY_swV7xQYtoTC3UZi0ZaolnH9mCdSigJgaefNJUGnTnK2unVrfmjBGhNPLnAmHKc-6V_3qJMBxfudi20fisWR6zEIVg0YMw_eIEC9jmho1Ib6H7ILMlCs2R4g"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHbhu1IvacniTuRdLluotvIvmDv1wHl4Rkhtg97uxG1wXK5k1EA39Ni3wTv5tFebwd1IepLZzW2TX5wV7xdki-A-DpJvk6vg2G7vylZUiyhc-FfrlmXebe0pnlGgWG4BY_Pp3x1jO5e_5wDFBxsFg1xkpw="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQELiHKH8OgFHIKD5F6tcFumsmpwYuBxOinmPgA790MWXza9c_HuhPlDheYDtBH6SSnhPum_hAGRLpuCFUIMmwQ8J5pw5lMK6pn_3xjbeI4DT_XFw1NumHJCP-otFFvSKOu_0R69P01YXu9O6jqVcyw="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHF7DPPW0GR_UfnW5LKmh9mKDsO0qR2T4mn1LWD2o51IJmUGffxv3vVtnfj350P-PzdwR631Rns8CrBXynjdDh32gw2pMy47i3Kyh94ua1hzZfrBcOS0_TcFA81UwwELBnf-Kmhz1717Ki4n5ERV5yOaPZ4HVSAHNs="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGJWJkKtyMfFoMWWLHD3WQ9fEz0ivawMgBeAEXlU---p0Vv-1FxgTumdJjuhi6mViuNm3zUSVM4HaOVMTzHOIJboG1mcqrcdYxUQUlq8Im5Ie4s81unhyATZPS1ZDEppO-sHMCJgRwHw5NBXv8-0Hz3Eth-4esXOIzVoRIugWxw13rKdw=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGO6HRQZULgfRejLaMc8_m10u6TD1Wq6HAcuiXHeU0z1seqPPwRszCJgfXsnD1qjBUEW7wg_XXkKtumM8-nauIcrnjw_bHEeWJtHYlFpNyjtLYFtyjRud4tCu9LT3AX7HVqWgdH4tC9jvENJMcG9WXE"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEXHwMNUMNLZ4bwlpSmEysPaWjowXU4U1epu9TK89xUM1IN5c0xz5Y4ms-bNp0073NYKK16zu4YOrCq2LjMq9DAaDRS2Zw4kpS_93J3pnG23n1TInGDrNoC9G4G1f3F2bmzy0pLH8MZjS3YyStLASVkEcw6KJYRH_7qzTIAZsS6lRI_h0hAuiOFvg=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFeYziHQytI-JefqWzSUnEtvvbig9HolldoR7izdmQGvN5y8d0nONi3936-VyxwOS17VdZ7-x002fQLMwT4mEEhua-Q8oCpslvzV-fKaS_IwcEnS2ga4Q4XrS6OPB5Nz1f_pZ3qOtJmRG9lxzc6-hliJxZ-E7Ct3PCIPtFQYjla9fJoWpg="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHB7dfFYIhaMVftA73G3v5Hi24uLQi-vEJ0GzXe8MtloUy_Ih9kYVhXQNxTcppdTJM82RWlT9UCGr83WG1y_5tsO8gxkot094AciGr43iH40m3Xed-1oeq880FFwOLvB-FA2oAq9bCEaa-rRhJqlnmeBKMkByso"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE6ZRvRYLGkQ7YONoL9tFc69pENh5X4HkjIiwD33MJBf8tV8ICTkA7yUMCMpwSqKzvUHsH-tT-6oFyNb2-xzkTQAxWJM5uO9xibAHueY_WdyzvMEo8BVpjAc4vopXcstAtrWuMBxQk="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF6LmFQ16o2YhAUBbirQXmLhjQAjZ-2zuGaR02gEc973VAmaDhLQ82MiEQOsNwpn6ytao6Mern10_Nvc8wfWKNPwdjHHIIUwJZxTgdA7Uo-59D1gSTya6J7oS-9o60="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGn703UH_o5SYTKL2f7TNo91H6tNzolr8cyM4OWE1dNG4ubzaJTa4R1t2YcLmlgpwZ6lW-J0L-_ZBJ_d1W2HWWKHjkm3QIaF85Bmrhlo0Syu6bERSSBCWCbVZqpU5MgcJzuxgq4RPWNEWOnvPeWC6Arap7G9oJsvF0w7gfAqWhIGNcxd94="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE7yFdrAaZzrbelSiYAl2hd3TOa7f89cKR2TPuGs-MXKyW4xVysBJm5cFpREoNhDknQVlF1cvvyUsgkwWdKV9wDNPMsqM7sAfukbNz8huDt5Kle_Np8b3-Ex8j97iiQYqvO3U07GorMn7u4RdkW7MozbX6WsKnPEfiTulh_HBg="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFXCcVMKA08u-IYM7Grkm0L5zuWxt56mOJ2zsHciUveH7xfhBfw5jZHpSkaXd_DVU_FSMkojGvyYTchDQ662WM34zCRxGHHz24uOd8OFd5O5T9VCfvX7a09xskUKg=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFBWIhC0gCFFy7NsbhpomTD0W4LMmS4JVsRxe_jaGFiSI8P3xwhe8qDRxkZK2aXQuL_XOsB_qzKLarBur4mlUAzATNgvm8qMl2AuLJgMiy2jhbqQjJeWcFymyhacHMOrzu9RmARkC1N73iv0z9pE4Ym9W_TrQ=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH1Z4jD9ev5N5ukcf-CEgZMtkLUEscMGDXKg5HEveeNxULHDlkzIFoOnnydmfcf_5053pdX1N28dg9M4_jxBT9nab_4LIHZ3OoxASVZVFBOQVx4AqZVFLiU6-YwIK-L9R2WwDUEdMTn3dR09b-Ymw=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGUKTzsm79K2vjUIf65TxEBHDTdNqmZfpAlXBK_mfWvO0KIf3Zf5_LYRlYmmq11nC6kRo_iHW_0HvQLu3LEmKdUPWFi2E49OvGebIpmYVEmepTw9Qq4IqxLtb5nTHkucRM1y777k1DUOaCN8pUuyA=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHZerjbxS85CZ4huRynukc_aCHEan-CFy-i4wca_dw4s8RG1wxIIdQHk-su5OpX1ex_ADdx_A6sA1s5Y9Iqd7_8ztHns5ho8haXNbUGYfpoe4mSz7VjNCz0uF0VouLSE2e8NTkogT-Gz_bR5yQEi3QeOct5csGCdDBfPLfGxpvhNhQbOf9jT0_9iJSBbyEosGv7VKWRg457JC13rtpjdjaA"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHQoBxHlEoHEc9BcT5ns2KFDH87ZbFDKUwBmrEpOyW85z1m1bi5ASRvlC3hFCAhZ0oAlbVMvaMKmh45qCng86-pEFld08N3N6YAen_HZEXYEnGMLyZjwZRrIRIoJWAZ4ZzTHIWT3sKbEzar_UmGkC1_GHUwG8TtsySoogx69R36kXbk5epURD3_VvBphTUAvg=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHTnXCCiG460XAI9lmMRRFsiJ0C3KNw7Sp2x2tPHkyPcgiDzSIRuKk4NR67DdOKS6mG1wa2WBBVgHGflgUAdb9oXL4FpMrYCqRymQn5CdxaFQMOBt1kLWLalQFC1lku5vazQRlwePRJDw=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHhV4yR6sEB8D_xjdUh61wlC8sFRKwgWzYDnXfrshe0PoQrwhq9_w9Lmnf4fp0lw3pzA_A8I5EypD9VaDZznvT-7Zyselnu6A2_sa9CK3yD-PzFDTMfIvRk4JA4I_wbXrkEcSJqHMHPsMjquzhp"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGy1LYtSuG6PDeFA1CB1m-W-ANxzx_imqgbsaejftf362mvwEpt8DA28vpCyp8LfsdjJGGvH_1fJUT036HZROIFLxpYCrubgc4qWrenuiQFEpaOO1qd3-9RubPM-O84ouIvyK8p6DaRLMwnzTeDaY61o_1KEjW8MJgOjle4NpVIXZYQFPS493Px615qV1hh-X8vTWw="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHWyImJu6IhyxNORfNIgsUSqG6eGbzV7XPwIZgL4fNhqoRGgjiMAVFqyauX9hoomiYTV6v749l5RmOjJCsUqditMLdGB-DF2LAMKhZaob2beZ_YpGlpvVb-zYD8IF-aMIN8wzquPkB-vWsjKG7mOIRFTh60SA=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGe6NK7hGm3qTpRVsKiCC90kU8eZyFMtTwAr08tAAcGbYGufyLLf7-ZguYlEqBkZDaa_5TFFUBfWJ-OiBoEAWjstgMXh-g5fyr1RR24lt00mnFiaN8Uf2yWqP-KYXmD9-Vn3Q=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGViyibBnQF-N6W_o1Me9w-7OClr09S_5A_qJEiMMSq9vEqiXWmlHpRzgt5iUCzbZPt5FmTYA30pE2EV5lWmNL-J_ukKlNpQw4r7zIOcDIwcRRle4x7z-FJo2SmUkX7ckMgs-uptUOmmHkiaFIJr9PzkMpWZW3YPyVsg1Viecy8CLg4Fw_tRzVVy2VNq9jwyF_trKXztVHXeQRTMO5wZ_sqDw=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH3-Q4a9FkZ0oCF73HoYv9XiKfSy_tDsn3poJg8-pJdzPOY748we2BBC9xmFCIOlJ4CB1hXSZ97y0b-VaxmKKEvBypP_8e4UQV6gxtXycHNpCFe8W7MLaEehJ1rWivTx4q04A177xObzIvvNyk="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHYgkftA9qeVPY8-MfuULPju3E5NbEkUFfQopUDztWK0srb3ezIpHOikSppCQQpZM3uBCEIJecrlTsKy4E_rey4j02w6bM5EQVj6X6Wug4FdtnVxLz7BBCOAsJgFn7LD9HMkIlg-F2xpZnKffvvgsfxbmcU"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQET41a5Bp57gVr6A3ofbKGNweTZIZYCZMMXcggXaJmtNuKGMqWNrRsQil-ZuQlY1kRV9IZ7zmzFpxfys-Dd5FOmVNxR2E-Jbj6Iqmub75MlfTNiCh3BJUXObg7BWonVqfA2rC1TNzksdrWXbLK4_TI="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFgCZVHuZsiZq7nO0T4Zq_6TwWod5jBwfRzIDazJOjxro_sP71zfTkO7I7ij981N4S3jAYDYiXaQ1cfhMYAZJcrcDNBL4o-NV7rxSvjqI0KS3N70r06DZZm-eMOHGHlYHkRr92qMVAeyObIKZvyUX467zE="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHMunAKA7Pp3YgHeGWJW5Vo9U1j5AC7iVlEWyNX_HjFpf-afD4YyCH1PoMx5ELY3-QmjDri6yFRG45xGVlt0wmE-KbzcEgAFAzjKHQov3QTvyDrK0-81D1MXI85YKM="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGBeAcHwhU5l89GJSoG4az3Ml1uGJfyB83JV2et443qdExQ1CgmjqOjFEAiyy-RiJWEFYpw_ZpNLXklrGpMXX6rOCa_4n4Ha22MO1nJPkMw5DnA2-61hYn8LQwa-rbw9UvvAN05I8Z3"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHaNhYinaZMm-schYQlQ5kEIJeO7Yb58MR2MaTi1vWhH2tS8Iv9EU6T6lHdAb_v7EGYGWpLSuLYjUw60RaAaM4UE1tRF0XTTQZdoufndQ5Qw0Ok2lYVSEDPLcOvaqlBf-BK0tHBViE-n0DVto-WTiizw9T52Xpe5Wva0J4FedKVVA=="
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFD-ku78ZhjNMltl8oz9Qjx2StBSbTVQsKdEYydMtKhwl1AECbrRYOB1yuatrzecpMW4BroXR6geUo2p_GevXLeEEYJe-fbokk5iYLwW58AYSfaNyIuMuGT3zOGhbfCkfdyf0sn4stY5pYEq_ENpJIT2doPczxa"
+        },
+        {
+          "title": null,
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH8Kk5xNP6S3JFv2EKr4LGBR1fO6wEU5OGHGsHttiaudN50D7Tb84B7kQo5b8rQQRVB1KXMPyNBKSfG74PnICPslbIa_TLnds2yr2KLd08eHdVYRt0rBv8WGsxc3540u28CG6cJRUbd8U9tdMyRfYGCuxYS"
+        }
+      ],
+      "content_format": "markdown",
+      "full_response_file": "full-responses/gemini-deep.md",
+      "full_citations_file": "full-responses/gemini-deep.citations.json",
+      "collected_at": "2026-09-18T04:11:29.322Z",
+      "wall_clock_ms": 307333,
+      "model": "deep-research-preview-04-2026",
+      "cost_usd": null,
+      "cost_state": "unknown",
+      "status": "succeeded"
+    },
+    {
+      "provider": "parallel",
+      "profile": "parallel/research",
+      "title": "Best Google Analytics Alternatives by Use Case",
+      "content": "# Best Google Analytics Alternatives by Use Case\n\n## Executive Summary\n\n- **Best overall privacy-first replacement: Matomo**: It combines conventional web analytics with campaigns, ecommerce, events, funnels, custom reports, heatmaps, recordings, and A/B testing, while offering cloud or self-hosting and a free on-premise Community edition. Choose it when you need GA-like breadth plus data ownership. [1] [3] [2]\n- **Best for simple content and marketing sites: Plausible**: It is lightweight, cookie-free, focused on aggregate traffic insights, and says site data stays in the EU. Choose it when fast adoption and low operational complexity matter more than user-level analysis. [5] [5] [5]\n…",
+      "citations": [
+        {
+          "title": null,
+          "url": "https://matomo.org/pricing"
+        },
+        {
+          "title": null,
+          "url": "https://matomo.org/"
+        },
+        {
+          "title": null,
+          "url": "https://matomo.org/product-features"
+        },
+        {
+          "title": null,
+          "url": "https://plausible.io/pricing"
+        },
+        {
+          "title": null,
+          "url": "https://plausible.io/privacy"
+        },
+        {
+          "title": null,
+          "url": "https://plausible.io/"
+        },
+        {
+          "title": null,
+          "url": "https://posthog.com/pricing"
+        },
+        {
+          "title": null,
+          "url": "https://clarity.microsoft.com/"
+        },
+        {
+          "title": null,
+          "url": "https://posthog.com/"
+        },
+        {
+          "title": null,
+          "url": "https://umami.is/"
+        },
+        {
+          "title": null,
+          "url": "https://amplitude.com/pricing"
+        },
+        {
+          "title": null,
+          "url": "https://usefathom.com/"
+        },
+        {
+          "title": null,
+          "url": "https://business.adobe.com/products/adobe-analytics.html"
+        },
+        {
+          "title": null,
+          "url": "https://amplitude.com/amplitude-analytics"
+        },
+        {
+          "title": null,
+          "url": "https://usefathom.com/pricing"
+        },
+        {
+          "title": null,
+          "url": "https://umami.is/pricing"
+        },
+        {
+          "title": null,
+          "url": "https://plausible.io/docs/subscription-plans"
+        },
+        {
+          "title": null,
+          "url": "https://outmano.com/pricing-page-analyzer/plausible.io"
+        },
+        {
+          "title": null,
+          "url": "https://www.heap.io/"
+        },
+        {
+          "title": null,
+          "url": "https://posthog.com/docs/privacy/gdpr-compliance"
+        },
+        {
+          "title": null,
+          "url": "https://learn.microsoft.com/en-us/clarity/setup-and-installation/clarity-consent-api-v2"
+        },
+        {
+          "title": null,
+          "url": "https://learn.microsoft.com/en-us/clarity/faq"
+        },
+        {
+          "title": null,
+          "url": "https://experienceleague.adobe.com/en/docs/analytics/analyze/analysis-workspace/home"
+        },
+        {
+          "title": null,
+          "url": "https://posthog.com/web-analytics"
+        }
+      ],
+      "content_format": "markdown",
+      "full_response_file": "full-responses/parallel-research.md",
+      "full_citations_file": "full-responses/parallel-research.citations.json",
+      "collected_at": "2026-09-18T04:10:53.467Z",
+      "wall_clock_ms": 271430,
+      "model": "pro",
+      "cost_usd": null,
+      "cost_state": "unknown",
+      "status": "succeeded"
+    },
+    {
+      "provider": "you-research",
+      "profile": "you-research/research",
+      "title": null,
+      "content": "There is no single best replacement; choose based on whether you need **simple website reporting, privacy, product analytics, or enterprise attribution**.\n\n| Alternative | Best for | Main strengths | Main trade-off |\n|---|---|---|---|\n| **Matomo** | Closest full-featured GA replacement | GA-like reports, goals, funnels, ecommerce, heatmaps, session recordings; self-hosting provides data ownership | More complex to configure and maintain |\n| **Plausible** | Small businesses, blogs, marketing sites | Lightweight, cookieless, privacy-focused, simple dashboard, optional self-hosting | Less depth in user journeys, ecommerce, and behavioral analysis |\n| **Fathom** | Polished, privacy-first reporting | Very simple hosted analytics, cookieless tracking, campaign and conversion reporting | Cloud-only and narrower than Matomo |\n…",
+      "citations": [
+        {
+          "title": "Plausible vs Matomo - Analytics Platform - Matomo",
+          "url": "https://matomo.org/plausible-vs-matomo/"
+        },
+        {
+          "title": "Why Fathom Analytics is a great Matomo alternative",
+          "url": "https://usefathom.com/features/vs-matomo"
+        },
+        {
+          "title": "Best Google Analytics Alternatives: 9 Tools Compared",
+          "url": "https://amplitude.com/compare/best-google-analytics-alternatives"
+        },
+        {
+          "title": "Mixpanel vs. Amplitude (Complete Guide to and Comparison of Both)",
+          "url": "https://mcgaw.io/blog/mixpanel-vs-amplitude/"
+        },
+        {
+          "title": "Google Analytics Alternatives 2026: Top 22 Tools",
+          "url": "https://accs-net.com/the-complete-guide-to-google-analytics-alternatives-in-2025-20-best-tools/"
+        },
+        {
+          "title": "10 Best Web Analytics Tools in 2026 (Tested and Compared)",
+          "url": "https://bootstrap.build/articles/best-web-analytics-tools/"
+        }
+      ],
+      "content_format": "markdown",
+      "full_response_file": "full-responses/you-research-background.md",
+      "full_citations_file": "full-responses/you-research-background.citations.json",
+      "collected_at": "2026-09-18T04:06:57.009Z",
+      "wall_clock_ms": 34960,
+      "model": null,
+      "cost_usd": null,
+      "cost_state": "unknown",
+      "status": "succeeded"
+    }
+  ],
+  "provenance_notes": {
+    "perplexity_model_selection": {
+      "finding": "The librarium profile id is perplexity-sonar-deep (display name \"Perplexity Sonar Deep Research\"), but the API exercised is the Perplexity Agent API at https://api.perplexity.ai/v1/agent. The request body carried {input, preset: \"high\", background: true} and NO model override (model is only sent when explicitly configured; none was). The response model field \"openai/gpt-5.6-sol\" was read verbatim from the provider response root (the adapter rejects a completed Agent response that omits model). Attempt was number 1 with no replaces_attempt_id and fallback_authorized=false, so the model is provider-managed selection under preset high — not local synthesis and not a fallback. \"Sonar\" is a librarium catalog/profile name, not the observed model.",
+      "evidence_sources": [
+        "src/adapters/perplexity-sonar-deep.ts (preset high, PerplexityAgentBaseProvider subclass)",
+        "src/adapters/perplexity-agent-base.ts:24 AGENT_API_URL, buildAgentRequest (model only on override), parse requiring root.model on completed responses",
+        "saved run.json attempt attempt-d0af5599-f64d-4762-8bf8-570d51603783 (attempt_number 1, no replaces_attempt_id, model from provider output)"
+      ],
+      "inspection_scope": "existing source and saved response only; no additional provider calls were made",
+      "honest_site_label": "Perplexity Research (Agent API), preset high — observed model openai/gpt-5.6-sol (provider-reported)"
+    }
+  }
+}

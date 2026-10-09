@@ -45,7 +45,7 @@ You can also mix approaches. Use Librarium for research and a native provider SD
 
 ## Choose the runtime, not just the package name
 
-The [JavaScript CLI/MCP runtime](/cli-mcp) includes built-in adapters, concurrent research, paid-attempt accounting, saved evidence, and durable async recovery. The [JavaScript core](/javascript) offers Worker-safe primitives with caller-injected bindings and execution dependencies, not a one-call runner.
+The [JavaScript CLI runtime](/cli) includes built-in adapters, concurrent research, paid-attempt accounting, saved evidence, and durable async recovery. The [JavaScript core](/javascript) offers Worker-safe primitives with caller-injected bindings and execution dependencies, not a one-call runner.
 
 The [Laravel package](/laravel) is native PHP: sequential Profile execution, Laravel AI SDK integration, encrypted queue jobs, and application-owned persistence. It is not a Node wrapper and does not include the JavaScript MCP server.
 
@@ -55,4 +55,4 @@ Both implementations distinguish unknown pricing from zero. Their budget control
 
 Choose one real question, the smallest useful provider set, and an explicit spending policy. Keep the returned evidence and compare the work required to inspect it—not just the quality of a polished summary.
 
-Follow [your first multi-provider query](/guides/first-query), or [connect your coding agent](/guides/agent-research). Installation instructions retain the current source/post-release boundaries until JavaScript v2 and PHP are ready to publish.
+Install JavaScript v2 with `npm install -g librarium@^2`, then follow [your first multi-provider query](/guides/first-query) or [connect your coding agent](/guides/agent-research). The first-party PHP package retains its separate [install-after-release guidance](/docs/php#install-after-release).

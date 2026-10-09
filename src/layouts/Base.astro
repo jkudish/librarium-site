@@ -12,6 +12,11 @@ interface Props {
   description?: string;
   robots?: string;
   includeSoftwareMetadata?: boolean;
+  /** Homepage passes its ivory page color so the hero's negative-z dotted
+      background can paint above the canvas and below all page content. */
+  bodyClass?: string;
+  /** Forwarding address for preserved legacy routes such as /cli-mcp. */
+  redirect?: string;
 }
 
 const {
@@ -19,11 +24,15 @@ const {
   description = "Librarium fans one research query out to search engines, AI-grounded answers, and deep-research APIs in parallel, then merges everything into one structured output.",
   robots,
   includeSoftwareMetadata = true,
+  bodyClass = "bg-white",
+  redirect,
 } = Astro.props;
 
-const canonical = Astro.site
-  ? new URL(Astro.url.pathname, Astro.site).href
-  : undefined;
+const canonical = redirect
+  ? new URL(redirect, Astro.site ?? Astro.url).href
+  : Astro.site
+    ? new URL(Astro.url.pathname, Astro.site).href
+    : undefined;
 const productDescription = "The meta harness for research queries.";
 
 const jsonLd = JSON.stringify([
@@ -62,8 +71,27 @@ const jsonLd = JSON.stringify([
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // Theme default follows the OS; a stored choice from the header toggle
+      // overrides it. Runs before first paint to avoid a flash.
+      (() => {
+        const root = document.documentElement;
+        const media = window.matchMedia("(prefers-color-scheme: dark)");
+        const storedChoice = () => {
+          try { return localStorage.getItem("librarium-theme"); } catch { return null; }
+        };
+        const apply = (dark) => { root.dataset.theme = dark ? "dark" : "light"; };
+        const stored = storedChoice();
+        apply(stored === "dark" || stored === "light" ? stored === "dark" : media.matches);
+        media.addEventListener("change", (event) => {
+          const current = storedChoice();
+          if (current !== "dark" && current !== "light") apply(event.matches);
+        });
+      })();
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
+    {redirect && <meta http-equiv="refresh" content={`0; url=${redirect}`} />}
     {robots && <meta name="robots" content={robots} />}
     {canonical && <link rel="canonical" href={canonical} />}
     <meta property="og:title" content={title} />
@@ -90,7 +118,7 @@ const jsonLd = JSON.stringify([
       rel="stylesheet"
     />
   </head>
-  <body class="bg-white font-sans text-neutral-600">
+  <body class:list={["font-sans text-neutral-600", bodyClass]}>
     <div class="isolate">
       <slot />
     </div>

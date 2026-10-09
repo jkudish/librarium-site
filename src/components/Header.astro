@@ -2,9 +2,15 @@
 import Icon from "./Icon.astro";
 interface Props { wide?: boolean; }
 const { wide = false } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, "");
+const markdownHref = ["", "/docs", "/docs/php", "/v1", "/guides"].includes(path)
+  ? `${path}/index.md`
+  : `${path}.md`;
 const links = [
-  { href: "/#features", label: "Features" },
-  { href: "/#library", label: "Library" },
+  { href: "/agents", label: "Agents & MCP" },
+  { href: "/cli", label: "CLI" },
+  { href: "/javascript", label: "JavaScript" },
+  { href: "/laravel", label: "Laravel" },
   { href: "/#providers", label: "Providers" },
   { href: "/guides", label: "Guides" },
   { href: "/docs", label: "Docs" },
@@ -17,22 +23,32 @@ const links = [
       <span class="font-mono text-base font-semibold text-neutral-950">librarium</span>
     </a>
     <nav class="flex items-center gap-x-7" aria-label="Primary navigation">
-      <div class="flex items-center gap-x-5 text-sm text-neutral-600 max-md:hidden lg:gap-x-7">
+      <div class="flex items-center gap-x-5 text-sm text-neutral-600 max-lg:hidden lg:gap-x-7">
         {links.map((link) => (
           <a href={link.href} class="hover:text-neutral-950">{link.label}</a>
         ))}
       </div>
       <a
         href="https://github.com/jkudish/librarium"
-        class="flex items-center gap-x-2 rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3"
+        class="flex items-center gap-x-2 rounded px-3 py-1.5 text-sm font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3"
       >
         <Icon name="githubLogo" class="size-4" />
         GitHub
       </a>
       <button
         type="button"
+        id="theme-toggle"
+        aria-label="Dark theme"
+        aria-pressed="false"
+        class="flex size-9 cursor-pointer items-center justify-center rounded text-neutral-600 hover:bg-neutral-950/3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+      >
+        <Icon name="moon" class="size-4 dark:hidden" />
+        <Icon name="sun" class="hidden size-4 dark:block" />
+      </button>
+      <button
+        type="button"
         id="menu-toggle"
-        class="relative -mr-2 rounded-lg p-2 text-neutral-600 hover:bg-neutral-950/3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 md:hidden"
+        class="relative -mr-2 rounded p-2 text-neutral-600 hover:bg-neutral-950/3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 lg:hidden"
         aria-label="Open menu"
         aria-expanded="false"
         aria-controls="mobile-menu"
@@ -42,16 +58,99 @@ const links = [
       </button>
     </nav>
   </div>
-  <div id="mobile-menu" hidden class="border-t border-neutral-950/10 md:hidden!">
+  <div id="mobile-menu" hidden class="border-t border-neutral-950/10 lg:hidden!">
     <nav class="mx-auto flex max-w-6xl flex-col gap-y-1 px-4 py-3" aria-label="Mobile navigation">
       {links.map((link) => (
-        <a href={link.href} class="rounded-lg px-2 py-2 text-base text-neutral-700 hover:bg-neutral-950/3 hover:text-neutral-950">{link.label}</a>
+        <a href={link.href} class="rounded-sm px-2 py-2 text-base text-neutral-700 hover:bg-neutral-950/3 hover:text-neutral-950">{link.label}</a>
       ))}
+    </nav>
+  </div>
+  <div id="page-format-control" class="fixed bottom-5 left-1/2 z-50 -translate-x-1/2">
+    <nav aria-label="Page format" class="flex rounded border border-neutral-300 bg-white p-0.5 font-mono text-xs shadow-lg dark:shadow-none">
+      <a id="human-view" href={Astro.url.pathname} aria-current="page" class="group flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 uppercase tracking-wide text-neutral-600 hover:text-neutral-950 aria-[current=page]:bg-neutral-950 aria-[current=page]:text-white">
+        <span aria-hidden="true" class="flex size-3.5 shrink-0 items-center justify-center rounded-full border border-current p-0.5">
+          <span class="block size-full rounded-full bg-current opacity-0 transition-opacity group-aria-[current=page]:opacity-100 motion-reduce:transition-none"></span>
+        </span>
+        Human
+      </a>
+      <a id="machine-view" href={markdownHref} class="group flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 uppercase tracking-wide text-neutral-600 hover:text-neutral-950 aria-[current=page]:bg-neutral-950 aria-[current=page]:text-white">
+        <span aria-hidden="true" class="flex size-3.5 shrink-0 items-center justify-center rounded-full border border-current p-0.5">
+          <span class="block size-full rounded-full bg-current opacity-0 transition-opacity group-aria-[current=page]:opacity-100 motion-reduce:transition-none"></span>
+        </span>
+        Machine
+      </a>
     </nav>
   </div>
 </header>
 
+<section id="machine-panel" hidden class="mx-auto max-w-6xl px-6 py-10 lg:px-8" aria-label="Markdown view">
+  <div class="mb-6 flex items-center justify-between gap-4">
+    <h1 class="font-mono text-lg font-medium text-neutral-950">Markdown</h1>
+    <a href={markdownHref} class="text-sm text-amber-800 underline underline-offset-4">Open raw Markdown</a>
+  </div>
+  <p id="machine-status" role="status" class="text-sm text-neutral-600"></p>
+  <pre id="machine-content" class="whitespace-pre-wrap break-words font-mono text-sm/7 text-neutral-800"></pre>
+</section>
+
+<style>
+  :global(html[data-page-view="machine"] header ~ *:not(#machine-panel)) {
+    display: none !important;
+  }
+</style>
+
 <script>
+  // Mobile browser chrome and pinch zoom can make the visible viewport smaller
+  // than the layout viewport used by position: fixed.
+  const formatControl = document.getElementById("page-format-control");
+  const viewport = window.visualViewport;
+  function positionFormatControl() {
+    if (!formatControl || !viewport) return;
+    formatControl.style.left = `${viewport.offsetLeft + viewport.width / 2}px`;
+    const inset = Math.max(0, window.innerHeight - viewport.offsetTop - viewport.height);
+    formatControl.style.bottom = `calc(${inset}px + 1.25rem + env(safe-area-inset-bottom))`;
+  }
+  viewport?.addEventListener("resize", positionFormatControl);
+  viewport?.addEventListener("scroll", positionFormatControl);
+  window.addEventListener("resize", positionFormatControl);
+  positionFormatControl();
+  const human = document.querySelector<HTMLAnchorElement>("#human-view");
+  const machine = document.querySelector<HTMLAnchorElement>("#machine-view");
+  const panel = document.querySelector<HTMLElement>("#machine-panel");
+  const content = document.querySelector<HTMLElement>("#machine-content");
+  const status = document.querySelector<HTMLElement>("#machine-status");
+  let request: AbortController | undefined;
+  human?.addEventListener("click", (event) => {
+    event.preventDefault();
+    request?.abort();
+    delete document.documentElement.dataset.pageView;
+    if (panel) panel.hidden = true;
+    human.setAttribute("aria-current", "page");
+    machine?.removeAttribute("aria-current");
+  });
+  machine?.addEventListener("click", async (event) => {
+    event.preventDefault();
+    if (!panel || !content || !status) return;
+    request?.abort();
+    const current = new AbortController();
+    request = current;
+    document.documentElement.dataset.pageView = "machine";
+    window.scrollTo({ top: 0, behavior: "instant" });
+    panel.hidden = false;
+    machine.setAttribute("aria-current", "page");
+    human?.removeAttribute("aria-current");
+    content.textContent = "";
+    status.textContent = "Loading Markdown…";
+    try {
+      const response = await fetch(machine.href, { signal: current.signal });
+      if (!response.ok) throw new Error("Markdown unavailable");
+      const text = await response.text();
+      if (current.signal.aborted) return;
+      content.textContent = text;
+      status.textContent = "";
+    } catch {
+      if (!current.signal.aborted) status.textContent = "Could not load Markdown. Try again or open the raw Markdown link.";
+    }
+  });
   const toggle = document.getElementById("menu-toggle");
   const menu = document.getElementById("mobile-menu");
   toggle?.addEventListener("click", () => {
@@ -59,4 +158,23 @@ const links = [
     if (menu) menu.hidden = isOpen;
     toggle.setAttribute("aria-expanded", String(!isOpen));
   });
+  const themeToggle = document.querySelector<HTMLButtonElement>("#theme-toggle");
+  const syncThemeToggle = () => {
+    const dark = document.documentElement.dataset.theme === "dark";
+    themeToggle?.setAttribute("aria-pressed", String(dark));
+  };
+  // Every theme change goes through <html data-theme>: the toggle above,
+  // and the OS-preference listener in Base.astro. Watching the attribute
+  // keeps the accessible state correct no matter which path changed it.
+  new MutationObserver(syncThemeToggle).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+  themeToggle?.addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme !== "dark";
+    root.dataset.theme = dark ? "dark" : "light";
+    try { localStorage.setItem("librarium-theme", dark ? "dark" : "light"); } catch { /* storage unavailable */ }
+  });
+  syncThemeToggle();
 </script>

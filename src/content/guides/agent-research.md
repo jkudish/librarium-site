@@ -8,12 +8,16 @@ Use Librarium's MCP server when a coding agent needs current external evidence r
 
 ## Connect the MCP server
 
-First install the version-matched v2 CLI using [the installation boundary](/docs#install). Do not use an unversioned public npm installation as proof that v2 is installed. Verify the major version, then register the stdio server with Claude Code:
+Install the published v2 CLI, verify the major version, then register the stdio server with Claude Code:
 
 ```bash
+npm install -g librarium@^2
 librarium --version
+# Must report major version 2
 claude mcp add librarium -- librarium mcp
 ```
+
+See [Getting started](/docs#install) for other supported installation channels.
 
 The command exposes five tools: `research`, `get_results`, `check_async`, `list_providers`, and `list_groups`. Other MCP clients can launch the same `librarium mcp` stdio command using their own server configuration format. Keep stdout reserved for MCP protocol traffic.
 

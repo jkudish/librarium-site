@@ -11,57 +11,47 @@ interface Props {
   description: string;
   headings: MarkdownHeading[];
   kind: "product" | "guide" | "comparison" | "story";
-  runtime?: "javascript" | "laravel" | "cli";
+  redirect?: string;
   ctaHref?: string;
   ctaLabel?: string;
 }
-const { title, description, headings, kind, runtime, ctaHref = "/docs", ctaLabel = "Open the documentation" } = Astro.props;
+const { title, description, headings, kind, redirect, ctaHref = "/docs", ctaLabel = "Open the documentation" } = Astro.props;
 const markdownHref = `${Astro.url.pathname.replace(/\/$/, "")}.md`;
-const implementations = [
-  { href: "/javascript", label: "JavaScript", runtime: "javascript", logos: ["javascript", "typescript"] },
-  { href: "/cli-mcp", label: "CLI & MCP", runtime: "cli", logos: [] },
-  { href: "/laravel", label: "Laravel", runtime: "laravel", logos: ["laravel"] },
-];
 ---
 
-<Base title={`${title} | librarium`} description={description} includeSoftwareMetadata={false}>
+<Base title={`${title} | librarium`} description={description} includeSoftwareMetadata={false} redirect={redirect}>
   <Header />
   <main>
     <div class="border-b border-neutral-200 bg-[#faf9f6]">
       <div class="mx-auto max-w-6xl px-6 pt-10 pb-12 sm:pt-14 sm:pb-16 lg:px-8">
-        {kind === "product" ? (
-          <nav aria-label="Librarium implementations" class="mb-12 flex flex-wrap gap-x-7 gap-y-4 text-base sm:text-sm">
-            {implementations.map((item) => <a href={item.href} aria-current={runtime === item.runtime ? "page" : undefined} class="flex items-center gap-2 border-b-2 border-transparent pb-3 text-neutral-500 hover:text-neutral-950 aria-current:border-amber-700 aria-current:text-neutral-950">
-              {item.logos.map((logo) => <img src={`/languages/${logo}.svg`} width="20" height="20" alt="" class="size-5" />)}
-              {item.runtime === "cli" && <Icon name="terminal" class="size-5" />}
-              {item.label}
-            </a>)}
-          </nav>
-        ) : <a href="/guides" class="mb-9 inline-flex items-center gap-2 text-base text-neutral-500 hover:text-amber-700 sm:text-sm"><Icon name="arrowLeft" /> Guides & field notes</a>}
+        {kind !== "product" && <a href="/guides" class="mb-9 inline-flex items-center gap-2 text-base text-neutral-500 hover:text-amber-700 sm:text-sm"><Icon name="arrowLeft" /> Guides & field notes</a>}
         <h1 class="max-w-[21ch] text-4xl/[1.08] font-medium tracking-[-0.045em] text-pretty text-neutral-950 sm:text-6xl/[1.06]">{title}</h1>
         <p class="mt-6 max-w-[58ch] text-lg/8 text-pretty text-neutral-600">{description}</p>
         <div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
-          {kind === "product" && <a href={ctaHref} class="inline-flex items-center gap-2 rounded-lg bg-neutral-950 px-5 py-3 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>}
+          {kind === "product" && <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>}
           <a href={markdownHref} class="inline-flex items-center gap-2 py-2 text-base text-neutral-500 hover:text-amber-700 sm:text-sm"><Icon name="markdownLogo" class="size-5" /> Read as Markdown</a>
         </div>
       </div>
     </div>
     <div class="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-12 lg:grid-cols-[minmax(0,1fr)_216px] lg:px-8 lg:py-16">
       <article class="prose min-w-0 max-w-[75ch]"><slot /></article>
-      <aside class="hidden lg:block">
-        <nav aria-label="On this page" class="sticky top-10">
-          <p class="mb-5 text-sm font-medium text-neutral-950">On this page</p>
-          <DocsOutline headings={headings} />
-          <a href="/guides" class="mt-8 flex items-center gap-2 border-t border-neutral-200 pt-6 text-sm font-medium text-amber-700">Explore the guides <Icon name="arrowRight" /></a>
-        </nav>
-      </aside>
+      {!redirect && (
+        <aside class="hidden lg:block">
+          <nav aria-label="On this page" class="sticky top-10">
+            <p class="mb-5 text-sm font-medium text-neutral-950">On this page</p>
+            <DocsOutline headings={headings} />
+            <a href="/guides" class="mt-8 flex items-center gap-2 border-t border-neutral-200 pt-6 text-sm font-medium text-amber-700">Explore the guides <Icon name="arrowRight" /></a>
+          </nav>
+        </aside>
+      )}
     </div>
-    <div class="mx-auto max-w-6xl px-6 pb-16 lg:px-8">
-      <div class="flex flex-col items-start justify-between gap-6 border-t border-neutral-200 pt-10 sm:flex-row sm:items-center">
-        <p class="text-xl font-medium text-neutral-950">Put the evidence to work.</p>
-        <a href={ctaHref} class="inline-flex items-center gap-2 rounded-lg bg-neutral-950 px-5 py-3 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
+    {!redirect && (
+      <div class="mx-auto max-w-6xl px-6 pb-16 lg:px-8">
+        <div class="flex justify-end border-t border-neutral-200 pt-10">
+          <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
+        </div>
       </div>
-    </div>
+    )}
   </main>
   <Footer />
 </Base>

@@ -14,7 +14,7 @@ const options = [
 <div class="grid grid-cols-2 gap-2" role="group" aria-label="Documentation language">
   {options.map((option) => (
     <a href={option.href} aria-label={option.name} aria-current={language === option.id ? "true" : undefined}
-      class="group min-w-0 rounded-lg border border-neutral-200 bg-white p-3 text-neutral-600 hover:border-neutral-400 hover:text-neutral-950 aria-current:border-amber-700/50 aria-current:bg-amber-50/60 aria-current:text-neutral-950">
+      class="group min-w-0 rounded border border-neutral-200 bg-white p-3 text-neutral-600 hover:border-neutral-400 hover:text-neutral-950 aria-current:border-amber-700/50 aria-current:bg-amber-50/60 aria-current:text-neutral-950">
       <span class="flex items-center justify-between gap-2">
         <span class="flex items-center gap-2">
           <img src={`/languages/${option.logo}.svg`} alt="" width="24" height="24" class="size-6" />

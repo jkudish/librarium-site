@@ -8,12 +8,17 @@ This tutorial takes a query from offline preflight to saved, cited results. Prov
 
 ## JavaScript: use the v2 CLI
 
-Follow the version-aware [JavaScript installation instructions](/docs#install). Until v2 is published, do not treat the unversioned public npm package as a v2 installation. Configure provider credentials without putting keys in commands or source control:
+Install the published v2 CLI and verify the major version before configuring provider credentials. Do not put keys in commands or source control:
 
 ```bash
+npm install -g librarium@^2
+librarium --version
+# Must report major version 2
 librarium init
 librarium doctor --json
 ```
+
+See the [JavaScript installation instructions](/docs#install) for other supported installation channels.
 
 `doctor` checks local configuration and credential presence. It does not authenticate with providers unless you explicitly add `--live`; a live check uses the network and may incur charges.
 

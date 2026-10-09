@@ -6,7 +6,7 @@ order: 8
 
 ## Upgrade and pin
 
-`librarium upgrade` follows the detected installation method and its published release channel. Check or preview that channel before changing an installed stable release:
+`librarium upgrade` follows the detected installation method and release channel. Check or preview that channel before changing an installed stable release:
 
 ```bash
 librarium upgrade --check
@@ -14,7 +14,13 @@ librarium upgrade --dry-run
 librarium upgrade
 ```
 
-These commands follow the current npm, pnpm, yarn, Homebrew, or standalone release channel. Use `--force` only when you intend to bypass the normal version guard. They do not turn an unpublished v2 source checkout into a published release. Until your channel contains v2, follow the reviewed-source installation in [Getting started](/docs).
+These commands follow the current npm, pnpm, yarn, Homebrew, or standalone release channel. Use `--force` only when you intend to bypass the normal version guard. To install or pin the published npm package to the v2 major:
+
+```bash
+npm install -g librarium@^2
+librarium --version
+# Must report major version 2
+```
 
 Follow [Upgrade from v1](/docs/upgrading-to-v2) separately. Upgrading the executable is not proof that a v1 config was migrated, reviewed, and activated as v2.
 

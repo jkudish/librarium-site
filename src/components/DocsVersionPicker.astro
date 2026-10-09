@@ -18,7 +18,7 @@ const { id, version, v1Href, v2Href } = Astro.props;
     <select
       id={id}
       data-docs-version-picker
-      class="w-full appearance-none rounded-lg bg-white py-2 pr-9 pl-3 text-sm font-medium text-neutral-950 ring-1 ring-neutral-950/15 hover:ring-neutral-950/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
+      class="w-full appearance-none rounded bg-white py-2 pr-9 pl-3 text-sm font-medium text-neutral-950 ring-1 ring-neutral-950/15 hover:ring-neutral-950/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"
     >
       <option value={v2Href} selected={version === "v2"}>v2</option>
       <option value={v1Href} selected={version === "v1"}>v1 legacy</option>

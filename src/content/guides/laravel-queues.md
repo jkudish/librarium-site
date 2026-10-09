@@ -6,7 +6,7 @@ order: 3
 
 Queued research fits requests that may outlive an HTTP response. Librarium compiles the same plan as `run()`, dispatches one encrypted Laravel job, and returns a request ID immediately. Your application owns queue operation and durable result storage.
 
-Install the package only within the [documented release boundary](/docs/php#install-after-release), configure the selected Profiles, and run a worker for the configured connection and queue. The queue defaults to `research`; its job timeout defaults to 7,200 seconds, while the research deadline defaults to 6,900 seconds.
+[Install the package](/docs/php#install), configure the selected Profiles, and run a worker for the configured connection and queue. The queue defaults to `research`; its job timeout defaults to 7,200 seconds, while the research deadline defaults to 6,900 seconds.
 
 ## Preview before dispatch
 

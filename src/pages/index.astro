@@ -108,8 +108,8 @@ const useCases = [
                   {[
                     { id: "agent", label: "Agent setup prompt", copy: "Copy setup prompt", value: "agent", href: "/docs/using-with-agents#mcp-server" },
                     { id: "cli", label: "CLI install", copy: "Copy CLI install", value: "npm install -g librarium", href: "/docs#install" },
-                    { id: "javascript", label: "JavaScript / TypeScript", copy: "Copy JavaScript install", value: "npm install librarium@^2", href: "/javascript" },
-                    { id: "laravel", label: "Laravel install", copy: "Copy Laravel install", value: "composer require jkudish/laravel-ai-librarium", href: "/docs/php#install-after-release" },
+                    { id: "javascript", label: "JavaScript / TypeScript", copy: "Copy JavaScript install", value: "npm install librarium", href: "/javascript" },
+                    { id: "laravel", label: "Laravel install", copy: "Copy Laravel install", value: "composer require jkudish/laravel-ai-librarium", href: "/docs/php#install" },
                   ].map((choice, index) => (
                     <>
                       {index === 1 && <hr class="mx-2 my-1 border-neutral-200" />}
@@ -336,7 +336,7 @@ const useCases = [
             </div>
             <h3 class="text-2xl font-medium tracking-tight text-white">JavaScript / TypeScript</h3>
             <p class="mt-3 text-base/7 text-pretty text-neutral-400">Build research into your application with the typed library. Use portable core modules in Workers or Node services for local configuration and artifacts.</p>
-            <button type="button" data-copy-command="npm install librarium@^2" aria-label="Copy JavaScript install command" title="npm install librarium@^2" class="install-copy mt-6 rounded border border-white/15 bg-white/5 font-mono text-sm text-amber-100 hover:bg-white/10"><Icon name="copy" class="size-4 shrink-0" /><code>npm install librarium@^2</code></button>
+            <button type="button" data-copy-command="npm install librarium" aria-label="Copy JavaScript install command" title="npm install librarium" class="install-copy mt-6 rounded border border-white/15 bg-white/5 font-mono text-sm text-amber-100 hover:bg-white/10"><Icon name="copy" class="size-4 shrink-0" /><code>npm install librarium</code></button>
             <a href="/javascript" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore JavaScript <Icon name="arrowUpRight" class="inline-block" /></a>
           </div>
           <div class="border-t border-white/20 pt-8">

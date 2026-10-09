@@ -13,7 +13,7 @@ This is a first-party Laravel package built on the Laravel AI SDK, not a Node pr
 
 It complements the SDK: the SDK owns your agent and model interaction; librarium supplies research results with their citations attached. Your application decides what that evidence supports.
 
-Requires PHP 8.4, Laravel 13, and Laravel AI SDK `>=0.10.3 <0.12.0`. Composer setup applies after a compatible package release; see [the installation boundary](/docs/php#install-after-release).
+Requires PHP 8.4, Laravel 13, and Laravel AI SDK `^1.0.1`. Install it with `composer require jkudish/laravel-ai-librarium`; see [Install](/docs/php#install).
 
 ## Research before your agent recommends
 
@@ -128,7 +128,7 @@ $answer = (new TechnicalAdvisor($evidence))->prompt(
 
 Configure the agent's model/provider through the SDK. The outer model call is **not** included in Librarium's research budget. For large responses, store evidence in your application and expose authorized, bounded result and citation pages instead of returning everything to the model at once.
 
-These classes follow the SDK's [Tool](https://github.com/laravel/ai/blob/v0.10.3/src/Contracts/Tool.php), [HasTools](https://github.com/laravel/ai/blob/v0.10.3/src/Contracts/HasTools.php), and [Promptable](https://github.com/laravel/ai/blob/v0.10.3/src/Promptable.php) contracts. They are example application code, not built-in Librarium agents.
+These classes follow the SDK's [Tool](https://github.com/laravel/ai/blob/v1.0.1/src/Contracts/Tool.php), [HasTools](https://github.com/laravel/ai/blob/v1.0.1/src/Contracts/HasTools.php), and [Promptable](https://github.com/laravel/ai/blob/v1.0.1/src/Promptable.php) contracts. They are example application code, not built-in Librarium agents.
 
 ## Use the same pattern for different jobs
 

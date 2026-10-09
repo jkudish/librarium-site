@@ -17,7 +17,7 @@ librarium upgrade
 These commands follow the current npm, pnpm, yarn, Homebrew, or standalone release channel. Use `--force` only when you intend to bypass the normal version guard. To install or pin the published npm package to the v2 major:
 
 ```bash
-npm install -g librarium@^2
+npm install -g librarium
 librarium --version
 # Must report major version 2
 ```

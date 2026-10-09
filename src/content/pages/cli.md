@@ -28,7 +28,7 @@ librarium run \
 
 This command can incur charges and has no explicit dollar cap. Add `--max-cost` when the preview establishes bounded estimates for the selected work and its fallback reserve. Unknown estimates fail hard-budget admission rather than becoming zero. See [your first query](/guides/first-query) for setup, costs, and result inspection.
 
-These are v2 instructions. Install the published CLI with `npm install -g librarium@^2`, verify that `librarium --version` reports major version 2, and see [Getting started](/docs#install) for other supported channels.
+These are v2 instructions. Install the published CLI with `npm install -g librarium`, verify that `librarium --version` reports major version 2, and see [Getting started](/docs#install) for other supported channels.
 
 ## Long research does not need a long chat message
 

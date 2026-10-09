@@ -11,10 +11,10 @@ Use Librarium's MCP server when a coding agent needs current external evidence r
 Install the published v2 CLI, verify the major version, then register the stdio server with Claude Code:
 
 ```bash
-npm install -g librarium@^2
+npm install -g librarium
 librarium --version
 # Must report major version 2
-claude mcp add librarium -- librarium mcp
+claude mcp add --scope user librarium -- librarium mcp
 ```
 
 See [Getting started](/docs#install) for other supported installation channels.

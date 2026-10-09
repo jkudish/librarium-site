@@ -11,7 +11,7 @@ Librarium is a meta harness for research queries. It sends one query to selected
 The published v2 CLI requires Node.js 22.12.0 or newer when installed from npm. Install the v2 major, then confirm the executable version:
 
 ```bash
-npm install -g librarium@^2
+npm install -g librarium
 librarium --version
 # Must report major version 2
 ```

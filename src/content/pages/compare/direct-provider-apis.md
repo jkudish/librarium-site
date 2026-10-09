@@ -55,4 +55,4 @@ Both implementations distinguish unknown pricing from zero. Their budget control
 
 Choose one real question, the smallest useful provider set, and an explicit spending policy. Keep the returned evidence and compare the work required to inspect it—not just the quality of a polished summary.
 
-Install JavaScript v2 with `npm install -g librarium@^2`, then follow [your first multi-provider query](/guides/first-query) or [connect your coding agent](/guides/agent-research). The first-party PHP package retains its separate [install-after-release guidance](/docs/php#install-after-release).
+Install JavaScript v2 with `npm install -g librarium`, then follow [your first multi-provider query](/guides/first-query) or [connect your coding agent](/guides/agent-research). For Laravel, see [the PHP install guide](/docs/php#install).

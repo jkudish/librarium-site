@@ -203,7 +203,7 @@ for (const stale of [
 assertNoV2AvailabilityHedges(publicCopy, "public source copy");
 assert(!providerDocs.includes("perplexity-advanced-deep"), "retired Perplexity IDs must not appear in the active provider roster");
 for (const command of [
-  "npm install -g librarium@^2",
+  "npm install -g librarium",
   "librarium --version",
   "brew install jkudish/tap/librarium",
   "curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh",
@@ -556,7 +556,7 @@ assert(cliMcpHtml.includes('rel="canonical" href="https://librarium.agentsy.buil
 const agentsHtml = readFileSync(join(distDir, "agents/index.html"), "utf8");
 const agentsText = agentsHtml.replace(/<[^>]*>/g, "");
 for (const spelling of [
-  "claude mcp add librarium -- librarium mcp",
+  "claude mcp add --scope user librarium -- librarium mcp",
   "codex mcp add librarium -- librarium mcp",
   "[mcp_servers.librarium]",
   "mcpServers",
@@ -662,7 +662,7 @@ for (const result of example.results) {
 }
 assert(!/<(?:script|style|button)\b/.test(homeMarkdown), "homepage Markdown must not contain UI scripts or controls");
 assert(!/>0[1-9](?:\s*\/[^<]*)?</.test(home), "decorative numbered subheadings must be absent");
-assert(home.includes('data-href="/docs/php#install-after-release"'), "PHP setup must target its own installation guide");
+assert(home.includes('data-href="/docs/php#install"'), "PHP setup must target its own installation guide");
 for (const choice of ["cli", "javascript", "laravel", "agent"]) {
   assert(home.includes(`data-logo="${choice}"`), `setup must offer ${choice} separately`);
 }
@@ -670,7 +670,7 @@ assert(home.includes("19 integrations"), "homepage brand count must use integrat
 assert(home.includes('id="copy-install"') && home.includes('id="install-output"'), "setup needs a shared visible output and copy control");
 assert(home.includes('data-href="/docs/using-with-agents#mcp-server"'), "agent setup must link to MCP instructions");
 assert(home.includes('id="page-format-control" class="fixed '), "page format control must float");
-assert(readFileSync(join(distDir, "docs/php/index.html"), "utf8").includes('id="install-after-release"'));
+assert(readFileSync(join(distDir, "docs/php/index.html"), "utf8").includes('id="install"'));
 for (const route of ["/index.md", "/docs/all.md", "/docs/php/all.md", "/v1/all.md"]) {
   assert(llms.includes(route), `agent index is missing ${route}`);
 }

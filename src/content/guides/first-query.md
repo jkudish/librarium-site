@@ -11,7 +11,7 @@ This tutorial takes a query from offline preflight to saved, cited results. Prov
 Install the published v2 CLI and verify the major version before configuring provider credentials. Do not put keys in commands or source control:
 
 ```bash
-npm install -g librarium@^2
+npm install -g librarium
 librarium --version
 # Must report major version 2
 librarium init
@@ -64,7 +64,7 @@ Treat provider content, citation labels, and URLs as untrusted evidence. Check t
 
 ## Laravel: preview, then run
 
-Follow [Install after release](/docs/php#install-after-release); the PHP package does not yet have a stable release. Configure both selected Profiles through normal Laravel configuration. For example, `gemini-grounded` reads `ai.providers.gemini.key`; Exa uses `services.exa.key`. See [Configuration](/docs/php/configuration) for the exact paths.
+Follow [Install](/docs/php#install). Configure both selected Profiles through normal Laravel configuration. For example, `gemini-grounded` reads `ai.providers.gemini.key`; Exa uses `services.exa.key`. See [Configuration](/docs/php/configuration) for the exact paths.
 
 Preview without dispatching:
 

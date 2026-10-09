@@ -15,7 +15,7 @@ The shipped skill teaches the v2 profile catalog, workflow selection, durable mo
 ## MCP server
 
 ```bash
-claude mcp add librarium -- librarium mcp
+claude mcp add --scope user librarium -- librarium mcp
 ```
 
 The stdio server exposes exactly five tools:
@@ -63,7 +63,7 @@ This documentation is also published as [`llms.txt`](/llms.txt) and [`llms-full.
 Amp needs the Librarium User Skill and v2 CLI, not a plugin. Global User Skills sync into orbs automatically. Install and verify the published v2 CLI before registering or using the skill:
 
 ```bash
-npm install -g librarium@^2
+npm install -g librarium
 librarium --version
 # Must report major version 2
 ```

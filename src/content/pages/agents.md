@@ -11,7 +11,7 @@ ctaLabel: Read the agent docs
 Your agent gets research through the same CLI you use. Install it once:
 
 ```bash
-npm install -g librarium@^2
+npm install -g librarium
 ```
 
 The MCP server and the agent skill ship with that install. There is nothing else to download. Check that `librarium --version` reports major version 2 before you connect an agent. [Getting started](/docs#install) covers other install channels, and the [CLI page](/cli) covers terminal use.
@@ -21,7 +21,7 @@ The MCP server and the agent skill ship with that install. There is nothing else
 Paste this into your coding agent. It installs v2, registers the MCP server, checks the install offline, and stops before any paid call:
 
 ```text
-Install Librarium v2 as a CLI and MCP tool for my coding agent. Read https://librarium.agentsy.build/docs/index.md and https://librarium.agentsy.build/docs/using-with-agents.md. Check that Node.js is at least 22.12, then run `npm install -g librarium@^2` and confirm `librarium --version` reports major version 2. Ask which MCP client and configuration scope I use. Preserve existing servers and register a stdio server named librarium with command `librarium` and args `["mcp"]`; for Claude Code, use `claude mcp add librarium -- librarium mcp` with the agreed scope. Ask which providers I want and guide me through `librarium init` without exposing credentials in chat or source control. Run `librarium doctor` without --live and verify MCP discovery with list_providers and list_groups. Do not run research or make paid provider calls without my approval. Summarize the installation, client configuration, and any remaining credential setup.
+Install Librarium v2 as a CLI and MCP tool for my coding agent. Read https://librarium.agentsy.build/docs/index.md and https://librarium.agentsy.build/docs/using-with-agents.md. Check that Node.js is at least 22.12, then run `npm install -g librarium` and confirm `librarium --version` reports major version 2. Ask which MCP client and configuration scope I use. Preserve existing servers and register a stdio server named librarium with command `librarium` and args `["mcp"]`; for Claude Code, use `claude mcp add --scope user librarium -- librarium mcp` with the agreed scope. Ask which providers I want and guide me through `librarium init` without exposing credentials in chat or source control. Run `librarium doctor` without --live and verify MCP discovery with list_providers and list_groups. Do not run research or make paid provider calls without my approval. Summarize the installation, client configuration, and any remaining credential setup.
 ```
 
 ## Register the MCP server in your agent
@@ -31,7 +31,7 @@ Every host launches the same local command: `librarium mcp`. The registration sp
 **Claude Code** ([MCP docs](https://code.claude.com/docs/en/mcp)):
 
 ```bash
-claude mcp add librarium -- librarium mcp
+claude mcp add --scope user librarium -- librarium mcp
 ```
 
 **Codex** ([MCP docs](https://developers.openai.com/codex/mcp)): add it by command, or edit `~/.codex/config.toml` (project-scoped: `.codex/config.toml`):

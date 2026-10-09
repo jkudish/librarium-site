@@ -56,7 +56,7 @@ The terminal snapshot version does not imply artifact or runtime compatibility. 
 
 `api_output` means the named API returned the output. A citation may be `provider_reported`, `collector_extracted`, or `librarium_inferred`. This says how it entered the result, not whether it supports every nearby claim.
 
-SearchAPI consumer profiles are collected `surface_snapshot` observations. They are not official consumer-vendor APIs and do not promise parity for an account, location, subscription, experiment cohort, or time. The six surfaces share a collector and collector run correlation. Their agreement is correlated visibility evidence, not six independent confirmations.
+SearchAPI consumer profiles are collected `surface_snapshot` observations. They are not official consumer-vendor APIs and do not promise parity for an account, location, subscription, experiment cohort, or time. The five surfaces share a collector and collector run correlation. Their agreement is correlated visibility evidence, not five independent confirmations.
 
 Web, X-only, combined, and specialized media results retain distinct profile identities and corpus provenance. `grok/web`, `grok-x-only/x`, and `grok-combined/combined` must not be collapsed. A normalized shared source records source overlap. Correlation records related retrieval paths. Neither is corroboration. Corroboration requires a consumer to assess support and independence; Librarium does not serialize a universal `verified` or `independent` claim.
 

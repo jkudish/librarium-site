@@ -12,7 +12,7 @@ V2 reserves exactly four names.
 | --- | --- |
 | `quick` | `gemini-grounded/grounded`, `openrouter/grounded`, `brave-answers/grounded`, `exa/search`, `kagi-fastgpt/grounded`, `parallel/turbo` |
 | `deep` | Derived from implemented research-report profiles |
-| `visibility` | Six SearchAPI surface profiles, then `perplexity-sonar-pro/grounded`, `gemini-grounded/grounded`, and `grok/web` |
+| `visibility` | Five SearchAPI surface profiles, then `perplexity-sonar-pro/grounded`, `gemini-grounded/grounded`, and `grok/web` |
 | `all` | Derived from selectable profiles allowed by catalog policy |
 
 ```bash

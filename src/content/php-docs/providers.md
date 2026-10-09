@@ -4,7 +4,7 @@ description: Reference 41 enabled Profiles and six disabled-by-default DataForSE
 order: 4
 ---
 
-The current PHP source configures 47 flat Profile IDs. Forty-one have
+The current PHP source configures 46 flat Profile IDs. Forty have
 `enabled: true`; six DataForSEO Profiles have `enabled: false`. A Profile is the
 public Laravel selector. Enabled state alone does not make it available:
 credentials and configuration must also pass preflight.
@@ -32,7 +32,6 @@ credentials and configuration must also pass preflight.
 | `searchapi` | SearchAPI Google | search results | inline |
 | `searchapi-chatgpt` | SearchAPI ChatGPT | surface observation | inline |
 | `searchapi-gemini` | SearchAPI Gemini | surface observation | inline |
-| `searchapi-perplexity` | SearchAPI Perplexity | surface observation | inline |
 | `searchapi-google-ai-mode` | SearchAPI Google AI Mode | surface observation | inline |
 | `searchapi-bing-copilot` | SearchAPI Bing Copilot | surface observation | inline |
 | `searchapi-google-ai-overview` | SearchAPI Google AI Overview | surface observation | two-stage inline |

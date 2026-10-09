@@ -54,7 +54,6 @@ const phpEnabledProfiles = [
   "searchapi",
   "searchapi-chatgpt",
   "searchapi-gemini",
-  "searchapi-perplexity",
   "searchapi-google-ai-mode",
   "searchapi-bing-copilot",
   "searchapi-google-ai-overview",
@@ -88,16 +87,17 @@ const phpDataForSeoProfiles = [
 assert.equal(PRODUCT_VERSION, "2.0.0");
 assert.equal(NODE_FLOOR, "22.12.0");
 assert.equal(PROVIDER_COUNT, providerIds.size);
-assert.equal(PROVIDER_COUNT, 34);
+assert.equal(PROVIDER_COUNT, 33);
 assert.equal(PROFILE_COUNT, profiles.length);
-assert.equal(PROFILE_COUNT, 41);
+assert.equal(PROFILE_COUNT, 40);
 assert.equal(new Set(profiles).size, profiles.length, "profile roster contains duplicates");
 assert.deepEqual(WORKFLOWS.map((workflow) => workflow.id), ["quick", "deep", "visibility", "all"]);
 assert.equal(WORKFLOWS.find((workflow) => workflow.id === "quick")?.selection.length, 6);
-assert.equal(WORKFLOWS.find((workflow) => workflow.id === "visibility")?.selection.length, 9);
+assert.equal(WORKFLOWS.find((workflow) => workflow.id === "visibility")?.selection.length, 8);
 assert(profiles.includes("tavily/search"));
 assert(!profiles.includes("tavily/research"));
 assert(!profiles.includes("parallel/chat"));
+assert(!profiles.includes("searchapi-perplexity/surface"));
 
 const v1DocNames = readdirSync(v1DocsDir).sort();
 const v2DocNames = readdirSync(docsDir).sort();
@@ -134,18 +134,18 @@ const phpProviders = readFileSync(join(phpDocsDir, "providers.md"), "utf8");
 const phpConfiguration = readFileSync(join(phpDocsDir, "configuration.md"), "utf8");
 const phpGroups = readFileSync(join(phpDocsDir, "groups-and-modes.md"), "utf8");
 
-assert.equal(phpEnabledProfiles.length, 41);
+assert.equal(phpEnabledProfiles.length, 40);
 assert.equal(phpDataForSeoProfiles.length, 6);
-assert.equal(new Set([...phpEnabledProfiles, ...phpDataForSeoProfiles]).size, 47);
+assert.equal(new Set([...phpEnabledProfiles, ...phpDataForSeoProfiles]).size, 46);
 const documentedPhpProfiles = [...phpProviders.matchAll(/^\| `([^`]+)` \|/gm)].map((match) => match[1]);
 assert.deepEqual(
   documentedPhpProfiles,
   [...phpEnabledProfiles, ...phpDataForSeoProfiles],
-  "PHP provider tables must document the exact 41 enabled and six disabled-by-default Profiles",
+  "PHP provider tables must document the exact 40 enabled and six disabled-by-default Profiles",
 );
 for (const fact of [
-  "47 flat Profile IDs",
-  "Forty-one have",
+  "46 flat Profile IDs",
+  "Forty have",
   "six DataForSEO Profiles",
   "historical compatibility evidence",
 ]) {
@@ -161,7 +161,7 @@ for (const fact of [
 ]) {
   assert(phpConfiguration.includes(fact), `PHP configuration docs are missing: ${fact}`);
 }
-for (const fact of ["47 configured Profiles", "Six are DataForSEO", "remaining 41 Profiles"]) {
+for (const fact of ["46 configured Profiles", "Six are DataForSEO", "remaining 40 Profiles"]) {
   assert(phpGroups.includes(fact), `PHP group docs are missing: ${fact}`);
 }
 

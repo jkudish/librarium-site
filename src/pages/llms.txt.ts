@@ -44,7 +44,7 @@ Refinement, research, synthesis, and verification share a paid-attempt wallet. K
 
 MCP research and async checks return compact indexes. Use \`get_results\` content/citation pages and follow \`nextCursor\` with unchanged filters for complete evidence. Completed evidence is readable while other providers remain pending. Static profile discovery does not execute custom code or authenticate. Amp uses a User Skill and the v2 CLI, not a plugin.
 
-For answer-engine visibility work, \`--group visibility\` compares six SearchAPI-collected consumer surfaces with three first-party API baselines. The six surfaces share one collector. Agreement is correlated visibility evidence, not independent corroboration or parity with a particular account.
+For answer-engine visibility work, \`--group visibility\` compares five SearchAPI-collected consumer surfaces with three first-party API baselines. The five surfaces share one collector. Agreement is correlated visibility evidence, not independent corroboration or parity with a particular account.
 
 API output, provider-reported citations and usage, collected consumer observations, normalized source overlap, correlation, and independent corroboration are distinct claims. Librarium records provenance. It does not serialize a universal confidence score.
 

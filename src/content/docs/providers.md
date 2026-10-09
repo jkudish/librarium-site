@@ -22,7 +22,7 @@ Librarium v2 has 34 built-in providers and exactly 41 public profiles. Selection
 | OpenRouter | `openrouter/grounded`, `openrouter/chat` |
 | Parallel | `parallel/search`, `parallel/turbo`, `parallel/research` |
 | Perplexity | `perplexity-search/search`, `perplexity-sonar-pro/grounded`, `perplexity-deep-research/research`, `perplexity-sonar-deep/research` |
-| SearchAPI | `searchapi/search`, `searchapi-chatgpt/surface`, `searchapi-gemini/surface`, `searchapi-perplexity/surface`, `searchapi-google-ai-mode/surface`, `searchapi-bing-copilot/surface`, `searchapi-google-ai-overview/surface` |
+| SearchAPI | `searchapi/search`, `searchapi-chatgpt/surface`, `searchapi-gemini/surface`, `searchapi-google-ai-mode/surface`, `searchapi-bing-copilot/surface`, `searchapi-google-ai-overview/surface` |
 | SerpAPI | `serpapi/search` |
 | SerpBase | `serpbase/search`, `serpbase/news` |
 | Tavily | `tavily/search` |

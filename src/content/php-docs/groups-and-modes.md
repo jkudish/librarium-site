@@ -31,17 +31,17 @@ not require a provider/profile path syntax.
 5. `kagi-fastgpt`
 6. `parallel-turbo`
 
-`visibility` contains the six SearchAPI surface Profiles followed by
+`visibility` contains the five SearchAPI surface Profiles followed by
 `perplexity-sonar-pro`, `gemini-grounded`, and `grok`.
 
 `deep` is derived from configured `research_report` Profiles. `all` is derived
 from every configured Profile. Disabled or unavailable members are reported
 and omitted from execution.
 
-The shipped catalog contains 47 configured Profiles. Six are DataForSEO
+The shipped catalog contains 46 configured Profiles. Six are DataForSEO
 surface collectors with `enabled: false`; they are not members of `quick` or
 `visibility`, and join derived `all` only after explicit enablement and the
-other eligibility checks pass. The remaining 41 Profiles have `enabled: true`
+other eligibility checks pass. The remaining 40 Profiles have `enabled: true`
 in shipped configuration. Missing credentials or invalid options still make an
 enabled Profile unavailable.
 

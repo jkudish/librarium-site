@@ -1,4 +1,5 @@
 ---
+import LogoMark from "./LogoMark.astro";
 const groups = [
   { title: "Use Librarium", links: [
     { href: "/agents", label: "Agents & MCP" },
@@ -28,7 +29,7 @@ const groups = [
 <footer class="border-t border-neutral-950/10 py-12">
   <div class="mx-auto grid max-w-6xl gap-10 px-6 lg:grid-cols-[1fr_2fr] lg:gap-12 lg:px-8">
     <div>
-      <a href="/" aria-label="Homepage"><span class="font-mono text-lg font-semibold text-neutral-950">librarium</span></a>
+      <a href="/" aria-label="Homepage" class="inline-flex items-center gap-x-2 text-neutral-950"><LogoMark id="logo-footer" class="size-7 shrink-0" /><span class="font-mono text-lg font-semibold text-neutral-950">librarium</span></a>
       <p class="mt-4 max-w-[32ch] text-base/7 text-neutral-600 sm:text-sm/6">Give your agent more than one source.</p>
     </div>
     <nav class="grid grid-cols-2 gap-x-6 gap-y-8 text-base font-normal sm:grid-cols-4 sm:text-sm" aria-label="Footer navigation">

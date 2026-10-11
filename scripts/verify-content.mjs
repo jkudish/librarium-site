@@ -588,7 +588,7 @@ for (const eyebrow of ["Provenance", "Cost controls", "Long-running research"]) 
 for (const file of htmlFiles) {
   const html = readFileSync(file, "utf8");
   for (const svg of html.matchAll(/<svg\b[^>]*>/g)) {
-    assert(svg[0].includes("data-icon="), `${relative(distDir, file)} has a non-Phosphor UI icon`);
+    assert(svg[0].includes("data-icon=") || svg[0].includes('data-brand="librarium"'), `${relative(distDir, file)} has a non-Phosphor UI icon`);
   }
   for (const link of html.matchAll(/href="(\/[^\"]*#[^\"]+)"/g)) {
     const [path, anchor] = link[1].split("#");

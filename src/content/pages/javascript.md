@@ -34,6 +34,55 @@ The root and core boundaries are Worker-safe. Core callers supply adapter bindin
 
 Install the v2 library in your project with `npm install librarium`. For the command-line tool, see [CLI installation](/docs#install).
 
+## Plan a run before anything executes
+
+Planning is local and network-free. Build a catalog from your provider configuration, then prepare an exact request. The prepared plan carries each selected profile's adapter binding and network-free estimate:
+
+```ts
+import { buildProviderCatalog, prepareResearchExecution } from 'librarium/core';
+
+// Enable two built-in providers. Credentials come from a context you supply.
+const catalog = buildProviderCatalog({
+  providerConfigs: { exa: { enabled: true }, 'kagi-fastgpt': { enabled: true } },
+  credentials: { env: process.env },
+});
+
+let next = 0;
+const plan = prepareResearchExecution(
+  {
+    query: 'Lisbon or Porto for a long weekend without a car?',
+    mode: 'sync',
+    selector: {
+      kind: 'targets',
+      targets: [
+        { provider_id: 'exa', profile_id: 'search' },
+        { provider_id: 'kagi-fastgpt', profile_id: 'grounded' },
+      ],
+    },
+    fallback: { kind: 'disabled' },
+    limits: {
+      max_concurrency: 2,
+      request_deadline_ms: 120_000,
+      inline_attempt_deadline_ms: 60_000,
+      background_attempt_deadline_ms: 120_000,
+      poll_interval_ms: 5_000,
+    },
+  },
+  catalog,
+  { clock: { now: () => Date.now() }, ids: { next: (scope) => `${scope}-${++next}` } },
+);
+
+if (!plan.ok) throw new Error(plan.issues.map((issue) => issue.message).join('\n'));
+
+for (const profile of Object.values(plan.prepared.profile_plans_by_identity)) {
+  console.log(profile.binding.adapter_id, profile.estimate);
+}
+// exa { estimated_cost_microusd: '17000', … }
+// kagi-fastgpt { estimated_cost_microusd: '15000', billable_units: [ { unit: 'requests', quantity: '1' } ] }
+```
+
+Executing the plan is a separate step: `runPreparedExecution(plan.prepared, dependencies)` runs it with dependencies you inject, namely a coordination state store (`InMemoryCoordinationStateStore` is exported), coordinator dependencies, and an attempt-execution port that calls your adapters.
+
 ## Turn a terminal response into an application feature
 
 Validate a response at your application boundary, then render each result with its own citations. Keep raw content out of HTML sinks.
@@ -55,6 +104,50 @@ const evidence = response.results.map((result) => ({
 // Render content as text or sanitized Markdown; validate citation URLs.
 // Handle response.errors and partial/failed status alongside successes.
 ```
+
+A terminal response looks like this. The values are illustrative, not a captured run; the object passes `ResearchResponseSchema`:
+
+```json
+{
+  "generator": "jkudish/librarium",
+  "generator_version": "2.0.0",
+  "request_id": "req_01J9Z6K3XW",
+  "status": "succeeded",
+  "completed_at": "2026-10-12T09:14:07Z",
+  "results": [
+    {
+      "id": "res_kagi_1",
+      "content_format": "markdown",
+      "content": "Porto is walkable; Lisbon needs more transit…",
+      "requested_profile": "grounded",
+      "provider": "kagi-fastgpt",
+      "profile": "grounded",
+      "provenance": {
+        "result_kind": "grounded_answer",
+        "retrieval_methods": ["search_endpoint"],
+        "corpora": ["web"],
+        "observed_at": "2026-10-12T09:14:05Z"
+      },
+      "citations": [
+        {
+          "id": "cit_1",
+          "derivation": "provider_reported",
+          "source": {
+            "kind": "web_page",
+            "url": "https://www.visitportugal.com/en/content/porto",
+            "title": "Porto | Visit Portugal"
+          }
+        }
+      ],
+      "completed_at": "2026-10-12T09:14:05Z",
+      "usage": { "estimated_cost": "0.015", "currency": "USD" }
+    }
+  ],
+  "errors": []
+}
+```
+
+`status` is `succeeded`, `partial`, or `failed`, and must agree with `results` and `errors`. Costs are decimal strings with a currency; a missing cost is unknown, not zero. Citation URLs are untrusted identifiers.
 
 Your app still owns authentication, tenant boundaries, persistence, retention, and the interface around the evidence. Shared terminal contracts make that boundary explicit; they do not make the JavaScript and PHP runtimes interchangeable.
 

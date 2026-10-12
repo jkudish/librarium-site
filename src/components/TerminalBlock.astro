@@ -1,0 +1,103 @@
+---
+// A terminal transcript for the product pages: `$` command lines and plain
+// output lines, a badge that says whether the output is real or illustrative,
+// and a copy button that copies only the commands.
+import Icon from "./Icon.astro";
+
+export type TerminalLine =
+  | { cmd: string; accent?: string; prompt?: string }
+  | { out: string; tone?: "dim" | "ok" | "warn" | "accent" };
+
+interface Props {
+  title: string;
+  badge: string;
+  /** "real" output was captured from the shipped tool; "illustrative" was
+   *  not; "commands" shows commands only, with no output. */
+  kind: "real" | "illustrative" | "commands";
+  lines: TerminalLine[];
+  caption?: string;
+  label?: string;
+  class?: string;
+}
+const { title, badge, kind, lines, caption, label, class: className } = Astro.props;
+const commands = lines.flatMap((line) => ("cmd" in line ? [line.cmd] : []));
+const toneClass = { dim: "term-dim", ok: "term-ok", warn: "term-warn", accent: "term-accent" } as const;
+const splitAccent = (cmd: string, accent?: string) => {
+  const at = accent ? cmd.indexOf(accent) : -1;
+  return at === -1 || !accent ? [cmd, "", ""] : [cmd.slice(0, at), accent, cmd.slice(at + accent.length)];
+};
+---
+
+<figure class:list={["terminal min-w-0 overflow-hidden rounded-lg", className]} aria-label={label ?? title}>
+  <div class="term-bar flex items-center gap-3 px-4 py-2.5">
+    <span class="flex gap-1.5" aria-hidden="true"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span></span>
+    <span class="min-w-0 flex-1 truncate font-mono text-xs text-neutral-400">{title}</span>
+    <span class:list={["term-badge shrink-0 rounded-sm px-1.5 py-0.5 font-mono text-[10.5px] tracking-wide uppercase", kind === "real" ? "term-badge-real" : "term-badge-illustrative"]}>{badge}</span>
+    {commands.length > 0 && (
+      <button type="button" class="term-copy group" data-code-copy data-copy={commands.join("\n")} data-copy-state="idle" aria-label={`Copy ${commands.length > 1 ? "commands" : "command"}: ${title}`}>
+        <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" />
+        <Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" />
+      </button>
+    )}
+  </div>
+  <pre tabindex="0" class="term-body"><code>{lines.map((line) => "cmd" in line ? (
+    <span class="term-cmd"><span class="term-prompt" aria-hidden="true">{line.prompt ?? "$"} </span>{(() => { const [before, accent, after] = splitAccent(line.cmd, line.accent); return <>{before}{accent && <span class="term-flag">{accent}</span>}{after}</>; })()}</span>
+  ) : (
+    <span class:list={["term-out", line.tone && toneClass[line.tone]]}>{line.out || " "}</span>
+  ))}</code></pre>
+  {caption && <figcaption class="term-caption px-4 py-2.5 text-xs/5 text-pretty">{caption}</figcaption>}
+</figure>
+
+<style>
+  .terminal {
+    background: var(--color-neutral-950, #0a0a0a);
+    border: 1px solid var(--color-neutral-950, #0a0a0a);
+  }
+  .term-bar { border-bottom: 1px solid rgb(255 255 255 / 0.1); }
+  .term-dot { display: block; width: 0.625rem; height: 0.625rem; border-radius: 9999px; background: rgb(255 255 255 / 0.18); }
+  .term-badge-real { color: var(--color-amber-200, #fee685); background: rgb(251 191 36 / 0.12); }
+  .term-badge-illustrative { color: var(--color-neutral-300, #d4d4d4); background: rgb(255 255 255 / 0.08); }
+  .term-copy {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-sm);
+    padding: 0.25rem;
+    cursor: pointer;
+    color: var(--color-neutral-300, #d4d4d4);
+  }
+  .term-copy:hover { color: var(--color-amber-300, #ffd230); background: rgb(255 255 255 / 0.06); }
+  .term-copy:focus-visible { outline: 2px solid var(--color-amber-300, #ffd230); outline-offset: 2px; }
+  .term-body {
+    margin: 0;
+    overflow-x: auto;
+    padding: 1rem 1.25rem 1.125rem;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--color-neutral-300, #d4d4d4);
+  }
+  .term-body:focus-visible { outline: 2px solid var(--color-amber-300, #ffd230); outline-offset: -2px; }
+  .term-body > code { display: block; min-width: max-content; }
+  .term-cmd, .term-out { display: block; white-space: pre; }
+  .term-cmd { color: var(--color-amber-100, #fef3c6); }
+  .term-cmd + .term-out { margin-top: 0.25rem; }
+  .term-out + .term-cmd { margin-top: 0.875rem; }
+  .term-prompt { color: var(--color-neutral-500, #737373); user-select: none; }
+  .term-flag { color: var(--color-amber-300, #ffd230); }
+  .term-dim { color: var(--color-neutral-500, #737373); }
+  .term-ok { color: var(--color-amber-200, #fee685); }
+  .term-warn { color: var(--color-amber-300, #ffd230); }
+  .term-accent { color: var(--color-amber-100, #fef3c6); }
+  .term-caption {
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+    color: var(--color-neutral-400, #a1a1a1);
+  }
+  :global(:root[data-theme="dark"]) .terminal { border-color: #3e403a; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) .terminal { border-color: #3e403a; }
+  }
+</style>
+
+<script>
+  import "../scripts/copy-buttons";
+</script>

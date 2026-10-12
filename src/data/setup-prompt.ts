@@ -1,5 +1,6 @@
 // The canonical agent setup prompt. The homepage copy control and the
 // Agents & MCP page render this one string; scripts/verify-content.mjs
-// fails the build if the page copy drifts from it.
+// fails the build if the page copy drifts from it. The full install, verify,
+// and MCP-registration steps live in src/data/install.md, served at /install.md.
 export const AGENT_SETUP_PROMPT =
-  "Install Librarium v2 as a CLI and MCP tool for my coding agent. Read https://librarium.agentsy.build/docs/index.md and https://librarium.agentsy.build/docs/using-with-agents.md. Check that Node.js is at least 22.12, then run `npm install -g librarium` and confirm `librarium --version` reports major version 2. Ask which MCP client and configuration scope I use. Preserve existing servers and register a stdio server named librarium with command `librarium` and args `[\"mcp\"]`; for Claude Code, use `claude mcp add --scope user librarium -- librarium mcp` with the agreed scope. Ask which providers I want and guide me through `librarium init` without exposing credentials in chat or source control. Run `librarium doctor` without --live and verify MCP discovery with list_providers and list_groups. Do not run research or make paid provider calls without my approval. Summarize the installation, client configuration, and any remaining credential setup.";
+  "Install Librarium for me by following https://librarium.agentsy.build/install.md. Don't run research or make paid provider calls without my approval, and keep my API keys out of chat and source control.";

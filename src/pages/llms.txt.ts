@@ -71,6 +71,7 @@ ${articleLines}
 
 ## Markdown for agents
 
+- [Install for a coding agent](${base}/install.md): step-by-step CLI install, offline verification, and MCP registration for Claude Code, Codex, Cursor, OpenCode, Amp, Hermes, and other hosts, with no research or paid provider calls
 - [Homepage](${base}/index.md)
 - [All JavaScript v2 docs](${base}/docs/all.md)
 - [All PHP docs](${base}/docs/php/all.md)

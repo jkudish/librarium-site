@@ -145,7 +145,7 @@ const useCases = [
 
         <div id="research-example" role="region" tabindex="-1" aria-label="Captured research demo — playback, not live" class="mt-12 min-w-0 scroll-mt-6 overflow-hidden border-x border-t border-neutral-300 bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600 sm:mt-16">
           <div class="flex flex-col justify-between gap-4 border-b border-neutral-200 px-5 pt-6 sm:flex-row sm:items-end sm:px-7 sm:pt-7">
-            <h2 class="max-w-[30ch] pb-5 text-2xl font-medium tracking-tight text-balance text-neutral-950 sm:pb-7">One question. Five providers.</h2>
+            <h2 class="max-w-[30ch] pb-5 text-2xl font-medium tracking-tight text-balance text-neutral-950 sm:pb-7">One question. Multiple providers.</h2>
             <div id="example-tabs" role="tablist" aria-label="Example format" hidden class="shrink-0">
               <button id="example-readable-tab" type="button" role="tab" aria-selected="true" aria-controls="example-readable" class="min-h-12 cursor-pointer border-b-2 border-transparent px-1 py-3 text-base font-medium text-neutral-500 aria-selected:border-amber-700 aria-selected:text-amber-800 hover:text-neutral-950 sm:text-sm">Readable result</button>
               <button id="example-json-tab" type="button" role="tab" aria-selected="false" aria-controls="example-json" tabindex="-1" class="ml-6 min-h-12 cursor-pointer border-b-2 border-transparent px-1 py-3 text-base text-neutral-500 aria-selected:border-amber-700 aria-selected:text-amber-800 hover:text-neutral-950 sm:text-sm">JSON</button>
@@ -159,21 +159,25 @@ const useCases = [
               </div>
               <div id="demo-providers" role="tablist" aria-label="Provider results" class="demo-tabs mt-5 flex min-h-10 gap-2 overflow-x-auto pb-0.5">
                 {RESEARCH_DEMO.results.map((result, index) => (
-                  <button type="button" role="tab" id={`demo-tab-${index}`} data-demo-tab={index} aria-selected={index === 0 ? "true" : "false"} aria-controls={`demo-panel-${index}`} tabindex={index === 0 ? 0 : -1} class="flex min-h-10 shrink-0 cursor-pointer items-center gap-2 rounded border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 aria-selected:border-neutral-950 aria-selected:text-neutral-950">
+                  <button type="button" role="tab" id={`demo-tab-${index}`} data-demo-tab={index} data-demo-state="done" aria-selected={index === 0 ? "true" : "false"} aria-controls={`demo-panel-${index}`} tabindex={index === 0 ? 0 : -1} title={result.provider} class="demo-tab flex min-h-10 shrink-0 cursor-pointer items-center gap-2 rounded border px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
                     <img src={providerMark(result.logo)} alt="" width="20" height="20" class="size-5 shrink-0" />
                     <span class="whitespace-nowrap font-medium">{result.shortName}</span>
+                    <span class="demo-dot size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                    <span class="demo-tab-status min-w-[7ch] text-left font-mono text-xs" data-demo-status>{result.status === "failed" ? "failed" : formatElapsed(result.elapsedSeconds)}</span>
                   </button>
                 ))}
               </div>
-              <noscript><style>[data-demo-panel]{display:block !important}</style></noscript>
+              <noscript><style>[data-demo-panel]{display:block !important}[data-demo-heading]{position:static !important;width:auto !important;height:auto !important;margin:1.5rem 0 0 !important;overflow:visible !important;clip:auto !important;clip-path:none !important;white-space:normal !important}</style></noscript>
               {RESEARCH_DEMO.results.map((result, index) => (
-                <div id={`demo-panel-${index}`} role="tabpanel" aria-labelledby={`demo-tab-${index}`} data-demo-panel={index} data-demo-final={result.status === "failed" ? "failed" : formatElapsed(result.elapsedSeconds)} tabindex="0" hidden={index !== 0} class="demo-panel mt-4 flex h-[30rem] flex-col focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-700 sm:h-[26rem]">
-                  <div class="flex min-h-8 flex-wrap items-center gap-x-2.5 gap-y-1">
-                    <img src={providerMark(result.logo)} alt="" width="20" height="20" class="size-5 shrink-0" />
-                    <span class="text-sm font-medium text-balance text-neutral-950">{result.provider}</span>
-                    <span class="ml-auto shrink-0 font-mono text-xs text-neutral-500" data-demo-status>{result.status === "failed" ? "failed" : formatElapsed(result.elapsedSeconds)}</span>
+                <div id={`demo-panel-${index}`} role="tabpanel" aria-labelledby={`demo-tab-${index}`} data-demo-panel={index} data-demo-final={result.status === "failed" ? "failed" : formatElapsed(result.elapsedSeconds)} tabindex="0" hidden={index !== 0} class="demo-panel mt-3 flex h-[30rem] flex-col focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-700 sm:h-[26rem]">
+                  <h3 class="sr-only text-sm font-medium text-neutral-950" data-demo-heading>{result.provider}</h3>
+                  <div class="demo-pending hidden border-t border-neutral-200 pt-4" aria-hidden="true">
+                    <span class="block h-3 w-2/3 rounded-sm bg-neutral-100"></span>
+                    <span class="mt-3 block h-3 w-11/12 rounded-sm bg-neutral-100"></span>
+                    <span class="mt-3 block h-3 w-4/5 rounded-sm bg-neutral-100"></span>
+                    <span class="mt-3 block h-3 w-1/2 rounded-sm bg-neutral-100"></span>
                   </div>
-                  <div data-demo-body class="mt-3 min-h-0 flex-1 overflow-y-auto border-t border-neutral-200 pt-3 pr-1">
+                  <div data-demo-body class="min-h-0 flex-1 overflow-y-auto border-t border-neutral-200 pt-4 pr-1">
                     {result.title && <h3 class="max-w-[60ch] text-lg font-medium text-balance text-neutral-950">{result.title}</h3>}
                     <div class="demo-report mt-2 max-w-[75ch] text-sm/6 text-pretty text-neutral-600" set:html={renderCapturedMarkdown(result.displayContent)} />
                     {result.citations.length > 0 && (
@@ -422,6 +426,45 @@ const useCases = [
     white-space: normal;
   }
   .demo-report :global(th) { white-space: nowrap; color: inherit; font-weight: var(--font-weight-medium); }
+  /* Provider chips: the chip is the only provider label above a result, so the
+     selected chip carries a strong state and its status (queued, running, or
+     the captured wall-clock duration). The dark palette is set here because
+     the shared dark overrides do not know these states. */
+  .demo-tab { border-color: var(--color-neutral-200); background: #fff; color: var(--color-neutral-700); }
+  .demo-tab:hover { background: var(--color-neutral-100); }
+  .demo-tab-status { color: var(--color-neutral-500); }
+  .demo-tab[aria-selected="true"] {
+    border-color: var(--color-amber-700);
+    background: var(--color-amber-50);
+    box-shadow: inset 0 0 0 1px var(--color-amber-700);
+    color: var(--color-neutral-950);
+  }
+  .demo-tab[aria-selected="true"] .demo-tab-status { color: var(--color-amber-800); }
+  .demo-dot { background: var(--color-neutral-300); }
+  .demo-tab[data-demo-state="queued"] .demo-dot { background: transparent; box-shadow: inset 0 0 0 1px var(--color-neutral-400); }
+  .demo-tab[data-demo-state="running"] .demo-dot,
+  .demo-tab[aria-selected="true"] .demo-dot { background: var(--color-amber-600); box-shadow: none; }
+  [data-demo-panel]:is([data-demo-state="running"], [data-demo-state="queued"]) .demo-pending { display: block; }
+  :global(:root[data-theme="dark"]) .demo-tab { border-color: #3e403a; background: #191a19; color: #c9cbc4; }
+  :global(:root[data-theme="dark"]) .demo-tab:hover { background: #33352f; }
+  :global(:root[data-theme="dark"]) .demo-tab-status { color: #adb0a6; }
+  :global(:root[data-theme="dark"]) .demo-tab[aria-selected="true"] { border-color: #efc184; background: #2b2720; box-shadow: inset 0 0 0 1px #efc184; color: #f2f2ed; }
+  :global(:root[data-theme="dark"]) .demo-tab[aria-selected="true"] .demo-tab-status { color: #efc184; }
+  :global(:root[data-theme="dark"]) .demo-dot { background: #5a5d55; }
+  :global(:root[data-theme="dark"]) .demo-tab[data-demo-state="queued"] .demo-dot { background: transparent; box-shadow: inset 0 0 0 1px #6d7068; }
+  :global(:root[data-theme="dark"]) .demo-tab[data-demo-state="running"] .demo-dot,
+  :global(:root[data-theme="dark"]) .demo-tab[aria-selected="true"] .demo-dot { background: #efc184; box-shadow: none; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) .demo-tab { border-color: #3e403a; background: #191a19; color: #c9cbc4; }
+    :global(:root:not([data-theme])) .demo-tab:hover { background: #33352f; }
+    :global(:root:not([data-theme])) .demo-tab-status { color: #adb0a6; }
+    :global(:root:not([data-theme])) .demo-tab[aria-selected="true"] { border-color: #efc184; background: #2b2720; box-shadow: inset 0 0 0 1px #efc184; color: #f2f2ed; }
+    :global(:root:not([data-theme])) .demo-tab[aria-selected="true"] .demo-tab-status { color: #efc184; }
+    :global(:root:not([data-theme])) .demo-dot { background: #5a5d55; }
+    :global(:root:not([data-theme])) .demo-tab[data-demo-state="queued"] .demo-dot { background: transparent; box-shadow: inset 0 0 0 1px #6d7068; }
+    :global(:root:not([data-theme])) .demo-tab[data-demo-state="running"] .demo-dot,
+    :global(:root:not([data-theme])) .demo-tab[aria-selected="true"] .demo-dot { background: #efc184; box-shadow: none; }
+  }
   /* Demo engine affordances; under reduced motion the engine never runs and
      the server-rendered static output stands, so none of these activate. */
   @media (prefers-reduced-motion: no-preference) {
@@ -438,10 +481,10 @@ const useCases = [
     }
     @keyframes demo-word { from { opacity: 0; } to { opacity: 1; } }
     @keyframes demo-panel-in { from { opacity: 0; } to { opacity: 1; } }
-    [data-demo-panel][data-demo-state="running"] [data-demo-status]::after { content: ""; animation: demo-ellipsis 1.2s steps(4, end) infinite; }
+    .demo-tab[data-demo-state="running"] .demo-dot { animation: demo-pulse 1s ease-in-out infinite alternate; }
+    [data-demo-panel][data-demo-state="running"] .demo-pending { animation: demo-pulse 1s ease-in-out infinite alternate; }
     @keyframes demo-caret-blink { to { visibility: hidden; } }
-    @keyframes demo-reveal { from { opacity: 0; translate: 0 4px; } to { opacity: 1; translate: 0 0; } }
-    @keyframes demo-ellipsis { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } 100% { content: ""; } }
+    @keyframes demo-pulse { from { opacity: 1; } to { opacity: 0.35; } }
   }
 </style>
 

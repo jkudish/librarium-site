@@ -1,0 +1,407 @@
+---
+// Dedicated product page for /cli. src/content/pages/cli.md stays the source
+// of truth for the agent-readable twin at /cli.md (served by [...page].md.ts
+// and bundled into the llms files); every fact rendered here mirrors that
+// file or the shipped v2 CLI.
+//
+// Where the terminal output comes from:
+// - "Real output" blocks were captured from the librarium 2.0.0 CLI with
+//   offline commands only (`--version`, `plan`, `init`, `doctor` without
+//   --live, `groups`), using a throwaway HOME with dummy keys. No provider
+//   was called. Trimmed lines are marked as trimmed, never reworded.
+// - "Illustrative" blocks (`run`, `status --wait`, the run directory) were
+//   not captured: they would call paid providers. Their line formats follow
+//   src/commands/run-format.ts and status.ts in the CLI; provider ids are the
+//   real adapter ids for those profiles; times, counts, paths, and file
+//   hashes are examples.
+import { getEntry } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import Icon from "../components/Icon.astro";
+import ProductHero from "../components/ProductHero.astro";
+import TerminalBlock, { type TerminalLine } from "../components/TerminalBlock.astro";
+import { inline } from "../lib/inline-markup";
+
+const entry = await getEntry("pages", "cli");
+if (!entry) throw new Error("src/content/pages/cli.md is missing");
+const { title, description, ctaHref, ctaLabel } = entry.data;
+const markdownHref = "/cli.md";
+
+const question = "Lisbon or Porto for a long weekend without a car?";
+const deepQuestion = "Which Lisbon and Porto neighborhoods work best without a car?";
+const runDir = "~/agents/librarium/1791820800-lisbon-or-porto-for-a-long-weekend-witho-412k3x9qm";
+const q = (text: string) => `  "${text}" \\`;
+
+interface Step {
+  id: string;
+  eyebrow: string;
+  heading: string;
+  body: string[];
+  terminal: { title: string; kind: "real" | "illustrative"; badge: string; lines: TerminalLine[]; caption: string };
+}
+
+const steps: Step[] = [
+  {
+    id: "preview",
+    eyebrow: "Preview",
+    heading: "See what would run before anything is paid.",
+    body: [
+      "`librarium plan` resolves the group, the models, and the estimates, then stops. It makes no provider calls and does not test credentials.",
+      "Unknown estimates stay unknown; they are never counted as zero. Add `--json` for a versioned planning receipt your scripts can read.",
+    ],
+    terminal: {
+      title: "~",
+      kind: "real",
+      badge: "Real output · offline",
+      lines: [
+        { cmd: `librarium plan \\\n${q(question)}\n  --group quick`, accent: "--group quick" },
+        { out: "Research plan", tone: "accent" },
+        { out: "" },
+        { out: "Providers  gemini-grounded/grounded (model gemini-3.8-flash) · estimate unknown" },
+        { out: "           openrouter/grounded (model openai/gpt-6-luna) · estimate unknown" },
+        { out: "           brave-answers/grounded (model brave) · estimate unknown" },
+        { out: "           exa/search · est. $0.017", tone: "ok" },
+        { out: "           kagi-fastgpt/grounded (preset fastgpt) · est. $0.015", tone: "ok" },
+        { out: "           parallel/turbo · estimate unknown" },
+        { out: "Steps      Research" },
+        { out: "Execution  Concurrent · up to 6 requests" },
+        { out: "Timeouts   30s per inline call · 30m total" },
+        { out: "Budget     No cap" },
+        { out: "" },
+        { out: "Preview only. No calls made; credentials untested; costs may change.", tone: "dim" },
+      ],
+      caption: "Captured from librarium 2.0.0 with the six quick profiles enabled. Models and estimates come from your configuration and the bundled price snapshot.",
+    },
+  },
+  {
+    id: "budget",
+    eyebrow: "Set a ceiling",
+    heading: "A hard budget only admits what it can price.",
+    body: [
+      "`--max-cost` caps estimated admission and provider-reported cost. A profile without a bounded price cannot be admitted, so the plan refuses instead of guessing.",
+      "Pick profiles the preview can price, and the same cap holds for the run. It is a ceiling on what Librarium admits, not a provider refund.",
+    ],
+    terminal: {
+      title: "~",
+      kind: "real",
+      badge: "Real output · offline",
+      lines: [
+        { cmd: `librarium plan \\\n${q(question)}\n  --group quick --max-cost 0.50`, accent: "--max-cost 0.50" },
+        { out: "Cannot plan:", tone: "warn" },
+        { out: "  Profile \"brave-answers/grounded\" has no bounded price, so a hard budget cannot admit it." },
+        { out: "  … 3 more profiles refused the same way (trimmed)", tone: "dim" },
+        { cmd: `librarium plan \\\n${q(question)}\n  -p exa,kagi-fastgpt --max-cost 0.10`, accent: "-p exa,kagi-fastgpt --max-cost 0.10" },
+        { out: "Research plan", tone: "accent" },
+        { out: "" },
+        { out: "Providers  exa/search · est. $0.017", tone: "ok" },
+        { out: "           kagi-fastgpt/grounded (preset fastgpt) · est. $0.015", tone: "ok" },
+        { out: "Steps      Research" },
+        { out: "Execution  Concurrent · up to 6 requests" },
+        { out: "Timeouts   30s per inline call · 30m total" },
+        { out: "Budget     $0.1 spending cap (shared)", tone: "accent" },
+        { out: "" },
+        { out: "Preview only. No calls made; credentials untested; costs may change.", tone: "dim" },
+      ],
+      caption: "Captured from librarium 2.0.0. The refusal lists four profiles: three are trimmed here, and the one shown is cut after its first sentence.",
+    },
+  },
+  {
+    id: "run",
+    eyebrow: "Run",
+    heading: "Run the same question for real.",
+    body: [
+      "Each provider gets a line as it finishes: its tier, its time, and how many sources it cited. The summary counts unique sources after dedupe and prints where the run was saved.",
+      "This command can incur charges and has no explicit dollar cap. Add `--max-cost` when the preview establishes bounded estimates for the selected work and its fallback reserve.",
+    ],
+    terminal: {
+      title: "~",
+      kind: "illustrative",
+      badge: "Illustrative",
+      lines: [
+        { cmd: `librarium run \\\n${q(question)}\n  --group quick`, accent: "--group quick" },
+        { out: "" },
+        { out: "  ✓ gemini-grounded     ai-grounded      4.2s    11 sources" },
+        { out: "  ✓ openrouter-online   ai-grounded      6.8s     8 sources" },
+        { out: "  ✓ brave-answers       ai-grounded      3.1s     6 sources" },
+        { out: "  ✓ exa                 raw-search       1.4s    10 results" },
+        { out: "  ✓ kagi-fastgpt        ai-grounded      2.7s     5 sources" },
+        { out: "  ✓ parallel-turbo      raw-search       1.9s    10 results" },
+        { out: "" },
+        { out: "  6 succeeded, 0 failed, 0 async pending in 7.1s", tone: "dim" },
+        { out: "  ▸ 41 unique sources after dedupe (50 total citations)" },
+        { out: `  ▸ ${runDir}/` },
+      ],
+      caption: "Illustrative: not a captured run. The line format matches the 2.0.0 CLI; times, counts, and the path are examples.",
+    },
+  },
+  {
+    id: "read",
+    eyebrow: "Read the results",
+    heading: "Every answer stays on disk with its sources.",
+    body: [
+      "A run directory holds the prompt, `run.json`, a summary, the deduplicated sources, and one Markdown file plus metadata per provider. Read `run.json` for the exact file names instead of reconstructing them.",
+      "Open a self-contained `report.html` for the latest run, browse past runs, or pass `--json` to `run` to get the run on stdout. Provider text and URLs are untrusted input.",
+    ],
+    terminal: {
+      title: "~",
+      kind: "illustrative",
+      badge: "Illustrative",
+      lines: [
+        { cmd: `ls ${runDir.replace("-witho-412k3x9qm", "-…")}/` },
+        { out: "prompt.md  run.json  summary.md  sources.json" },
+        { out: "provider-exa--3b7f….md              provider-exa--3b7f….meta.json" },
+        { out: "provider-gemini-grounded--a41c….md  provider-gemini-grounded--a41c….meta.json" },
+        { out: "… one .md and .meta.json per provider, plus the paid-attempt ledger", tone: "dim" },
+        { cmd: "librarium html --open" },
+        { cmd: "librarium browse" },
+      ],
+      caption: "Illustrative listing: the files follow the documented run-directory layout; hashes are shortened and the provider list is trimmed.",
+    },
+  },
+  {
+    id: "async",
+    eyebrow: "Come back later",
+    heading: "Start deep research, then walk away.",
+    body: [
+      "`--mode async` submits background work and returns. Durable async runs retain accepted task identity and prior spend.",
+      "`librarium status --wait` takes no run ID: it polls every pending task under the output directory, then retrieves results. Use `--retrieve` to fetch what is done without waiting. Resume keeps the original deadline instead of granting a fresh budget of time or money.",
+    ],
+    terminal: {
+      title: "~",
+      kind: "illustrative",
+      badge: "Plan real · rest illustrative",
+      lines: [
+        { cmd: `librarium plan \\\n${q(deepQuestion)}\n  -p parallel/research,you-research/research,gemini-deep/research \\\n  --mode async`, accent: "--mode async" },
+        { out: "Research plan", tone: "accent" },
+        { out: "" },
+        { out: "Providers  parallel/research (preset pro) · est. $0.1", tone: "ok" },
+        { out: "           you-research/research (preset standard) · est. $0.05", tone: "ok" },
+        { out: "           gemini-deep/research (agent deep-research-preview-04-2026) · estimate unknown" },
+        { out: "Steps      Research" },
+        { out: "Execution  Background · up to 6 requests" },
+        { out: "Timeouts   2205s per background call · 2205s total" },
+        { out: "Budget     No cap" },
+        { out: "" },
+        { out: "Preview only. No calls made; credentials untested; costs may change.", tone: "dim" },
+        { cmd: `librarium run \\\n${q(deepQuestion)}\n  -p parallel/research,you-research/research,gemini-deep/research \\\n  --mode async --yes`, accent: "--mode async --yes" },
+        { out: "" },
+        { out: "  ◷ parallel-research         deep-research   submitted", tone: "warn" },
+        { out: "  ◷ you-research-background   deep-research   submitted", tone: "warn" },
+        { out: "  ◷ gemini-deep               deep-research   submitted", tone: "warn" },
+        { out: "" },
+        { out: "  0 succeeded, 0 failed, 3 async pending in 4.6s", tone: "dim" },
+        { out: "  ▸ 0 unique sources after dedupe (0 total citations)" },
+        { out: "  ▸ ~/agents/librarium/1791821400-which-lisbon-and-porto-neighborhoods-wor-087m2c5tq/" },
+        { out: "" },
+        { out: "  ◷ async tasks pending: run `librarium status --wait` to poll and retrieve", tone: "warn" },
+        { cmd: "librarium status --wait", accent: "--wait" },
+        { out: "  ✓ parallel-research         deep-research    412.3s    24 sources" },
+        { out: "  ✓ you-research-background   deep-research    538.9s    31 sources" },
+        { out: "  ✓ gemini-deep               deep-research    611.4s    46 sources" },
+        { out: "✔ All async tasks completed; retrieved 3 results.", tone: "ok" },
+      ],
+      caption: "The plan is captured 2.0.0 output. The run and status lines are illustrative: their messages come from the CLI source; times, counts, and paths are examples. Each retrieved line also names its saved file and word count, cut here to fit.",
+    },
+  },
+];
+
+const setup = [
+  {
+    eyebrow: "Install",
+    heading: "Install the v2 CLI",
+    body: "Requires Node.js 22.12 or newer. Check that `librarium --version` reports major version 2. Homebrew and a standalone installer are in [Getting started](/docs#install).",
+    commands: ["npm install -g librarium", "librarium --version"],
+  },
+  {
+    eyebrow: "Connect",
+    heading: "Turn on your providers",
+    body: "Enables every provider whose API key is in your environment and writes `~/.config/librarium/config.json`. Opt-in providers need `--enable <ids>`.",
+    commands: ["librarium init --auto"],
+  },
+  {
+    eyebrow: "Check",
+    heading: "Check it offline",
+    body: "Checks configuration and credential presence without a network call. Only `doctor --live` tests connectivity, and it can incur provider charges.",
+    commands: ["librarium doctor"],
+  },
+];
+
+// `init --auto` and `doctor`, captured from 2.0.0 with dummy keys in a
+// throwaway HOME; trimmed rows are marked, kept rows are verbatim.
+const firstRun: TerminalLine[] = [
+  { cmd: "librarium init --auto" },
+  { out: "Auto-discovering provider API keys..." },
+  { out: "" },
+  { out: "  [+] Exa Search — EXA_API_KEY found, enabled", tone: "ok" },
+  { out: "  [+] Kagi FastGPT — KAGI_API_KEY found, enabled", tone: "ok" },
+  { out: "  [ ] Tavily Search — TAVILY_API_KEY not found", tone: "dim" },
+  { out: "  … one row per built-in provider (trimmed)", tone: "dim" },
+  { out: "" },
+  { out: "Config saved. 14 providers enabled." },
+  { out: "Edit ~/.config/librarium/config.json to customize." },
+  { cmd: "librarium doctor" },
+  { out: "Provider Health Check:" },
+  { out: "" },
+  { out: "  [----] Exa Search                   Credential present; connectivity not tested" },
+  { out: "  [----] Kagi FastGPT                 Credential present; connectivity not tested" },
+  { out: "  [SKIP] Tavily Search                Not enabled", tone: "dim" },
+  { out: "  … (trimmed)", tone: "dim" },
+  { out: "" },
+  { out: "Offline check only; connectivity was not tested. Use `librarium doctor --live` to make live requests (provider charges may apply).", tone: "dim" },
+];
+
+// Descriptions are the CLI's own `--help` summaries (librarium 2.0.0).
+const commands = [
+  { name: "plan", example: 'librarium plan "…" --group quick --json', help: "Preview exact research, answer, and verification admission offline.", badge: "Offline" },
+  { name: "run", example: 'librarium run "…" --group quick', help: "Run a research query across multiple providers.", badge: "Can spend" },
+  { name: "status", example: "librarium status --wait", help: "Check status of async deep-research tasks. `--wait` polls until all complete, then retrieves.", badge: "Resumes work" },
+  { name: "answer", example: 'librarium answer "…" --group quick', help: "Fan out a query and synthesize one grounded, cited answer from the results.", badge: "Can spend" },
+  { name: "browse", example: "librarium browse", help: "Browse past research runs and provider results.", badge: "Local" },
+  { name: "html", example: "librarium html --open", help: "Generate a self-contained report.html for a run directory (default: most recent run).", badge: "Local" },
+  { name: "groups", example: "librarium groups", help: "List and manage provider groups: `quick`, `deep`, `visibility`, `all`, and your own.", badge: "Local" },
+  { name: "usage", example: "librarium usage --days 30", help: "Aggregate API-reported cost and tokens across past runs.", badge: "Local" },
+  { name: "mcp", example: "librarium mcp", help: "Start an MCP server over stdio for AI agent integration.", badge: "For agents" },
+];
+
+const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl";
+---
+
+<Base title={`${title} | librarium`} description={description} includeSoftwareMetadata={false}>
+  <Header />
+  <main>
+    <ProductHero title={title} description={description} ctaHref={ctaHref} ctaLabel={ctaLabel} markdownHref={markdownHref} secondary={{ href: "#session", label: "Walk through a session" }}>
+      <TerminalBlock title="Install" kind="real" badge="Real output" lines={[{ cmd: "npm install -g librarium" }, { cmd: "librarium --version" }, { out: "2.0.0", tone: "ok" }]} caption="npm’s own output omitted." />
+      <p class="mt-4 text-sm/6 text-pretty text-neutral-600" set:html={inline("Requires Node.js 22.12 or newer. Homebrew and a standalone installer are in [Getting started](/docs#install).")} />
+    </ProductHero>
+
+    <!-- Session walkthrough. -->
+    <section id="session" class="scroll-mt-6 py-16 sm:py-24" aria-labelledby="session-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <h2 id="session-heading" class={sectionHeading}>Ask once. Keep the sources.</h2>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">One question, start to finish: preview it for free, set a ceiling, run it, read what came back, and pick up the slow providers later. You will spend most of your time between <code class="font-mono text-[0.9em] text-neutral-950">plan</code> and <code class="font-mono text-[0.9em] text-neutral-950">run</code>.</p>
+
+        <ol class="mt-14 space-y-16 sm:space-y-20">
+          {steps.map((step) => (
+            <li id={step.id} class="grid scroll-mt-6 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-12">
+              <div class="min-w-0 lg:pt-2">
+                <p class="font-mono text-xs tracking-wide text-amber-700 uppercase">{step.eyebrow}</p>
+                <h3 class="mt-3 text-2xl font-medium tracking-tight text-pretty text-neutral-950">{step.heading}</h3>
+                {step.body.map((paragraph) => <p class="mt-3 text-base/7 text-pretty text-neutral-600" set:html={inline(paragraph)} />)}
+              </div>
+              <TerminalBlock {...step.terminal} class="lg:self-start" />
+            </li>
+          ))}
+        </ol>
+        <p class="mt-14 max-w-[70ch] text-base/7 text-pretty text-neutral-600" set:html={inline("Unknown estimates fail hard-budget admission rather than becoming zero. See [your first query](/guides/first-query) for setup, costs, and result inspection, and [request and recovery behavior](/docs/request-and-retry) for the exact retry and cancellation boundaries.")} />
+      </div>
+    </section>
+
+    <!-- Setup cards. -->
+    <section id="setup" class="scroll-mt-6 border-t border-neutral-200 bg-[#faf9f6] py-16 sm:py-24" aria-labelledby="setup-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <h2 id="setup-heading" class={sectionHeading}>Set it up once.</h2>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600" set:html={inline("These are v2 instructions. Nothing here calls a provider. The CLI is the full runtime: provider connections, saved results, cost tracking, and the tools your agent uses too.")} />
+        <ul class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {setup.map((card) => (
+            <li class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
+              <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">{card.eyebrow}</p>
+              <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">{card.heading}</h3>
+              <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline(card.body)} />
+              <div class="mt-auto space-y-2">
+                {card.commands.map((command) => (
+                  <div class="cmd-chip flex min-w-0 items-center gap-2 rounded-md bg-neutral-950 py-1.5 pr-1.5 pl-3">
+                    <code class="min-w-0 flex-1 truncate font-mono text-xs text-amber-100" title={command}><span class="text-neutral-400 select-none">$ </span>{command}</code>
+                    <button type="button" class="chip-copy group" data-code-copy data-copy={command} data-copy-state="idle" aria-label={`Copy ${command}`}>
+                      <Icon name="copy" class="size-3.5 group-data-[copy-state=success]:hidden" />
+                      <Icon name="check" class="hidden size-3.5 text-amber-300 group-data-[copy-state=success]:block" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ul>
+        <TerminalBlock class="mt-6" title="First run" kind="real" badge="Real output · offline · trimmed" lines={firstRun} caption="Captured from librarium 2.0.0 with dummy keys in a throwaway home directory. No provider was called; trimmed rows are marked." />
+      </div>
+    </section>
+
+    <!-- Command cards. -->
+    <section class="py-16 sm:py-24" aria-labelledby="commands-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <div class="flex flex-wrap items-end justify-between gap-6">
+          <h2 id="commands-heading" class={sectionHeading}>The commands you will use.</h2>
+          <a href="/docs/commands" class="inline-flex items-center gap-2 text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">Every command and flag <Icon name="arrowRight" /></a>
+        </div>
+        <ul class="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {commands.map((command) => (
+            <li class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-5">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="font-mono text-base font-semibold text-neutral-950">{command.name}</p>
+                <span class:list={["rounded-sm px-2 py-0.5 text-xs", command.badge === "Can spend" ? "bg-amber-50 text-amber-800" : "bg-neutral-950/4 text-neutral-600"]}>{command.badge}</span>
+              </div>
+              <p class="mt-2 mb-4 text-sm/6 text-pretty text-neutral-600" set:html={inline(command.help)} />
+              <div class="cmd-chip mt-auto flex min-w-0 items-center gap-2 rounded-md bg-neutral-950 py-1.5 pr-1.5 pl-3">
+                <code class="min-w-0 flex-1 truncate font-mono text-xs text-amber-100" title={command.example}>{command.example}</code>
+                <button type="button" class="chip-copy group" data-code-copy data-copy={command.example} data-copy-state="idle" aria-label={`Copy ${command.name} example`}>
+                  <Icon name="copy" class="size-3.5 group-data-[copy-state=success]:hidden" />
+                  <Icon name="check" class="hidden size-3.5 text-amber-300 group-data-[copy-state=success]:block" />
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Durability and the agent boundary. -->
+    <section class="border-y border-neutral-300 bg-[#eeeae0] py-16 sm:py-24" aria-labelledby="long-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <h2 id="long-heading" class={sectionHeading}>Long research does not need a long chat message.</h2>
+        <div class="mt-12 grid grid-cols-1 gap-12 border-t border-neutral-950/15 pt-8 lg:grid-cols-3">
+          <div>
+            <h3 class="text-lg font-semibold text-neutral-950">Spend is remembered</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600">Durable async runs retain accepted task identity and prior spend. Resume uses the original deadline instead of granting a fresh budget of time or money. Known failure charges count; unreported costs remain unknown.</p>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-neutral-950">Cancelling is local</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600" set:html={inline("Local cancellation stops local work. Remote cancellation depends on the provider and is not a refund. Do not infer that no work happened because a connection timed out. See [request and recovery behavior](/docs/request-and-retry).")} />
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-neutral-950">The same install serves your agent</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600" set:html={inline("The MCP server and agent skill ship with this CLI installation, not as separate packages; see [Agents & MCP](/agents). For an in-process Laravel integration, use [the first-party Laravel package](/laravel); its Artisan agent mode is not an MCP server.")} />
+          </div>
+        </div>
+        <div class="mt-12 flex flex-wrap items-center gap-x-7 gap-y-4">
+          <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
+          <a href="/agents" class="inline-flex items-center gap-2 py-2 text-base font-medium text-neutral-700 hover:text-neutral-950 sm:text-sm">Connect your agent</a>
+          <a href={markdownHref} class="inline-flex items-center gap-2 py-2 text-base text-neutral-600 hover:text-amber-700 sm:text-sm"><Icon name="markdownLogo" class="size-5" /> Read as Markdown</a>
+        </div>
+      </div>
+    </section>
+    <p id="copy-status" role="status" class="sr-only"></p>
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .chip-copy {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    border-radius: var(--radius-sm);
+    padding: 0.375rem;
+    cursor: pointer;
+    color: #d4d4d4;
+  }
+  .chip-copy:hover { color: #ffd230; background: rgb(255 255 255 / 0.08); }
+  .chip-copy:focus-visible { outline: 2px solid #ffd230; outline-offset: 2px; }
+  :global(:root[data-theme="dark"]) .cmd-chip { box-shadow: 0 0 0 1px #3e403a; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) .cmd-chip { box-shadow: 0 0 0 1px #3e403a; }
+  }
+</style>
+
+<script>
+  import "../scripts/copy-buttons";
+</script>

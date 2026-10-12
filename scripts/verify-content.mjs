@@ -120,6 +120,7 @@ const publicSources = [
   join(root, "src/content/pages/agents.md"),
   join(root, "src/content/pages/cli.md"),
   join(root, "src/content/pages/cli-mcp.md"),
+  join(root, "src/data/install.md"),
 ];
 const publicCopy = publicSources.map((file) => readFileSync(file, "utf8")).join("\n");
 const gettingStarted = readFileSync(join(docsDir, "index.md"), "utf8");
@@ -224,6 +225,10 @@ assert(publicCopy.includes('{ href: "/#providers", label: "Providers" }'), "the 
 assert(publicCopy.includes('{ href: "/agents", label: "Agents & MCP" }'), "the handwritten Agents & MCP navigation is missing");
 assert(publicCopy.includes('{ href: "/cli", label: "CLI" }'), "the handwritten CLI navigation is missing");
 assert(readFileSync(join(root, "src/content/pages/agents.md"), "utf8").includes(AGENT_SETUP_PROMPT), "the Agents & MCP page must embed the canonical setup prompt verbatim");
+// The pasted prompt is a one-liner that defers to /install.md; the safety
+// guarantees must survive in the prompt and in the install doc it points at.
+assert(AGENT_SETUP_PROMPT.includes("https://librarium.agentsy.build/install.md"), "the setup prompt must point agents at /install.md");
+assert(AGENT_SETUP_PROMPT.includes("paid provider calls without my approval"), "the setup prompt must forbid unapproved research and paid calls");
 // The dark palette has two synchronized gates: explicit <html data-theme="dark">
 // and the script-free OS-preference fallback. Fail if their bodies drift.
 const globalCss = readFileSync(join(root, "src/styles/global.css"), "utf8");
@@ -469,6 +474,11 @@ assert(!home.includes("provider-demo archive"), "no reference to the internal co
 assert(!home.includes("Captured deep-research examples"), "the removed demo caption must stay absent");
 assert(!home.includes("nothing about other profiles"), "the removed demo caption paragraph must stay absent");
 assert(home.includes('aria-label="Captured research demo'), "the demo region must still be labeled as captured playback, not live");
+assert(home.includes("One question. Multiple providers.") && !home.includes("Five providers."), "the demo heading must not pin a provider count");
+// The provider chip is the only provider label above a result: each chip
+// carries the run status/duration, and panels no longer repeat a logo row.
+assert.equal((home.match(/role="tab" id="demo-tab-[^>]*>(?:(?!<\/button>)[\s\S])*data-demo-status/g) ?? []).length, 5, "each provider chip must carry its status and duration");
+assert(!/role="tabpanel"[^>]*data-demo-panel=[\s\S]{0,400}?<img src="\/providers\//.test(home), "demo panels must not repeat the provider logo-and-name row");
 const logoPaths = [...home.matchAll(/src="(\/providers\/[^\"]+\.(?:svg|png))"/g)].map((match) => match[1]);
 assert.equal(new Set(logoPaths).size, 19, "expected every JS brand plus PHP's DataForSEO mark");
 for (const provider of PROVIDERS) {
@@ -671,7 +681,33 @@ assert(home.includes('id="copy-install"') && home.includes('id="install-output"'
 assert(home.includes('data-href="/docs/using-with-agents#mcp-server"'), "agent setup must link to MCP instructions");
 assert(home.includes('id="page-format-control" class="fixed '), "page format control must float");
 assert(readFileSync(join(distDir, "docs/php/index.html"), "utf8").includes('id="install"'));
-for (const route of ["/index.md", "/docs/all.md", "/docs/php/all.md", "/v1/all.md"]) {
+const installMarkdown = readFileSync(join(distDir, "install.md"), "utf8");
+assert.equal(installMarkdown, readFileSync(join(root, "src/data/install.md"), "utf8"), "/install.md must serve src/data/install.md verbatim");
+for (const fact of [
+  "22.12.0",
+  "npm install -g librarium",
+  "Must report major version 2",
+  "Do not run research or make paid provider calls without the user's approval",
+  "never write credentials into source control",
+  "Never ask the user to paste an API key into chat",
+  "Preserve the user's existing MCP servers",
+  "librarium init",
+  "Run `doctor` without `--live`",
+  "list_providers",
+  "list_groups",
+  'args `["mcp"]`',
+  "claude mcp add --scope user librarium -- librarium mcp",
+  "codex mcp add librarium -- librarium mcp",
+  "[mcp_servers.librarium]",
+  "mcpServers",
+  "opencode.json",
+  "amp mcp add librarium -- librarium mcp",
+  "mcp_servers:",
+  "Any other MCP host",
+]) {
+  assert(installMarkdown.includes(fact), `/install.md is missing: ${fact}`);
+}
+for (const route of ["/install.md", "/index.md", "/docs/all.md", "/docs/php/all.md", "/v1/all.md"]) {
   assert(llms.includes(route), `agent index is missing ${route}`);
 }
 

@@ -64,7 +64,9 @@ export function initResearchDemo(): void {
   // motion. The server-rendered static output is complete on its own.
   const canPlay = () => !reduce.matches && !reduceSeen && !interacted;
 
-  const statusOf = (panel: HTMLElement) => panel.querySelector<HTMLElement>("[data-demo-status]");
+  // Each provider chip carries its run status (queued, running, or the
+  // captured duration); there is no second provider row inside the panel.
+  const statusOf = (index: number) => tabs[index]?.querySelector<HTMLElement>("[data-demo-status]") ?? null;
   const bodyOf = (panel: HTMLElement) => panel.querySelector<HTMLElement>("[data-demo-body]");
 
   // Wrap every word of each answer in a span that knows its position in the
@@ -106,13 +108,24 @@ export function initResearchDemo(): void {
       tab.tabIndex = active ? 0 : -1;
     }
     for (const [i, panel] of panels.entries()) panel.hidden = i !== index;
+    // On narrow screens the chip strip scrolls sideways: keep the active chip
+    // in view (only the strip scrolls, never the page).
+    const tab = tabs[index];
+    const strip = tab?.parentElement;
+    if (tab && strip && strip.scrollWidth > strip.clientWidth) {
+      const tabBox = tab.getBoundingClientRect();
+      const stripBox = strip.getBoundingClientRect();
+      const left = strip.scrollLeft + tabBox.left - stripBox.left - (strip.clientWidth - tabBox.width) / 2;
+      strip.scrollTo({ left: Math.max(0, left), behavior: reduce.matches ? "auto" : "smooth" });
+    }
   }
 
   function setPanelState(index: number, state: "queued" | "running" | "done"): void {
     const panel = panels[index];
-    const status = statusOf(panel);
+    const status = statusOf(index);
     const body = bodyOf(panel);
     panel.dataset.demoState = state;
+    if (tabs[index]) tabs[index].dataset.demoState = state;
     if (status) status.textContent = state === "running" ? "running" : state === "queued" ? "queued" : panel.dataset.demoFinal || "done";
     if (body) body.hidden = state !== "done";
   }

@@ -35,6 +35,26 @@ $evidence = $research->run();
 
 Fan-out selects multiple Profiles; PHP executes them sequentially under one deadline. Check the preview for omissions, fallbacks, and known or unknown pricing. This example has no explicit cost ceiling. Add `maxCost('0.25', 'USD')` before preview when all reachable quotes can prove that conservative bound; an incomplete quote is rejected, not treated as free.
 
+`run()` returns a typed `ResearchResponse`. Each result keeps its effective provider and Profile, its citations, and its provenance:
+
+```php
+foreach ($evidence->results as $result) {
+    $result->provider;               // Effective provider.
+    $result->profile;                // Effective Profile.
+    $result->provenance->resultKind; // ResultKind, e.g. GroundedAnswer.
+
+    foreach ($result->citations as $citation) {
+        $citation->source->url;      // Untrusted: validate first.
+    }
+}
+
+$evidence->status;    // ResponseStatus: Succeeded, Partial, or Failed.
+$evidence->errors;    // ResearchError items: code, message, Profile.
+$evidence->toArray(); // The shared terminal array shape.
+```
+
+Provider content and URLs remain untrusted evidence. Escape content for its output context and verify important claims against their cited sources.
+
 ## Let an AI SDK agent inspect the evidence
 
 A useful first integration separates research from reasoning. Run one approved research request, then give an agent a read-only tool over that terminal response. The tool cannot launch more research or silently enlarge the provider set.
@@ -141,15 +161,25 @@ For on-demand research inside a tool, keep authorization and a fixed allowed Pro
 ## Queue longer research, then hand it to an agent
 
 ```php
+use App\Actions\StoreResearchResponse; // Your class, not Librarium's.
+
 $queued = Librarium::query(
     'Research current connection-pooling guidance for Laravel deployments.',
 )->using('perplexity-sonar-deep')
     ->timeout(900)
     ->queue()
-    ->onQueue('research');
+    ->onQueue('research')
+    ->then(function ($response): void {
+        app(StoreResearchResponse::class)->handle($response->toArray());
+    })
+    ->catch(function (Throwable $exception): void {
+        report($exception);
+    });
 
 $requestId = $queued->requestId;
 ```
+
+`queue()` compiles the same plan as `run()` and dispatches one encrypted Laravel job with `tries = 1`, so a failure is never retried automatically. `Librarium::status($requestId)` reports transient `queued`, `running`, `completed`, or `failed` state from the cache (10,800-second default TTL); it is not durable history. Where a provider supports webhooks, they are only wake-up hints: polling the provider remains authoritative for terminal content.
 
 Dispatch can incur provider charges. Preview and authorize first. On completion, persist the terminal response in your own storage, then pass it into an agent or a review screen. The [Laravel queue guide](/guides/laravel-queues) covers callbacks, transient status, failures, and testing without paid calls.
 

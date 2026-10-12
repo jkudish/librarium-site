@@ -1,0 +1,339 @@
+---
+// Dedicated product page for /laravel. src/content/pages/laravel.md stays
+// the source of truth for the agent-readable twin at /laravel.md (served by
+// [...page].md.ts and bundled into the llms files). Every PHP example below
+// is read from that file's fenced blocks, so the page and its Markdown
+// cannot drift apart.
+//
+// Provenance of the output shown:
+// - The preview values were captured offline from jkudish/laravel-ai-
+//   librarium (release/1.0-prep) under Orchestra Testbench, running the
+//   page's own fanOut() example with placeholder credentials. No provider
+//   was called; the REPL-style layout is presentation, the values are real.
+// - The Artisan agent-mode JSON is real `librarium:query --agent` output
+//   from the same checkout (preview only), pretty-printed and trimmed.
+// - The config excerpt is copied from the package's config/librarium.php;
+//   the services.php block is the documented credential setup.
+import { getEntry } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import Icon from "../components/Icon.astro";
+import ProductHero from "../components/ProductHero.astro";
+import CodePanel from "../components/CodePanel.astro";
+import TerminalBlock, { type TerminalLine } from "../components/TerminalBlock.astro";
+import { inline } from "../lib/inline-markup";
+import { fencedBlocks, pickBlock } from "../lib/markdown-code";
+
+const entry = await getEntry("pages", "laravel");
+if (!entry) throw new Error("src/content/pages/laravel.md is missing");
+const { title, description, ctaHref, ctaLabel } = entry.data;
+const markdownHref = "/laravel.md";
+const source = "src/content/pages/laravel.md";
+const blocks = fencedBlocks(entry.body ?? "");
+const previewCode = pickBlock(blocks, "php", "->fanOut(", source);
+const resultsCode = pickBlock(blocks, "php", "foreach ($evidence->results", source);
+const queueCode = pickBlock(blocks, "php", "->then(function ($response)", source);
+const toolCode = pickBlock(blocks, "php", "final class ResearchEvidence", source);
+const agentCode = pickBlock(blocks, "php", "final class TechnicalAdvisor", source);
+const promptCode = pickBlock(blocks, "php", "(new TechnicalAdvisor($evidence))->prompt(", source);
+
+const install = "composer require jkudish/laravel-ai-librarium";
+const publish = "php artisan vendor:publish --tag=librarium-config";
+
+const previewSession: TerminalLine[] = [
+  { prompt: ">", cmd: "$preview->profiles->pluck('id')->all()" },
+  { out: '= ["exa", "gemini-grounded"]' },
+  { prompt: ">", cmd: "$preview->unavailable->all()" },
+  { out: "= []" },
+  { prompt: ">", cmd: "$preview->pricingStatus" },
+  { out: '= "complete"' },
+  { prompt: ">", cmd: "$preview->knownCostSubtotals->all()" },
+  { out: '= ["USD" => "1.857"]', tone: "ok" },
+  { prompt: ">", cmd: "$preview->costEstimateComplete" },
+  { out: "= false", tone: "warn" },
+  { prompt: ">", cmd: "$research->maxCost('0.25', 'USD')->preview()" },
+  { out: "  ValidationException", tone: "warn" },
+  { out: "  A maximum-cost preflight check requires complete, current, single-currency quotes" },
+  { out: "  from configured conservative usage estimates for every primary and reachable fallback." },
+];
+
+const agentModeJson: TerminalLine[] = [
+  { cmd: "php artisan librarium:query \\\n  'Compare PostgreSQL connection-pooling options for Laravel workers.' \\\n  --agent --profile=gemini-grounded", accent: "--agent --profile=gemini-grounded" },
+  { out: "{" },
+  { out: '  "schema_version": 1,' },
+  { out: '  "type": "preview",' },
+  { out: '  "request_id": "01M4PV1VH1SAWGC2GC6BW7Q08B",' },
+  { out: '  "query": "Compare PostgreSQL connection-pooling options for Laravel workers.",' },
+  { out: '  "profiles": ["gemini-grounded"],' },
+  { out: '  "fallbacks": [],' },
+  { out: '  "unavailable": [],' },
+  { out: '  "warnings": [],' },
+  { out: '  "cost": { "amount": null, "currency": null, "complete": false },', tone: "warn" },
+  { out: '  "pricing": {' },
+  { out: '    "status": "complete",' },
+  { out: '    "known_subtotals": [{ "amount": "1.850", "currency": "USD" }],', tone: "ok" },
+  { out: '    "priced_at": "2026-10-12T01:18:52+00:00",' },
+  { out: '    "priced_until": "2026-10-12T03:13:52+00:00",' },
+  { out: "    … quotes, freshness, and provenance (trimmed)", tone: "dim" },
+  { out: "  }" },
+  { out: "}" },
+];
+
+const queueFlow = [
+  { label: "Dispatch", body: "`queue()` compiles the same plan as `run()` and returns a `requestId` right away." },
+  { label: "One encrypted job", body: "A single Laravel job with `tries = 1` and `failOnTimeout`. A failure is never retried automatically, so paid work is not silently repeated." },
+  { label: "Poll the provider", body: "Polling is authoritative for terminal content. Where a provider supports webhooks, they are only wake-up hints." },
+  { label: "Your callback", body: "`then()` receives the terminal `ResearchResponse`; `catch()` receives the failure. Persist it in your own storage." },
+];
+
+const configExcerpt = `return [
+    'default_group' => 'quick',
+    'timeout' => 6900,
+    'status_ttl' => 10800,
+    'webhook_signal_ttl' => 10800,
+    // …
+    'queue' => [
+        'connection' => null,
+        'name' => 'research',
+        'timeout' => 7200,
+    ],
+    // … one entry per Profile under 'profiles'
+];`;
+
+const servicesExcerpt = `// config/services.php
+return [
+    'exa' => ['key' => env('EXA_API_KEY')],
+    'kagi' => ['key' => env('KAGI_API_KEY')],
+    'perplexity' => ['key' => env('PERPLEXITY_API_KEY')],
+    // … one entry per focused HTTP provider you use
+];`;
+
+const useCases = [
+  { title: "A technical advisor", body: "Compare current platform documentation before proposing an architecture. Require the cited passage to support each material claim." },
+  { title: "A product analyst", body: "Inspect how answer surfaces describe a luxury rental service, retaining the surface and collector behind each observation. Our [Agentsy Report field note](/stories/agentsy-report) shows the application-owned evidence boundary." },
+  { title: "An editorial agent", body: "Collect source material first, then draft with citations and explicit gaps. Provider output is evidence to verify, not permission to publish its claims." },
+];
+
+const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl";
+const chipCopy = "chip-copy group";
+---
+
+<Base title={`${title} | librarium`} description={description} includeSoftwareMetadata={false}>
+  <Header />
+  <main>
+    <ProductHero title={title} description={description} ctaHref={ctaHref} ctaLabel={ctaLabel} markdownHref={markdownHref} secondary={{ href: "#preview", label: "See it in code" }}>
+      <div class="rounded-lg border border-neutral-200 bg-white p-5">
+        <div class="flex items-center gap-3">
+          <img src="/languages/laravel.svg" alt="" width="24" height="24" class="size-6" />
+          <p class="text-sm font-medium text-neutral-950">First-party Laravel package</p>
+        </div>
+        <div class="mt-4 space-y-2">
+          {[install, publish].map((command) => (
+            <div class="cmd-chip flex min-w-0 items-center gap-2 rounded-md bg-neutral-950 py-1.5 pr-1.5 pl-3">
+              <code class="min-w-0 flex-1 truncate font-mono text-xs text-amber-100" title={command}><span class="text-neutral-400 select-none">$ </span>{command}</code>
+              <button type="button" class={chipCopy} data-code-copy data-copy={command} data-copy-state="idle" aria-label={`Copy ${command}`}>
+                <Icon name="copy" class="size-3.5 group-data-[copy-state=success]:hidden" />
+                <Icon name="check" class="hidden size-3.5 text-amber-300 group-data-[copy-state=success]:block" />
+              </button>
+            </div>
+          ))}
+        </div>
+        <ul class="mt-4 flex flex-wrap gap-2" aria-label="Requirements">
+          {["PHP 8.4", "Laravel 13", "Laravel AI SDK ^1.0.1"].map((requirement) => (
+            <li class="rounded-sm border border-neutral-200 bg-neutral-50 px-2 py-0.5 font-mono text-xs text-neutral-700">{requirement}</li>
+          ))}
+        </ul>
+        <p class="mt-3 text-xs/5 text-pretty text-neutral-500" set:html={inline("Publishing the config is optional. See [Install](/docs/php#install).")} />
+      </div>
+    </ProductHero>
+
+    <!-- Preview, then run. -->
+    <section id="preview" class="scroll-mt-6 py-16 sm:py-24" aria-labelledby="preview-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <div class="grid grid-cols-1 gap-x-12 gap-y-6 lg:grid-cols-2">
+          <div>
+            <p class="font-mono text-xs tracking-wide text-amber-700 uppercase">Preview, then run</p>
+            <h2 id="preview-heading" class={`mt-3 ${sectionHeading}`}>Research before your agent recommends.</h2>
+          </div>
+          <div class="lg:pt-8">
+            <p class="text-base/7 text-pretty text-neutral-600">Preview the selection before authorizing provider spend. The preview compiles the Profiles, fallbacks, and pricing without calling a research provider.</p>
+            <p class="mt-4 text-base/7 text-pretty text-neutral-600" set:html={inline("Fan-out selects multiple Profiles; PHP executes them sequentially under one deadline. Check the preview for omissions, fallbacks, and known or unknown pricing.")} />
+          </div>
+        </div>
+        <CodePanel class="mt-10" label="Research step" lang="php" code={previewCode} />
+        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+          <TerminalBlock class="lg:self-start" title="Inspecting $preview" kind="real" badge="Real values · offline" lines={previewSession} caption="Captured offline from the Laravel package with placeholder credentials; no provider was called. Values are real; the REPL-style layout is ours." />
+          <div class="space-y-4">
+            <div class="rounded-lg border border-neutral-200 bg-white p-5">
+              <p class="text-sm font-semibold text-neutral-950">Known is not the same as bounded</p>
+              <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("Both Profiles have current quotes, so pricing is `complete` and the known subtotal is $1.857. But Gemini's usage assumption is not a conservative bound, so the estimate is not complete and `maxCost('0.25', 'USD')` is rejected before dispatch.")} />
+            </div>
+            <div class="rounded-lg border border-neutral-200 bg-white p-5">
+              <p class="text-sm font-semibold text-neutral-950">The rule</p>
+              <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("This example has no explicit cost ceiling. Add `maxCost('0.25', 'USD')` before preview when all reachable quotes can prove that conservative bound; an incomplete quote is rejected, not treated as free.")} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- The response. -->
+    <section class="border-t border-neutral-200 bg-[#faf9f6] py-16 sm:py-24" aria-labelledby="response-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <div class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-12">
+          <div>
+            <h2 id="response-heading" class={sectionHeading}>Every result keeps its sources.</h2>
+            <p class="mt-5 text-base/7 text-pretty text-neutral-600" set:html={inline("`run()` returns a typed `ResearchResponse`. Each result keeps its effective provider and Profile, its citations, and its provenance.")} />
+            <p class="mt-4 text-base/7 text-pretty text-neutral-600" set:html={inline("`toArray()` is the same terminal shape the JavaScript package validates, so a PHP response and a TypeScript response describe evidence the same way. The runtimes themselves are not interchangeable.")} />
+            <p class="mt-4 text-base/7 text-pretty text-neutral-600">Provider content and URLs remain untrusted evidence. Escape content for its output context and verify important claims against their cited sources.</p>
+          </div>
+          <CodePanel class="lg:self-start" label="Reading the response" lang="php" code={resultsCode} />
+        </div>
+      </div>
+    </section>
+
+    <!-- Queue. -->
+    <section id="queue" class="scroll-mt-6 py-16 sm:py-24" aria-labelledby="queue-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <h2 id="queue-heading" class={sectionHeading}>Queue longer research, then hand it to an agent.</h2>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">Dispatch can incur provider charges. Preview and authorize first. On completion, persist the terminal response in your own storage, then pass it into an agent or a review screen.</p>
+        <div class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+          <CodePanel class="lg:self-start" label="Queued research" lang="php" code={queueCode} />
+          <ol class="relative space-y-6 border-l border-neutral-300 pl-6 lg:mt-2" aria-label="What happens after queue()">
+            {queueFlow.map((step) => (
+              <li class="relative">
+                <span class="absolute top-1.5 -left-[29px] size-2.5 rounded-full bg-amber-600" aria-hidden="true"></span>
+                <p class="text-sm font-semibold text-neutral-950">{step.label}</p>
+                <p class="mt-1 text-sm/6 text-pretty text-neutral-600" set:html={inline(step.body)} />
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div class="rounded-lg border border-neutral-200 bg-white p-5">
+            <p class="text-sm font-semibold text-neutral-950">Status is transient</p>
+            <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("`Librarium::status($requestId)` reports `queued`, `running`, `completed`, or `failed` from the cache (10,800-second default TTL). It is not durable history.")} />
+          </div>
+          <div class="rounded-lg border border-neutral-200 bg-white p-5">
+            <p class="text-sm font-semibold text-neutral-950">Your app owns the rest</p>
+            <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("Librarium ships no research-history tables. Tenant ownership, retention, indexing, conversation memory, and the final product experience remain yours. The [Laravel queue guide](/guides/laravel-queues) covers callbacks, failures, and testing without paid calls.")} />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Agent tool. -->
+    <section id="agent" class="scroll-mt-6 border-t border-neutral-200 bg-[#faf9f6] py-16 sm:py-24" aria-labelledby="agent-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <h2 id="agent-heading" class={sectionHeading}>Let an AI SDK agent inspect the evidence.</h2>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">A useful first integration separates research from reasoning. Run one approved research request, then give an agent a read-only tool over that terminal response. The tool cannot launch more research or silently enlarge the provider set.</p>
+        <div class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div class="min-w-0">
+            <p class="mb-3 text-sm text-neutral-600" set:html={inline("Create this application-owned tool in `app/Ai/Tools/ResearchEvidence.php`:")} />
+            <CodePanel label="ResearchEvidence.php" lang="php" code={toolCode} scroll />
+          </div>
+          <div class="min-w-0">
+            <p class="mb-3 text-sm text-neutral-600" set:html={inline("Attach it to an agent in `app/Ai/Agents/TechnicalAdvisor.php`:")} />
+            <CodePanel label="TechnicalAdvisor.php" lang="php" code={agentCode} scroll />
+          </div>
+        </div>
+        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+          <div class="min-w-0">
+            <p class="mb-3 text-sm text-neutral-600" set:html={inline("Pass the `$evidence` response from the approved research step into the agent:")} />
+            <CodePanel label="Prompt the agent" lang="php" code={promptCode} />
+          </div>
+          <div class="rounded-lg border border-amber-700/25 bg-amber-50 p-5 lg:mt-8">
+            <p class="text-sm font-semibold text-neutral-950">A separate paid model call</p>
+            <p class="mt-2 text-sm/6 text-pretty text-neutral-700" set:html={inline("Configure the agent's model/provider through the SDK. The outer model call is not included in Librarium's research budget; authorize that cost too.")} />
+          </div>
+        </div>
+        <p class="mt-8 max-w-[75ch] text-base/7 text-pretty text-neutral-600" set:html={inline("For large responses, store evidence in your application and expose authorized, bounded result and citation pages instead of returning everything to the model at once. These classes follow the SDK's [Tool](https://github.com/laravel/ai/blob/v1.0.1/src/Contracts/Tool.php), [HasTools](https://github.com/laravel/ai/blob/v1.0.1/src/Contracts/HasTools.php), and [Promptable](https://github.com/laravel/ai/blob/v1.0.1/src/Promptable.php) contracts. They are example application code, not built-in Librarium agents.")} />
+
+        <h3 class="mt-16 text-2xl font-medium tracking-tight text-neutral-950">Use the same pattern for different jobs</h3>
+        <ul class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+          {useCases.map((useCase) => (
+            <li class="rounded-lg border border-neutral-200 bg-white p-5">
+              <p class="text-base font-semibold text-neutral-950">{useCase.title}</p>
+              <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline(useCase.body)} />
+            </li>
+          ))}
+        </ul>
+        <p class="mt-6 max-w-[75ch] text-base/7 text-pretty text-neutral-600">For on-demand research inside a tool, keep authorization and a fixed allowed Profile set in application code. Enforce request limits and a total spend policy across repeated tool calls; never let the model supply its own permission to spend. The read-only example above is a safer starting point.</p>
+      </div>
+    </section>
+
+    <!-- Configure and automate. -->
+    <section id="configure" class="scroll-mt-6 py-16 sm:py-24" aria-labelledby="configure-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <div class="flex flex-wrap items-end justify-between gap-6">
+          <h2 id="configure-heading" class={sectionHeading}>Configure it like any Laravel package.</h2>
+          <a href="/docs/php/configuration" class="inline-flex items-center gap-2 text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">Configuration reference <Icon name="arrowRight" /></a>
+        </div>
+        <div class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
+            <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Defaults</p>
+            <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Publish only what you change</h3>
+            <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The package defaults to the `quick` group, a 6,900-second research timeout, 10,800-second status and webhook-signal TTLs, and the `research` queue with a 7,200-second job timeout. A per-request `timeout()` may be 1–86,400 seconds.")} />
+            <CodePanel class="mt-auto" label="config/librarium.php (excerpt)" lang="php" code={configExcerpt} />
+          </div>
+          <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
+            <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Credentials</p>
+            <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Keys stay where Laravel keeps them</h3>
+            <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Laravel AI SDK Profiles read `config/ai.php` (for example `ai.providers.gemini.key`); focused HTTP Profiles read `config/services.php`. A Profile without its credential is never called: a group reports it unavailable and omits it, and an explicit selection fails preflight.")} />
+            <CodePanel class="mt-auto" label="config/services.php" lang="php" code={servicesExcerpt} />
+          </div>
+        </div>
+        <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
+          <div class="rounded-lg border border-neutral-200 bg-white p-6 lg:self-start">
+            <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Artisan</p>
+            <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Preview from the command line</h3>
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("`--agent` without `--run` or `--queue` is preview-only and makes no research provider call. Add `--run` to dispatch synchronously, or `--queue` to submit one encrypted job. Artisan agent mode is versioned JSON for automation; it is not an MCP server.")} />
+            <p class="mt-4 text-sm/6 text-pretty text-neutral-600" set:html={inline("See [Artisan commands](/docs/php/commands) for status and profile listings.")} />
+          </div>
+          <TerminalBlock title="Agent-mode preview" kind="real" badge="Real output · trimmed" lines={agentModeJson} caption="Captured from the Laravel package with a placeholder Gemini key; preview only. Pretty-printed, with quote details trimmed. Your request ID and timestamps will differ." />
+        </div>
+      </div>
+    </section>
+
+    <!-- Positioning and next steps. -->
+    <section class="border-y border-neutral-300 bg-[#eeeae0] py-16 sm:py-24" aria-labelledby="native-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <h2 id="native-heading" class={sectionHeading}>Laravel-native, not a wrapper.</h2>
+        <div class="mt-12 grid grid-cols-1 gap-12 border-t border-neutral-950/15 pt-8 lg:grid-cols-2">
+          <p class="text-base/7 text-pretty text-neutral-600">This is a first-party Laravel package built on the Laravel AI SDK, not a Node process in disguise. Collect research through the facade, hand it to your agents as a tool, and move long runs into encrypted queue jobs. Your app owns storage and workflows.</p>
+          <p class="text-base/7 text-pretty text-neutral-600" set:html={inline("It complements the SDK: the SDK owns your agent and model interaction; Librarium supplies research results with their citations attached. Your application decides what that evidence supports. Requires PHP 8.4, Laravel 13, and Laravel AI SDK `^1.0.1`.")} />
+        </div>
+        <div class="mt-12 flex flex-wrap items-center gap-x-7 gap-y-4">
+          <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
+          <a href="/guides/laravel-queues" class="inline-flex items-center gap-2 py-2 text-base font-medium text-neutral-700 hover:text-neutral-950 sm:text-sm">Read the queue guide</a>
+          <a href={markdownHref} class="inline-flex items-center gap-2 py-2 text-base text-neutral-600 hover:text-amber-700 sm:text-sm"><Icon name="markdownLogo" class="size-5" /> Read as Markdown</a>
+        </div>
+      </div>
+    </section>
+    <p id="copy-status" role="status" class="sr-only"></p>
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .chip-copy {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    border-radius: var(--radius-sm);
+    padding: 0.375rem;
+    cursor: pointer;
+    color: #d4d4d4;
+  }
+  .chip-copy:hover { color: #ffd230; background: rgb(255 255 255 / 0.08); }
+  .chip-copy:focus-visible { outline: 2px solid #ffd230; outline-offset: 2px; }
+  :global(:root[data-theme="dark"]) .cmd-chip { box-shadow: 0 0 0 1px #3e403a; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) .cmd-chip { box-shadow: 0 0 0 1px #3e403a; }
+  }
+</style>
+
+<script>
+  import "../scripts/copy-buttons";
+</script>

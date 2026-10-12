@@ -32,6 +32,19 @@ These are v2 instructions. Install the published CLI with `npm install -g librar
 
 ## Long research does not need a long chat message
 
+Deep research can take minutes. Start it in the background, then come back for the results:
+
+```bash
+librarium run \
+  "Which Lisbon and Porto neighborhoods work best without a car?" \
+  --group deep --mode async
+
+# Later: poll every pending task in the output directory, then retrieve results.
+librarium status --wait
+```
+
+In an interactive terminal, a run with three or more deep-research providers asks for confirmation first; `--yes` skips that prompt. `librarium status` takes no run ID; it checks the async tasks saved under the output directory (`-o` selects another base). Add `--retrieve` to fetch completed results without waiting, or `--json` for machine output.
+
 Durable async runs retain accepted task identity and prior spend. Resume uses the original deadline instead of granting a fresh budget of time or money. Known failure charges count; unreported costs remain unknown.
 
 Local cancellation stops local work. Remote cancellation depends on the provider and is not a refund. Do not infer that no work happened because a connection timed out.

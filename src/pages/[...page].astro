@@ -4,10 +4,12 @@ import { getArticles } from "../lib/articles";
 import ArticleLayout from "../layouts/ArticleLayout.astro";
 
 export async function getStaticPaths() {
-  // /agents has a dedicated product page (src/pages/agents.astro); its
-  // Markdown twin is still served from agents.md by [...page].md.ts.
+  // These routes have dedicated product pages (src/pages/{agents,cli,
+  // javascript,laravel}.astro); their Markdown twins are still served from
+  // src/content/pages/*.md by [...page].md.ts.
+  const dedicated = new Set(["agents", "cli", "javascript", "laravel"]);
   return (await getArticles())
-    .filter(({ path }) => path !== "agents")
+    .filter(({ path }) => !dedicated.has(path))
     .map(({ path, entry }) => ({ params: { page: path }, props: { entry } }));
 }
 const { entry } = Astro.props as { entry: CollectionEntry<"pages"> | CollectionEntry<"guides"> };

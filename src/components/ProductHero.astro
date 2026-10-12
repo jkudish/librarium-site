@@ -1,0 +1,33 @@
+---
+// Hero for the dedicated product pages (/cli, /javascript, /laravel). Same
+// pieces and classes as /agents and ArticleLayout's kind: product hero; the
+// title, description, and primary CTA come from the page's Markdown source.
+import Icon from "./Icon.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  ctaHref: string;
+  ctaLabel: string;
+  markdownHref: string;
+  secondary?: { href: string; label: string };
+}
+const { title, description, ctaHref, ctaLabel, markdownHref, secondary } = Astro.props;
+---
+
+<div class="border-b border-neutral-200 bg-[#faf9f6]">
+  <div class="mx-auto grid max-w-6xl gap-12 px-6 pt-10 pb-12 sm:pt-14 sm:pb-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,25rem)] lg:items-end lg:px-8">
+    <div>
+      <h1 class="max-w-[21ch] text-4xl/[1.08] font-medium tracking-[-0.045em] text-pretty text-neutral-950 sm:text-6xl/[1.06]">{title}</h1>
+      <p class="mt-6 max-w-[58ch] text-lg/8 text-pretty text-neutral-600">{description}</p>
+      <div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+        <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
+        {secondary && <a href={secondary.href} class="inline-flex items-center gap-2 py-2 text-base font-medium text-neutral-700 hover:text-neutral-950 sm:text-sm">{secondary.label}</a>}
+        <a href={markdownHref} class="inline-flex items-center gap-2 py-2 text-base text-neutral-500 hover:text-amber-700 sm:text-sm"><Icon name="markdownLogo" class="size-5" /> Read as Markdown</a>
+      </div>
+    </div>
+    <div class="min-w-0 lg:pb-2">
+      <slot />
+    </div>
+  </div>
+</div>

@@ -28,11 +28,13 @@ Ask your agent a research question in plain language, and say how far it may go:
 
 ## Give your agent the setup prompt
 
-Paste this into your coding agent. It installs v2, registers the MCP server, checks the install offline, and stops before any paid call:
+Paste this into your coding agent. It points the agent at the install instructions, which install v2, register the MCP server, check the install offline, and stop before any paid call:
 
 ```text
-Install Librarium v2 as a CLI and MCP tool for my coding agent. Read https://librarium.agentsy.build/docs/index.md and https://librarium.agentsy.build/docs/using-with-agents.md. Check that Node.js is at least 22.12, then run `npm install -g librarium` and confirm `librarium --version` reports major version 2. Ask which MCP client and configuration scope I use. Preserve existing servers and register a stdio server named librarium with command `librarium` and args `["mcp"]`; for Claude Code, use `claude mcp add --scope user librarium -- librarium mcp` with the agreed scope. Ask which providers I want and guide me through `librarium init` without exposing credentials in chat or source control. Run `librarium doctor` without --live and verify MCP discovery with list_providers and list_groups. Do not run research or make paid provider calls without my approval. Summarize the installation, client configuration, and any remaining credential setup.
+Install Librarium for me by following https://librarium.agentsy.build/install.md. Don't run research or make paid provider calls without my approval, and keep my API keys out of chat and source control.
 ```
+
+The agent reads [install.md](/install.md): the Node.js check, the npm install, MCP registration for your host without touching your other servers, `librarium init` with keys kept out of chat and source control, and an offline `librarium doctor` check.
 
 ## Register the MCP server in your agent
 

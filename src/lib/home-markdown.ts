@@ -88,13 +88,13 @@ function prepare(main: HTMLElement): Map<string, string> {
     for (const heading of panel.querySelectorAll("h1, h2, h3, h4, h5")) {
       heading.tagName = `h${Math.min(6, Number(heading.tagName.slice(1)) + 1)}`;
     }
-    const status = panel.querySelector("[data-demo-status]");
-    const row = status?.parentNode;
-    if (status && row) {
-      const label = status.text.trim();
-      status.remove();
-      const name = row.text.replace(/\s+/g, " ").trim();
-      row.replaceWith(`<h3>${[name, label].filter(Boolean).join(" — ")}</h3>`);
+    // The visible provider label and duration live on the (dropped) tab chip;
+    // the panel's own heading carries the full provider name.
+    const heading = panel.querySelector("[data-demo-heading]");
+    if (heading) {
+      const name = heading.text.replace(/\s+/g, " ").trim();
+      const label = panel.getAttribute("data-demo-final")?.trim();
+      heading.replaceWith(`<h3>${escapeHtml([name, label].filter(Boolean).join(" — "))}</h3>`);
     }
     const index = Number(panel.getAttribute("data-demo-panel"));
     // The citation strip is the body's link-only row, not links inside the report.

@@ -18,11 +18,17 @@ const CHAR_MS = 34;
 const RUN_AT = 350;
 const RUN_FOR = 450;
 const RUN_AFTER_TYPING = 900;
-const SEGMENT_RUNNING = 700;
-const SEGMENT_REVEAL = 700;
-const SEGMENT_DWELL = 1200;
+// Each provider gets a visible "running" beat, a streamed reveal of its answer
+// (one block at a time, see REVEAL_STEP_MS), and time to read before moving on.
+const SEGMENT_RUNNING = 1500;
+const SEGMENT_REVEAL = 3000;
+const SEGMENT_DWELL = 3200;
 const SEGMENT_TOTAL = SEGMENT_RUNNING + SEGMENT_REVEAL + SEGMENT_DWELL;
 const READING_PAUSE = 4200;
+// Streamed reveal: the answer appears word by word, like a model streaming its
+// output. Words are paced so every answer finishes within the reveal window.
+const REVEAL_WORD_MS_MAX = 45;
+const REVEAL_BUDGET_MS = SEGMENT_REVEAL - 400;
 const VISIBLE_RATIO = 0.35;
 const HIDDEN_RATIO = 0.05;
 
@@ -60,6 +66,38 @@ export function initResearchDemo(): void {
 
   const statusOf = (panel: HTMLElement) => panel.querySelector<HTMLElement>("[data-demo-status]");
   const bodyOf = (panel: HTMLElement) => panel.querySelector<HTMLElement>("[data-demo-body]");
+
+  // Wrap every word of each answer in a span that knows its position in the
+  // stream, so CSS can fade the words in order while the panel plays. The
+  // text content is unchanged, so copy, search, and screen readers are unaffected.
+  for (const panel of panels) {
+    const body = bodyOf(panel);
+    if (!body) continue;
+    const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+    const nodes: Text[] = [];
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if ((node.textContent ?? "").trim() !== "") nodes.push(node as Text);
+    }
+    let index = 0;
+    for (const node of nodes) {
+      const fragment = document.createDocumentFragment();
+      for (const part of (node.textContent ?? "").split(/(\s+)/)) {
+        if (part === "") continue;
+        if (/^\s+$/.test(part)) {
+          fragment.append(part);
+          continue;
+        }
+        const word = document.createElement("span");
+        word.dataset.demoWord = "";
+        word.style.setProperty("--demo-word", String(index++));
+        word.textContent = part;
+        fragment.append(word);
+      }
+      node.replaceWith(fragment);
+    }
+    const stepMs = Math.min(REVEAL_WORD_MS_MAX, REVEAL_BUDGET_MS / Math.max(index, 1));
+    panel.style.setProperty("--demo-word-ms", `${stepMs.toFixed(1)}ms`);
+  }
 
   function select(index: number): void {
     for (const [i, tab] of tabs.entries()) {
@@ -102,6 +140,7 @@ export function initResearchDemo(): void {
 
   function renderFinal(): void {
     region.dataset.demoPhase = "complete";
+    region.dataset.demoPlaying = "false"; // manual browsing shows answers instantly
     if (action) action.dataset.engaged = "false";
     if (typed) typed.textContent = query;
     for (const [index] of panels.entries()) setPanelState(index, "done");
@@ -111,6 +150,7 @@ export function initResearchDemo(): void {
   function begin(single: boolean): void {
     if (!canPlay()) return;
     mode = single ? "single" : "autoplay";
+    region.dataset.demoPlaying = "true";
     elapsed = 0;
     if (replay) replay.hidden = true;
     if (typed) typed.textContent = "";

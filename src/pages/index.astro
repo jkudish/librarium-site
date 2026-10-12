@@ -427,7 +427,16 @@ const useCases = [
     .demo-caret { display: none; width: 0.55em; height: 1.05em; margin-left: 2px; translate: 0 0.16em; background: #a69b89; }
     #research-example[data-demo-phase="typing"] .demo-caret { display: inline-block; animation: demo-caret-blink 1s steps(2, start) infinite; }
     #demo-action[data-engaged="true"] { border-color: var(--color-amber-700); color: var(--color-amber-800); }
-    [data-demo-panel][data-demo-state="done"] [data-demo-body] { animation: demo-reveal 320ms ease-out both; }
+    /* Switching providers: the incoming panel eases in while it is "running". */
+    #research-example[data-demo-playing="true"] [data-demo-panel][data-demo-state="running"] { animation: demo-panel-in 480ms ease-out both; }
+    /* The answer streams in word by word, like model output; the script sets
+       each word's --demo-word index and the panel's --demo-word-ms pace. */
+    #research-example[data-demo-playing="true"] [data-demo-panel][data-demo-state="done"] :global([data-demo-word]) {
+      animation: demo-word 320ms ease-out both;
+      animation-delay: calc(var(--demo-word, 0) * var(--demo-word-ms, 30ms));
+    }
+    @keyframes demo-word { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes demo-panel-in { from { opacity: 0; } to { opacity: 1; } }
     [data-demo-panel][data-demo-state="running"] [data-demo-status]::after { content: ""; animation: demo-ellipsis 1.2s steps(4, end) infinite; }
     @keyframes demo-caret-blink { to { visibility: hidden; } }
     @keyframes demo-reveal { from { opacity: 0; translate: 0 4px; } to { opacity: 1; translate: 0 0; } }

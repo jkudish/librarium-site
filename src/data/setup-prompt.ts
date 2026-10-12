@@ -4,3 +4,7 @@
 // and MCP-registration steps live in src/data/install.md, served at /install.md.
 export const AGENT_SETUP_PROMPT =
   "Install Librarium for me by following https://librarium.agentsy.build/install.md. Don't run research or make paid provider calls without my approval, and keep my API keys out of chat and source control.";
+
+/** The same prompt, naming the agent the user is pasting it into. */
+export const agentSetupPromptFor = (host: string): string =>
+  AGENT_SETUP_PROMPT.replace("Install Librarium for me by following", `Install Librarium for me in ${host} by following`);

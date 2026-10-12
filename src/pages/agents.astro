@@ -10,7 +10,7 @@ import Base from "../layouts/Base.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import Icon from "../components/Icon.astro";
-import { AGENT_SETUP_PROMPT } from "../data/setup-prompt";
+import { AGENT_SETUP_PROMPT, agentSetupPromptFor } from "../data/setup-prompt";
 
 const entry = await getEntry("pages", "agents");
 if (!entry) throw new Error("src/content/pages/agents.md is missing");
@@ -417,7 +417,12 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
                   </p>
                 )}
               </div>
-              <p class="mt-4 max-w-[75ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline(host.intro)} />
+              <div class="code-panel mt-4 min-w-0">
+                <div class="code-toolbar"><span>Paste into {host.id === "other" ? "your agent" : host.name}</span><button type="button" class="copy-btn group" data-copy={agentSetupPromptFor(host.id === "other" ? "my coding agent" : host.name)} data-copy-state="idle" aria-label={`Copy setup prompt for ${host.name}`}><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy prompt</span></button></div>
+                <p class="px-5 py-4 font-mono text-xs/6 break-words whitespace-pre-wrap text-amber-100">{agentSetupPromptFor(host.id === "other" ? "my coding agent" : host.name)}</p>
+              </div>
+              <p class="mt-6 text-sm font-medium text-neutral-950">Or register it yourself</p>
+              <p class="mt-1 max-w-[75ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline(host.intro)} />
               {host.blocks.length > 0 && (
                 <div class:list={["mt-4 grid gap-4", host.blocks.length > 1 && "lg:grid-cols-2"]}>
                   {host.blocks.map((block) => (

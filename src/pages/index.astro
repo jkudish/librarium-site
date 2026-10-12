@@ -3,6 +3,8 @@ import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 import Icon from "../components/Icon.astro";
 import Base from "../layouts/Base.astro";
+import EvidenceControls from "../components/EvidenceControls.astro";
+import { WORKFLOWS } from "../data/product";
 import { RESEARCH_DEMO, formatElapsed, renderCapturedMarkdown } from "../data/research-demo";
 
 const providerMark = (logo: string) => `/providers/${logo}.${["you", "serpapi", "dataforseo"].includes(logo) ? "png" : "svg"}`;
@@ -249,31 +251,30 @@ const useCases = [
           ))}
         </div>
       </div>
+      <div class="mx-auto mt-16 max-w-6xl px-6 sm:mt-20 lg:px-8">
+        <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+          <h3 id="workflows-heading" class="text-2xl font-medium tracking-tight text-neutral-950">The four workflows</h3>
+          <p class="text-base text-neutral-600 sm:text-sm">Preview any of them offline with <code class="font-mono text-neutral-800">librarium plan "…" --group &lt;name&gt;</code></p>
+        </div>
+        <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {WORKFLOWS.map((workflow) => (
+            <li class="flex flex-col rounded border border-neutral-300 bg-white p-5">
+              <code class="w-fit rounded-sm border border-amber-700/30 bg-amber-50 px-2 py-0.5 font-mono text-sm text-amber-800">--group {workflow.id}</code>
+              <p class="mt-4 text-lg/7 font-medium tracking-tight text-pretty text-neutral-950">{workflow.purpose}</p>
+              <p class="mt-4 font-mono text-xs tracking-wide text-neutral-500 uppercase">Runs</p>
+              <p class="mt-1 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{workflow.runs}</p>
+              <p class="mt-4 font-mono text-xs tracking-wide text-neutral-500 uppercase">Speed</p>
+              <p class="mt-1 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{workflow.pace}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
 
     <section class="border-y border-neutral-300 bg-[#eeeae0] py-16 sm:py-24" aria-labelledby="controls-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="controls-heading" class="max-w-[24ch] text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Keep the evidence.<br />Keep control.</h2>
-        <div class="mt-12 grid grid-cols-1 gap-12 border-t border-neutral-950/15 pt-8 lg:grid-cols-3">
-          <div>
-            <h3 class="text-lg font-semibold text-neutral-950">See where each result came from.</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
-              Every finding keeps the provider that returned it and the sources it cited. Open them and judge for yourself — when providers agree, that’s a signal worth checking, not proof they’re right.
-            </p>
-          </div>
-          <div>
-            <h3 class="text-lg font-semibold text-neutral-950">Decide what can run.</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
-              Dry-run a question before anything is paid. Review the selected providers, set a spending ceiling, and check reported costs as results land. Estimates can be missing or wrong — a provider can still bill more than it quoted.
-            </p>
-          </div>
-          <div>
-            <h3 class="text-lg font-semibold text-neutral-950">Come back to a long-running job.</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
-              Deep research can outlast a coffee break. Start it, step away, and pick it up later without a fresh budget of time or money: JavaScript keeps durable async jobs readable as they finish, and Laravel runs them as encrypted queue jobs that call back into your app.
-            </p>
-          </div>
-        </div>
+        <EvidenceControls />
       </div>
     </section>
 

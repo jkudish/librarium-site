@@ -1,12 +1,10 @@
 ---
 import LogoMark from "./LogoMark.astro";
 import Icon from "./Icon.astro";
+import { markdownHrefFor } from "../lib/markdown-href";
 interface Props { wide?: boolean; }
 const { wide = false } = Astro.props;
-const path = Astro.url.pathname.replace(/\/$/, "");
-const markdownHref = ["", "/docs", "/docs/php", "/v1", "/guides"].includes(path)
-  ? `${path}/index.md`
-  : `${path}.md`;
+const markdownHref = markdownHrefFor(Astro.url.pathname);
 const links = [
   { href: "/agents", label: "Agents & MCP" },
   { href: "/cli", label: "CLI" },
@@ -85,18 +83,41 @@ const links = [
   </div>
 </header>
 
-<section id="machine-panel" hidden class="mx-auto max-w-6xl px-6 py-10 lg:px-8" aria-label="Markdown view">
-  <div class="mb-6 flex items-center justify-between gap-4">
-    <h1 class="font-mono text-lg font-medium text-neutral-950">Markdown</h1>
-    <a href={markdownHref} class="text-sm text-amber-800 underline underline-offset-4">Open raw Markdown</a>
+<section id="machine-panel" hidden class="mx-auto max-w-4xl px-6 pt-10 pb-28 lg:px-8" aria-labelledby="machine-heading">
+  <div class="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+    <div class="min-w-0">
+      <h1 id="machine-heading" class="flex items-center gap-2 font-mono text-lg font-medium text-neutral-950"><Icon name="markdownLogo" class="size-5 text-neutral-500" />Markdown</h1>
+      <p class="mt-1 font-mono text-xs text-neutral-500"><span class="break-all">{markdownHref}</span><span id="machine-meta"></span></p>
+    </div>
+    <div class="flex shrink-0 items-center gap-2">
+      <button
+        type="button"
+        id="machine-copy"
+        data-copy-state="idle"
+        disabled
+        class="group flex min-h-9 cursor-pointer items-center gap-2 rounded px-3 py-1.5 text-sm font-medium text-neutral-700 ring-1 ring-neutral-950/15 hover:bg-neutral-950/3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 disabled:cursor-not-allowed disabled:opacity-50 data-[copy-state=success]:text-amber-800"
+      >
+        <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" />
+        <Icon name="check" class="hidden size-4 group-data-[copy-state=success]:block" />
+        <span id="machine-copy-label">Copy Markdown</span>
+      </button>
+      <a href={markdownHref} class="flex min-h-9 items-center gap-1.5 rounded px-3 py-1.5 text-sm text-neutral-600 hover:text-neutral-950">Open raw <Icon name="arrowUpRight" class="size-3.5" /></a>
+    </div>
   </div>
-  <p id="machine-status" role="status" class="text-sm text-neutral-600"></p>
-  <pre id="machine-content" class="whitespace-pre-wrap break-words font-mono text-sm/7 text-neutral-800"></pre>
+  <p id="machine-status" role="status" class="text-sm text-neutral-600 empty:hidden"></p>
+  <p id="machine-copy-status" aria-live="polite" class="sr-only"></p>
+  <pre id="machine-content" tabindex="0" aria-label="Page Markdown" class="machine-markdown rounded border border-neutral-200 bg-neutral-50 px-5 py-5 font-mono text-[13px]/6 text-neutral-800 empty:hidden sm:text-sm/7 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:px-7 sm:py-6"></pre>
 </section>
 
 <style>
   :global(html[data-page-view="machine"] header ~ *:not(#machine-panel)) {
     display: none !important;
+  }
+  .machine-markdown {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    tab-size: 2;
+    font-variant-ligatures: none;
   }
 </style>
 
@@ -120,7 +141,45 @@ const links = [
   const panel = document.querySelector<HTMLElement>("#machine-panel");
   const content = document.querySelector<HTMLElement>("#machine-content");
   const status = document.querySelector<HTMLElement>("#machine-status");
+  const meta = document.querySelector<HTMLElement>("#machine-meta");
+  const copyButton = document.querySelector<HTMLButtonElement>("#machine-copy");
+  const copyLabel = document.querySelector<HTMLElement>("#machine-copy-label");
+  const copyStatus = document.querySelector<HTMLElement>("#machine-copy-status");
   let request: AbortController | undefined;
+  let copyReset: number | undefined;
+  function setCopyState(state: "idle" | "success" | "error") {
+    if (!copyButton || !copyLabel || !copyStatus) return;
+    window.clearTimeout(copyReset);
+    copyButton.dataset.copyState = state;
+    copyLabel.textContent = state === "success" ? "Copied" : state === "error" ? "Press Ctrl+C / ⌘C" : "Copy Markdown";
+    copyStatus.textContent = state === "success"
+      ? "Markdown copied to clipboard."
+      : state === "error" ? "Clipboard unavailable. The Markdown is selected; press Control C or Command C to copy it." : "";
+    if (state !== "idle") copyReset = window.setTimeout(() => setCopyState("idle"), state === "success" ? 2000 : 5000);
+  }
+  // Fallback when the Clipboard API is missing or denied (insecure origin,
+  // permissions): select the text so the reader can copy it with the keyboard.
+  function selectMarkdown() {
+    if (!content) return;
+    const range = document.createRange();
+    range.selectNodeContents(content);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    content.focus({ preventScroll: true });
+  }
+  copyButton?.addEventListener("click", async () => {
+    const text = content?.textContent ?? "";
+    if (!text) return;
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard API unavailable");
+      await navigator.clipboard.writeText(text);
+      setCopyState("success");
+    } catch {
+      selectMarkdown();
+      setCopyState("error");
+    }
+  });
   human?.addEventListener("click", (event) => {
     event.preventDefault();
     request?.abort();
@@ -141,6 +200,9 @@ const links = [
     machine.setAttribute("aria-current", "page");
     human?.removeAttribute("aria-current");
     content.textContent = "";
+    if (meta) meta.textContent = "";
+    if (copyButton) copyButton.disabled = true;
+    setCopyState("idle");
     status.textContent = "Loading Markdown…";
     try {
       const response = await fetch(machine.href, { signal: current.signal });
@@ -148,6 +210,10 @@ const links = [
       const text = await response.text();
       if (current.signal.aborted) return;
       content.textContent = text;
+      const lines = text.trimEnd().split("\n").length;
+      const kilobytes = new Blob([text]).size / 1024;
+      if (meta) meta.textContent = ` · ${lines.toLocaleString()} lines · ${kilobytes < 10 ? kilobytes.toFixed(1) : Math.round(kilobytes)} KB`;
+      if (copyButton) copyButton.disabled = false;
       status.textContent = "";
     } catch {
       if (!current.signal.aborted) status.textContent = "Could not load Markdown. Try again or open the raw Markdown link.";

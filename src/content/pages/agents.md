@@ -16,6 +16,16 @@ npm install -g librarium
 
 The MCP server and the agent skill ship with that install. There is nothing else to download. Check that `librarium --version` reports major version 2 before you connect an agent. [Getting started](/docs#install) covers other install channels, and the [CLI page](/cli) covers terminal use.
 
+## How you'd use it
+
+Ask your agent a research question in plain language, and say how far it may go: for example, a quick pass, then a deep pass if coverage is thin, inside the budget your librarium configuration already sets. A typical session over MCP:
+
+1. `list_groups` to see the configured workflows, so the agent picks a group without guessing.
+2. `research` with `group: "quick"`, which returns an index of the run rather than the answers.
+3. `get_results` on that run, following `nextCursor` until `hasMore` is false.
+4. If coverage is thin, `research` again with `group: "deep"` and `mode: "async"`, then `check_async` to move the pending work forward.
+5. `get_results` on the deep run, then an answer that keeps each finding tied to the provider that wrote it and the sources it cited.
+
 ## Give your agent the setup prompt
 
 Paste this into your coding agent. It installs v2, registers the MCP server, checks the install offline, and stops before any paid call:

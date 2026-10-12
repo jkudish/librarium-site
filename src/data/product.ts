@@ -36,6 +36,9 @@ export const WORKFLOWS = [
   {
     id: "quick",
     summary: "Low-latency discovery and cited answers.",
+    purpose: "Fast discovery and cited answers.",
+    runs: "Six search and grounded-answer profiles, including Exa, Brave, Gemini, and Kagi.",
+    pace: "Inline, returns in the active call. The default when no group is set.",
     selection: [
       "gemini-grounded/grounded",
       "openrouter/grounded",
@@ -48,11 +51,17 @@ export const WORKFLOWS = [
   {
     id: "deep",
     summary: "Implemented research-report profiles, derived from the catalog.",
+    purpose: "Long-form research reports for decisions that deserve them.",
+    runs: "Every research-report profile, such as OpenAI, Gemini, Perplexity, and Parallel research.",
+    pace: "Background and durable, often minutes. Run with --mode async, collect with librarium status.",
     selection: ["catalog-derived"],
   },
   {
     id: "visibility",
-    summary: "Six collected consumer surfaces, then three first-party API baselines.",
+    summary: "Five collected consumer surfaces, then three first-party API baselines.",
+    purpose: "See how AI answer engines describe your product.",
+    runs: "Five SearchAPI answer surfaces, including ChatGPT, Google AI Mode, and Bing Copilot, then three API baselines.",
+    pace: "Inline. Needs a SearchAPI key and never runs as part of quick.",
     selection: [
       "searchapi-chatgpt/surface",
       "searchapi-gemini/surface",
@@ -67,6 +76,9 @@ export const WORKFLOWS = [
   {
     id: "all",
     summary: "Every selectable profile allowed by workflow policy, derived from the catalog.",
+    purpose: "Maximum coverage for a single question.",
+    runs: "Every enabled profile: search, answers, chat, research reports, and surfaces.",
+    pace: "Slowest and costliest, since it includes deep reports. Plan it first.",
     selection: ["catalog-derived"],
   },
 ] as const;

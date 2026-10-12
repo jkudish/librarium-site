@@ -6,6 +6,7 @@ import {
   PROFILE_COUNT,
   PROVIDER_COUNT,
 } from "../data/product";
+import { markdownHrefFor } from "../lib/markdown-href";
 
 interface Props {
   title: string;
@@ -33,6 +34,9 @@ const canonical = redirect
   : Astro.site
     ? new URL(Astro.url.pathname, Astro.site).href
     : undefined;
+// Agents fetching HTML can discover the page's Markdown twin (the static
+// assets host cannot negotiate on Accept: text/markdown).
+const markdownAlternate = new URL(markdownHrefFor(Astro.url.pathname), Astro.site ?? Astro.url).href;
 const productDescription = "The meta harness for research queries.";
 
 const jsonLd = JSON.stringify([
@@ -94,6 +98,7 @@ const jsonLd = JSON.stringify([
     {redirect && <meta http-equiv="refresh" content={`0; url=${redirect}`} />}
     {robots && <meta name="robots" content={robots} />}
     {canonical && <link rel="canonical" href={canonical} />}
+    <link rel="alternate" type="text/markdown" href={markdownAlternate} title="Markdown" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />

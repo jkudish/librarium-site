@@ -4,7 +4,11 @@ import { getArticles } from "../lib/articles";
 import ArticleLayout from "../layouts/ArticleLayout.astro";
 
 export async function getStaticPaths() {
-  return (await getArticles()).map(({ path, entry }) => ({ params: { page: path }, props: { entry } }));
+  // /agents has a dedicated product page (src/pages/agents.astro); its
+  // Markdown twin is still served from agents.md by [...page].md.ts.
+  return (await getArticles())
+    .filter(({ path }) => path !== "agents")
+    .map(({ path, entry }) => ({ params: { page: path }, props: { entry } }));
 }
 const { entry } = Astro.props as { entry: CollectionEntry<"pages"> | CollectionEntry<"guides"> };
 const { Content, headings } = await render(entry);

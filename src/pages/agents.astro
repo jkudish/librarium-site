@@ -1,0 +1,624 @@
+---
+// Dedicated product page for /agents. src/content/pages/agents.md stays the
+// source of truth for the agent-readable twin at /agents.md (served by
+// [...page].md.ts and bundled into the llms files); every fact rendered here
+// mirrors that file, and scripts/verify-content.mjs checks this page's HTML
+// for each host registration, docs link, and tool contract.
+import { getEntry } from "astro:content";
+import { Code } from "astro:components";
+import Base from "../layouts/Base.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import Icon from "../components/Icon.astro";
+import { AGENT_SETUP_PROMPT } from "../data/setup-prompt";
+
+const entry = await getEntry("pages", "agents");
+if (!entry) throw new Error("src/content/pages/agents.md is missing");
+const { title, description } = entry.data;
+const ctaHref = entry.data.ctaHref ?? "/docs/using-with-agents";
+const ctaLabel = entry.data.ctaLabel ?? "Read the agent docs";
+const markdownHref = "/agents.md";
+
+/** Static, trusted copy only: escape, then render `code` and [links](href). */
+const inline = (text: string) =>
+  text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/`([^`]+)`/g, '<code class="rounded-sm bg-neutral-950/4 px-0.5 py-px font-mono text-[0.875em] text-neutral-950">$1</code>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="font-medium text-amber-700 underline decoration-amber-700/30 underline-offset-[3px] hover:text-amber-600">$1</a>');
+
+type Lang = "bash" | "toml" | "json" | "yaml";
+interface Host {
+  id: string;
+  name: string;
+  logo?: string;
+  docs: { label: string; href: string }[];
+  intro: string;
+  blocks: { label: string; lang: Lang; code: string }[];
+  note?: string;
+}
+
+// Registration strings are copied verbatim from agents.md. Keep them in sync.
+const hosts: Host[] = [
+  {
+    id: "claude-code",
+    name: "Claude Code",
+    logo: "/providers/claude.svg",
+    docs: [{ label: "MCP docs", href: "https://code.claude.com/docs/en/mcp" }],
+    intro: "Register it once for your user, from any terminal:",
+    blocks: [{ label: "Terminal", lang: "bash", code: "claude mcp add --scope user librarium -- librarium mcp" }],
+  },
+  {
+    id: "codex",
+    name: "Codex",
+    logo: "/agents/codex.svg",
+    docs: [{ label: "MCP docs", href: "https://developers.openai.com/codex/mcp" }],
+    intro: "Add it by command, or edit `~/.codex/config.toml` (project-scoped: `.codex/config.toml`):",
+    blocks: [
+      { label: "Terminal", lang: "bash", code: "codex mcp add librarium -- librarium mcp" },
+      { label: "~/.codex/config.toml", lang: "toml", code: '[mcp_servers.librarium]\ncommand = "librarium"\nargs = ["mcp"]' },
+    ],
+  },
+  {
+    id: "cursor",
+    name: "Cursor",
+    logo: "/agents/cursor.svg",
+    docs: [{ label: "MCP docs", href: "https://cursor.com/docs/mcp" }],
+    intro: "Create `.cursor/mcp.json` in your project, or `~/.cursor/mcp.json` to add it everywhere:",
+    blocks: [{ label: ".cursor/mcp.json", lang: "json", code: '{\n  "mcpServers": {\n    "librarium": {\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
+  },
+  {
+    id: "opencode",
+    name: "OpenCode",
+    logo: "/agents/opencode.svg",
+    docs: [
+      { label: "config docs", href: "https://opencode.ai/docs/mcp-servers/" },
+      { label: "v2 docs", href: "https://v2.opencode.ai/mcp" },
+    ],
+    intro: "Add it under `mcp` in `opencode.json` (`~/.config/opencode/opencode.json`, or your project root). OpenCode v2 moves servers under `mcp.servers` ([v2 docs](https://v2.opencode.ai/mcp)):",
+    blocks: [{ label: "opencode.json", lang: "json", code: '{\n  "mcp": {\n    "librarium": {\n      "type": "local",\n      "command": ["librarium", "mcp"]\n    }\n  }\n}' }],
+  },
+  {
+    id: "amp",
+    name: "Amp",
+    logo: "/agents/amp.svg",
+    docs: [{ label: "MCP manual", href: "https://ampcode.com/manual/mcp" }],
+    intro: "Register it from your terminal:",
+    blocks: [{ label: "Terminal", lang: "bash", code: "amp mcp add librarium -- librarium mcp" }],
+    note: "Servers added to your global config (`~/.config/amp/settings.json`) run without approval; servers declared in a project's `.amp/settings.json` are approved once with `amp mcp approve librarium`.",
+  },
+  {
+    id: "hermes",
+    name: "Hermes Agent",
+    logo: "/agents/hermes.svg",
+    docs: [{ label: "MCP docs", href: "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp" }],
+    intro: "Add it to `~/.hermes/config.yaml`:",
+    blocks: [{ label: "~/.hermes/config.yaml", lang: "yaml", code: 'mcp_servers:\n  librarium:\n    command: "librarium"\n    args: ["mcp"]' }],
+  },
+  {
+    id: "other",
+    name: "Other",
+    docs: [],
+    intro: "Register a stdio server named `librarium` with command `librarium` and args `[\"mcp\"]`, following your host's own config format.",
+    blocks: [],
+  },
+];
+
+// Tool contracts mirror "What your agent can call" in agents.md, which in
+// turn mirrors src/mcp/server.ts in the librarium repository.
+const tools = [
+  {
+    name: "research",
+    lead: "Starts a run.",
+    input: "a required `query`, plus optional `group` (a workflow like `quick` or `deep`), `providers` (exact profile ids), `mode` (`sync` or `async`), and `refine`.",
+    output: "a short index of the run; statuses, which provider returned what, source counts, known and unknown costs, and where results are saved. It does not paste whole answers into chat.",
+    use: "Use it inside the scope and budget already authorized; only steps beyond that scope need fresh approval.",
+    badge: "Can spend",
+  },
+  {
+    name: "get_results",
+    lead: "Reads what a run saved.",
+    input: "the run directory, optionally one `provider` or `resultId`, a `part` (`content` or `citations`), a `cursor`, and a `limitChars` page size (256 to 12,000; default 8,000).",
+    output: "complete text and citations, one bounded page at a time.",
+    use: "Use it to read the whole answer; follow `nextCursor` with the same filters until `hasMore` is false. It reads saved files only: no provider calls, no credential lookups.",
+    badge: "Saved files only",
+  },
+  {
+    name: "check_async",
+    lead: "Moves a long-running job forward.",
+    input: "the run directory, and a `retrieve` toggle that only matters for runs saved by an older schema.",
+    output: "counts plus an updated index, committing results as they finish.",
+    use: "Use it to advance work already submitted, under its original time and cost limits; a charge still pending with a provider stays unknown until the provider reports it. It may contact providers to fetch completed work; it starts no new research.",
+    badge: "No new research",
+  },
+  {
+    name: "list_providers",
+    lead: "Shows what can run.",
+    input: "optional `detail: \"profiles\"` and one `provider` id.",
+    output: "static summaries, or exact profile declarations with targets, capabilities, workflows, and availability reasons.",
+    use: "Use it to plan a run. It is local: no custom code is loaded, no credentials are resolved, and nothing is authenticated, so a listed provider is not a verified one.",
+    badge: "Local",
+  },
+  {
+    name: "list_groups",
+    lead: "Shows the configured workflows.",
+    input: "none.",
+    output: "group names and their member profiles.",
+    use: "Use it to pick a group without guessing. Local and free.",
+    badge: "Local and free",
+  },
+];
+
+// Vetted agent-prompt wording, reused verbatim from the homepage use cases.
+const askPrompts = [
+  {
+    title: "Research a technical decision",
+    prompt: "Use the Librarium skill to run a quick research pass on SQLite or Postgres for a small team app — deployment, concurrent writes, operational overhead. Read the saved evidence, and if coverage is thin, deepen only within the scope and budget I already authorized; ask me before anything beyond that. Keep each provider’s findings and citations attached to that provider.",
+  },
+  {
+    title: "Plan a provider matrix first",
+    prompt: "Using the Librarium MCP tools, list the configured providers with their profiles and capabilities, and the workflow groups, then propose a provider matrix for this API’s authentication, rate limits, and retry guidance with a $2 budget. The research tool takes no budget or fallback flags — those come from librarium configuration — so confirm the applicable config before treating the budget or exact-only matrix as enforced. Wait for my approval, run research once with the agreed matrix, and read the full evidence with get_results.",
+  },
+  {
+    title: "See how answer engines describe you",
+    prompt: "Use Librarium’s visibility workflow to see how AI answer engines describe a luxury villa rental service for a week on the Amalfi Coast — as a complement to, not a substitute for, a regular research pass on the same question. Keep each answer surface’s identity and citations attached to its findings.",
+  },
+];
+
+// Illustrative session. Tool names, input fields, and output field names
+// match src/mcp/server.ts, shaping.ts, and result-pages.ts in librarium;
+// the run path, counts, and findings are an example, not a captured run.
+const quickRun = "…/1791820800-webhook-retry-guidance-412k3x";
+const deepRun = "…/1791820874-idempotency-key-retries-9qk2m1";
+type Turn =
+  | { kind: "user"; text: string }
+  | { kind: "agent"; text: string }
+  | { kind: "tool"; name: string; input: string; output: string; note?: string };
+const session: Turn[] = [
+  { kind: "user", text: "Before I add retries to our webhook client, research current guidance on exponential backoff, jitter, and idempotency keys. A quick pass, then a deep pass if coverage is thin — both are inside the budget in my librarium config. Keep each provider’s sources attached." },
+  { kind: "agent", text: "First I’ll check which workflows you have configured, so I don’t guess." },
+  {
+    kind: "tool",
+    name: "list_groups",
+    input: "{}",
+    output: "groups: quick (gemini-grounded/grounded, exa/search, parallel/turbo, …), deep (gemini-deep/research, openai-research/research, perplexity-deep-research/research), …",
+    note: "Local and free",
+  },
+  {
+    kind: "tool",
+    name: "research",
+    input: 'query: "Retry backoff, jitter, and idempotency keys for webhook clients", group: "quick"',
+    output: `state: "terminal", tallies.succeeded: 6, sources.unique: 31, outputDir: "${quickRun}"`,
+  },
+  {
+    kind: "tool",
+    name: "get_results",
+    input: `runDir: "${quickRun}", part: "content"`,
+    output: 'results: 6 providers, hasMore: true, nextCursor: "eyJ2IjoxLC…"',
+    note: "Followed nextCursor until hasMore was false",
+  },
+  { kind: "agent", text: "All six agree on backoff with jitter, but they’re thin on how a server should treat a repeated idempotency key. Starting the deep workflow in the background." },
+  {
+    kind: "tool",
+    name: "research",
+    input: 'query: "How should a server handle a repeated Idempotency-Key on retried POSTs?", group: "deep", mode: "async"',
+    output: `state: "pending", tallies.pending: 3, outputDir: "${deepRun}"`,
+  },
+  {
+    kind: "tool",
+    name: "check_async",
+    input: `runDir: "${deepRun}"`,
+    output: 'polled: 3, retrieved: 3, index.state: "terminal"',
+    note: "Starts no new research",
+  },
+  {
+    kind: "tool",
+    name: "get_results",
+    input: `runDir: "${deepRun}", part: "content"`,
+    output: "results: 3 reports, read page by page until hasMore: false",
+  },
+];
+const answer = [
+  {
+    claim: "Retry with capped exponential backoff and full jitter, not fixed intervals.",
+    sources: [{ profile: "exa/search", source: "AWS Builders’ Library: Timeouts, retries, and backoff with jitter" }, { profile: "gemini-grounded/grounded", source: "Google Cloud: Retry strategy" }],
+  },
+  {
+    claim: "Send an Idempotency-Key on every retried POST; the server returns the first response for a key it has already seen.",
+    sources: [{ profile: "perplexity-deep-research/research", source: "Stripe API reference: Idempotent requests" }, { profile: "openai-research/research", source: "IETF draft: The Idempotency-Key HTTP Header Field" }],
+  },
+  {
+    claim: "Honor Retry-After on 429 and 503 before applying your own backoff.",
+    sources: [{ profile: "gemini-deep/research", source: "RFC 9110: HTTP Semantics" }],
+  },
+];
+
+const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl";
+const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 underline-offset-[3px] hover:text-amber-600";
+---
+
+<Base title={`${title} | librarium`} description={description} includeSoftwareMetadata={false}>
+  <Header />
+  <main>
+    <!-- Hero: same pieces and classes ArticleLayout uses for kind: product. -->
+    <div class="border-b border-neutral-200 bg-[#faf9f6]">
+      <div class="mx-auto grid max-w-6xl gap-12 px-6 pt-10 pb-12 sm:pt-14 sm:pb-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-end lg:px-8">
+        <div>
+          <h1 class="max-w-[21ch] text-4xl/[1.08] font-medium tracking-[-0.045em] text-pretty text-neutral-950 sm:text-6xl/[1.06]">{title}</h1>
+          <p class="mt-6 max-w-[58ch] text-lg/8 text-pretty text-neutral-600">{description}</p>
+          <div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+            <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
+            <a href="#setup" class="inline-flex items-center gap-2 py-2 text-base font-medium text-neutral-700 hover:text-neutral-950 sm:text-sm">Set it up</a>
+            <a href={markdownHref} class="inline-flex items-center gap-2 py-2 text-base text-neutral-500 hover:text-amber-700 sm:text-sm"><Icon name="markdownLogo" class="size-5" /> Read as Markdown</a>
+          </div>
+        </div>
+        <div class="lg:pb-2">
+          <p class="text-sm text-neutral-500">Works with the agent you already use</p>
+          <ul class="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6 lg:grid-cols-3" aria-label="Supported coding agents">
+            {hosts.filter((host) => host.logo).map((host) => (
+              <li>
+                <a href={`#host-tab-${host.id}`} data-host-link={host.id} class="flex h-full flex-col items-center gap-2 rounded-md border border-neutral-200 bg-white px-2 py-3 text-center text-xs text-neutral-700 hover:border-neutral-300 hover:text-neutral-950">
+                  <span class="logo-tile flex size-8 items-center justify-center rounded-md"><img src={host.logo} alt="" width="20" height="20" class="size-5" /></span>
+                  {host.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- How you'd use it: an illustrative agent session over MCP. -->
+    <section class="py-16 sm:py-24" aria-labelledby="usage-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <h2 id="usage-heading" class={sectionHeading}>Ask a question. Your agent does the reading.</h2>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">You ask in plain language. Your agent picks a workflow, runs it across several providers, resumes the slow ones, and reads every saved page before it answers, with each finding still tied to the provider and sources behind it.</p>
+
+        <div class="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:gap-12">
+          <figure class="min-w-0 overflow-hidden rounded-lg border border-neutral-200 bg-white">
+            <div class="flex items-center justify-between gap-4 border-b border-neutral-200 bg-[#faf9f6] px-4 py-3 sm:px-5">
+              <div class="flex items-center gap-2">
+                <span class="flex gap-1.5" aria-hidden="true"><span class="size-2.5 rounded-full bg-neutral-300 dark:bg-neutral-600"></span><span class="size-2.5 rounded-full bg-neutral-300 dark:bg-neutral-600"></span><span class="size-2.5 rounded-full bg-neutral-300 dark:bg-neutral-600"></span></span>
+                <span class="ml-2 font-mono text-xs whitespace-nowrap text-neutral-500"><span class="max-sm:hidden">your agent · </span>librarium MCP</span>
+              </div>
+              <span class="rounded-sm border border-neutral-200 px-1.5 py-0.5 font-mono text-[11px] tracking-wide text-neutral-500 uppercase">Example session</span>
+            </div>
+            <ol class="space-y-4 px-4 py-6 sm:px-6" aria-label="Example agent session">
+              {session.map((turn) => (
+                turn.kind === "user" ? (
+                  <li class="flex justify-end">
+                    <div class="user-bubble max-w-[85%] rounded-lg rounded-br-sm bg-neutral-950 px-4 py-3 text-sm/6 text-pretty text-white">
+                      <span class="sr-only">You: </span>{turn.text}
+                    </div>
+                  </li>
+                ) : turn.kind === "agent" ? (
+                  <li class="max-w-[90%] text-sm/6 text-pretty text-neutral-700"><span class="sr-only">Agent: </span>{turn.text}</li>
+                ) : (
+                  <li class="tool-call min-w-0 rounded-md border border-neutral-200 bg-neutral-50 font-mono text-xs/5">
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-neutral-200 px-3 py-2">
+                      <Icon name="terminal" class="size-3.5 text-amber-700" />
+                      <span class="text-neutral-500">librarium</span>
+                      <span class="font-semibold text-neutral-950">{turn.name}</span>
+                      {turn.note && <span class="ml-auto font-sans text-[11px] text-neutral-500">{turn.note}</span>}
+                    </div>
+                    <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 px-3 py-2">
+                      <dt class="text-neutral-500">in</dt>
+                      <dd class="break-words text-neutral-800">{turn.input}</dd>
+                      <dt class="text-neutral-500">out</dt>
+                      <dd class="break-words text-neutral-600">{turn.output}</dd>
+                    </dl>
+                  </li>
+                )
+              ))}
+              <li class="rounded-md border border-amber-700/25 bg-amber-50 px-4 py-4 text-sm/6 text-neutral-700">
+                <span class="sr-only">Agent: </span>
+                <p class="text-neutral-950">Here’s what both passes found, with who said it:</p>
+                <ul class="mt-3 space-y-3">
+                  {answer.map((item) => (
+                    <li>
+                      <p class="text-pretty">{item.claim}</p>
+                      <ul class="mt-1.5 flex flex-wrap gap-1.5" aria-label="Sources">
+                        {item.sources.map((source) => (
+                          <li class="source-chip inline-flex max-w-full items-center gap-1.5 rounded-sm border border-neutral-200 bg-white px-2 py-0.5 text-xs text-neutral-600">
+                            <span class="font-mono text-neutral-950">{source.profile}</span>
+                            <span aria-hidden="true" class="text-neutral-400">·</span>
+                            <span class="truncate">{source.source}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+                <p class="mt-4 text-pretty">Only the deep pass covered the IETF Idempotency-Key text, and it’s still a draft. Open it before you depend on its semantics.</p>
+              </li>
+            </ol>
+            <figcaption class="border-t border-neutral-200 px-4 py-3 text-xs/5 text-neutral-500 sm:px-6">Illustrative session. Tool names, inputs, and output fields match the librarium MCP server; the paths, counts, and findings are an example, not a captured run.</figcaption>
+          </figure>
+
+          <div class="min-w-0 lg:sticky lg:top-8 lg:self-start">
+            <h3 class="text-lg font-semibold text-neutral-950">Things to ask your agent</h3>
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Paste one of these once librarium is connected. Each keeps spend inside what you already authorized.</p>
+            <ul class="mt-6 space-y-4">
+              {askPrompts.map((item, index) => (
+                <li class="rounded-md border border-neutral-200 bg-white p-4">
+                  <div class="flex items-start justify-between gap-3">
+                    <p class="text-sm font-medium text-neutral-950">{item.title}</p>
+                    <button type="button" class="copy-btn group shrink-0" data-copy={item.prompt} data-copy-state="idle" aria-label={`Copy prompt: ${item.title}`}>
+                      <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" />
+                      <Icon name="check" class="hidden size-4 text-amber-700 group-data-[copy-state=success]:block" />
+                    </button>
+                  </div>
+                  <p id={`ask-${index}`} class="mt-2 text-sm/6 text-pretty text-neutral-600">{item.prompt}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Setup: install, setup prompt, and per-host registration tabs. -->
+    <section id="setup" class="scroll-mt-6 border-t border-neutral-200 bg-[#faf9f6] py-16 sm:py-24" aria-labelledby="setup-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <h2 id="setup-heading" class={sectionHeading}>Set it up once.</h2>
+        <div class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
+            <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">One install, two ways to work</p>
+            <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Install the CLI</h3>
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Your agent gets research through the same CLI you use. Install it once:</p>
+            <div class="code-panel mt-4">
+              <div class="code-toolbar"><span>Terminal</span><button type="button" class="copy-btn group" data-copy="npm install -g librarium" data-copy-state="idle" aria-label="Copy install command"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy</span></button></div>
+              <Code code="npm install -g librarium" lang="bash" theme="github-dark-default" />
+            </div>
+            <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The MCP server and the agent skill ship with that install. There is nothing else to download. Check that `librarium --version` reports major version 2 before you connect an agent. [Getting started](/docs#install) covers other install channels, and the [CLI page](/cli) covers terminal use.")} />
+          </div>
+          <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
+            <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Or let your agent do it</p>
+            <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Give your agent the setup prompt</h3>
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Paste this into your coding agent. It installs v2, registers the MCP server, checks the install offline, and stops before any paid call:</p>
+            <div class="code-panel mt-4 flex-1">
+              <div class="code-toolbar"><span>Setup prompt</span><button type="button" class="copy-btn group" data-copy={AGENT_SETUP_PROMPT} data-copy-state="idle" aria-label="Copy setup prompt"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy prompt</span></button></div>
+              <p tabindex="0" class="max-h-56 overflow-y-auto px-5 py-4 font-mono text-xs/6 break-words whitespace-pre-wrap text-amber-100 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-300">{AGENT_SETUP_PROMPT}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 overflow-hidden rounded-lg border border-neutral-200 bg-white">
+          <div class="px-6 pt-6">
+            <h3 class="text-xl font-medium tracking-tight text-neutral-950">Register the MCP server in your agent</h3>
+            <p class="mt-2 max-w-[70ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Every host launches the same local command: `librarium mcp`. The registration spelling differs per host, so use your own agent's form below.")} />
+          </div>
+          <noscript><style is:inline>[data-host-panel][hidden]{display:block !important}#host-tabs{display:none !important}</style></noscript>
+          <div id="host-tabs" role="tablist" aria-label="Coding agent" class="host-tabs mt-5 flex gap-1 overflow-x-auto border-b border-neutral-200 px-4 sm:px-5">
+            {hosts.map((host, index) => (
+              <button type="button" role="tab" id={`host-tab-${host.id}`} aria-selected={index === 0 ? "true" : "false"} aria-controls={`host-panel-${host.id}`} tabindex={index === 0 ? 0 : -1} class="-mb-px flex min-h-12 shrink-0 cursor-pointer items-center gap-2 border-b-2 border-transparent px-3 py-2 text-sm text-neutral-500 hover:text-neutral-950 aria-selected:border-amber-700 aria-selected:font-medium aria-selected:text-neutral-950 focus-visible:outline-offset-[-2px]">
+                {host.logo
+                  ? <span class="logo-tile flex size-6 items-center justify-center rounded"><img src={host.logo} alt="" width="16" height="16" class="size-4" /></span>
+                  : <span class="flex size-6 items-center justify-center rounded border border-neutral-200 text-neutral-600"><Icon name="plus" class="size-3.5" /></span>}
+                <span class="whitespace-nowrap">{host.name}</span>
+              </button>
+            ))}
+          </div>
+          {hosts.map((host, index) => (
+            <div id={`host-panel-${host.id}`} role="tabpanel" aria-labelledby={`host-tab-${host.id}`} tabindex="0" data-host-panel hidden={index !== 0} class="p-6 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-700">
+              <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+                <div class="flex items-center gap-3">
+                  {host.logo
+                    ? <span class="logo-tile flex size-10 items-center justify-center rounded-md border border-neutral-200"><img src={host.logo} alt="" width="24" height="24" class="size-6" /></span>
+                    : <span class="flex size-10 items-center justify-center rounded-md border border-neutral-200 text-neutral-600"><Icon name="terminal" class="size-5" /></span>}
+                  <p class="text-lg font-medium text-neutral-950">{host.id === "other" ? "Any other MCP host" : host.name}</p>
+                </div>
+                {host.docs.length > 0 && (
+                  <p class="flex flex-wrap gap-x-5 gap-y-1 text-sm">
+                    {host.docs.map((doc) => (
+                      <a href={doc.href} class={codeLink}>{host.name} {doc.label} <Icon name="arrowUpRight" class="inline-block" /></a>
+                    ))}
+                  </p>
+                )}
+              </div>
+              <p class="mt-4 max-w-[75ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline(host.intro)} />
+              {host.blocks.length > 0 && (
+                <div class:list={["mt-4 grid gap-4", host.blocks.length > 1 && "lg:grid-cols-2"]}>
+                  {host.blocks.map((block) => (
+                    <div class="code-panel min-w-0">
+                      <div class="code-toolbar"><span>{block.label}</span><button type="button" class="copy-btn group" data-copy={block.code} data-copy-state="idle" aria-label={`Copy ${host.name} ${block.label === "Terminal" ? "command" : block.label}`}><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy</span></button></div>
+                      <Code code={block.code} lang={block.lang} theme="github-dark-default" />
+                    </div>
+                  ))}
+                </div>
+              )}
+              {host.id === "other" && (
+                <dl class="mt-4 grid max-w-md grid-cols-[auto_1fr] gap-x-6 gap-y-2 rounded-md border border-neutral-200 bg-neutral-50 p-4 font-mono text-sm">
+                  <dt class="text-neutral-500">name</dt><dd class="text-neutral-950">librarium</dd>
+                  <dt class="text-neutral-500">transport</dt><dd class="text-neutral-950">stdio</dd>
+                  <dt class="text-neutral-500">command</dt><dd class="text-neutral-950">librarium</dd>
+                  <dt class="text-neutral-500">args</dt><dd class="text-neutral-950">["mcp"]</dd>
+                </dl>
+              )}
+              {host.note && <p class="mt-4 max-w-[75ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline(host.note)} />}
+            </div>
+          ))}
+          <div class="flex items-start gap-3 border-t border-neutral-200 bg-neutral-50 px-6 py-4 text-base/7 text-neutral-700 sm:text-sm/6">
+            <Icon name="check" class="mt-1 size-4 text-amber-700" />
+            <p set:html={inline("After registering, have your agent call `list_providers` and `list_groups` to confirm the connection. Those calls are local and free.")} />
+          </div>
+        </div>
+        <p id="copy-status" role="status" class="sr-only"></p>
+      </div>
+    </section>
+
+    <!-- Tool reference. -->
+    <section class="py-16 sm:py-24" aria-labelledby="tools-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-12">
+          <div class="lg:sticky lg:top-8 lg:self-start">
+            <h2 id="tools-heading" class={sectionHeading}>What your agent can call</h2>
+            <p class="mt-5 text-base/7 text-pretty text-neutral-600">The server exposes five tools. None of them takes a budget or fallback flag; spending limits and fallback behavior come from your librarium configuration, so a budget promised in a prompt is only real if the matching config is in place.</p>
+            <div class="mt-8 rounded-md border border-neutral-200 bg-neutral-50 p-5">
+              <p class="text-sm font-semibold text-neutral-950">There is no <code class="font-mono">plan</code> tool.</p>
+              <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Offline previews are a CLI command (`librarium plan \"…\" --group quick --json`), so over MCP an agent designs a run with `list_providers` and `list_groups` instead.")} />
+            </div>
+          </div>
+          <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {tools.map((tool, index) => (
+              <li class:list={["flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-5", index === 0 && "sm:col-span-2"]}>
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <p class="font-mono text-base font-semibold text-neutral-950">{tool.name}</p>
+                  <span class="rounded-sm bg-amber-50 px-2 py-0.5 text-xs text-amber-800">{tool.badge}</span>
+                </div>
+                <p class="mt-1 text-sm text-neutral-500">{tool.lead}</p>
+                <dl class="mt-4 space-y-3 text-sm/6">
+                  <div><dt class="inline font-medium text-neutral-950">Input: </dt><dd class="inline text-pretty text-neutral-600" set:html={inline(tool.input)} /></div>
+                  <div><dt class="inline font-medium text-neutral-950">Output: </dt><dd class="inline text-pretty text-neutral-600" set:html={inline(tool.output)} /></div>
+                </dl>
+                <p class="mt-3 border-t border-neutral-200 pt-3 text-sm/6 text-pretty text-neutral-600" set:html={inline(tool.use)} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reading guidance. -->
+    <section class="border-y border-neutral-300 bg-[#eeeae0] py-16 sm:py-24" aria-labelledby="evidence-heading">
+      <div class="mx-auto max-w-6xl px-6 lg:px-8">
+        <h2 id="evidence-heading" class={sectionHeading}>Read everything. Then check it.</h2>
+        <div class="mt-12 grid grid-cols-1 gap-12 border-t border-neutral-950/15 pt-8 lg:grid-cols-2">
+          <div>
+            <h3 class="text-lg font-semibold text-neutral-950">Ask for the whole answer</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600" set:html={inline("The first response to `research` is an index, not the findings. A good agent follows the pages until it has everything: completed results stay readable while slower providers finish. Tell it to. The [coding-agent guide](/guides/agent-research) walks a real engineering question through this loop.")} />
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-neutral-950">Check the sources, not just the summary</h3>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600" set:html={inline("Every answer keeps the provider that wrote it and the links it cited. When several providers agree, that is a lead, not proof; open the sources before you build on it. The [agent docs](/docs/using-with-agents) record every boundary in detail.")} />
+          </div>
+        </div>
+        <div class="mt-12 flex flex-wrap items-center gap-x-7 gap-y-4">
+          <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
+          <a href={markdownHref} class="inline-flex items-center gap-2 py-2 text-base text-neutral-600 hover:text-amber-700 sm:text-sm"><Icon name="markdownLogo" class="size-5" /> Read as Markdown</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  /* Brand marks keep their own colors on a light tile in both themes. */
+  .logo-tile { background: #fbfaf7; }
+  .host-tabs { scrollbar-width: thin; }
+  .code-panel {
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--color-neutral-950);
+  }
+  .code-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.1);
+    padding: 0.5rem 0.75rem 0.5rem 1.25rem;
+    color: var(--color-neutral-400);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+  .code-toolbar > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .code-toolbar .copy-btn { color: var(--color-neutral-300); padding: 0.375rem 0.5rem; }
+  .code-toolbar .copy-btn:hover { color: var(--color-amber-300); background: rgb(255 255 255 / 0.06); }
+  .code-panel :global(pre) {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    background: transparent !important;
+    overflow-x: auto;
+    font-size: var(--text-sm);
+    line-height: 1.5rem;
+  }
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: var(--radius-sm);
+    padding: 0.375rem;
+    cursor: pointer;
+    color: var(--color-neutral-500);
+  }
+  .copy-btn:hover { color: var(--color-neutral-950); background: rgb(10 10 10 / 0.04); }
+  .copy-btn:focus-visible { outline: 2px solid var(--color-amber-600); outline-offset: 2px; }
+  :global(:root[data-theme="dark"]) .user-bubble { background: #33352f; }
+  :global(:root[data-theme="dark"]) .copy-btn:not(.code-toolbar .copy-btn):hover { color: #fff; background: #33352f; }
+  :global(:root[data-theme="dark"]) .tool-call { background: #222321; }
+  :global(:root[data-theme="dark"]) .source-chip { background: #191a19; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) .user-bubble { background: #33352f; }
+    :global(:root:not([data-theme])) .source-chip { background: #191a19; }
+  }
+</style>
+
+<script>
+  const status = document.getElementById("copy-status");
+  for (const button of document.querySelectorAll<HTMLButtonElement>(".copy-btn[data-copy]")) {
+    let reset: ReturnType<typeof setTimeout>;
+    button.addEventListener("click", async () => {
+      clearTimeout(reset);
+      const label = button.querySelector<HTMLElement>(".copy-label");
+      const original = label?.dataset.original ?? label?.textContent ?? "";
+      if (label) label.dataset.original = original;
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? "");
+        button.dataset.copyState = "success";
+        if (label) label.textContent = "Copied";
+        if (status) status.textContent = "Copied to clipboard.";
+      } catch {
+        button.dataset.copyState = "error";
+        if (label) label.textContent = "Select to copy";
+        if (status) status.textContent = "Copy unavailable. Select the text and copy it manually.";
+      }
+      reset = setTimeout(() => {
+        button.dataset.copyState = "idle";
+        if (label) label.textContent = original;
+        if (status) status.textContent = "";
+      }, 2000);
+    });
+  }
+
+  // Host tabs: every panel is server-rendered; script only toggles them.
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>("#host-tabs [role=tab]")];
+  function selectHost(selected: HTMLButtonElement, focus = false) {
+    for (const tab of tabs) {
+      const active = tab === selected;
+      tab.setAttribute("aria-selected", String(active));
+      tab.tabIndex = active ? 0 : -1;
+      const panel = document.getElementById(tab.getAttribute("aria-controls")!);
+      if (panel) panel.hidden = !active;
+    }
+    if (focus) selected.focus();
+    selected.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+  for (const [index, tab] of tabs.entries()) {
+    tab.addEventListener("click", () => selectHost(tab));
+    tab.addEventListener("keydown", (event) => {
+      let next: number;
+      switch (event.key) {
+        case "ArrowRight": next = (index + 1) % tabs.length; break;
+        case "ArrowLeft": next = (index + tabs.length - 1) % tabs.length; break;
+        case "Home": next = 0; break;
+        case "End": next = tabs.length - 1; break;
+        default: return;
+      }
+      event.preventDefault();
+      selectHost(tabs[next], true);
+    });
+  }
+  // Hero logo shortcuts open the matching tab.
+  for (const link of document.querySelectorAll<HTMLAnchorElement>("[data-host-link]")) {
+    link.addEventListener("click", (event) => {
+      const tab = document.getElementById(`host-tab-${link.dataset.hostLink}`) as HTMLButtonElement | null;
+      if (!tab) return;
+      event.preventDefault();
+      selectHost(tab);
+      document.getElementById("setup")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      tab.focus({ preventScroll: true });
+    });
+  }
+</script>

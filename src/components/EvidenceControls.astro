@@ -1,0 +1,189 @@
+---
+// "Keep the evidence. Keep control." vignettes (PlanMode #4912).
+// Every visual is grounded in real Librarium output — nothing here is a
+// mock-up of a feature that does not exist:
+// - Provenance: the captured deep-research run in research-demo.ts (same
+//   data as the hero demo). Quotes are verbatim provider wording, checked at
+//   build time; cited hosts come from each provider's own citations.
+// - Plan: `librarium plan` output from the 2.0.0 CLI, captured offline (no
+//   provider calls) with five deep profiles enabled. Lines are trimmed —
+//   profile parentheticals such as "(preset high)" and the "Steps",
+//   "Execution", and "Timeouts" rows are omitted — but never reworded.
+// - Async: real `run --mode async` / `status` message strings from the CLI
+//   source, with wall-clock durations from the captured run, plus the Laravel
+//   package's queued job (`queue()` → encrypted job → `then()` callback).
+import Icon from "./Icon.astro";
+import { RESEARCH_DEMO, formatElapsed } from "../data/research-demo";
+
+const providerMark = (logo: string) => `/providers/${logo}.${["you", "serpapi", "dataforseo"].includes(logo) ? "png" : "svg"}`;
+const plain = (text: string) => text.replace(/\*\*/g, "");
+const byProfile = (profile: string) => {
+  const result = RESEARCH_DEMO.results.find((candidate) => candidate.profile === profile);
+  if (!result) throw new Error(`missing captured profile ${profile}`);
+  return result;
+};
+
+const subject = "Plausible";
+const quotes: Array<{ profile: string; quote: string }> = [
+  { profile: "perplexity-sonar-deep/research", quote: "Plausible for most small and midsize websites" },
+  { profile: "parallel/research", quote: "Best for simple content and marketing sites: Plausible" },
+  { profile: "exa/research", quote: "the best default for a content, marketing, SaaS landing, or small-to-medium business site" },
+  { profile: "you-research/research", quote: "Small businesses, blogs, marketing sites" },
+];
+const provenanceRows = quotes.map(({ profile, quote }) => {
+  const result = byProfile(profile);
+  if (!plain(result.content).includes(quote)) throw new Error(`quote for ${profile} is not verbatim captured wording`);
+  const hosts = new Map<string, { url: string; count: number }>();
+  for (const citation of result.citations) {
+    if (!citation.url.toLowerCase().includes(subject.toLowerCase())) continue;
+    const host = new URL(citation.url).hostname.replace(/^www\./, "");
+    const entry = hosts.get(host);
+    if (entry) entry.count += 1;
+    else hosts.set(host, { url: citation.url, count: 1 });
+  }
+  return { name: result.shortName, logo: result.logo, quote, hosts: [...hosts].map(([host, entry]) => ({ host, ...entry })) };
+});
+const unnamed = RESEARCH_DEMO.results.filter((result) => !result.content.includes(subject));
+const namedCount = RESEARCH_DEMO.results.length - unnamed.length;
+
+// `librarium plan "SQLite or Postgres for a small team app?" --group deep`
+// (2.0.0, offline). Bounded-price rows are the ones `--max-cost` can admit.
+const deepPlan: Array<[string, string]> = [
+  ["perplexity-sonar-deep/research", "estimate unknown"],
+  ["gemini-deep/research", "estimate unknown"],
+  ["parallel/research", "est. $0.1"],
+  ["exa/research", "estimate unknown"],
+  ["you-research/research", "est. $0.05"],
+];
+
+const durations = [...RESEARCH_DEMO.results].sort((a, b) => a.elapsedSeconds - b.elapsedSeconds);
+const longest = Math.max(...durations.map((result) => result.elapsedSeconds));
+---
+
+<div class="mt-12 grid grid-cols-1 gap-x-8 gap-y-14 border-t border-neutral-950/15 pt-8 lg:grid-cols-3 lg:grid-rows-[auto_auto] lg:gap-y-6">
+  <div class="grid gap-6 lg:row-span-2 lg:grid-rows-subgrid">
+    <figure class="rounded border border-neutral-300 bg-white p-4 text-left" aria-label="A finding from a captured deep-research run, with each provider’s wording and cited sources">
+      <p class="font-mono text-[11px] tracking-wide text-neutral-500 uppercase">Captured run · {RESEARCH_DEMO.results.length} deep-research providers</p>
+      <p class="mt-1 text-sm text-neutral-700">“{RESEARCH_DEMO.query}”</p>
+      <div class="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-neutral-200 pt-3">
+        <p class="text-sm font-semibold text-neutral-950">{subject} for small and marketing sites</p>
+        <span class="rounded-sm border border-amber-700/30 bg-amber-50 px-1.5 py-0.5 font-mono text-[11px] text-amber-800">named by {namedCount} of {RESEARCH_DEMO.results.length}</span>
+      </div>
+      <ul class="mt-2 divide-y divide-neutral-200">
+        {provenanceRows.map((row) => (
+          <li class="py-2">
+            <div class="flex items-center gap-2">
+              <img src={providerMark(row.logo)} alt="" width="14" height="14" loading="lazy" class="size-3.5 shrink-0" />
+              <span class="text-xs font-medium text-neutral-800">{row.name}</span>
+            </div>
+            <p class="mt-1 text-xs/5 text-neutral-600 italic">“{row.quote}”</p>
+            <p class="mt-1 flex flex-wrap gap-1">
+              {row.hosts.map((host) => (
+                <a href={host.url} target="_blank" rel="noopener noreferrer" class="rounded-sm bg-neutral-950/4 px-1.5 py-0.5 font-mono text-[11px] text-neutral-700 hover:text-amber-800">{host.host}{host.count > 1 && <span class="text-neutral-500"> ×{host.count}</span>}</a>
+              ))}
+            </p>
+          </li>
+        ))}
+        {unnamed.map((result) => (
+          <li class="flex items-center gap-2 py-2">
+            <img src={providerMark(result.logo)} alt="" width="14" height="14" loading="lazy" class="size-3.5 shrink-0 opacity-60" />
+            <span class="text-xs font-medium text-neutral-500">{result.shortName}</span>
+            <span class="ml-auto text-[11px] text-neutral-500">not named in the captured excerpt</span>
+          </li>
+        ))}
+      </ul>
+    </figure>
+    <div>
+      <h3 class="text-lg font-semibold text-neutral-950">See where each result came from.</h3>
+      <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
+        Every finding keeps the provider that returned it and the sources it cited. Open them and judge for yourself — when providers agree, that’s a signal worth checking, not proof they’re right.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:row-span-2 lg:grid-rows-subgrid">
+    <figure class="flex flex-col overflow-hidden rounded border border-neutral-950 bg-neutral-950 text-left font-mono text-[11px]/[1.65] text-neutral-300" aria-label="Offline librarium plan output: the deep group, then a spending ceiling">
+      <div class="flex items-center gap-2 border-b border-white/10 px-4 py-2 text-neutral-400">
+        <Icon name="terminal" class="size-3.5" />
+        <span>Offline preview · no provider calls</span>
+      </div>
+      <div class="flex flex-1 flex-col gap-3 px-4 py-3">
+        <div>
+          <p class="break-words text-amber-100"><span class="text-neutral-500 select-none">$ </span>librarium plan "SQLite or Postgres for a small team app?" <span class="text-amber-300">--group deep</span></p>
+          <p class="mt-1.5 text-neutral-500">Providers</p>
+          <ul class="pl-2">
+            {deepPlan.map(([profile, estimate]) => (
+              <li class="flex flex-wrap justify-between gap-x-2"><span>{profile}</span><span class:list={["ml-auto", estimate.startsWith("est.") ? "text-amber-200" : "text-neutral-500"]}>{estimate}</span></li>
+            ))}
+          </ul>
+          <p class="flex justify-between gap-x-2"><span class="text-neutral-500">Budget</span><span>No cap</span></p>
+        </div>
+        <div>
+          <p class="break-words text-amber-100"><span class="text-neutral-500 select-none">$ </span>librarium plan "…" --group deep <span class="text-amber-300">--max-cost 2</span></p>
+          <p class="mt-1.5 text-amber-200">Cannot plan:</p>
+          <p class="pl-3">Profile "exa/research" has no bounded price, so a hard budget cannot admit it. <span class="text-neutral-500">(+2 more)</span></p>
+        </div>
+        <div>
+          <p class="break-words text-amber-100"><span class="text-neutral-500 select-none">$ </span>librarium plan "…" <span class="whitespace-nowrap">-p parallel/research,you-research/research</span> <span class="text-amber-300">--max-cost 1</span></p>
+          <p class="mt-1.5 text-neutral-500">Providers</p>
+          <ul class="pl-2">
+            {deepPlan.filter(([, estimate]) => estimate.startsWith("est.")).map(([profile, estimate]) => (
+              <li class="flex flex-wrap justify-between gap-x-2"><span>{profile}</span><span class="ml-auto text-amber-200">{estimate}</span></li>
+            ))}
+          </ul>
+          <p class="flex justify-between gap-x-2"><span class="text-neutral-500">Budget</span><span class="text-amber-100">$1 spending cap (shared)</span></p>
+        </div>
+        <p class="mt-auto border-t border-white/10 pt-2 text-neutral-500">Preview only. No calls made; credentials untested; costs may change.</p>
+      </div>
+    </figure>
+    <div>
+      <h3 class="text-lg font-semibold text-neutral-950">Decide what can run.</h3>
+      <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
+        Dry-run a question before anything is paid. Review the selected providers, set a spending ceiling, and check reported costs as results land. Estimates can be missing or wrong — a provider can still bill more than it quoted.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:row-span-2 lg:grid-rows-subgrid">
+    <figure class="flex flex-col rounded border border-neutral-300 bg-white p-4 text-left" aria-label="An async deep-research run: started, providers finishing over minutes, then picked up later with librarium status">
+      <ol class="relative flex flex-col gap-4 border-l border-neutral-300 pl-4">
+        <li class="relative">
+          <span class="absolute top-1.5 -left-[21px] size-2.5 rounded-full bg-amber-600" aria-hidden="true"></span>
+          <p class="text-xs font-medium text-neutral-800">Start it</p>
+          <p class="mt-1 rounded-sm bg-neutral-950 px-2 py-1 font-mono text-[11px]/[1.6] break-words text-amber-100">librarium run "Best alternatives to Google Analytics?" --group deep <span class="text-amber-300">--mode async</span></p>
+          <p class="mt-1 font-mono text-[11px]/[1.6] text-neutral-600">◷ async tasks pending: run `librarium status --wait` to poll and retrieve</p>
+        </li>
+        <li class="relative">
+          <span class="absolute top-1.5 -left-[21px] size-2.5 rounded-full border-2 border-amber-600 bg-white motion-safe:animate-pulse" aria-hidden="true"></span>
+          <p class="text-xs font-medium text-neutral-800">Step away <span class="font-normal text-neutral-500">· captured wall-clock times</span></p>
+          <ul class="mt-1.5 flex flex-col gap-1" aria-label="Wall-clock time per provider in the captured run">
+            {durations.map((result) => (
+              <li class="grid grid-cols-[4.5rem_1fr_3.25rem] items-center gap-2 font-mono text-[11px] text-neutral-600">
+                <span class="truncate">{result.shortName}</span>
+                <span class="h-1.5 rounded-full bg-neutral-950/4"><span class="block h-full rounded-full bg-amber-500" style={`width: ${Math.max(4, Math.round((result.elapsedSeconds / longest) * 100))}%`}></span></span>
+                <span class="text-right text-neutral-500">{formatElapsed(result.elapsedSeconds)}</span>
+              </li>
+            ))}
+          </ul>
+        </li>
+        <li class="relative">
+          <span class="absolute top-1.5 -left-[21px] size-2.5 rounded-full bg-amber-600" aria-hidden="true"></span>
+          <p class="text-xs font-medium text-neutral-800">Come back later</p>
+          <p class="mt-1 rounded-sm bg-neutral-950 px-2 py-1 font-mono text-[11px]/[1.6] break-words text-amber-100">librarium status <span class="text-amber-300">--wait</span></p>
+          <p class="mt-1 font-mono text-[11px]/[1.6] text-neutral-600"><Icon name="check" class="inline-block text-amber-700" /> All async tasks completed.</p>
+        </li>
+      </ol>
+      <div class="mt-4 border-t border-neutral-200 pt-3">
+        <p class="flex items-center gap-1.5 text-xs font-medium text-neutral-800"><img src="/languages/laravel.svg" alt="" width="14" height="14" loading="lazy" class="size-3.5" /> In Laravel</p>
+        <p class="mt-1 font-mono text-[11px]/[1.6] text-neutral-700"><span class="block">Librarium::query(…)</span><span class="block pl-4">-&gt;queue()</span><span class="block pl-4">-&gt;then(fn ($response) =&gt; …);</span></p>
+        <p class="mt-1 text-[11px]/[1.5] text-neutral-500">One encrypted queued job; your callback receives the finished response.</p>
+      </div>
+    </figure>
+    <div>
+      <h3 class="text-lg font-semibold text-neutral-950">Come back to a long-running job.</h3>
+      <p class="mt-3 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
+        Deep research can outlast a coffee break. Start it, step away, and pick it up later without a fresh budget of time or money: JavaScript keeps durable async jobs readable as they finish, and Laravel runs them as encrypted queue jobs that call back into your app.
+      </p>
+    </div>
+  </div>
+</div>

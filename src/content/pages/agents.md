@@ -1,5 +1,5 @@
 ---
-title: Connect your coding agent to better research.
+title: Connect your coding agent to better research tools.
 description: Install the CLI once, register the MCP server in your agent, and let it ask a question across many providers and read every answer with its sources.
 kind: product
 ctaHref: /docs/using-with-agents

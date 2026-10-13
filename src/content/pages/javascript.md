@@ -1,160 +1,87 @@
 ---
 title: Research inside your JavaScript app.
-description: One typed shape for results from many providers, with the sources attached. Runs in Node services and Workers.
+description: One typed client for research, stored Runs, recovery, answers, and citations. Use it in Node or Workers.
 kind: product
 runtime: javascript
 ctaHref: /docs/library
 ctaLabel: Explore the JavaScript API
 ---
 
-## Start with the job, not the integration
+## One client, three boundaries
 
-Research a technical decision, compare answer surfaces, or collect evidence for a feature. librarium gives those results a shared shape without pretending a search result, a grounded answer, and a research report are the same thing.
+This describes the unreleased simplified-surface JS 2.0 candidate. Install a compatible release with `npm install librarium`; check its exports before using these examples.
 
-For a ready-made provider runtime, use the [CLI](/cli) or the [MCP server](/agents). To build your own execution flow, build on the package's explicit import boundaries. There is no one-call `research()` client hidden behind the examples below.
+`librarium` and `librarium/node` construct a ready-to-use client with v3 config and filesystem storage. `librarium/core` is runtime-neutral: callers inject configuration, credentials, and a store; its default is process-local memory. Importing core never inspects process state or files.
 
-## Typed boundaries, without a Node dependency everywhere
-
-```ts
-// Schemas and terminal interchange. No provider calls on import.
-import { ResearchResponseSchema } from 'librarium';
-
-// Planning and execution primitives for injected dependencies.
-import {
-  buildProviderCatalog,
-  prepareResearchExecution,
-  runPreparedExecution,
-} from 'librarium/core';
-
-// Filesystem configuration and trusted custom-provider loading.
-import { loadConfigV2, loadCustomProviders } from 'librarium/node';
-```
-
-The root and core boundaries are Worker-safe. Core callers supply adapter bindings, transport, persistence, and execution dependencies; core does not construct a global registry or initialize concrete providers. The Node boundary handles host-specific concerns, not a general high-level runner.
-
-Install the v2 library in your project with `npm install librarium`. For the command-line tool, see [CLI installation](/docs#install).
-
-## Plan a run before anything executes
-
-Planning is local and network-free. Build a catalog from your provider configuration, then prepare an exact request. The prepared plan carries each selected profile's adapter binding and network-free estimate:
+## Preview, then research
 
 ```ts
-import { buildProviderCatalog, prepareResearchExecution } from 'librarium/core';
+import { createLibrarium } from 'librarium';
 
-// Enable two built-in providers. Credentials come from a context you supply.
-const catalog = buildProviderCatalog({
-  providerConfigs: { exa: { enabled: true }, 'kagi-fastgpt': { enabled: true } },
-  credentials: { env: process.env },
+const librarium = createLibrarium();
+const plan = await librarium.research('Lisbon or Porto without a car?', {
+  only: ['exa', 'kagi'], maxCost: '0.10', dryRun: true,
 });
-
-let next = 0;
-const plan = prepareResearchExecution(
-  {
-    query: 'Lisbon or Porto for a long weekend without a car?',
-    mode: 'sync',
-    selector: {
-      kind: 'targets',
-      targets: [
-        { provider_id: 'exa', profile_id: 'search' },
-        { provider_id: 'kagi-fastgpt', profile_id: 'grounded' },
-      ],
-    },
-    fallback: { kind: 'disabled' },
-    limits: {
-      max_concurrency: 2,
-      request_deadline_ms: 120_000,
-      inline_attempt_deadline_ms: 60_000,
-      background_attempt_deadline_ms: 120_000,
-      poll_interval_ms: 5_000,
-    },
-  },
-  catalog,
-  { clock: { now: () => Date.now() }, ids: { next: (scope) => `${scope}-${++next}` } },
-);
-
-if (!plan.ok) throw new Error(plan.issues.map((issue) => issue.message).join('\n'));
-
-for (const profile of Object.values(plan.prepared.profile_plans_by_identity)) {
-  console.log(profile.binding.adapter_id, profile.estimate);
-}
-// exa { estimated_cost_microusd: '17000', … }
-// kagi-fastgpt { estimated_cost_microusd: '15000', billable_units: [ { unit: 'requests', quantity: '1' } ] }
+console.log(plan.status, plan.results.map((result) => result.source));
+// After authorizing provider charges:
+const run = await librarium.research('Lisbon or Porto without a car?', {
+  only: ['exa', 'kagi'], maxCost: '0.10',
+});
 ```
 
-Executing the plan is a separate step: `runPreparedExecution(plan.prepared, dependencies)` runs it with dependencies you inject, namely a coordination state store (`InMemoryCoordinationStateStore` is exported), coordinator dependencies, and an attempt-execution port that calls your adapters.
+Dry runs are offline and not stored. Real Runs are stored before dispatch. Quick is the default; choose `depth: 'deep'` for reports and `wait: false` to return before completion. `get(id, { wait: true })` resumes saved durable handles, not a new submission. In-flight calls can exceed an admission cap.
 
-## Turn a terminal response into an application feature
-
-Validate a response at your application boundary, then render each result with its own citations. Keep raw content out of HTML sinks.
+## Read the shared Run
 
 ```ts
-import { ResearchResponseSchema } from 'librarium';
+import { RunSchema } from 'librarium';
 
-// `payload` is a terminal response from your application-owned transport.
-const response = ResearchResponseSchema.parse(payload);
-
-const evidence = response.results.map((result) => ({
-  id: result.id,
-  profile: result.profile,
-  content: result.content,
+// payload comes from your application-owned transport.
+const run = RunSchema.parse(payload);
+const evidence = run.results.map((result) => ({
+  source: result.source,
+  observation: result.observation,
+  answer: result.answer,
   citations: result.citations,
   provenance: result.provenance,
+  error: result.error,
 }));
-
-// Render content as text or sanitized Markdown; validate citation URLs.
-// Handle response.errors and partial/failed status alongside successes.
+// Render as text or sanitized Markdown; validate citation URLs.
 ```
 
-A terminal response looks like this. The values are illustrative, not a captured run; the object passes `ResearchResponseSchema`:
+This illustrative empty plan passes `RunSchema`; it is not a captured provider response:
 
 ```json
 {
-  "generator": "jkudish/librarium",
-  "generator_version": "2.0.0",
-  "request_id": "req_01J9Z6K3XW",
-  "status": "succeeded",
-  "completed_at": "2026-10-12T09:14:07Z",
-  "results": [
-    {
-      "id": "res_kagi_1",
-      "content_format": "markdown",
-      "content": "Porto is walkable; Lisbon needs more transit…",
-      "requested_profile": "grounded",
-      "provider": "kagi-fastgpt",
-      "profile": "grounded",
-      "provenance": {
-        "result_kind": "grounded_answer",
-        "retrieval_methods": ["search_endpoint"],
-        "corpora": ["web"],
-        "observed_at": "2026-10-12T09:14:05Z"
-      },
-      "citations": [
-        {
-          "id": "cit_1",
-          "derivation": "provider_reported",
-          "source": {
-            "kind": "web_page",
-            "url": "https://www.visitportugal.com/en/content/porto",
-            "title": "Porto | Visit Portugal"
-          }
-        }
-      ],
-      "completed_at": "2026-10-12T09:14:05Z",
-      "usage": { "estimated_cost": "0.015", "currency": "USD" }
-    }
-  ],
-  "errors": []
+  "spec": "librarium.run/1",
+  "id": "run_01JAB2C3D4E5F6G7H8J9K0M1N2",
+  "question": "Lisbon or Porto without a car?",
+  "depth": "quick",
+  "status": "planned",
+  "created_at": "2026-10-13T00:00:00Z",
+  "finished_at": null,
+  "cost": { "estimated": "0", "reported": null, "complete": false, "max": "0.10" },
+  "results": [],
+  "skipped": [],
+  "notices": []
 }
 ```
 
-`status` is `succeeded`, `partial`, or `failed`, and must agree with `results` and `errors`. Costs are decimal strings with a currency; a missing cost is unknown, not zero. Citation URLs are untrusted identifiers.
+Statuses are `planned`, `running`, `done`, `partial`, or `failed`. Costs are exact USD decimal strings or `null`. Keep failures and skips visible. Source answers are `observation: api`; collected engines are `surface`. Provenance describes collection, not truth or independent corroboration.
 
-Your app still owns authentication, tenant boundaries, persistence, retention, and the interface around the evidence. Shared terminal contracts make that boundary explicit; they do not make the JavaScript and PHP runtimes interchangeable.
+## Workers and custom stores
 
-## Preserve the distinctions that matter
+```ts
+import { createLibrarium, MemoryRunStore } from 'librarium/core';
 
-- **Results, not just summaries.** Keep the content and citations from each successful provider.
-- **Provenance, not a confidence vote.** Record the effective Profile, retrieval method, and surface or collector where available.
-- **Explicit execution policy.** The core exposes planning and coordinator primitives; your integration supplies the operational dependencies. The complete CLI runtime supplies its own wallet and durable run storage.
+const client = createLibrarium({
+  config: { version: 3, sources: {}, engines: {}, groups: {}, max_cost: null,
+    runs: { store: 'memory', path: './runs', keep_days: null } },
+  env: {}, store: new MemoryRunStore(),
+});
+client.sources();
+```
 
-For a concrete application-owned evidence model, read [Building answer visibility in Agentsy Report](/stories/agentsy-report). For your first executable workflow, follow [the multi-provider query guide](/guides/first-query).
+A production Worker needs a durable custom `RunStore` with expected-version CAS, not process-local memory. `librarium/testing` exports `runStoreContract` for disposable store checks. Your application owns tenant access, signing-key custody, retention, and the UI. JS and Laravel share semantic interchange, not private runtime execution.
+
+See [the library reference](/docs/library), [custom sources and stores](/docs/custom-providers), and [application-owned visibility evidence](/stories/agentsy-report).

@@ -1,79 +1,71 @@
 ---
 title: PHP and Laravel
-description: Get started with Librarium's first-party Laravel research API.
+description: Research, store, queue, and recover Runs through the Laravel facade.
 order: 1
 ---
 
-Librarium for PHP is a Laravel-native research package. It provides Profiles,
-cost previews, synchronous and queued execution, normalized responses, Artisan
-commands, and a test fake through `jkudish/laravel-ai-librarium`.
-
-Profiles are flat IDs. Most ship enabled but stay credential- and
-configuration-gated; the DataForSEO Profiles ship disabled for explicit opt-in.
-
-## Requirements
-
-PHP 8.4 or newer, Laravel 13, and Laravel AI SDK `^1.0.1`.
+Librarium is a Laravel-native research abstraction built on the official Laravel AI SDK. Every real request becomes a stored Run with answers, citations, honest reported cost, and redacted evidence.
 
 ## Install
 
-```bash
-composer require jkudish/laravel-ai-librarium
+PHP 8.4+, Laravel 13.30+, and Laravel AI SDK `^1.0.1`. This is the **unreleased PHP 1.0 candidate**; do not assume the published package has this surface. The candidate pins `jkudish/librarium-spec`; consumers must copy its Composer package repository declaration because Composer does not inherit repositories. A stable spec constraint is a release gate.
+
+For an authorized candidate installation, merge this entry into your application's `composer.json` `repositories` array, preserving existing entries:
+
+```json
+{
+  "type": "package",
+  "package": {
+    "name": "jkudish/librarium-spec",
+    "version": "dev-spec-15c8a306",
+    "type": "library",
+    "license": "MIT",
+    "source": {
+      "type": "git",
+      "url": "https://github.com/jkudish/librarium-spec.git",
+      "reference": "15c8a30673b43b006944623be2ddf99f216b846c"
+    },
+    "dist": {
+      "type": "zip",
+      "url": "https://api.github.com/repos/jkudish/librarium-spec/zipball/15c8a30673b43b006944623be2ddf99f216b846c",
+      "reference": "15c8a30673b43b006944623be2ddf99f216b846c"
+    }
+  }
+}
 ```
 
-Laravel package discovery registers the service provider. Import the facade
-shown below when using the library API. Publish
-the configuration when your application needs to alter Profiles, groups,
-timeouts, queue settings, or pricing freshness:
+The commands below are the stable installation path **after publication**. Before publication, use only a separately authorized candidate checkout or Composer harness; do not replace an existing installation automatically.
 
 ```bash
+composer require jkudish/laravel-ai-librarium
 php artisan vendor:publish --tag=librarium-config
 ```
 
-Add the credential required by the Profile you plan to use. Laravel AI Profiles
-read Laravel AI configuration; most focused HTTP Profiles read
-`config/services.php`, while DataForSEO reads provider login/password values
-from the published `config/librarium.php`.
-See [Configuration](/docs/php/configuration).
+Credentials come from `config/ai.php` and `config/services.php`; source `key` overrides belong in `config/librarium.php`, never request options.
 
-## Preview before dispatch
-
-The minimum safe operator path is an offline preview. It compiles the effective
-Profile and pricing information but does not call a research provider:
-
-```bash
-php artisan librarium:query 'Compare current agent memory architectures.' \
-  --agent --profile=gemini-grounded
-```
-
-Inspect the JSON, especially `profiles`, `fallbacks`, `timeout`, and `pricing`.
-Unknown cost is not zero. To dispatch synchronously, repeat the command with an
-explicit action:
-
-```bash
-php artisan librarium:query 'Compare current agent memory architectures.' \
-  --agent --profile=gemini-grounded --run
-```
-
-This can make a paid provider call. A successful run writes a
-`ResearchResponse::toArray()` value. Use `--queue` instead of `--run` to submit
-one encrypted Laravel job; your application must run and monitor its queue.
-
-## Minimum library call
+## Preview and research
 
 ```php
 use Jkudish\LaravelAiLibrarium\Facades\Librarium;
 
-$preview = Librarium::query('Compare current agent memory architectures.')
-    ->using('gemini-grounded')
-    ->preview();
-
-$response = Librarium::query('Compare current agent memory architectures.')
-    ->using('gemini-grounded')
-    ->run();
+$plan = Librarium::research('Compare EU analytics tools')
+    ->only(['exa'])->dryRun();
+// Can incur charges:
+$run = Librarium::research('Compare EU analytics tools')
+    ->deep()->only(['exa'])->maxCost('1.00')->run();
+$run->toArray();
 ```
 
-`run()` returns a typed `ResearchResponse`. Librarium does not create research
-history tables: persist the response in your own application if you need durable
-history. Continue with [the library API](/docs/php/library), or use
-[Artisan commands](/docs/php/commands) for operator and automation workflows.
+`dryRun()` makes no provider call and stores nothing. Quick is the default; deep selects durable research variants. Omit `only()` to use all configured research sources, never engines. Groups are user-saved source lists without built-ins.
+
+`maxCost()` admits bounded estimates greedily in catalog order; unpriced and over-budget sources are skipped. In-flight work can exceed the cap. Unknown reported cost is `null`, not zero.
+
+## Queue and recover
+
+```php
+$queued = Librarium::research('Prepare a cited report')
+    ->deep()->only(['openai'])->queue()->onQueue('research');
+$run = Librarium::find($queued->id())?->refresh();
+```
+
+The Run is stored before one encrypted, one-attempt job is dispatched. The application owns queue workers and infrastructure. Saved durable handles survive process loss; inline work cannot be resumed. See [library API](/docs/php/library), [Artisan](/docs/php/commands), and [configuration](/docs/php/configuration).

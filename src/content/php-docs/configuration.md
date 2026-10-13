@@ -1,131 +1,50 @@
 ---
-title: Configuration
-description: Configure Laravel Profiles, credentials, queues, deadlines, and pricing.
+title: Laravel configuration and storage
+description: Sources, engine collectors, queues, and supported RunStore backends.
 order: 3
 ---
-
-Publish `config/librarium.php` when defaults need to change:
 
 ```bash
 php artisan vendor:publish --tag=librarium-config
 ```
 
-The package defaults to the `quick` group, a 6,900-second research timeout,
-10,800-second status and webhook-signal TTLs, and the `research` queue with a
-7,200-second job timeout. A per-request `timeout()` may be 1–86,400 seconds.
-
-## Credentials
-
-Laravel AI SDK Profiles resolve these normal Laravel AI paths:
-
-| Profiles | Configuration path |
-| --- | --- |
-| Gemini | `ai.providers.gemini.key` |
-| OpenRouter | `ai.providers.openrouter.key` |
-| Anthropic | `ai.providers.anthropic.key` |
-| OpenAI chat and research | `ai.providers.openai.key` |
-| xAI Grok | `ai.providers.xai.key` |
-
-Focused HTTP Profiles use service configuration:
+The simplified config has `sources`, `engines`, `groups`, `max_cost`, `runs`, and `timeout`. Source options replace public profile entries. PHP 1.0 is unreleased; there is no old PHP config migration.
 
 ```php
-// config/services.php
-return [
-    'brave' => ['key' => env('BRAVE_API_KEY')],
-    'exa' => ['key' => env('EXA_API_KEY')],
-    'jina' => ['key' => env('JINA_API_KEY')],
-    'kagi' => ['key' => env('KAGI_API_KEY')],
-    'parallel' => ['key' => env('PARALLEL_API_KEY')],
-    'perplexity' => ['key' => env('PERPLEXITY_API_KEY')],
-    'searchapi' => ['key' => env('SEARCHAPI_KEY')],
-    'serpapi' => ['key' => env('SERPAPI_API_KEY')],
-    'serpbase' => ['key' => env('SERPBASE_API_KEY')],
-    'tavily' => ['key' => env('TAVILY_API_KEY')],
-    'valyu' => ['key' => env('VALYU_API_KEY')],
-];
-```
-
-You.com uses `YOU_COM_API_KEY`, with `YDC_API_KEY` as a fallback when the
-canonical variable is blank. DataForSEO is the exception to the service-path
-pattern: its login and password are read from `librarium.providers.dataforseo`.
-The OpenAI webhook secret is read from `services.openai.webhook_secret`.
-
-Credentials are resolved into in-memory Profile objects. They are excluded
-from previews, serialized Profiles, terminal responses, provider metadata, and
-safe Driver errors. Do not put credentials in Profile `options`.
-
-## Profiles and groups
-
-Each entry under `librarium.profiles` defines a flat Profile ID, Driver,
-provider/model identity, result semantics, prompt template, enabled state,
-options, credential, and pricing usage assumptions. Unknown options fail
-preflight according to the selected Driver's rules.
-
-Add application groups under `librarium.groups`. Built-in `quick`, `visibility`,
-`deep`, and `all` remain available. See [Groups and modes](/docs/php/groups-and-modes).
-
-## Opt in DataForSEO
-
-All six DataForSEO Profiles ship in `config/librarium.php` with `enabled: false`.
-First set the provider credentials:
-
-```dotenv
-DATAFORSEO_LOGIN=your-api-login
-DATAFORSEO_PASSWORD=your-api-password
-```
-
-Publish the package config, then edit the complete shipped entry for each
-Profile the application intends to use. Retain its Driver, provider, result,
-provenance, prompt, credential, and pricing fields; the excerpt below shows only
-the values an application normally changes:
-
-```php
-// Inside the shipped librarium.profiles.dataforseo-chatgpt entry:
-'enabled' => true,
-'options' => [
-    'location_code' => 2840,
-    'language_code' => 'en',
-    'force_web_search' => true,
+// config/librarium.php
+'sources' => ['parallel' => ['processor' => 'pro']],
+'engines' => ['collector' => 'searchapi'],
+'groups' => ['visibility' => ['chatgpt', 'gemini-app', 'copilot']],
+'max_cost' => '1.00',
+'runs' => [
+    'store' => 'filesystem', 'disk' => 'local', 'path' => 'librarium',
+    'encrypt' => true, 'keep_days' => null,
 ],
 ```
 
-Every DataForSEO Profile requires a positive `location_code` and a non-empty
-`language_code`. ChatGPT also requires boolean `force_web_search`. Gemini
-accepts no additional surface control. Google AI Mode may omit both device
-fields, or use `device: desktop` with `os: windows|macos`, or `device: mobile`
-with `os: android|ios`. Unknown and incompatible options fail preflight.
+## Credentials
 
-The exact Standard/Live pairs are `dataforseo-chatgpt` /
-`dataforseo-chatgpt-live`, `dataforseo-gemini` /
-`dataforseo-gemini-live`, and `dataforseo-google-ai-mode` /
-`dataforseo-google-ai-mode-live`. They remain outside `quick` and `visibility`.
-An enabled and otherwise eligible entry joins derived `all`.
+SDK sources read `ai.providers.<provider>.key`; focused HTTP sources read `services.<provider>.key`. Per-source `key` overrides belong in configuration, never request options. Use `env()` only inside Laravel config files. You.com reads `YOU_COM_API_KEY`, with `YDC_API_KEY` as a fallback. Collector credentials and location/language controls remain collector configuration.
 
-Preview the exact flat Profile ID before authorizing a run. The source and
-offline tests do not authorize a new paid canary or establish current account
-availability. See the package's live-canary inventory for dated evidence.
+Setting `enabled: false` excludes a source. A key alone is not authentication or spending authorization. Discovery and dry runs are offline.
 
-## Queue
+## Supported stores
 
-Set `librarium.queue.connection` to a Laravel queue connection or leave it
-`null` to use the application's default. `librarium.queue.name` defaults to
-`research`. The application owns queue infrastructure, worker supervision, and
-failed-job handling.
+- **filesystem:** local Laravel disks only. Encryption defaults to the app key; disable only for a protected JS/PHP interchange folder. Both languages share a non-expiring, token-owned `run.json.lock` marker across complete reads/writes. Removing a crashed-owner marker requires establishing that the owner cannot resume. Locking prevents concurrent access, not crash-atomic multi-file writes.
+- **database:** query-builder storage, one row per Run, optional `librarium_runs` table. Publish with `vendor:publish --tag=librarium-migrations`, review it, and obtain your application's database authorization before migrating. Nothing auto-runs; no Eloquent model is required.
+- **cache:** process-local Laravel ArrayStore or standalone RedisStore on Redis 7+ with connection serialization/compression disabled. Redis uses a native conditional commit for version, document TTL, and listing membership. Set `cache_store` and `ttl` (604800 seconds by default). Expiry loses recovery material.
+- **memory:** process-local tests, not shared workers.
 
-## Pricing
+Unsupported disks, cache drivers, decorated/failover caches, and Redis Cluster fail closed. Use a custom `RunStore` for those backends. ArrayStore cannot supply persistence across queue workers. Shared production alternatives are database, supported standalone Redis, or a custom conditional store.
 
-Pricing previews come from `jkudish/laravel-ai-pricing`; Librarium does not keep
-a second rate table. Offline preview can use configured rates, the reviewed
-snapshot, and previously synchronized last-known-good catalog data. Remote
-catalog refresh is explicit:
+All stores compare the expected version and reject stale writers. `state.json` is written last; an uncertain transport outcome is not permission to repeat provider work. Preserve app/signing keys outside storage. Key rotation can prevent old ciphertext or handles from being recovered.
 
-```bash
-php artisan ai:pricing:sync
-```
+## Queue and deadlines
 
-Non-configured catalog prices must be no older than
-`librarium.pricing.max_age_days` (30 by default). `maxCost()` and `--max-cost`
-fail closed unless all reachable primary and fallback quotes are complete,
-current, conservative, and in one currency. SearchAPI pricing is
-configured-only: define `successful_search_request` in `config/ai-pricing.php`
-or its cost remains unavailable.
+Wait timeout defaults to 6900 seconds; encrypted job timeout to 7200, with one attempt. Your app owns workers, failed-job policy, queue connection, and the `research` queue. Set worker timeout at least the job timeout and queue `retry_after` above the worker timeout. Local timeouts do not stop provider billing.
+
+## Pricing and redaction
+
+Estimates come from `jkudish/laravel-ai-pricing`; synchronization is an explicit operation, not a dry-run side effect. `maxCost()` skips unpriced work and admits bounded sources in catalog order. In-flight calls can exceed a cap; unknown reported USD remains `null`.
+
+Evidence is redacted before storage. Add application-private `redaction.paths` and `redaction.patterns` where needed. Source text can still be sensitive; control access and retention. There is no raw sensitive-capture API.

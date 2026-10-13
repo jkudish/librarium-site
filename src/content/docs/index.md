@@ -1,59 +1,52 @@
 ---
 title: Getting started
-description: Install Librarium, configure providers, and run your first query.
+description: Set up sources, preview a question offline, and read a stored Run.
 order: 1
 ---
 
-Librarium is a meta harness for research queries. It sends one query to selected search, grounded-answer, and deep-research providers, then writes the results to one run directory.
+Ask a question, choose quick or deep research, and keep each source's answer, citations, provenance, and cost in one Run.
 
 ## Install
 
-The published v2 CLI requires Node.js 22.12.0 or newer when installed from npm. Install the v2 major, then confirm the executable version:
+These docs describe the **unreleased JS 2.0 candidate**. npm, Homebrew, and standalone channels may still serve 1.x. Check the installed version; do not use these commands with a 1.x binary. npm requires Node.js 22.12 or newer.
 
 ```bash
 npm install -g librarium
 librarium --version
-# Must report major version 2
+librarium research --help
 ```
 
-Homebrew and standalone binaries include their own runtime; npm installs require Node.js 22.12.0 or newer:
+Continue only when the installed binary reports major version 2 and exposes `research`; a version number alone does not prove this candidate surface is present. Existing 1.x users can read [legacy docs](/v1) and the [migration guide](/docs/upgrading-to-v2).
+
+## Configure sources
 
 ```bash
-brew install jkudish/tap/librarium
-curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh
+librarium setup
+librarium setup --check
+librarium sources --json
 ```
 
-## Configure providers
+`setup --check` checks local configuration and credential presence without calling providers. Presence does not prove authentication. Keys may be environment references such as `env:EXA_API_KEY`; never paste keys into a question or commit them.
 
-Run the setup wizard, then inspect configuration and credential presence offline:
+## Preview, then research
 
 ```bash
-librarium init
-librarium doctor
+librarium research "Compare current HTTP caching guidance" --only exa --dry-run --json
+# Can incur provider charges:
+librarium research "Compare current HTTP caching guidance" --only exa
 ```
 
-Provider calls can incur charges. Check the selected providers' pricing before running a broad workflow. Missing cost data means the cost is unknown, not zero.
+A dry run returns `status: planned`, estimates, and skips. It makes no provider calls and writes nothing to the store. Every real request is stored before its first provider call.
 
-Doctor does not authenticate or load custom provider code unless you explicitly use `--live`; live checks may incur charges. Preview a request before running it:
+Without `--only`, every set-up research source runs at quick depth; engines never join that default. Narrow with `--only` or `--skip`, and use `--max-cost` for catalog-ordered budget admission. Unknown reported cost is `null`, not zero. In-flight work can exceed a cap.
+
+## Come back to deep work
 
 ```bash
-librarium plan "current guidance for HTTP caching" --json
+librarium research "Compare database hosting options" --deep --only exa --no-wait
+librarium show <run-id> --wait --json
 ```
 
-An admitted plan means local preflight passed, not that an account was authenticated or a price guaranteed. Planning creates no run artifacts and makes no provider calls.
+Deep tasks keep signed handles in private Run state. `show` resumes them rather than submitting again. Quick work usually runs inline, though some collectors are durable. CLI `--no-wait` requires `--deep`, except for a dry run. Ctrl-C detaches and prints a recovery command; it is not a billing guarantee.
 
-## Run a query
-
-```bash
-librarium run "current guidance for HTTP caching" --group quick
-```
-
-The command prints progress to stderr and writes the results under `./agents/librarium/`. Add `--json` for machine-readable stdout. Use `librarium browse` to open previous runs.
-
-New requests default to `quick` in `sync` mode, with selected providers running concurrently and awaited. `quick` includes raw `exa/search`, not just AI-grounded answers. Saved mode/limit settings override factory defaults; explicit flags override configuration. Explicit providers take precedence over a group with a notice. Missing quick providers are omitted with diagnostics, not replaced with every enabled provider.
-
-The built-in workflows are `quick`, `deep`, `visibility`, and `all`. User-defined groups use the `custom:<name>` prefix. See [Groups and modes](/docs/groups-and-modes) for their exact selection rules.
-
-## Moving from v1
-
-V2 configuration uses strict snake_case JSON. Migration previews without changing your v1 file and writes only to an explicit output path. Follow [Upgrade from v1](/docs/upgrading-to-v2) before replacing a working setup.
+Continue with [commands](/docs/commands), [source selection](/docs/groups-and-modes), or [agent integration](/docs/using-with-agents).

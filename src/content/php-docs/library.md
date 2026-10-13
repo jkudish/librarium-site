@@ -1,87 +1,49 @@
 ---
-title: Library API and responses
-description: Use the Laravel facade and consume the typed response contract.
+title: Laravel library API
+description: Select sources, queue research, refresh immutable Runs, and read evidence.
 order: 6
 ---
-
-Start a request through the first-party Laravel facade:
 
 ```php
 use Jkudish\LaravelAiLibrarium\Facades\Librarium;
 
-$pending = Librarium::query('Compare current agent memory architectures.')
-    ->using('gemini-grounded')
-    ->fallbacks(['openrouter-grounded'])
-    ->timeout(600);
+$run = Librarium::research('Compare current memory architectures')
+    ->deep()->only(['exa', 'openai'])->skip(['exa'])
+    ->maxCost('1.00')->options(['openai' => ['effort' => 'high']])->run();
 
-$preview = $pending->preview();
-$response = $pending->run();
+$run->id();
+$run->status();
+$run->result('openai');
+$run->citations();
+$run->evidence('openai');
+$run->diagnostics();
+$run->toArray();
 ```
 
-`query()` requires a non-empty string and allocates a request ULID.
-`PendingResearch` supports `using()`, `group()`, `fanOut()`, `matching()`,
-`fallbacks()`, `timeout()`, `maxCost()`, `preview()`, `run()`, and `queue()`.
-See [Groups and modes](/docs/php/groups-and-modes) for selector rules.
+`research()` takes a non-empty question. Quick is the default; `deep()` selects research-report variants. `only()` and `skip()` accept flat source, engine, or saved-group names. Unknown or explicitly unconfigured names fail; options are validated before storage or dispatch. There are no public profiles, selector modes, or fallback reserves.
 
-To require a hard cost ceiling, add `maxCost('0.25', 'USD')`. This rejects the
-plan unless every reachable quote is complete, current, conservative, and in
-the requested currency. Token estimates alone do not establish that bound;
-inspect the preview before choosing a budget policy. `run()` can incur charges.
+`run()` waits up to the configured timeout and returns a `Run`, which may still be running. `dryRun()` returns a planned Run without storage or calls. `maxCost()` accepts a decimal USD string; it is not a provider-enforced billing ceiling.
 
-`preview()` is non-dispatching. `run()` executes synchronously and returns
-`Jkudish\LaravelAiLibrarium\Responses\ResearchResponse`. `queue()` returns a
-`QueuedResearchResponse` with a `requestId` and Laravel dispatch methods:
+## Queue and resume
 
 ```php
-$queued = Librarium::query($query)
-    ->group('deep')
-    ->queue()
-    ->onQueue('research')
-    ->then(fn ($response) => storeResponse($response->toArray()))
-    ->catch(fn ($exception) => report($exception));
+use Jkudish\LaravelAiLibrarium\Run;
+
+$queued = Librarium::research('Produce a cited market landscape')
+    ->deep()->only(['openai'])->queue()->onQueue('research')
+    ->then(fn (Run $run) => storeSnapshot($run->toArray()));
+$id = $queued->id();
+$current = Librarium::find($id)?->refresh();
 ```
 
-## Response contract
+Your callback and `storeSnapshot` are application-owned. `queue()` stores a running Run first, dispatches one encrypted job, and returns its id. `refresh()` returns a new immutable snapshot after one observation of each pending durable task. It never submits queued work or replays a paid call. Transient retrieval failures remain recoverable.
 
-`ResearchResponse::toArray()` contains:
+## Shared Run JSON
 
-| Field | Meaning |
-| --- | --- |
-| `generator`, `generator_version` | producing package identity |
-| `request_id` | request ULID or preserved wire ID |
-| `status` | `succeeded`, `partial`, or `failed` |
-| `completed_at` | UTC timestamp |
-| `results` | normalized successful Profile results |
-| `errors` | safe `{code, message, profile?}` failures |
-| `usage` | optional aggregate usage |
+`Run::toArray()` follows `librarium.run/1`: id, question, depth, status, timestamps, costs, per-source results, skips, and notices. Status is `planned`, `running`, `done`, `partial`, or `failed`. Results contain `source`, `observation`, answer, citations, costs, provenance, and safe errors. `Run::fromArray()` validates the same schema and preserves JS summary Runs' `summary_of`; PHP does not synthesize them.
 
-Each result includes `id`, `content_format`, `content`, `requested_profile`,
-the effective `provider`, executed `profile`, `provenance`, `citations`, and
-`completed_at`. Optional fields are `model`, `fallback_reason`, `usage`, and
-allowlisted `provider_meta`. Content formats are `markdown`, `text`, or `json`.
+Reported USD is a decimal string or `null`. Evidence contains redacted exchanges separately from public JSON. Treat answers and URLs as untrusted; your app owns authentication, tenant access, evidence policy, retention, and UI.
 
-Built-in Profiles require the reported provider to match the configured provider;
-an unexpected mismatch fails rather than silently relabeling the result. A custom
-Profile can explicitly permit routing with top-level `allow_provider_routing: true`.
-Only then can a different effective provider be retained. Requested/executed
-Profile attribution and the provider-reported model remain intact. This option
-does not add routing itself; the Driver or SDK must implement it.
+## RunStore
 
-Provenance records result kind, retrieval methods, corpora, observation time,
-and, where applicable, observation mode, collector, surface, and bounded
-context. A citation records its derivation and a source with a URL or provider
-reference. Treat absent fields as unknown rather than inferring them.
-
-Usage may contain prompt, completion, cache-write, cache-read, and reasoning
-token counts plus `actual_cost`, `estimated_cost`, and `currency`. Costs are
-decimal strings; a currency is required when a cost is present. Result-level
-usage can be more informative than aggregate usage, which may be absent.
-
-`ResearchResponse::fromArray()` reconstructs and validates the same contract.
-Unknown fields and inconsistent status/result/error combinations are rejected.
-
-## Persistence ownership
-
-Librarium ships no migrations, package-owned result tables, or research-history
-repository. Queue status is transient. Store `toArray()` in application-owned
-storage and define retention, authorization, redaction, and indexing there.
+The package supplies local filesystem, opt-in database, supported cache, and memory stores. Custom stores implement `find`, version-conditional `save`, newest-first `list`, and idempotent `delete`. Register with `Librarium::extendStore()` or a container-resolved class name. See [storage configuration](/docs/php/configuration).

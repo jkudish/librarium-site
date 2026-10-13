@@ -1,86 +1,36 @@
 ---
-title: Groups and execution modes
-description: Select one flat Profile set and understand sequential execution.
+title: Depth, sources, and groups
+description: Select flat source names and named-only engines without modes or fallbacks.
 order: 5
 ---
 
-Every query compiles exactly one primary selector. Choose a Profile, a group,
-an explicit fan-out list, or semantic matching. Selectors cannot be combined.
-
 ```php
-use Jkudish\LaravelAiLibrarium\Facades\Librarium;
-use Jkudish\LaravelAiLibrarium\Responses\Enums\ResultKind;
-
-Librarium::query($query)->using('gemini-grounded');
-Librarium::query($query)->group('quick');
-Librarium::query($query)->fanOut(['exa', 'kagi-fastgpt']);
-Librarium::query($query)->matching(resultKind: ResultKind::ResearchReport);
+Librarium::research($question)->only(['exa', 'claude']);
+Librarium::research($question)->deep()->only(['exa', 'openai']);
+Librarium::research($question)->only(['chatgpt', 'copilot']);
 ```
 
-Profile IDs are flat package-native strings such as `gemini-grounded`; PHP does
-not require a provider/profile path syntax.
+Quick is the default; deep selects durable research variants. Sources without a deep variant are skipped as `no_deep_variant`. Durability belongs to the driver/collector: quick DataForSEO standard tasks and Firecrawl agent collection can also save signed handles.
 
-## Built-in groups
+Omit `only()` to use every configured research source, never engines. `skip()` removes names after expansion. Unknown and explicitly unconfigured names fail. Inspect `Librarium::sources()` or `librarium:sources` for language and variant availability.
 
-`quick` is the default and preserves this order:
-
-1. `gemini-grounded`
-2. `openrouter-grounded`
-3. `brave-answers`
-4. `exa`
-5. `kagi-fastgpt`
-6. `parallel-turbo`
-
-`visibility` contains the five SearchAPI surface Profiles followed by
-`perplexity-sonar-pro`, `gemini-grounded`, and `grok`.
-
-`deep` is derived from configured `research_report` Profiles. `all` is derived
-from every configured Profile. Disabled or unavailable members are reported
-and omitted from execution.
-
-The shipped catalog contains 46 configured Profiles. Six are DataForSEO
-surface collectors with `enabled: false`; they are not members of `quick` or
-`visibility`, and join derived `all` only after explicit enablement and the
-other eligibility checks pass. The remaining 40 Profiles have `enabled: true`
-in shipped configuration. Missing credentials or invalid options still make an
-enabled Profile unavailable.
-
-Application groups are ordered Profile ID lists under `librarium.groups` and
-are selected as `custom:<name>`:
+## Saved groups
 
 ```php
-'groups' => [
-    'editorial' => ['exa', 'gemini-grounded'],
-],
+// config/librarium.php
+'groups' => ['editorial' => ['exa', 'claude']],
 ```
 
 ```php
-$pending = Librarium::query($query)->group('custom:editorial');
+$plan = Librarium::research($question)->only(['editorial'])->dryRun();
 ```
 
-## Sequential, not concurrent
+Groups are user source lists without a `custom:` prefix; no built-in groups remain. Group names cannot collide with sources or engines. There are no public modes, selectors, or fallback reserves.
 
-Groups and fan-out execute eligible primaries sequentially in compiled order
-under one request-wide deadline. Do not size deadlines or worker capacity as if
-Profile calls run concurrently. Each successful slot contributes one result;
-failed slots contribute errors, producing `succeeded`, `partial`, or `failed`.
+## Cost and execution
 
-## Fallback reserve
+With `maxCost('1.00')`, unpriced sources are skipped and remaining estimates are admitted greedily in catalog order. Runtime spend plus reservations stops unstarted work. In-flight work can exceed the cap; failed calls can bill. No failed source is automatically replaced.
 
-Fallbacks are a separate ordered reserve, not additional primary fan-out:
+`run()` waits in the calling process; `queue()` dispatches one encrypted job. PHP's runtime owns sequential driver execution, not the JS concurrency implementation. Both expose the same semantic Run shape, not interchangeable private runtimes.
 
-```php
-Librarium::query($query)
-    ->using('gemini-grounded')
-    ->fallbacks(['openrouter-grounded']);
-```
-
-A fallback must be semantically compatible with at least one primary, cannot
-duplicate a primary, and is tried only after a Driver failure that permits
-fallback. The runtime uses each fallback Profile at most once across the whole
-request. `fallback_reason` records why the effective Profile replaced the
-requested one.
-
-Call `preview()` before `run()` or `queue()` to inspect the final ordered
-selection, unavailable members, fallback reserve, prompts, deadline, and
-pricing assumptions.
+Engine observations are `surface`, while research answers are `api`. Shared collectors make observations correlated, not independent proof. API baselines join only when the caller names them.

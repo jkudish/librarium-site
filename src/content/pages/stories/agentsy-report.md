@@ -8,6 +8,8 @@ ctaLabel: Explore the Laravel integration
 
 This is a development field note, not a production launch story. The demonstrated Agentsy integration is a backend dogfood implementation: it ingests terminal Librarium responses and tests evidence ownership and replay behavior. It does not demonstrate a deployed reporting UI, scheduled live collection, or customer outcomes.
 
+This is historical integration evidence using `ResearchResponse` and Profile identities. The simplified-surface candidate now uses Run; this note does not claim that the application integration has migrated or passed compatibility checks against it.
+
 ## Start with a question a business recognizes
 
 Imagine a luxury villa rental service asking: “Which services do AI answers recommend for a week on the Amalfi Coast? Do we appear, how are we described, and which sources shape those recommendations?”

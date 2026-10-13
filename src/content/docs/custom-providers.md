@@ -1,58 +1,47 @@
 ---
-title: Custom providers
-description: Build and register custom npm or script providers for librarium.
+title: Custom sources and RunStores
+description: Add trusted source variants or a four-method conditional RunStore.
 order: 10
 ---
 
-## Trust boundary
+## Custom sources
 
-Custom npm modules and scripts are executable code. `trusted_provider_ids` is an allowlist, not a sandbox. Loaded code receives the caller's process permissions and environment. Review it before adding the public provider ID to the allowlist. Automatic migration never grants trust.
+Pass trusted instances to `createLibrarium({ customSources })`. Each entry has an `id`, optional `name`, and a quick and/or deep provider; `engine: true` makes it named-only. Built-in names are reserved. Instances belong to a client, not a global registry.
 
-Node loads trusted custom providers through `librarium/node`. `loadCustomProviders()` returns caller-owned instances and does not mutate a global registry. Built-in provider IDs are reserved.
+Inline providers implement `execute`; durable providers implement `submit`, `poll`, and `retrieve`. Deep variants must be durable. Return normalized content, citations, and provider-reported usage without inventing missing cost. Declare `requiresApiKey: false` only for a credential-free source.
 
-Execution admission checks an exact declared and trusted primary matrix and compatible enabled fallback reserve before loading executable custom code. Static discovery can show disabled declarations, but cannot make them executable. Standalone `loadCustomProviders()` skips explicitly disabled entries without importing their npm modules or spawning scripts; this does not weaken request preparation's exact-selection checks.
+Custom executable code is trusted, not sandboxed. It runs with process permissions. Review it before loading or granting credentials.
 
-## Declare the exact profile
+## Four-method RunStore
 
-```json
-{
-  "version": 2,
-  "custom_providers": {
-    "acme": {
-      "type": "npm",
-      "module": "@acme/librarium-provider",
-      "execution_profile": {
-        "binding_id": "acme.search.v1",
-        "profile": {
-          "identity": {
-            "provider_id": "acme",
-            "profile_id": "search",
-            "target": { "primary": { "model_selection": "not_applicable" } }
-          },
-          "result_kind": "search_results",
-          "observation_mode": "api_output",
-          "corpora": ["web"],
-          "retrieval_method": "search_endpoint",
-          "access_mode": "direct",
-          "operator_id": "acme",
-          "invocation": "inline",
-          "resumability": "none"
-        }
-      }
-    }
-  },
-  "trusted_provider_ids": ["acme"]
+```ts
+import type { RunStore, StoredRun, RunSummary } from 'librarium/core';
+import { RunStoreConflict } from 'librarium/core';
+
+class MyStore implements RunStore {
+  async get(id: string): Promise<StoredRun | null> { return null; }
+  async save(doc: StoredRun, expectedVersion: number | null): Promise<number> {
+    // Replace with an atomic version-conditional commit.
+    throw new RunStoreConflict();
+  }
+  async list(opts?: { limit?: number; before?: string }): Promise<RunSummary[]> {
+    return [];
+  }
+  async delete(id: string): Promise<void> { /* idempotent */ }
 }
 ```
 
-A profile declaration states stable capability facts. It does not claim runtime success, correctness, cost, citations, independence, or a specific account experience.
+This is an interface skeleton, not a working store. `save` must atomically require the current version to equal `expectedVersion`; `null` means absent. Return the new version or throw `RunStoreConflict`. Return independent snapshots, list newest first with Run-id cursor paging, and make delete idempotent.
 
-## Runtime interfaces
+```ts
+import { runStoreContract } from 'librarium/testing';
+await runStoreContract(new MyStore()); // implement first; disposable empty store only
+```
 
-An npm source exports a provider object or a factory that receives the provider ID, config, and source options. Its returned provider ID must match the configured ID. Inline providers implement `execute`. Background providers also implement `submit`, `poll`, and `retrieve`.
+Register a store with `createLibrarium({ store })`, or configure a Node module whose default export returns it. Librarium redacts evidence before `save`; stores still own atomicity and schema boundaries.
 
-A script source reads one JSON request from stdin and writes one JSON response to stdout. The request uses integer `protocolVersion: 1` and an operation such as `describe`, `execute`, `submit`, `poll`, `retrieve`, or `test`. Return `{ "ok": true, "data": ... }` on success or `{ "ok": false, "error": "..." }` on failure. Librarium validates each operation's payload before using it.
+## Local filesystem
 
-The separate custom-provider exchange schemas currently in the source tree are not package exports or the runtime transport for npm and script providers. Do not build against those schemas as a public protocol.
+The shared unencrypted layout is public `run.json`, versioned private `state.json`, `answers/<source>.md`, and redacted `evidence/<source>.json`. Write state last. JS and PHP local stores coordinate through a non-expiring, token-owned `run.json.lock` marker. Do not remove one until its owner is known unable to resume.
 
-Do not expose keys, authorization values, resume credentials, raw provider responses, or secret-shaped data in `provider_meta`. Allowlist public metadata before emission.
+This prevents concurrent writers, not partial writes after a crash. Private execution state is language-owned; shared reading is not permission to execute another language's task state. Preserve signing keys outside the store.

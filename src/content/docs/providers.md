@@ -1,40 +1,40 @@
 ---
-title: Providers
-description: All 34 built-in providers, 41 public profiles, custody, credentials, and evidence boundaries.
+title: Sources and engines
+description: Flat research source names, quick/deep variants, engine collectors, and availability.
 order: 5
 ---
 
-## Public catalog
+The shared catalog has 16 research sources and five named-only engines. The website grid and counts read pinned `librarium-spec/sources.json`; `librarium sources --json` reports what your installation can actually use.
 
-Librarium v2 has 34 built-in providers and exactly 41 public profiles. Selection, config, artifacts, and provenance use `provider_id/profile_id`.
+## Research sources
 
-| Provider family | Public profiles |
-| --- | --- |
-| Brave | `brave-search/search`, `brave-answers/grounded` |
-| Claude | `claude/chat` |
-| Exa | `exa/search`, `exa/research` |
-| Firecrawl | `firecrawl-search/search` |
-| Gemini | `gemini-grounded/grounded`, `gemini-deep/research`, `gemini-chat/chat` |
-| Grok | `grok/web`, `grok-x-only/x`, `grok-combined/combined` |
-| Jina | `jina-search/search` |
-| Kagi | `kagi-fastgpt/grounded` |
-| OpenAI | `openai-research/research`, `openai-chat/chat` |
-| OpenRouter | `openrouter/grounded`, `openrouter/chat` |
-| Parallel | `parallel/search`, `parallel/turbo`, `parallel/research` |
-| Perplexity | `perplexity-search/search`, `perplexity-sonar-pro/grounded`, `perplexity-deep-research/research`, `perplexity-sonar-deep/research` |
-| SearchAPI | `searchapi/search`, `searchapi-chatgpt/surface`, `searchapi-gemini/surface`, `searchapi-google-ai-mode/surface`, `searchapi-bing-copilot/surface`, `searchapi-google-ai-overview/surface` |
-| SerpAPI | `serpapi/search` |
-| SerpBase | `serpbase/search`, `serpbase/news` |
-| Tavily | `tavily/search` |
-| Valyu | `valyu/search`, `valyu/research` |
-| You.com | `you-research/grounded`, `you-research/research`, `you-answer/grounded` |
+| Source | Quick | Deep | Options |
+| --- | --- | --- | --- |
+| `brave` | Answers or search | — | `results` |
+| `claude` | Chat with web search | — | `model` |
+| `exa` | Search | Research | — |
+| `firecrawl` | Search | — | `sources`, `limit` |
+| `gemini` | Grounded or chat | Deep Research | `quick` |
+| `google` | SERP collector | — | `collector`, `vertical` |
+| `grok` | Web, X, or both | — | `search` |
+| `jina` | Search | — | — |
+| `kagi` | FastGPT | — | — |
+| `openai` | Chat with web search | Research | `model`, `effort` |
+| `openrouter` | Grounded or chat | — | `quick`, `model` |
+| `parallel` | Turbo or search | Research | `quick`, `processor` |
+| `perplexity` | Sonar Pro, search, or agent | Deep Research | `quick`, `deep_effort` |
+| `tavily` | Search | — | — |
+| `valyu` | Search | Research | `mode`, `output` |
+| `you` | Answer or research | Research | `quick` |
 
-The durable profiles are `exa/research`, `gemini-deep/research`, `openai-research/research`, `parallel/research`, `perplexity-deep-research/research`, `perplexity-sonar-deep/research`, `valyu/research`, and `you-research/research`. Other custody follows the catalog declaration. `perplexity-search/search` remains raw Search unchanged. `perplexity-sonar-pro/grounded` is Agent low and inline. The two Perplexity research profiles are Agent medium and Agent high.
+Options replace public profile selectors. Every source has at most one selected quick and deep variant. Variant and option availability differs by language; the catalog's legacy mapping is not proof that every option is executable in every package. Inspect local discovery before selection. Deep variants are durable tasks; quick variants usually run inline.
 
-`grok-x-only/x` is X-only. `grok-combined/combined` has a separate identity from `grok/web`.
+## Engines
 
-## Credentials and cost
+`chatgpt`, `gemini-app`, `google-ai-mode`, `google-ai-overview`, and `copilot` observe consumer answer surfaces. They only run when named in `only`, directly or through a saved group, and have no deep variant.
 
-Run `librarium init` or `librarium init --auto`, then `librarium doctor`. Doctor is offline by default: credential presence is not authentication. Only `doctor --live` tests connectivity, loads trusted custom code, and may incur charges. Provider calls send the query and selected options upstream. Retention, account behavior, and billing are provider concerns. SearchAPI `zeroRetention` is sent only when explicitly configured and fails closed if rejected. It is not a broader privacy guarantee.
+Collectors are configuration: SearchAPI, PHP DataForSEO where supported, or the PHP Firecrawl browser adapter. Multiple engines can share one collector. Their results use `observation: surface`, not official research API output. A collector does not promise parity with a user's account, location, or subscription.
 
-Reported usage comes from provider output. A missing estimate, cost, API unit price, or token price means unknown, not free. Both hard-budget flags require bounded network-free estimates for primary and reserve profiles and require the complete primary estimate to fit. `--max-cost` also stops new launches when reported spend reaches the bound; in-flight calls can still finish and exceed it. See [Run-wide budgets](/docs/request-and-retry#run-wide-budgets) for shared helper spending, failure costs, synthesis reservations, and recovery.
+## Costs and credentials
+
+`setup --check` is offline; credential presence does not authenticate. Provider queries and selected options are sent upstream and can incur charges. Estimates come from package pricing, not the spec. Unknown reported cost stays `null`. With a cap, unpriced sources are skipped; in-flight work can exceed it. No failed source automatically substitutes another.

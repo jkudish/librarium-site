@@ -146,7 +146,7 @@ export const RESEARCH_DEMO: {
   fixture: "captured",
   mode: "deep-research",
   collectedAt: fixture.collectedAt,
-  scopeNote: fixture.scope.note,
+  scopeNote: `Historical provider capture; legacy profile identities are provenance, not current selectors. ${fixture.scope.note}`,
   query: fixture.query,
   results: (fixture.results as FixtureResult[]).map((result) => {
     const display = DISPLAY[result.provider];

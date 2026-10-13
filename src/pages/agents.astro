@@ -105,46 +105,30 @@ const hosts: Host[] = [
 ];
 
 // Tool contracts mirror "What your agent can call" in agents.md, which in
-// turn mirrors src/mcp/server.ts in the librarium repository.
+// turn mirrors src/mcp/run-server.ts in the librarium repository.
 const tools = [
   {
     name: "research",
-    lead: "Starts a run.",
-    input: "a required `query`, plus optional `group` (a workflow like `quick` or `deep`), `providers` (exact profile ids), `mode` (`sync` or `async`), and `refine`.",
-    output: "a short index of the run; statuses, which provider returned what, source counts, known and unknown costs, and where results are saved. It does not paste whole answers into chat.",
+    lead: "Previews or starts a Run.",
+    input: "a required `question`, plus optional `depth` (`quick` or `deep`), `only`, `skip`, `max_cost`, `dry_run`, and `wait_seconds`.",
+    output: "a bounded summary with id, source statuses, citation counts, costs, skips, and a next hint. It does not paste whole answers into chat.",
     use: "Use it inside the scope and budget already authorized; only steps beyond that scope need fresh approval.",
     badge: "Can spend",
   },
   {
-    name: "get_results",
-    lead: "Reads what a run saved.",
-    input: "the run directory, optionally one `provider` or `resultId`, a `part` (`content` or `citations`), a `cursor`, and a `limitChars` page size (256 to 12,000; default 8,000).",
-    output: "complete text and citations, one bounded page at a time.",
-    use: "Use it to read the whole answer; follow `nextCursor` with the same filters until `hasMore` is false. It reads saved files only: no provider calls, no credential lookups.",
-    badge: "Saved files only",
-  },
-  {
-    name: "check_async",
-    lead: "Moves a long-running job forward.",
-    input: "the run directory, and a `retrieve` toggle that only matters for runs saved by an older schema.",
-    output: "counts plus an updated index, committing results as they finish.",
-    use: "Use it to advance work already submitted, under its original time and cost limits; a charge still pending with a provider stays unknown until the provider reports it. It may contact providers to fetch completed work; it starts no new research.",
+    name: "get_run",
+    lead: "Resumes work or reads saved evidence.",
+    input: "the Run `id`, optionally `wait_seconds`, one `source`, and a `cursor`.",
+    output: "a Run summary, or paged JSON text containing a source answer and citations.",
+    use: "Follow `cursor` with unchanged id/source until null; concatenate pages before parsing. A changed answer invalidates an old cursor. It can retrieve accepted provider work but starts no new research.",
     badge: "No new research",
   },
   {
-    name: "list_providers",
+    name: "list_sources",
     lead: "Shows what can run.",
-    input: "optional `detail: \"profiles\"` and one `provider` id.",
-    output: "static summaries, or exact profile declarations with targets, capabilities, workflows, and availability reasons.",
-    use: "Use it to plan a run. It is local: no custom code is loaded, no credentials are resolved, and nothing is authenticated, so a listed provider is not a verified one.",
-    badge: "Local",
-  },
-  {
-    name: "list_groups",
-    lead: "Shows the configured workflows.",
     input: "none.",
-    output: "group names and their member profiles.",
-    use: "Use it to pick a group without guessing. Local and free.",
+    output: "research sources, named-only engines, saved groups, availability, and price hints.",
+    use: "Offline discovery is not authentication or spending permission. Groups are user-saved source lists, with no built-ins.",
     badge: "Local and free",
   },
 ];
@@ -157,79 +141,85 @@ const askPrompts = [
   },
   {
     title: "Plan a provider matrix first",
-    prompt: "Using the Librarium MCP tools, list the configured providers with their profiles and capabilities, and the workflow groups, then propose a provider matrix for this API’s authentication, rate limits, and retry guidance with a $2 budget. The research tool takes no budget or fallback flags — those come from librarium configuration — so confirm the applicable config before treating the budget or exact-only matrix as enforced. Wait for my approval, run research once with the agreed matrix, and read the full evidence with get_results.",
+    prompt: "Using the Librarium MCP tools, list sources, then preview this API’s authentication, rate limits, and retry guidance with only the agreed sources, max_cost 2.00, and dry_run true. The tool can lower but not raise the configured cap; in-flight charges can exceed it. Wait for my approval, research once with the agreed matrix, and read the full evidence with get_run.",
   },
   {
     title: "See how answer engines describe you",
-    prompt: "Use Librarium’s visibility workflow to see how AI answer engines describe a luxury villa rental service for a week on the Amalfi Coast — as a complement to, not a substitute for, a regular research pass on the same question. Keep each answer surface’s identity and citations attached to its findings.",
+    prompt: "Use the Librarium skill to compare explicitly named answer engines for a luxury villa rental service for a week on the Amalfi Coast — as a complement to, not a substitute for, research sources on the same question. Preview offline first. Keep each answer surface’s identity and citations attached to its findings.",
   },
 ];
 
-// Illustrative session. Tool names, input fields, and output field names
-// match src/mcp/server.ts, shaping.ts, and result-pages.ts in librarium;
-// the run path, counts, and findings are an example, not a captured run.
-const quickRun = "…/1791820800-webhook-retry-guidance-412k3x";
-const deepRun = "…/1791820874-idempotency-key-retries-9qk2m1";
+// Illustrative summaries, not captured provider results.
+const quickRun = "run_01JAB2C3D4E5F6G7H8J9K0M1N2";
+const deepRun = "run_01JAB2C3D4E5F6G7H8J9K0M1N3";
 type Turn =
   | { kind: "user"; text: string }
   | { kind: "agent"; text: string }
   | { kind: "tool"; name: string; input: string; output: string; note?: string };
 const session: Turn[] = [
-  { kind: "user", text: "Before I add retries to our webhook client, research current guidance on exponential backoff, jitter, and idempotency keys. A quick pass, then a deep pass if coverage is thin — both are inside the budget in my librarium config. Keep each provider’s sources attached." },
-  { kind: "agent", text: "First I’ll check which workflows you have configured, so I don’t guess." },
+  { kind: "user", text: "Before I add retries to our webhook client, research current guidance on exponential backoff, jitter, and idempotency keys. A quick pass, then a deep pass if coverage is thin — within the scope and spend I already authorized. Keep each source’s citations attached." },
+  { kind: "agent", text: "First I’ll discover sources and preview the selection offline." },
   {
     kind: "tool",
-    name: "list_groups",
+    name: "list_sources",
     input: "{}",
-    output: "groups: quick (gemini-grounded/grounded, exa/search, parallel/turbo, …), deep (gemini-deep/research, openai-research/research, perplexity-deep-research/research), …",
+    output: "sources: exa, gemini, openai, …; configured variants and price hints",
     note: "Local and free",
   },
   {
     kind: "tool",
     name: "research",
-    input: 'query: "Retry backoff, jitter, and idempotency keys for webhook clients", group: "quick"',
-    output: `state: "terminal", tallies.succeeded: 6, sources.unique: 31, outputDir: "${quickRun}"`,
+    input: 'question: "Retry backoff, jitter, and idempotency keys", only: ["exa", "gemini"], dry_run: true',
+    output: 'status: "planned", selected sources and estimates, skipped sources',
+    note: "Not stored; no provider calls",
   },
-  {
-    kind: "tool",
-    name: "get_results",
-    input: `runDir: "${quickRun}", part: "content"`,
-    output: 'results: 6 providers, hasMore: true, nextCursor: "eyJ2IjoxLC…"',
-    note: "Followed nextCursor until hasMore was false",
-  },
-  { kind: "agent", text: "All six agree on backoff with jitter, but they’re thin on how a server should treat a repeated idempotency key. Starting the deep workflow in the background." },
   {
     kind: "tool",
     name: "research",
-    input: 'query: "How should a server handle a repeated Idempotency-Key on retried POSTs?", group: "deep", mode: "async"',
-    output: `state: "pending", tallies.pending: 3, outputDir: "${deepRun}"`,
+    input: 'question: "Retry backoff, jitter, and idempotency keys", only: ["exa", "gemini"]',
+    output: `id: "${quickRun}", status: "done", source statuses and citation counts`,
+    note: "Within existing authorization",
   },
   {
     kind: "tool",
-    name: "check_async",
-    input: `runDir: "${deepRun}"`,
-    output: 'polled: 3, retrieved: 3, index.state: "terminal"',
+    name: "get_run",
+    input: `id: "${quickRun}", source: "exa"`,
+    output: 'content: "JSON-text chunk with answer and citations", cursor: "…"',
+    note: "Read each source until cursor is null",
+  },
+  { kind: "agent", text: "The quick answers support backoff with jitter but are thin on repeated idempotency keys. I’ll deepen within the authorized scope." },
+  {
+    kind: "tool",
+    name: "research",
+    input: 'question: "How should a server handle a repeated Idempotency-Key?", depth: "deep", only: ["openai"], wait_seconds: 0',
+    output: `id: "${deepRun}", status: "running"`,
+  },
+  {
+    kind: "tool",
+    name: "get_run",
+    input: `id: "${deepRun}", wait_seconds: 45`,
+    output: 'status: "done", source statuses and citation counts',
     note: "Starts no new research",
   },
   {
     kind: "tool",
-    name: "get_results",
-    input: `runDir: "${deepRun}", part: "content"`,
-    output: "results: 3 reports, read page by page until hasMore: false",
+    name: "get_run",
+    input: `id: "${deepRun}", source: "openai"`,
+    output: 'content: "JSON text with answer and citations", cursor: null',
   },
 ];
 const answer = [
   {
     claim: "Retry with capped exponential backoff and full jitter, not fixed intervals.",
-    sources: [{ profile: "exa/search", source: "AWS Builders’ Library: Timeouts, retries, and backoff with jitter" }, { profile: "gemini-grounded/grounded", source: "Google Cloud: Retry strategy" }],
+    sources: [{ profile: "exa", source: "AWS Builders’ Library: Timeouts, retries, and backoff with jitter" }, { profile: "gemini", source: "Google Cloud: Retry strategy" }],
   },
   {
     claim: "Send an Idempotency-Key on every retried POST; the server returns the first response for a key it has already seen.",
-    sources: [{ profile: "perplexity-deep-research/research", source: "Stripe API reference: Idempotent requests" }, { profile: "openai-research/research", source: "IETF draft: The Idempotency-Key HTTP Header Field" }],
+    sources: [{ profile: "openai", source: "Stripe API reference: Idempotent requests" }, { profile: "openai", source: "IETF draft: The Idempotency-Key HTTP Header Field" }],
   },
   {
     claim: "Honor Retry-After on 429 and 503 before applying your own backoff.",
-    sources: [{ profile: "gemini-deep/research", source: "RFC 9110: HTTP Semantics" }],
+    sources: [{ profile: "gemini", source: "RFC 9110: HTTP Semantics" }],
   },
 ];
 
@@ -272,7 +262,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
     <section class="py-16 sm:py-24" aria-labelledby="usage-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="usage-heading" class={sectionHeading}>Ask a question. Your agent does the reading.</h2>
-        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">You ask in plain language. Your agent picks a workflow, runs it across several providers, resumes the slow ones, and reads every saved page before it answers, with each finding still tied to the provider and sources behind it.</p>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">You ask in plain language. Your agent previews sources, researches within the authorized scope, resumes the slow ones, and reads every saved page before it answers, with each finding still tied to its source.</p>
 
         <div class="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:gap-12">
           <figure class="min-w-0 overflow-hidden rounded-lg border border-neutral-200 bg-white">
@@ -332,7 +322,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
                 <p class="mt-4 text-pretty">Only the deep pass covered the IETF Idempotency-Key text, and it’s still a draft. Open it before you depend on its semantics.</p>
               </li>
             </ol>
-            <figcaption class="border-t border-neutral-200 px-4 py-3 text-xs/5 text-neutral-500 sm:px-6">Illustrative session. Tool names, inputs, and output fields match the librarium MCP server; the paths, counts, and findings are an example, not a captured run.</figcaption>
+            <figcaption class="border-t border-neutral-200 px-4 py-3 text-xs/5 text-neutral-500 sm:px-6">Illustrative candidate session. The ids, summarized output, and findings are examples, not a captured Run. Verify that your install exposes these three tools.</figcaption>
           </figure>
 
           <div class="min-w-0 lg:sticky lg:top-8 lg:self-start">
@@ -380,7 +370,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
               <div class="code-toolbar"><span>Setup prompt</span><button type="button" class="copy-btn group" data-copy={AGENT_SETUP_PROMPT} data-copy-state="idle" aria-label="Copy setup prompt"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy prompt</span></button></div>
               <p tabindex="0" class="max-h-56 overflow-y-auto px-5 py-4 font-mono text-xs/6 break-words whitespace-pre-wrap text-amber-100 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-300">{AGENT_SETUP_PROMPT}</p>
             </div>
-            <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The agent reads [install.md](/install.md): the Node.js check, the npm install, MCP registration for your host without touching your other servers, `librarium init` with keys kept out of chat and source control, and an offline `librarium doctor` check.")} />
+            <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The agent reads [install.md](/install.md): Node.js and candidate command checks, MCP registration without touching your other servers, `librarium setup` with keys kept out of chat and source control, and offline `setup --check`.")} />
           </div>
         </div>
 
@@ -446,7 +436,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
           ))}
           <div class="flex items-start gap-3 border-t border-neutral-200 bg-neutral-50 px-6 py-4 text-base/7 text-neutral-700 sm:text-sm/6">
             <Icon name="check" class="mt-1 size-4 text-amber-700" />
-            <p set:html={inline("After registering, have your agent call `list_providers` and `list_groups` to confirm the connection. Those calls are local and free.")} />
+            <p set:html={inline("After registering, have your agent call `list_sources` to confirm the connection. It is local and free.")} />
           </div>
         </div>
         <p id="copy-status" role="status" class="sr-only"></p>
@@ -459,10 +449,10 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-12">
           <div class="lg:sticky lg:top-8 lg:self-start">
             <h2 id="tools-heading" class={sectionHeading}>What your agent can call</h2>
-            <p class="mt-5 text-base/7 text-pretty text-neutral-600">The server exposes five tools. None of them takes a budget or fallback flag; spending limits and fallback behavior come from your librarium configuration, so a budget promised in a prompt is only real if the matching config is in place.</p>
+            <p class="mt-5 text-base/7 text-pretty text-neutral-600">The server exposes exactly three tools. Research can lower but not raise the configured max_cost. In-flight calls can exceed admission caps; unknown reported spend remains null. Waiting defaults to 45 seconds, maximum 50.</p>
             <div class="mt-8 rounded-md border border-neutral-200 bg-neutral-50 p-5">
               <p class="text-sm font-semibold text-neutral-950">There is no <code class="font-mono">plan</code> tool.</p>
-              <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Offline previews are a CLI command (`librarium plan \"…\" --group quick --json`), so over MCP an agent designs a run with `list_providers` and `list_groups` instead.")} />
+              <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Use `research` with `dry_run: true` for an offline preview. Equivalent CLI: `librarium research \"…\" --dry-run --json`. Neither stores a Run nor calls providers.")} />
             </div>
           </div>
           <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2">

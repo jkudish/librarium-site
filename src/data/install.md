@@ -2,9 +2,11 @@
 
 These are step-by-step instructions for a coding agent installing Librarium v2 as a CLI and MCP tool on the user's machine. Follow them in order.
 
+This site describes the unreleased simplified-surface candidate. A published 2.x version alone does not prove this surface is present: confirm `librarium research --help` and `librarium setup --help`. Stop if either command is missing; do not install a Git candidate or replace an existing installation without authorization.
+
 ## Ground rules
 
-- Do not run research or make paid provider calls without the user's approval. Every step below is local and free; `librarium doctor --live`, `librarium run`, and the MCP `research` tool are not.
+- Do not run research or make paid provider calls without the user's approval. Offline discovery, `setup --check`, and research `--dry-run` are free; `setup --live` and real `research` are not.
 - Never ask the user to paste an API key into chat, and never write credentials into source control or into a project file that is committed.
 - Preserve the user's existing MCP servers. Add `librarium` alongside them; do not replace or reorder other entries.
 - Ask before changing anything outside the steps below.
@@ -102,27 +104,28 @@ mcp_servers:
 
 If the host cannot find `librarium`, use the absolute path that `command -v librarium` prints as the command.
 
-## 5. Configure providers
+## 5. Configure sources
 
-Ask which providers the user wants, then have the user run the setup wizard in their own terminal:
+Ask which sources the user wants, then have the user run the setup wizard in their own terminal:
 
 ```bash
-librarium init
+librarium setup
 ```
 
-`init` asks where to store each key: the OS keychain (macOS), a shell environment variable, or the user's config file. The user types keys into the wizard, not into chat. If their keys are already exported as environment variables, `librarium init --auto` enables the providers it finds; opt-in providers need `librarium init --enable <ids>`.
+The user types keys into the wizard, not into chat. `setup --auto` discovers existing credentials offline; `setup --enable <names>` chooses sources explicitly. Configuration uses flat source names, options, and saved groups without built-in workflows. Engines are named-only.
 
 Keys stored as environment-variable references must also be present in the MCP server's environment. Claude Code passes the shell environment. Codex passes only a small default set, so list the variables in `env_vars` under `[mcp_servers.librarium]`. In Cursor, add an `env` entry such as `"EXA_API_KEY": "${env:EXA_API_KEY}"`. Other hosts have their own `env` setting, such as `amp mcp add --env`. Reference variable names only; never write key values into a committed file.
 
 ## 6. Verify offline
 
 ```bash
-librarium doctor
+librarium setup --check
+librarium sources --json
 ```
 
-Run `doctor` without `--live`. It checks configuration and credential presence offline; `--live` makes provider requests and may incur charges. Credential presence is not authentication.
+Do not add `--live`. Credential presence is not authentication; live checks make provider requests and may incur charges.
 
-Then confirm the MCP connection from the agent: call `list_providers` and `list_groups`. Both are local and free, and neither authenticates a provider. The host may need a restart or a new session before the tools appear.
+Then confirm the MCP connection from the agent: call `list_sources`. It is local and free, and does not authenticate a provider. The server exposes exactly `research`, `get_run`, and `list_sources`. The host may need a restart or a new session before the tools appear.
 
 ## 7. Summarize
 
@@ -133,4 +136,4 @@ Stop here and tell the user:
 - which providers are configured and any credential setup that remains;
 - that no research or paid provider calls were made.
 
-Do not run a first query unless the user asks for one. When they do, `librarium plan "<question>" --group quick --json` previews it offline first. The [agent docs](https://librarium.agentsy.build/docs/using-with-agents.md) cover the MCP tools and how to read complete results.
+Do not run a first query unless the user asks for one. When they do, `librarium research "<question>" --only exa --dry-run --json` previews it offline first. The [agent docs](https://librarium.agentsy.build/docs/using-with-agents.md) cover the MCP tools and how to read complete results.

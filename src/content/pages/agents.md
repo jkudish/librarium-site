@@ -14,17 +14,17 @@ Your agent gets research through the same CLI you use. Install it once:
 npm install -g librarium
 ```
 
-The MCP server and the agent skill ship with that install. There is nothing else to download. Check that `librarium --version` reports major version 2 before you connect an agent. [Getting started](/docs#install) covers other install channels, and the [CLI page](/cli) covers terminal use.
+The MCP server and the agent skill ship with that install. This is the unreleased simplified-surface candidate; check both the version and `librarium research --help`. A version number alone does not prove these tools exist. [Getting started](/docs#install) covers installation, and the [CLI page](/cli) covers terminal use.
 
 ## How you'd use it
 
 Ask your agent a research question in plain language, and say how far it may go: for example, a quick pass, then a deep pass if coverage is thin, inside the budget your librarium configuration already sets. A typical session over MCP:
 
-1. `list_groups` to see the configured workflows, so the agent picks a group without guessing.
-2. `research` with `group: "quick"`, which returns an index of the run rather than the answers.
-3. `get_results` on that run, following `nextCursor` until `hasMore` is false.
-4. If coverage is thin, `research` again with `group: "deep"` and `mode: "async"`, then `check_async` to move the pending work forward.
-5. `get_results` on the deep run, then an answer that keeps each finding tied to the provider that wrote it and the sources it cited.
+1. `list_sources` to discover research sources, named-only engines, saved groups, and availability offline.
+2. `research` with `question`, `only`, and `dry_run: true` to preview without storage or provider calls.
+3. After authorizing spend, `research` without `dry_run`; keep the returned Run id.
+4. `get_run` with that id to resume pending work, or with `source` to read an answer and citations. Follow `cursor` until null; concatenate JSON-text chunks before parsing.
+5. If more research is needed, deepen only within the existing authorization; a new Run can incur new charges. Preserve source identity and uncertainty in the answer.
 
 ## Give your agent the setup prompt
 
@@ -34,7 +34,7 @@ Paste this into your coding agent. It points the agent at the install instructio
 Install Librarium for me by following https://librarium.agentsy.build/install.md. Don't run research or make paid provider calls without my approval, and keep my API keys out of chat and source control.
 ```
 
-The agent reads [install.md](/install.md): the Node.js check, the npm install, MCP registration for your host without touching your other servers, `librarium init` with keys kept out of chat and source control, and an offline `librarium doctor` check.
+The agent reads [install.md](/install.md): the Node.js and command checks, installation, MCP registration without changing other servers, `librarium setup` with keys kept out of chat and source control, and offline `setup --check`.
 
 ## Register the MCP server in your agent
 
@@ -103,23 +103,19 @@ mcp_servers:
 
 **Any other MCP host**: register a stdio server named `librarium` with command `librarium` and args `["mcp"]`, following your host's own config format.
 
-After registering, have your agent call `list_providers` and `list_groups` to confirm the connection. Those calls are local and free.
+After registering, have your agent call `list_sources` to confirm the connection. It is local and free.
 
 ## What your agent can call
 
-The server exposes five tools. None of them takes a budget or fallback flag; spending limits and fallback behavior come from your librarium configuration, so a budget promised in a prompt is only real if the matching config is in place.
+The server exposes exactly three tools. `max_cost` may lower but not raise the configured cap. In-flight calls can exceed admission caps; unknown reported spend remains null.
 
-**`research`** starts a run. Input: a required `query`, plus optional `group` (a workflow like `quick` or `deep`), `providers` (exact profile ids), `mode` (`sync` or `async`), and `refine`. Output: a short index of the run; statuses, which provider returned what, source counts, known and unknown costs, and where results are saved. It does not paste whole answers into chat. Use it inside the scope and budget already authorized; only steps beyond that scope need fresh approval.
+**`research`** starts a stored Run. Input: `question`, optional `depth` (`quick` or `deep`), `only`, `skip`, `max_cost`, `dry_run`, and `wait_seconds`. Output: bounded id, statuses, citation counts, costs, skips, and next hint. Dry runs neither store nor call providers. Waiting defaults to 45 seconds, maximum 50; zero returns without waiting.
 
-**`get_results`** reads what a run saved. Input: the run directory, optionally one `provider` or `resultId`, a `part` (`content` or `citations`), a `cursor`, and a `limitChars` page size (256 to 12,000; default 8,000). Output: complete text and citations, one bounded page at a time. Use it to read the whole answer; follow `nextCursor` with the same filters until `hasMore` is false. It reads saved files only: no provider calls, no credential lookups.
+**`get_run`** resumes or reads an existing Run. Input: `id`, optional `wait_seconds`, `source`, and `cursor`. Without source it returns a summary; with source it returns paged JSON text containing answer and citations. Continue with the returned cursor and unchanged id/source until cursor is null. A changed answer invalidates an old cursor; concatenate pages before parsing. It can retrieve accepted provider work but starts no new research.
 
-**`check_async`** moves a long-running job forward. Input: the run directory, and a `retrieve` toggle that only matters for runs saved by an older schema. Output: counts plus an updated index, committing results as they finish. Use it to advance work already submitted, under its original time and cost limits; a charge still pending with a provider stays unknown until the provider reports it. It may contact providers to fetch completed work; it starts no new research.
+**`list_sources`** reports sources, engines, user groups, availability, and price hints. No inputs. It is offline discovery, not authentication or spending permission.
 
-**`list_providers`** shows what can run. Input: optional `detail: "profiles"` and one `provider` id. Output: static summaries, or exact profile declarations with targets, capabilities, workflows, and availability reasons. Use it to plan a run. It is local: no custom code is loaded, no credentials are resolved, and nothing is authenticated, so a listed provider is not a verified one.
-
-**`list_groups`** shows the configured workflows. Input: none. Output: group names and their member profiles. Use it to pick a group without guessing. Local and free.
-
-There is no `plan` tool. Offline previews are a CLI command (`librarium plan "…" --group quick --json`), so over MCP an agent designs a run with `list_providers` and `list_groups` instead.
+No separate plan tool exists: `research` with `dry_run: true` is the offline preview, equivalent to CLI `research --dry-run`.
 
 ## Ask for the whole answer
 

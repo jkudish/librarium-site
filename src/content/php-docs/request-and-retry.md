@@ -1,68 +1,30 @@
 ---
-title: Requests, queues, and retries
-description: Operate shared deadlines and provider submissions safely.
+title: Requests, queues, and recovery
+description: Recover saved durable tasks without repeating paid submissions.
 order: 7
 ---
 
-Librarium compiles one request-wide plan before execution. `run()` executes it
-in the current process. `queue()` dispatches the same plan in one encrypted
-Laravel job and returns its request ID immediately.
+Every real request stores a Run before provider dispatch. `run()` submits and waits; `queue()` stores the Run and dispatches one encrypted, one-attempt Laravel job. Dry runs neither store nor dispatch.
 
-## Shared deadline
+## Recover a snapshot
 
-The configured `librarium.timeout` is 6,900 seconds by default. Override it for
-one request with `timeout(600)` or `--timeout=600`. The runtime calculates one
-deadline at start; every sequential Profile, fallback, HTTP timeout, poll, and
-sleep consumes that same budget.
+```php
+$run = Librarium::find($id);
+$current = $run?->refresh();
+```
 
-Provider Drivers stop before starting work that cannot fit in the remaining
-time and reject terminal responses that arrive after the deadline. A group does
-not receive a fresh timeout for every Profile.
+`refresh()` makes one observation of pending durable tasks and returns a new snapshot. It never starts queued sources, replays paid work, or cancels tasks. Temporary retrieval failures remain recoverable; permanent ones finish the affected result.
 
-The queue job timeout defaults to 7,200 seconds and is compiled separately to
-allow Laravel to terminate a worker after the research deadline. Keep worker
-and connection timeouts compatible with both values.
+Private signed handles bind Run, provider, variant, driver, model, options, and credential identity. Tampering or changed bindings fail before retrieval. Preserve the app key and configuration needed by pending tasks. Other-language state remains opaque, not executable PHP state.
 
-## Queue behavior
+## Ambiguous submission
 
-The job implements `ShouldQueue` and `ShouldBeEncrypted`, uses the configured
-connection and `research` queue, sets `failOnTimeout`, and has `tries = 1`.
-There is no automatic Laravel job retry. The application owns queue workers,
-failed-job policy, alerting, and terminal response persistence.
+Lost POST responses and worker loss can occur after provider acceptance but before handle persistence. A local store cannot make that window exactly-once. Do not blindly retry a job or submit a new Run. Preserve existing state, inspect provider activity and possible spend, and reconcile the accepted attempt. Unknown cost is not zero.
 
-`Librarium::status($requestId)` reports transient `queued`, `running`, and
-terminal progress through the configured cache-backed status store. Its default
-TTL is 10,800 seconds. Status is operational coordination, not durable history.
+Webhooks are verified wake hints; canonical retrieval remains evidence authority. No fallback or automatic paid resubmission is inferred from a transport failure.
 
-## Provider retry safety
+## Deadlines and storage
 
-Do not blindly rerun a failed queued job. A timeout or worker loss may occur
-after a paid provider accepted work but before Librarium recorded a terminal
-result. First inspect application logs, transient status, provider dashboards,
-and any stored receipt.
+The wait timeout defaults to 6900 seconds, the encrypted job timeout to 7200, with one attempt. Your app owns compatible worker supervision, retry_after, failed-job policy, and access controls. Inline work without a saved handle becomes interrupted after process loss; durable work remains recoverable. Local timeouts do not stop upstream work or billing.
 
-Inline HTTP Drivers may retry only bounded transient failures according to
-their concrete implementation and remaining deadline. Authentication,
-authorization, validation, and malformed terminal data are not safe generic
-retry candidates.
-
-Background provider submissions are particularly sensitive. Provider handles,
-polling, retrieval, webhook correlation, and idempotency remain private inside
-the Driver. Drivers must not retry an ambiguous mutating submission unless the
-provider supports a stable idempotency key for the same logical attempt. Some
-current Drivers deliberately send an ambiguous submission only once.
-
-Webhooks are wake-up signals, not terminal-content authority. A Driver verifies
-and correlates a signal, then retrieves canonical terminal content from the
-provider. Provider handles are not exposed as public resumable state.
-
-## Recovery checklist
-
-1. Determine whether the request is still active at the provider.
-2. Reconcile possible spend; unknown cost is not zero.
-3. Persist any recovered terminal result in application storage.
-4. Dispatch a new Librarium request only when duplicate work and spend are
-   acceptable, with a new preview and cost/deadline controls.
-
-For command exit behavior see [Artisan commands](/docs/php/commands). For queue
-callbacks and response persistence see [Library API](/docs/php/library).
+Version-conditional stores reject stale writers. Local filesystem markers never expire by age; remove a crashed owner's marker only after establishing the owner cannot resume. Cache expiry can destroy paid-task custody. Prefer persistent shared storage where that loss is unacceptable.

@@ -3,8 +3,8 @@ import "../styles/global.css";
 import {
   NODE_FLOOR,
   PRODUCT_VERSION,
-  PROFILE_COUNT,
-  PROVIDER_COUNT,
+  ENGINE_COUNT,
+  SOURCE_COUNT,
 } from "../data/product";
 import { markdownHrefFor } from "../lib/markdown-href";
 
@@ -50,10 +50,10 @@ const jsonLd = JSON.stringify([
     softwareVersion: PRODUCT_VERSION,
     runtimePlatform: `Node.js ${NODE_FLOOR}+`,
     featureList: [
-      `${PROVIDER_COUNT} built-in providers and ${PROFILE_COUNT} public profiles`,
-      "Four built-in workflows: quick, deep, visibility, and all",
-      "CLI, MCP server, agent skill, and Worker-safe package boundaries",
-      "Provider, profile, collection, and source provenance",
+      `${SOURCE_COUNT} research sources and ${ENGINE_COUNT} named-only engines`,
+      "Quick and deep variants with stored Runs",
+      "CLI, three-tool MCP server, agent skill, and runtime-neutral core",
+      "Source, provider, variant, model, and collector provenance",
     ],
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     license: "https://github.com/jkudish/librarium/blob/main/LICENSE",

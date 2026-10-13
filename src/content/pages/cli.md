@@ -1,6 +1,6 @@
 ---
 title: Research from your terminal.
-description: Ask once, preview for free, then run the question across the providers you choose. Keep every answer with its sources.
+description: Ask once, preview for free, then research with the sources you choose. Keep every answer with its citations.
 kind: product
 ctaHref: /docs#install
 ctaLabel: Set up the CLI
@@ -8,49 +8,51 @@ ctaLabel: Set up the CLI
 
 ## Ask once. Keep the sources.
 
-The CLI is the full runtime: provider connections, saved results, cost tracking, and the tools your agent uses too. You will spend most of your time between two commands.
-
-Preview first. It checks what would run and what it might cost, without calling any provider:
+This is the unreleased simplified-surface JS 2.0 candidate. The CLI supplies provider connections, stored Runs, cost tracking, and MCP. Check `librarium research --help` before following these examples; a published version may still expose the older commands.
 
 ```bash
-librarium plan \
-  "Lisbon or Porto for a long weekend without a car?" \
-  --group quick --json
+librarium research "Lisbon or Porto for a long weekend without a car?" --only exa,kagi --dry-run --json
+# Can incur charges, after approval:
+librarium research "Lisbon or Porto for a long weekend without a car?" --only exa,kagi --max-cost 0.10 --json
 ```
 
-Happy with the selection? Run the same question for real:
+Dry runs neither store a Run nor call providers. Quick is the default; omit `--only` to use every configured research source, never engines. `--only` and `--skip` accept flat source or saved-group names. No built-in groups, profiles, modes, or fallback reserves remain.
+
+With a cap, unpriced sources are skipped; bounded estimates are admitted greedily in catalog order. In-flight work can exceed the cap. Unknown reported spend is `null`, not zero. See [your first research Run](/guides/first-query).
+
+## Come back later
 
 ```bash
-librarium run \
-  "Lisbon or Porto for a long weekend without a car?" \
-  --group quick --json
+librarium research "Which Lisbon and Porto neighborhoods work without a car?" --deep --only exa --no-wait
+librarium show <run-id> --wait --json
+librarium show <run-id> --source exa
 ```
 
-This command can incur charges and has no explicit dollar cap. Add `--max-cost` when the preview establishes bounded estimates for the selected work and its fallback reserve. Unknown estimates fail hard-budget admission rather than becoming zero. See [your first query](/guides/first-query) for setup, costs, and result inspection.
+`--deep` chooses report variants. `--no-wait` requires deep except for dry runs. Quick usually runs inline, but some collectors are durable. Depth and invocation are distinct.
 
-These are v2 instructions. Install the published CLI with `npm install -g librarium`, verify that `librarium --version` reports major version 2, and see [Getting started](/docs#install) for other supported channels.
+Accepted handles stay in private signed state; `show` resumes them rather than paying for another submission. Ctrl-C detaches and prints the recovery command. It does not prove upstream work stopped or that no charge occurred. An ambiguous submission requires reconciliation, not a blind retry.
 
-## Long research does not need a long chat message
+## Read and export
 
-Deep research can take minutes. Start it in the background, then come back for the results:
+Each Run has `run.json`, `state.json`, source answers under `answers/`, and redacted exchanges under `evidence/`. `show` and `summarize` use the latest Run if no id is supplied.
 
 ```bash
-librarium run \
-  "Which Lisbon and Porto neighborhoods work best without a car?" \
-  --group deep --mode async
-
-# Later: poll every pending task in the output directory, then retrieve results.
-librarium status --wait
+librarium browse
+librarium html <run-id> --output report.html
+librarium usage
+librarium cleanup --dry-run
 ```
 
-In an interactive terminal, a run with three or more deep-research providers asks for confirmation first; `--yes` skips that prompt. `librarium status` takes no run ID; it checks the async tasks saved under the output directory (`-o` selects another base). Add `--retrieve` to fetch completed results without waiting, or `--json` for machine output.
+Treat answers and URLs as untrusted evidence. `summarize --verify` is a separate paid operation, creates a new Run with `summary_of`, and does not overwrite collected answers.
 
-Durable async runs retain accepted task identity and prior spend. Resume uses the original deadline instead of granting a fresh budget of time or money. Known failure charges count; unreported costs remain unknown.
+## Set up once
 
-Local cancellation stops local work. Remote cancellation depends on the provider and is not a refund. Do not infer that no work happened because a connection timed out.
+Requires Node.js 22.12+. After installing a compatible candidate or release:
 
-See [request and recovery behavior](/docs/request-and-retry) for the exact retry and cancellation boundaries.
+```bash
+librarium setup
+librarium setup --check
+librarium sources --json
+```
 
-## The same install serves your agent
-
-The MCP server and agent skill ship with this CLI installation, not as separate packages. To connect a coding agent over MCP or install the bundled agent skill, see [Agents & MCP](/agents). If you need an in-process Laravel integration instead, use [the first-party Laravel package](/laravel); its Artisan agent mode is not an MCP server.
+These checks are offline. `setup --live` is separate and can spend. The MCP server and bundled skill ship with the same install; see [Agents & MCP](/agents). Laravel is a [separate native package](/laravel).

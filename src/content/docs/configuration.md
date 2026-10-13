@@ -1,64 +1,43 @@
 ---
 title: Configuration
-description: Strict snake_case v2 config, global and project layers, and side-effect-free v1 migration.
+description: Configure flat sources, engine collectors, saved groups, and Run storage in v3 JSON.
 order: 7
 ---
 
-## V2 shape
-
-V2 config is strict snake_case JSON. Unknown keys and camelCase v1 fields are not v2 config.
+`librarium setup` writes `~/.config/librarium/config.json`. The simplified API uses config **version 3**; version 2 never shipped. Loading v1 writes an original-byte backup before migrating.
 
 ```json
 {
-  "version": 2,
-  "execution_defaults": {
-    "mode": "sync",
-    "max_concurrency": 4,
-    "inline_attempt_deadline_ms": 30000,
-    "background_attempt_deadline_ms": 1800000,
-    "request_deadline_ms": 1800000,
-    "poll_interval_ms": 10000
+  "version": 3,
+  "sources": {
+    "exa": { "key": "env:EXA_API_KEY" },
+    "parallel": { "key": "env:PARALLEL_API_KEY", "processor": "pro" },
+    "grok": { "key": "env:XAI_API_KEY", "search": "both", "enabled": false }
   },
-  "providers": { "exa": { "enabled": true } },
-  "custom_providers": {},
-  "trusted_provider_ids": [],
-  "groups": { "custom:team": ["exa/search"] },
-  "runtime": {
-    "output_dir": "./agents/librarium",
-    "llm_web_search": true
-  }
+  "engines": { "collector": "searchapi", "key": "env:SEARCHAPI_API_KEY" },
+  "groups": { "editorial": ["exa", "claude"] },
+  "summarize": { "source": "openai" },
+  "max_cost": "1.00",
+  "runs": { "store": "filesystem", "path": "./agents/librarium", "keep_days": null }
 }
 ```
 
-The global root has `version`, `execution_defaults`, `providers`, `custom_providers`, `trusted_provider_ids`, `groups`, and `runtime`. Optional `request_deadline_ms` bounds the entire run from its original start, including helpers and fallbacks; without it, preflight derives a window from the selected work and configured timeouts.
+A source is set up when it has a resolved key and `enabled` is not false. Environment keys can work without a config file. Credentials must not be source options. Unknown options and invalid combinations fail before calls; `sources --json` reports the shared option catalog.
 
-## CLI and library project layers
+## Options replace extra profiles
 
-The explicit Node library loader accepts global and project v1/native-v2 layers, merging project values over global ones. Native project config allows only fields in `LibrariumProjectConfigV2Schema`. Replacing custom code under an inherited ID removes inherited trust and requires project-layer trust. `saveConfigV2()` saves a complete validated global config, not a project override document.
+Examples: `grok.search` selects `web`, `x`, or `both`; `brave.results` selects `answer` or `search`; `parallel.processor` defaults to `pro`; `openai.effort` configures reasoning effort. A call can override options through `{ options: { parallel: { processor: 'ultra' } } }`.
 
-Normal CLI commands accept native v2 **global** config, but `.librarium.json` still uses the camelCase compatibility contract: `defaults`, `providers`, `customProviders`, `trustedProviderIds`, `groups`, `refine`, and `answer`. Do not place a native snake_case project document there and expect the normal CLI path to apply it. CLI flags override project settings, which override global settings and factory defaults.
+`google.collector` is `searchapi`, `serpapi`, or `serpbase`. Engine collector configuration is separate and may be overridden per engine. Availability differs by language and collector; do not infer it from a logo or a key alone.
 
-`config --json` shows the merged camelCase compatibility projection, not a save-ready native v2 document. `config --global --json` excludes the project layer. Both may include literal credentials: treat the output as sensitive. `config --menu` edits global settings only. Its legacy writer and onboarding refuse to overwrite an active native v2 file.
+## Storage and retention
 
-## Migrate from v1
+Relative Run paths resolve from the calling directory. `runs.keep_days: null` disables automatic retention. `cleanup` prunes terminal Runs. A custom store module path resolves relative to the config file:
 
-`migrateConfig()` accepts v1 or v2 input. It returns an immutable v2 config with notices, or structured issues. It does not write a file. Authored groups that collide with reserved workflows migrate to `custom:<name>`. Migration never grants trust to executable custom providers.
-
-Most users should follow the CLI procedure in [Upgrade from v1](/docs/upgrading-to-v2). The programmatic boundary below is for applications that own config migration themselves.
-
-`loadConfigV2()` also has no write side effect and requires explicit paths. Persist only after reviewing the result:
-
-```ts
-import { loadConfigV2, saveConfigV2 } from 'librarium/node';
-
-const migrated = loadConfigV2({
-  global_path: '/home/me/.config/librarium/config.json',
-  project_path: '/work/project/.librarium.json',
-});
-if (!migrated.ok) throw new Error(JSON.stringify(migrated.issues));
-saveConfigV2(migrated.config, {
-  path: '/home/me/.config/librarium/config-v2.json',
-});
+```json
+{ "runs": { "store": { "module": "./stores/redis.js" } } }
 ```
 
-`saveConfigV2()` validates, writes atomically, and enforces owner-only protection. It fails closed on Windows when equivalent owner-only protection cannot be verified. Keep the old file until the saved v2 config passes `librarium doctor` and a bounded test run.
+That module executes with process permissions; review it before loading. Node preserves a signing key beside config, outside Run storage. Keep it across restarts; losing or changing it prevents trusted handle recovery.
+
+`config show` may contain sensitive configuration; do not send its output to public logs. See [RunStore](/docs/custom-providers) and [v1 migration](/docs/upgrading-to-v2).

@@ -1,50 +1,44 @@
 ---
-title: Library usage
-description: Use librarium/core as an embeddable library in Workers, edge runtimes, and Node.js.
+title: JavaScript library
+description: Research and resume stored Runs in Node, Workers, and browsers.
 order: 9
 ---
 
+```ts
+import { createLibrarium } from 'librarium';
+
+const librarium = createLibrarium();
+const plan = await librarium.research('Compare database providers', {
+  only: ['exa'], dryRun: true,
+});
+// Can incur provider charges:
+const started = await librarium.research('Compare database providers', {
+  depth: 'deep', only: ['exa'], maxCost: '1.00', wait: false,
+});
+const later = await librarium.get(started.id, { wait: true });
+librarium.sources();
+if (later !== null) {
+  const summary = await librarium.summarize(later);
+}
+```
+
+`research` waits by default. With `wait: false`, durable work can be finished through `get`; quick inline work still depends on its process. `summarize` is a separate budgeted Run with `summary_of`, not a mutation of the source Run.
+
 ## Import boundaries
 
-| Import | Public boundary |
+| Import | Responsibility |
 | --- | --- |
-| `librarium` | Side-effect-free, Worker-safe schemas, terminal interchange types, config migration and validation, workflow types, and `BUILTIN_PROVIDER_CATALOG` |
-| `librarium/core` | Worker-safe catalog construction, planning, coordinator state, injected HTTP transport, execution ports, and `runPreparedExecution()` |
-| `librarium/node` | Node config-file load and atomic save, trusted custom-provider loading, credential context, and canonical validation helpers |
+| `librarium` | Node client with v3 config and filesystem storage |
+| `librarium/node` | Same client plus filesystem store and config loading/saving |
+| `librarium/core` | Runtime-neutral client; inject config/environment/store, memory by default |
+| `librarium/testing` | Disposable-store `runStoreContract` |
 
-Importing `librarium` does not inspect the host, read files, access credentials, initialize adapters, start the CLI, or install process handlers. `librarium/core` does not construct concrete provider adapters or a global registry. `librarium/node` does not promise a general high-level runner or portable persistence layer. The complete Node application is the `librarium` executable.
+The root is Node-oriented. Use `librarium/core` for Workers or browsers; it does not inspect process state or files on import. Preserve a persistent custom client's `handleKey` (32 random bytes) outside its store across restarts.
 
-## Worker-safe planning
+## Public Run
 
-```ts
-import {
-  buildProviderCatalog,
-  prepareResearchExecution,
-  runPreparedExecution,
-  type HttpClient,
-} from 'librarium/core';
-```
+JSON uses snake_case, JS options camelCase. The Run records `spec`, `id`, `question`, `depth`, `status`, timestamps, `cost`, `results`, `skipped`, and `notices`. Run status is `planned`, `running`, `done`, `partial`, or `failed`; results have `queued`, `running`, `done`, or `failed`.
 
-The core API expects dependencies and adapter bindings to be injected. It provides planning and execution primitives, not a one-call provider runner. Fetch-based `httpRequest()` and `httpStreamRequest()` are Worker-compatible and accept caller cancellation signals.
+Each result keeps a flat `source`, `observation`, Markdown `answer`, citations, cost, and provider/variant/model/collector provenance. Errors are safe `{ code, message, retryable }` values. Reported money is an exact decimal USD string or `null`; estimates never replace missing reported charges.
 
-HTTP retry behavior is explicit. GET defaults to bounded safe retries. Mutating requests do not retry unless the caller supplies an idempotency key and policy. Streaming submissions are one attempt only because replay could duplicate paid work. Timeouts, aborts, and response-size limits remain active while a stream is consumed.
-
-See [Requests, retries, and fallbacks](/docs/request-and-retry) for the complete policy, defaults, durable-submission boundary, and recovery behavior.
-
-## Node services
-
-```ts
-import {
-  loadConfigV2,
-  loadCustomProviders,
-  saveConfigV2,
-} from 'librarium/node';
-```
-
-Use the Node boundary for filesystem and executable-code concerns. Callers own returned custom-provider instances and decide how to bind them into a client-scoped runtime.
-
-## Shared TypeScript and PHP terminal boundary
-
-`contracts/v1` is a terminal, language-neutral snapshot of exactly seven values: `ResearchResponse`, `ResearchResult`, `Citation`, `Source`, `ResultProvenance`, `Usage`, and `ResearchError`. It is generated from Zod and vendored from an exact Git snapshot with checksums.
-
-It contains no request, attempt, lifecycle event, durable handle, coordinator state, config, persistence, manifest, JSONL, artifact schema, or custom-provider protocol. PHP `run()` and `queue()` and TypeScript runtime services are outside this boundary. Each terminal response carries `generator` and `generator_version`.
+The shared `librarium-spec` package owns schemas, source catalog, and semantic fixtures. It does not make private runtimes or task handles interchangeable. See [output and evidence](/docs/output-formats).

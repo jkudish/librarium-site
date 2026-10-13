@@ -5,15 +5,8 @@
 // is read from that file's fenced blocks, so the page and its Markdown
 // cannot drift apart.
 //
-// Provenance of the output shown:
-// - The preview values were captured offline from jkudish/laravel-ai-
-//   librarium (release/1.0-prep) under Orchestra Testbench, running the
-//   page's own fanOut() example with placeholder credentials. No provider
-//   was called; the REPL-style layout is presentation, the values are real.
-// - The Artisan agent-mode JSON is real `librarium:query --agent` output
-//   from the same checkout (preview only), pretty-printed and trimmed.
-// - The config excerpt is copied from the package's config/librarium.php;
-//   the services.php block is the documented credential setup.
+// This page describes the unreleased PHP 1.0 candidate. Output examples
+// below are illustrative; no live provider result is implied.
 import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Header from "../components/Header.astro";
@@ -31,8 +24,8 @@ const { title, description, ctaHref, ctaLabel } = entry.data;
 const markdownHref = "/laravel.md";
 const source = "src/content/pages/laravel.md";
 const blocks = fencedBlocks(entry.body ?? "");
-const previewCode = pickBlock(blocks, "php", "->fanOut(", source);
-const resultsCode = pickBlock(blocks, "php", "foreach ($evidence->results", source);
+const previewCode = pickBlock(blocks, "php", "$research = Librarium::research(", source);
+const resultsCode = pickBlock(blocks, "php", "$evidence->result('exa')", source);
 const queueCode = pickBlock(blocks, "php", "->then(function ($response)", source);
 const toolCode = pickBlock(blocks, "php", "final class ResearchEvidence", source);
 const agentCode = pickBlock(blocks, "php", "final class TechnicalAdvisor", source);
@@ -42,63 +35,42 @@ const install = "composer require jkudish/laravel-ai-librarium";
 const publish = "php artisan vendor:publish --tag=librarium-config";
 
 const previewSession: TerminalLine[] = [
-  { prompt: ">", cmd: "$preview->profiles->pluck('id')->all()" },
-  { out: '= ["exa", "gemini-grounded"]' },
-  { prompt: ">", cmd: "$preview->unavailable->all()" },
-  { out: "= []" },
-  { prompt: ">", cmd: "$preview->pricingStatus" },
-  { out: '= "complete"' },
-  { prompt: ">", cmd: "$preview->knownCostSubtotals->all()" },
-  { out: '= ["USD" => "1.857"]', tone: "ok" },
-  { prompt: ">", cmd: "$preview->costEstimateComplete" },
-  { out: "= false", tone: "warn" },
-  { prompt: ">", cmd: "$research->maxCost('0.25', 'USD')->preview()" },
-  { out: "  ValidationException", tone: "warn" },
-  { out: "  A maximum-cost preflight check requires complete, current, single-currency quotes" },
-  { out: "  from configured conservative usage estimates for every primary and reachable fallback." },
+  { prompt: ">", cmd: "$preview->status()" },
+  { out: '= "planned"' },
+  { prompt: ">", cmd: "$preview->toArray()['cost']['reported']" },
+  { out: "= null", tone: "warn" },
+  { prompt: ">", cmd: "$preview->toArray()['skipped']" },
+  { out: "= […] // Inspect unpriced and over-budget sources." },
 ];
 
 const agentModeJson: TerminalLine[] = [
-  { cmd: "php artisan librarium:query \\\n  'Compare PostgreSQL connection-pooling options for Laravel workers.' \\\n  --agent --profile=gemini-grounded", accent: "--agent --profile=gemini-grounded" },
-  { out: "{" },
-  { out: '  "schema_version": 1,' },
-  { out: '  "type": "preview",' },
-  { out: '  "request_id": "01M4PV1VH1SAWGC2GC6BW7Q08B",' },
-  { out: '  "query": "Compare PostgreSQL connection-pooling options for Laravel workers.",' },
-  { out: '  "profiles": ["gemini-grounded"],' },
-  { out: '  "fallbacks": [],' },
-  { out: '  "unavailable": [],' },
-  { out: '  "warnings": [],' },
-  { out: '  "cost": { "amount": null, "currency": null, "complete": false },', tone: "warn" },
-  { out: '  "pricing": {' },
-  { out: '    "status": "complete",' },
-  { out: '    "known_subtotals": [{ "amount": "1.850", "currency": "USD" }],', tone: "ok" },
-  { out: '    "priced_at": "2026-10-12T01:18:52+00:00",' },
-  { out: '    "priced_until": "2026-10-12T03:13:52+00:00",' },
-  { out: "    … quotes, freshness, and provenance (trimmed)", tone: "dim" },
-  { out: "  }" },
-  { out: "}" },
+  { cmd: "php artisan librarium:research \\\n  'Compare PostgreSQL connection-pooling options for Laravel workers.' \\\n  --only=exa --dry-run --json", accent: "--dry-run --json" },
+  { out: '"spec": "librarium.run/1"' },
+  { out: '"status": "planned"' },
+  { out: '"depth": "quick"' },
+  { out: "… remaining Run fields omitted", tone: "dim" },
 ];
 
 const queueFlow = [
-  { label: "Dispatch", body: "`queue()` compiles the same plan as `run()` and returns a `requestId` right away." },
+  { label: "Store, then dispatch", body: "`queue()` stores a running Run before dispatch and returns its `id()`." },
   { label: "One encrypted job", body: "A single Laravel job with `tries = 1` and `failOnTimeout`. A failure is never retried automatically, so paid work is not silently repeated." },
   { label: "Poll the provider", body: "Polling is authoritative for terminal content. Where a provider supports webhooks, they are only wake-up hints." },
-  { label: "Your callback", body: "`then()` receives the terminal `ResearchResponse`; `catch()` receives the failure. Persist it in your own storage." },
+  { label: "Your callback", body: "`then()` receives the Run; `catch()` receives the failure. Your app controls tenant access and workflows." },
 ];
 
 const configExcerpt = `return [
-    'default_group' => 'quick',
+    'sources' => [],
+    'groups' => ['editorial' => ['exa', 'gemini']],
+    'max_cost' => '1.00',
     'timeout' => 6900,
-    'status_ttl' => 10800,
-    'webhook_signal_ttl' => 10800,
-    // …
+    'runs' => ['store' => 'filesystem', 'disk' => 'local',
+        'path' => 'librarium', 'encrypt' => true, 'keep_days' => null],
     'queue' => [
         'connection' => null,
         'name' => 'research',
         'timeout' => 7200,
     ],
-    // … one entry per Profile under 'profiles'
+    // … other source and collector configuration
 ];`;
 
 const servicesExcerpt = `// config/services.php
@@ -126,7 +98,7 @@ const chipCopy = "chip-copy group";
       <div class="rounded-lg border border-neutral-200 bg-white p-5">
         <div class="flex items-center gap-3">
           <img src="/languages/laravel.svg" alt="" width="24" height="24" class="size-6" />
-          <p class="text-sm font-medium text-neutral-950">First-party Laravel package</p>
+          <p class="text-sm font-medium text-neutral-950">First-party Laravel · unreleased 1.0 candidate</p>
         </div>
         <div class="mt-4 space-y-2">
           {[install, publish].map((command) => (
@@ -140,11 +112,11 @@ const chipCopy = "chip-copy group";
           ))}
         </div>
         <ul class="mt-4 flex flex-wrap gap-2" aria-label="Requirements">
-          {["PHP 8.4", "Laravel 13", "Laravel AI SDK ^1.0.1"].map((requirement) => (
+          {["PHP 8.4", "Laravel 13.30+", "Laravel AI SDK ^1.0.1"].map((requirement) => (
             <li class="rounded-sm border border-neutral-200 bg-neutral-50 px-2 py-0.5 font-mono text-xs text-neutral-700">{requirement}</li>
           ))}
         </ul>
-        <p class="mt-3 text-xs/5 text-pretty text-neutral-500" set:html={inline("Publishing the config is optional. See [Install](/docs/php#install).")} />
+        <p class="mt-3 text-xs/5 text-pretty text-neutral-500" set:html={inline("Published packages may not expose this candidate. See [Install and the spec repository prerequisite](/docs/php#install).")} />
       </div>
     </ProductHero>
 
@@ -157,21 +129,21 @@ const chipCopy = "chip-copy group";
             <h2 id="preview-heading" class={`mt-3 ${sectionHeading}`}>Research before your agent recommends.</h2>
           </div>
           <div class="lg:pt-8">
-            <p class="text-base/7 text-pretty text-neutral-600">Preview the selection before authorizing provider spend. The preview compiles the Profiles, fallbacks, and pricing without calling a research provider.</p>
-            <p class="mt-4 text-base/7 text-pretty text-neutral-600" set:html={inline("Fan-out selects multiple Profiles; PHP executes them sequentially under one deadline. Check the preview for omissions, fallbacks, and known or unknown pricing.")} />
+            <p class="text-base/7 text-pretty text-neutral-600">Preview the source selection and admission before authorizing provider spend. A dry run stores nothing and makes no provider call.</p>
+            <p class="mt-4 text-base/7 text-pretty text-neutral-600" set:html={inline("`only()` selects flat names. PHP executes selected sources sequentially; inspect costs and skips before proceeding.")} />
           </div>
         </div>
         <CodePanel class="mt-10" label="Research step" lang="php" code={previewCode} />
         <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-          <TerminalBlock class="lg:self-start" title="Inspecting $preview" kind="real" badge="Real values · offline" lines={previewSession} caption="Captured offline from the Laravel package with placeholder credentials; no provider was called. Values are real; the REPL-style layout is ours." />
+          <TerminalBlock class="lg:self-start" title="Inspecting $preview" kind="illustrative" badge="Illustrative" lines={previewSession} caption="Illustrative dry-run fields; estimates and admission depend on your configuration." />
           <div class="space-y-4">
             <div class="rounded-lg border border-neutral-200 bg-white p-5">
               <p class="text-sm font-semibold text-neutral-950">Known is not the same as bounded</p>
-              <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("Both Profiles have current quotes, so pricing is `complete` and the known subtotal is $1.857. But Gemini's usage assumption is not a conservative bound, so the estimate is not complete and `maxCost('0.25', 'USD')` is rejected before dispatch.")} />
+              <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("With `maxCost('0.25')`, unpriced sources are skipped. Bounded estimates are admitted greedily in catalog order, not by a cheapest-source optimization.")} />
             </div>
             <div class="rounded-lg border border-neutral-200 bg-white p-5">
               <p class="text-sm font-semibold text-neutral-950">The rule</p>
-              <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("This example has no explicit cost ceiling. Add `maxCost('0.25', 'USD')` before preview when all reachable quotes can prove that conservative bound; an incomplete quote is rejected, not treated as free.")} />
+              <p class="mt-2 text-sm/6 text-pretty text-neutral-600">An admission cap is not a vendor billing guarantee. In-flight work can exceed it; missing reported spend stays null, never zero.</p>
             </div>
           </div>
         </div>
@@ -184,7 +156,7 @@ const chipCopy = "chip-copy group";
         <div class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-12">
           <div>
             <h2 id="response-heading" class={sectionHeading}>Every result keeps its sources.</h2>
-            <p class="mt-5 text-base/7 text-pretty text-neutral-600" set:html={inline("`run()` returns a typed `ResearchResponse`. Each result keeps its effective provider and Profile, its citations, and its provenance.")} />
+            <p class="mt-5 text-base/7 text-pretty text-neutral-600" set:html={inline("`run()` returns an immutable `Run`. Each result keeps its source, answer, citations, provenance, and safe error.")} />
             <p class="mt-4 text-base/7 text-pretty text-neutral-600" set:html={inline("`toArray()` is the same terminal shape the JavaScript package validates, so a PHP response and a TypeScript response describe evidence the same way. The runtimes themselves are not interchangeable.")} />
             <p class="mt-4 text-base/7 text-pretty text-neutral-600">Provider content and URLs remain untrusted evidence. Escape content for its output context and verify important claims against their cited sources.</p>
           </div>
@@ -212,12 +184,12 @@ const chipCopy = "chip-copy group";
         </div>
         <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div class="rounded-lg border border-neutral-200 bg-white p-5">
-            <p class="text-sm font-semibold text-neutral-950">Status is transient</p>
-            <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("`Librarium::status($requestId)` reports `queued`, `running`, `completed`, or `failed` from the cache (10,800-second default TTL). It is not durable history.")} />
+            <p class="text-sm font-semibold text-neutral-950">Recover the stored Run</p>
+            <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("`Librarium::find($id)?->refresh()` returns a new snapshot and observes saved durable handles. It never submits queued sources or replays paid work. Choose retention that preserves pending-task custody.")} />
           </div>
           <div class="rounded-lg border border-neutral-200 bg-white p-5">
             <p class="text-sm font-semibold text-neutral-950">Your app owns the rest</p>
-            <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("Librarium ships no research-history tables. Tenant ownership, retention, indexing, conversation memory, and the final product experience remain yours. The [Laravel queue guide](/guides/laravel-queues) covers callbacks, failures, and testing without paid calls.")} />
+            <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("RunStore provides version-conditional storage; database migration is opt-in and never automatic. Tenant ownership, retention, conversation memory, and the product experience remain yours. See [the queue guide](/guides/laravel-queues).")} />
           </div>
         </div>
       </div>
@@ -259,7 +231,7 @@ const chipCopy = "chip-copy group";
             </li>
           ))}
         </ul>
-        <p class="mt-6 max-w-[75ch] text-base/7 text-pretty text-neutral-600">For on-demand research inside a tool, keep authorization and a fixed allowed Profile set in application code. Enforce request limits and a total spend policy across repeated tool calls; never let the model supply its own permission to spend. The read-only example above is a safer starting point.</p>
+        <p class="mt-6 max-w-[75ch] text-base/7 text-pretty text-neutral-600">For on-demand research inside a tool, keep authorization and a fixed allowed source set in application code. Enforce request limits and a total spend policy across repeated tool calls; never let the model supply its own permission to spend.</p>
       </div>
     </section>
 
@@ -274,13 +246,13 @@ const chipCopy = "chip-copy group";
           <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Defaults</p>
             <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Publish only what you change</h3>
-            <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The package defaults to the `quick` group, a 6,900-second research timeout, 10,800-second status and webhook-signal TTLs, and the `research` queue with a 7,200-second job timeout. A per-request `timeout()` may be 1–86,400 seconds.")} />
+            <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Quick depth is the default, with no built-in groups. Wait timeout is 6,900 seconds; encrypted job timeout is 7,200. Your app owns worker supervision and compatible retry_after.</p>
             <CodePanel class="mt-auto" label="config/librarium.php (excerpt)" lang="php" code={configExcerpt} />
           </div>
           <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Credentials</p>
             <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Keys stay where Laravel keeps them</h3>
-            <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Laravel AI SDK Profiles read `config/ai.php` (for example `ai.providers.gemini.key`); focused HTTP Profiles read `config/services.php`. A Profile without its credential is never called: a group reports it unavailable and omits it, and an explicit selection fails preflight.")} />
+            <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("SDK sources read `config/ai.php`; focused HTTP sources read `config/services.php`. Source `key` overrides belong in config, never request options. Explicitly selecting an unconfigured source fails preflight.")} />
             <CodePanel class="mt-auto" label="config/services.php" lang="php" code={servicesExcerpt} />
           </div>
         </div>
@@ -288,10 +260,10 @@ const chipCopy = "chip-copy group";
           <div class="rounded-lg border border-neutral-200 bg-white p-6 lg:self-start">
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Artisan</p>
             <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Preview from the command line</h3>
-            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("`--agent` without `--run` or `--queue` is preview-only and makes no research provider call. Add `--run` to dispatch synchronously, or `--queue` to submit one encrypted job. Artisan agent mode is versioned JSON for automation; it is not an MCP server.")} />
-            <p class="mt-4 text-sm/6 text-pretty text-neutral-600" set:html={inline("See [Artisan commands](/docs/php/commands) for status and profile listings.")} />
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("`librarium:research --dry-run --json` is offline. Remove `--dry-run` to dispatch after approval, or add `--no-wait` to queue. JSON Artisan output is not an MCP server.")} />
+            <p class="mt-4 text-sm/6 text-pretty text-neutral-600" set:html={inline("See [Artisan commands](/docs/php/commands) for show, sources, and prune.")} />
           </div>
-          <TerminalBlock title="Agent-mode preview" kind="real" badge="Real output · trimmed" lines={agentModeJson} caption="Captured from the Laravel package with a placeholder Gemini key; preview only. Pretty-printed, with quote details trimmed. Your request ID and timestamps will differ." />
+          <TerminalBlock title="Artisan dry run" kind="illustrative" badge="Illustrative · excerpt" lines={agentModeJson} caption="Selected fields illustrate the Run contract, not a complete JSON payload or captured provider response." />
         </div>
       </div>
     </section>

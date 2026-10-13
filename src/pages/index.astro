@@ -4,51 +4,21 @@ import Header from "../components/Header.astro";
 import Icon from "../components/Icon.astro";
 import Base from "../layouts/Base.astro";
 import EvidenceControls from "../components/EvidenceControls.astro";
-import { WORKFLOWS } from "../data/product";
+import { WORKFLOWS, FEATURED_SOURCES, SOURCE_COUNT, ENGINE_COUNT } from "../data/product";
 import { RESEARCH_DEMO, formatElapsed, renderCapturedMarkdown } from "../data/research-demo";
 
 const providerMark = (logo: string) => `/providers/${logo}.${["you", "serpapi", "dataforseo"].includes(logo) ? "png" : "svg"}`;
 
-const featuredProviders = [
-  { name: "Exa", logo: "exa" },
-  { name: "Perplexity", logo: "perplexity" },
-  { name: "Gemini", logo: "gemini" },
-  { name: "OpenAI", logo: "openai" },
-  { name: "Claude", logo: "claude" },
-  { name: "Brave", logo: "brave" },
-  { name: "Grok", logo: "grok" },
-  { name: "Tavily", logo: "tavily" },
-  { name: "Firecrawl", logo: "firecrawl" },
-  { name: "Jina", logo: "jina" },
-  { name: "Kagi", logo: "kagi" },
-  { name: "OpenRouter", logo: "openrouter" },
-  { name: "Parallel", logo: "parallel" },
-  { name: "SearchAPI", logo: "searchapi" },
-  { name: "SerpAPI", logo: "serpapi" },
-  { name: "SerpBase", logo: "serpbase" },
-  { name: "DataForSEO", logo: "dataforseo" },
-  { name: "Valyu", logo: "valyu" },
-  { name: "You.com", logo: "you" },
-];
+const featuredProviders = FEATURED_SOURCES;
 const useCases = [
   {
     title: "Research a technical decision.",
     description: "Bring the options, tradeoffs, and source material into one place before you commit to an approach.",
     prompt: "SQLite or Postgres for a small team app? Compare deployment, concurrent writes, and operational overhead.",
-    // Agent-prompt wording follows the skill/MCP owner's verified handoff v2
-    // (.amp/transfer/next-wave/verified-syntax-handoff-v2.md): portable
-    // "Librarium skill"/MCP phrasing, no shell inside prompts, slash triggers
-    // never promised as universal. MCP research takes no per-call budget or
-    // fallback flags — budgets and fallbacks come from librarium
-    // configuration, so the prompt says to confirm the applicable config
-    // before treating a budget or exact-only matrix as enforced. Escalation
-    // inside an already authorized scope needs no redundant approval; only
-    // steps beyond it ask again.
+    // Escalation within an authorized scope needs no redundant approval.
     agentPrompt: "Use the Librarium skill to run a quick research pass on SQLite or Postgres for a small team app — deployment, concurrent writes, operational overhead. Read the saved evidence, and if coverage is thin, deepen only within the scope and budget I already authorized; ask me before anything beyond that. Keep each provider’s findings and citations attached to that provider.",
-    // Verified offline against the 2.0.0 CLI snapshot: `plan` previews without
-    // provider calls; `run` executes paid research.
-    command: 'librarium plan "SQLite or Postgres for a small team app?" --group deep --json',
-    runCommand: 'librarium run "SQLite or Postgres for a small team app?" --group deep --mode async',
+    command: 'librarium research "SQLite or Postgres for a small team app?" --deep --only exa --dry-run --json',
+    runCommand: 'librarium research "SQLite or Postgres for a small team app?" --deep --only exa --no-wait',
     note: "Keep each provider’s findings and citations, so you can check the reasoning yourself.",
     href: "/docs/groups-and-modes",
     link: "Explore research workflows",
@@ -57,20 +27,20 @@ const useCases = [
     title: "See how answer engines describe your product.",
     description: "Compare mentions, descriptions, and cited sources across collected answer surfaces and direct API results.",
     prompt: "Which luxury villa rental services do AI answers recommend for a week on the Amalfi Coast? Does our service appear, how is it described, and which sources shape those recommendations?",
-    agentPrompt: "Use Librarium’s visibility workflow to see how AI answer engines describe a luxury villa rental service for a week on the Amalfi Coast — as a complement to, not a substitute for, a regular research pass on the same question. Keep each answer surface’s identity and citations attached to its findings.",
-    command: 'librarium plan "Which luxury villa rental services do AI answers recommend for a week on the Amalfi Coast?" --group visibility --json',
-    runCommand: 'librarium run "Which luxury villa rental services do AI answers recommend for a week on the Amalfi Coast?" --group visibility',
-    note: "The visibility workflow preserves which surface or API returned each result. A shared collector is not independent corroboration.",
+    agentPrompt: "Use the Librarium skill to compare explicitly named answer engines for a luxury villa rental service for a week on the Amalfi Coast — as a complement to research sources on the same question. Preview offline first; research only within authorized scope and spend. Keep each surface’s identity and citations attached to its findings.",
+    command: 'librarium research "Which luxury villa rental services do AI answers recommend for a week on the Amalfi Coast?" --only chatgpt,gemini-app,copilot --dry-run --json',
+    runCommand: 'librarium research "Which luxury villa rental services do AI answers recommend for a week on the Amalfi Coast?" --only chatgpt,gemini-app,copilot',
+    note: "Named engines preserve which surface returned each result. API baselines join only when named; a shared collector is not independent corroboration.",
     href: "/docs/groups-and-modes",
-    link: "See the visibility workflow",
+    link: "See named-only engines",
   },
   {
     title: "Give your agent a research workflow.",
     description: "Let your agent request research and read the evidence through the CLI or MCP. Embed the library when you need your own execution flow.",
     prompt: "Before implementing this integration, research the API’s authentication, rate limits, and retry guidance. Include sources.",
-    agentPrompt: "Using the Librarium MCP tools, list the configured providers with their profiles and capabilities, and the workflow groups, then propose a provider matrix for this API’s authentication, rate limits, and retry guidance with a $2 budget. The research tool takes no budget or fallback flags — those come from librarium configuration — so confirm the applicable config before treating the budget or exact-only matrix as enforced. Wait for my approval, run research once with the agreed matrix, and read the full evidence with get_results.",
-    command: 'librarium plan "Research the API’s authentication, rate limits, and retry guidance" --group quick --json',
-    runCommand: 'librarium run "Research the API’s authentication, rate limits, and retry guidance" --group quick --mode sync',
+    agentPrompt: "Using the Librarium MCP tools, call list_sources and propose sources for this API’s authentication, rate limits, and retry guidance. Preview with research dry_run and max_cost 2.00; this may lower but not raise the configured cap, and in-flight work can exceed it. Wait for my approval, research once with the agreed sources, and read each answer and citation fully with get_run.",
+    command: 'librarium research "Research the API’s authentication, rate limits, and retry guidance" --only exa --dry-run --json',
+    runCommand: 'librarium research "Research the API’s authentication, rate limits, and retry guidance" --only exa',
     note: "Use the agent skill for operating instructions, and keep the complete results available beyond the first response.",
     href: "/docs/using-with-agents",
     link: "Connect your agent",
@@ -155,7 +125,7 @@ const useCases = [
             <div class="min-w-0 px-5 py-6 sm:px-7 sm:py-8">
               <div class="flex min-h-12 items-center justify-between gap-4 rounded border border-neutral-200 bg-white px-4 py-3">
                 <p class="min-h-6 min-w-0 flex-1 font-mono text-base/6 break-words text-neutral-800"><span id="demo-typed">{RESEARCH_DEMO.query}</span><span id="demo-caret" class="demo-caret" aria-hidden="true"></span></p>
-                <span id="demo-action" class="shrink-0 rounded-sm border border-neutral-300 bg-white px-2.5 py-1 font-mono text-xs tracking-wide text-neutral-700 uppercase">run</span>
+                <span id="demo-action" class="shrink-0 rounded-sm border border-neutral-300 bg-white px-2.5 py-1 font-mono text-xs tracking-wide text-neutral-700 uppercase">research</span>
               </div>
               <div id="demo-providers" role="tablist" aria-label="Provider results" class="demo-tabs mt-5 flex min-h-10 gap-2 overflow-x-auto pb-0.5">
                 {RESEARCH_DEMO.results.map((result, index) => (
@@ -213,7 +183,7 @@ const useCases = [
           <p class="mt-6 max-w-[34ch] text-lg/8 text-pretty text-neutral-600">Find sources for a quick answer, dig deeper with deep research into a topic, or see how AI answers describe your brand or product.</p>
           <p class="mt-8 max-w-[34ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
             Choose the capabilities and providers you need, or let your agent use librarium’s skill and MCP tools to effectively plan the research.
-            <a href="/docs/groups-and-modes" class="mt-3 block w-fit font-medium text-amber-800 hover:text-amber-600">Explore the four workflows <Icon name="arrowUpRight" class="inline-block" /></a>
+            <a href="/docs/groups-and-modes" class="mt-3 block w-fit font-medium text-amber-800 hover:text-amber-600">Explore depth and source selection <Icon name="arrowUpRight" class="inline-block" /></a>
           </p>
         </div>
         <div class="divide-y divide-neutral-300 border-t border-neutral-300">
@@ -248,7 +218,7 @@ const useCases = [
                     </div>
                   </div>
                 </div>
-                <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{useCase.note} The agent prompt works anywhere the Librarium skill or MCP tools are installed, and the command above is an offline preview. Paid research runs the same question with its own group: <code class="font-mono break-words">{useCase.runCommand}</code></p>
+                <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{useCase.note} The agent prompt works where the skill or MCP tools are installed. The command above is offline; after authorizing charges: <code class="font-mono break-words">{useCase.runCommand}</code></p>
               </details>
               <a href={useCase.href} class="mt-3 inline-block py-1 text-base font-medium text-amber-800 hover:text-amber-600 sm:text-sm">{useCase.link} <Icon name="arrowUpRight" class="inline-block" /></a>
             </article>
@@ -257,13 +227,13 @@ const useCases = [
       </div>
       <div class="mx-auto mt-16 max-w-6xl px-6 sm:mt-20 lg:px-8">
         <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-          <h3 id="workflows-heading" class="text-2xl font-medium tracking-tight text-neutral-950">The four workflows</h3>
-          <p class="text-base text-neutral-600 sm:text-sm">Preview any of them offline with <code class="font-mono text-neutral-800">librarium plan "…" --group &lt;name&gt;</code></p>
+          <h3 id="workflows-heading" class="text-2xl font-medium tracking-tight text-neutral-950">Quick, deep, and named-only engines</h3>
+          <p class="text-base text-neutral-600 sm:text-sm">Preview offline with <code class="font-mono text-neutral-800">librarium research "…" --dry-run</code></p>
         </div>
-        <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {WORKFLOWS.map((workflow) => (
             <li class="flex flex-col rounded border border-neutral-300 bg-white p-5">
-              <code class="w-fit rounded-sm border border-amber-700/30 bg-amber-50 px-2 py-0.5 font-mono text-sm text-amber-800">--group {workflow.id}</code>
+              <code class="w-fit rounded-sm border border-amber-700/30 bg-amber-50 px-2 py-0.5 font-mono text-sm text-amber-800">{workflow.id === "deep" ? "--deep" : workflow.id === "engines" ? "--only <engine>" : "quick (default)"}</code>
               <p class="mt-4 text-lg/7 font-medium tracking-tight text-pretty text-neutral-950">{workflow.purpose}</p>
               <p class="mt-4 font-mono text-xs tracking-wide text-neutral-500 uppercase">Runs</p>
               <p class="mt-1 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{workflow.runs}</p>
@@ -285,7 +255,7 @@ const useCases = [
     <section class="py-16 sm:py-28" id="providers">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 class="max-w-[25ch] text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Many sources.<br />One interface.</h2>
-        <p class="mt-5 max-w-[65ch] text-base/7 text-pretty text-neutral-600">A mix of search engines, grounded answers, and research APIs. The Librarium catalog includes {featuredProviders.length} integrations. Add your own with <a href="/docs/custom-providers" class="underline decoration-neutral-300 underline-offset-4 hover:text-amber-800">our easy guide</a>.</p>
+        <p class="mt-5 max-w-[65ch] text-base/7 text-pretty text-neutral-600">The shared catalog includes {SOURCE_COUNT} research sources and {ENGINE_COUNT} named-only engines. Language and collector availability differs. Add your own with <a href="/docs/custom-providers" class="underline decoration-neutral-300 underline-offset-4 hover:text-amber-800">our source guide</a>.</p>
         <ul class="mt-12 grid grid-cols-2 border-t border-l border-neutral-200 sm:grid-cols-3 lg:grid-cols-6" aria-label="Supported provider families">
           {featuredProviders.map((provider) => (
             <li class="flex flex-col items-center justify-center gap-3 border-r border-b border-neutral-200 px-3 py-7">

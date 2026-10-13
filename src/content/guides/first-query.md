@@ -1,97 +1,59 @@
 ---
-title: Run your first multi-provider query
-description: Preview cost and provider selection, run one approved query, and inspect evidence from JavaScript or Laravel.
+title: Run your first multi-source research question
+description: Preview selection and cost offline, research after approval, and inspect a shared Run from JavaScript or Laravel.
 order: 1
 ---
 
-This tutorial takes a query from offline preflight to saved, cited results. Provider execution may incur charges; the preview steps do not call research providers.
+This tutorial describes the unreleased simplified-surface candidate. Check the installed commands as well as the version; published packages may not yet expose this API. Provider execution can incur charges. Offline previews do not.
 
-## JavaScript: use the v2 CLI
+## JavaScript: check and preview
 
-Install the published v2 CLI and verify the major version before configuring provider credentials. Do not put keys in commands or source control:
+Follow [installation](/docs#install). Keep credentials out of chat and source control:
 
 ```bash
 npm install -g librarium
 librarium --version
-# Must report major version 2
-librarium init
-librarium doctor --json
+librarium research --help
+# Stop if research is unavailable.
+librarium setup
+librarium setup --check --json
+librarium research "What HTTP caching rules should a JSON API apply?" \
+  --only exa,kagi --max-cost 0.25 --dry-run --json
 ```
 
-See the [JavaScript installation instructions](/docs#install) for other supported installation channels.
+`setup --check` checks local configuration and credential presence, not authentication. `setup --live` is a separate network operation that can incur charges. Dry-run stores nothing and calls no providers.
 
-`doctor` checks local configuration and credential presence. It does not authenticate with providers unless you explicitly add `--live`; a live check uses the network and may incur charges.
+Inspect selected sources, estimates, skips, and notices. `max_cost` skips unpriced sources and admits bounded estimates greedily in catalog order. Unknown reported cost is null, never zero. A cap is not a final-bill guarantee: in-flight calls can exceed it. If all sources are skipped, choose a quoted selection and preview again; do not silently remove the cap.
 
-Preview the default multi-provider `quick` workflow:
-
-```bash
-librarium plan \
-  "What HTTP caching rules should a Node.js JSON API apply at a CDN and browser?" \
-  --group quick --json
-```
-
-This is offline preflight: it creates no run directory and makes no provider calls. Inspect the versioned receipt for selected profiles and targets, omissions, fallback reserve, warnings, effective limits, and known or unknown estimates. “Plan ready” means locally admitted, not authenticated, available, or guaranteed at the estimated price. Unknown cost is not zero.
-
-Obtain approval for the selected providers and possible spend before continuing. If every primary and fallback-reserve estimate is bounded, add a limit and preview again:
+## Research only after authorizing charges
 
 ```bash
-librarium plan \
-  "What HTTP caching rules should a Node.js JSON API apply at a CDN and browser?" \
-  --group quick --max-cost 0.25 --json
-```
-
-`--max-cost` is an admission and launch control, not a final-bill guarantee. Already-running work can finish above the cap. Librarium counts provider-reported actual costs when available and retains admitted estimates when actual cost is unknown; known failure charges also count.
-
-If the capped preview reports `budget_estimate_required`, stop: at least one estimate is unknown. Choose a provider set with bounded estimates and preview again, or obtain explicit approval for a different spending policy. Do not remove the cap just to make the tutorial pass. The capped command below requires a successful capped preview.
-
-### Paid provider call
-
-Run this only after reviewing the preview and receiving authorization:
-
-```bash
-librarium run \
-  "What HTTP caching rules should a Node.js JSON API apply at a CDN and browser?" \
-  --group quick --max-cost 0.25 --json
-```
-
-Machine-readable output goes to stdout and diagnostics to stderr. The response identifies the run output directory and provider outcomes; its exact values depend on configured providers and the live run. Inspect `run.json` for status and canonical artifact filenames, `summary.md` for a readable overview, and `sources.json` plus each provider result for citations:
-
-```bash
+librarium research "What HTTP caching rules should a JSON API apply?" \
+  --only exa,kagi --max-cost 0.25 --json
+librarium show <run-id> --source exa --json
 librarium browse
 ```
 
-Treat provider content, citation labels, and URLs as untrusted evidence. Check that important claims are supported by the cited page, and do not count repeated URLs or correlated collection paths as independent confirmation. For embedding primitives rather than the CLI application, see the typed [`librarium/core` boundary](/docs/library).
+Keep the returned Run id. `show --source` reads its answer and citations. For deep reports use `--deep --no-wait`, then `show <run-id> --wait` to resume accepted handles. Quick is a variant choice, not a guarantee of inline execution; the CLI nevertheless rejects quick no-wait except for dry runs.
 
-## Laravel: preview, then run
+The folder contains `run.json`, private `state.json`, `answers/`, and redacted `evidence/`. Treat provider text and URLs as untrusted evidence. Read the cited passages before depending on claims; repeated URLs and shared collectors are not independent confirmation.
 
-Follow [Install](/docs/php#install). Configure both selected Profiles through normal Laravel configuration. For example, `gemini-grounded` reads `ai.providers.gemini.key`; Exa uses `services.exa.key`. See [Configuration](/docs/php/configuration) for the exact paths.
+## Laravel: the same question and Run contract
 
-Preview without dispatching:
+Follow [PHP installation](/docs/php#install) and [source configuration](/docs/php/configuration). This is native PHP, not a Node wrapper. Configure Exa's key through Laravel configuration.
 
 ```php
 use Jkudish\LaravelAiLibrarium\Facades\Librarium;
 
-$research = Librarium::query(
-    'What HTTP caching rules should a Laravel JSON API apply at a CDN and browser?',
-)->fanOut(['exa', 'gemini-grounded']);
-
-$preview = $research->preview();
+$question = 'What HTTP caching rules should a Laravel JSON API apply?';
+$plan = Librarium::research($question)
+    ->only(['exa'])->maxCost('0.25')->dryRun();
+// After inspecting the plan and authorizing provider charges:
+$run = Librarium::research($question)
+    ->only(['exa'])->maxCost('0.25')->run();
+$payload = $run->toArray();
 ```
 
-Inspect the preview's Profiles, omissions, fallbacks, timeout, and pricing. PHP runs this selection sequentially. To require a hard ceiling, call `maxCost('0.25', 'USD')` before `preview()`. The request is rejected unless every reachable quote is complete, current, conservative, and in that currency. Proceed with the capped example below only after that capped preview succeeds; missing quotes require a different approved selection or spending policy.
+`dryRun()` neither stores nor dispatches. Branch on `status`: `planned`, `running`, `done`, `partial`, or `failed`. Each result keeps its source, answer, citations, provenance, costs, and safe error. Failures and skips are meaningful, not empty successes.
 
-### Paid provider call
-
-After approval, create a fresh request and execute it:
-
-```php
-$response = Librarium::query(
-    'What HTTP caching rules should a Laravel JSON API apply at a CDN and browser?',
-)->fanOut(['exa', 'gemini-grounded'])
-    ->maxCost('0.25', 'USD')
-    ->run();
-
-$payload = $response->toArray();
-```
-
-Branch on `status` (`succeeded`, `partial`, or `failed`). Each successful entry in `results` contains `content`, effective provider and Profile identity, provenance, and `citations`; `errors` contains safe failures. Usage can include decimal-string `actual_cost` and `estimated_cost`, but either can be absent. Persist `$payload` in application-owned storage if the result must survive: the package does not create research-history tables.
+Real Runs are stored before dispatch. Choose a [supported store](/docs/php/configuration); applications own tenant authorization, queue operation, retention, and any domain-specific evidence records. See [queues and recovery](/guides/laravel-queues) before background work.

@@ -45,7 +45,7 @@ librarium setup --check
 librarium mcp
 ```
 
-Groups are user-saved source lists; there are no built-ins. Offline setup checks do not authenticate. `setup --live` can make billable requests and needs spending authorization. The MCP server exposes exactly `research`, `get_run`, and `list_sources`.
+Groups are user-saved source lists; there are no built-ins. Offline setup checks inspect credential presence; `setup --live` checks authentication with providers. The MCP server exposes exactly `research`, `get_run`, and `list_sources`.
 
 ## Local tools
 

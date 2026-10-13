@@ -8,9 +8,9 @@ Librarium is a Laravel-native research abstraction built on the official Laravel
 
 ## Install
 
-PHP 8.4+, Laravel 13.30+, and Laravel AI SDK `^1.0.1`. This is the **unreleased PHP 1.0 candidate**; do not assume the published package has this surface. The candidate pins `jkudish/librarium-spec`; consumers must copy its Composer package repository declaration because Composer does not inherit repositories. A stable spec constraint is a release gate.
+PHP 8.4+, Laravel 13.30+, and Laravel AI SDK `^1.0.1`. The package pins `jkudish/librarium-spec`; consumers must copy its Composer package repository declaration because Composer does not inherit repositories.
 
-For an authorized candidate installation, merge this entry into your application's `composer.json` `repositories` array, preserving existing entries:
+Merge this entry into your application's `composer.json` `repositories` array, preserving existing entries:
 
 ```json
 {
@@ -34,8 +34,6 @@ For an authorized candidate installation, merge this entry into your application
 }
 ```
 
-The commands below are the stable installation path **after publication**. Before publication, use only a separately authorized candidate checkout or Composer harness; do not replace an existing installation automatically.
-
 ```bash
 composer require jkudish/laravel-ai-librarium
 php artisan vendor:publish --tag=librarium-config
@@ -50,7 +48,6 @@ use Jkudish\LaravelAiLibrarium\Facades\Librarium;
 
 $plan = Librarium::research('Compare EU analytics tools')
     ->only(['exa'])->dryRun();
-// Can incur charges:
 $run = Librarium::research('Compare EU analytics tools')
     ->deep()->only(['exa'])->maxCost('1.00')->run();
 $run->toArray();

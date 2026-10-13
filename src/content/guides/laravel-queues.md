@@ -4,7 +4,7 @@ description: Store a Run before dispatch, observe it by id, and recover accepted
 order: 3
 ---
 
-Queued research can outlive an HTTP response. The unreleased PHP 1.0 candidate stores a Run before dispatching one encrypted Laravel job. Applications own queue workers, authorization, retention, and domain records.
+Queued research can outlive an HTTP response. Librarium stores a Run before dispatching one encrypted Laravel job. Applications own queue workers, authorization, retention, and domain records.
 
 Follow [installation](/docs/php#install), configure Exa, and choose a durable [supported store](/docs/php/configuration). Process-local memory and ArrayStore cannot share Runs with a separate worker. Run a worker for the configured queue; the default queue is `research`.
 
@@ -20,7 +20,7 @@ $plan = Librarium::research($question)
 
 Dry-run is offline and stores nothing. Inspect estimates, selected sources, skips, and notices. Unpriced sources are skipped under a cap; unknown reported USD remains null. In-flight work can exceed the admission cap. Do not remove it just to obtain a nonempty plan.
 
-## Queue after authorizing charges
+## Queue the research
 
 ```php
 $queued = Librarium::research($question)

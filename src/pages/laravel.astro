@@ -98,7 +98,7 @@ const chipCopy = "chip-copy group";
       <div class="rounded-lg border border-neutral-200 bg-white p-5">
         <div class="flex items-center gap-3">
           <img src="/languages/laravel.svg" alt="" width="24" height="24" class="size-6" />
-          <p class="text-sm font-medium text-neutral-950">First-party Laravel · unreleased 1.0 candidate</p>
+          <p class="text-sm font-medium text-neutral-950">First-party Laravel package</p>
         </div>
         <div class="mt-4 space-y-2">
           {[install, publish].map((command) => (
@@ -116,7 +116,7 @@ const chipCopy = "chip-copy group";
             <li class="rounded-sm border border-neutral-200 bg-neutral-50 px-2 py-0.5 font-mono text-xs text-neutral-700">{requirement}</li>
           ))}
         </ul>
-        <p class="mt-3 text-xs/5 text-pretty text-neutral-500" set:html={inline("Published packages may not expose this candidate. See [Install and the spec repository prerequisite](/docs/php#install).")} />
+        <p class="mt-3 text-base text-pretty text-neutral-500 sm:text-sm" set:html={inline("[Install and configure Laravel](/docs/php#install).")} />
       </div>
     </ProductHero>
 
@@ -129,7 +129,7 @@ const chipCopy = "chip-copy group";
             <h2 id="preview-heading" class={`mt-3 ${sectionHeading}`}>Research before your agent recommends.</h2>
           </div>
           <div class="lg:pt-8">
-            <p class="text-base/7 text-pretty text-neutral-600">Preview the source selection and admission before authorizing provider spend. A dry run stores nothing and makes no provider call.</p>
+            <p class="text-base/7 text-pretty text-neutral-600">Preview the source selection and estimates. A dry run stores nothing and makes no provider call.</p>
             <p class="mt-4 text-base/7 text-pretty text-neutral-600" set:html={inline("`only()` selects flat names. PHP executes selected sources sequentially; inspect costs and skips before proceeding.")} />
           </div>
         </div>
@@ -169,7 +169,7 @@ const chipCopy = "chip-copy group";
     <section id="queue" class="scroll-mt-6 py-16 sm:py-24" aria-labelledby="queue-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="queue-heading" class={sectionHeading}>Queue longer research, then hand it to an agent.</h2>
-        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">Dispatch can incur provider charges. Preview and authorize first. On completion, persist the terminal response in your own storage, then pass it into an agent or a review screen.</p>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">On completion, persist the terminal response in your own storage, then pass it into an agent or a review screen.</p>
         <div class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <CodePanel class="lg:self-start" label="Queued research" lang="php" code={queueCode} />
           <ol class="relative space-y-6 border-l border-neutral-300 pl-6 lg:mt-2" aria-label="What happens after queue()">
@@ -215,9 +215,9 @@ const chipCopy = "chip-copy group";
             <p class="mb-3 text-sm text-neutral-600" set:html={inline("Pass the `$evidence` response from the approved research step into the agent:")} />
             <CodePanel label="Prompt the agent" lang="php" code={promptCode} />
           </div>
-          <div class="rounded-lg border border-amber-700/25 bg-amber-50 p-5 lg:mt-8">
-            <p class="text-sm font-semibold text-neutral-950">A separate paid model call</p>
-            <p class="mt-2 text-sm/6 text-pretty text-neutral-700" set:html={inline("Configure the agent's model/provider through the SDK. The outer model call is not included in Librarium's research budget; authorize that cost too.")} />
+          <div class="rounded-lg border border-neutral-200 bg-white p-5 lg:mt-8">
+            <p class="text-sm font-semibold text-neutral-950">Configure your agent through the SDK</p>
+            <p class="mt-2 text-sm/6 text-pretty text-neutral-700" set:html={inline("The SDK owns the agent's model and provider. Its model call has a separate budget from Librarium's research.")} />
           </div>
         </div>
         <p class="mt-8 max-w-[75ch] text-base/7 text-pretty text-neutral-600" set:html={inline("For large responses, store evidence in your application and expose authorized, bounded result and citation pages instead of returning everything to the model at once. These classes follow the SDK's [Tool](https://github.com/laravel/ai/blob/v1.0.1/src/Contracts/Tool.php), [HasTools](https://github.com/laravel/ai/blob/v1.0.1/src/Contracts/HasTools.php), and [Promptable](https://github.com/laravel/ai/blob/v1.0.1/src/Promptable.php) contracts. They are example application code, not built-in Librarium agents.")} />
@@ -260,7 +260,7 @@ const chipCopy = "chip-copy group";
           <div class="rounded-lg border border-neutral-200 bg-white p-6 lg:self-start">
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Artisan</p>
             <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Preview from the command line</h3>
-            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("`librarium:research --dry-run --json` is offline. Remove `--dry-run` to dispatch after approval, or add `--no-wait` to queue. JSON Artisan output is not an MCP server.")} />
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("`librarium:research --dry-run --json` is offline. Remove `--dry-run` to dispatch, or add `--no-wait` to queue. JSON Artisan output is not an MCP server.")} />
             <p class="mt-4 text-sm/6 text-pretty text-neutral-600" set:html={inline("See [Artisan commands](/docs/php/commands) for show, sources, and prune.")} />
           </div>
           <TerminalBlock title="Artisan dry run" kind="illustrative" badge="Illustrative · excerpt" lines={agentModeJson} caption="Selected fields illustrate the Run contract, not a complete JSON payload or captured provider response." />

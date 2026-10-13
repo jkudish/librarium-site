@@ -13,11 +13,11 @@ This is a first-party Laravel package built on the Laravel AI SDK, not a Node pr
 
 It complements the SDK: the SDK owns your agent and model interaction; librarium supplies research results with their citations attached. Your application decides what that evidence supports.
 
-Requires PHP 8.4, Laravel 13.30+, and Laravel AI SDK `^1.0.1`. This is the unreleased PHP 1.0 candidate, not a claim about the currently published package. See [Install](/docs/php#install), including the pinned spec repository prerequisite.
+Requires PHP 8.4, Laravel 13.30+, and Laravel AI SDK `^1.0.1`. See [Install](/docs/php#install), including the pinned spec repository prerequisite.
 
 ## Research before your agent recommends
 
-Preview the selection before authorizing provider spend:
+Preview your source selection:
 
 ```php
 use Jkudish\LaravelAiLibrarium\Facades\Librarium;
@@ -28,11 +28,10 @@ $research = Librarium::research(
 
 $preview = $research->dryRun(); // No storage or provider call.
 
-// Only after reviewing the preview and authorizing spend:
 $evidence = $research->run();
 ```
 
-`only()` selects flat source names; PHP executes them sequentially. The cap skips unpriced sources and admits bounded estimates greedily in catalog order. Check results and skips before authorizing spend. In-flight work can exceed the cap; unknown reported cost remains `null`.
+`only()` selects flat source names; PHP executes them sequentially. The cap skips unpriced sources and admits bounded estimates greedily in catalog order. In-flight work can exceed the cap; unknown reported cost remains `null`.
 
 `run()` returns an immutable `Run`. Each result keeps its source, answer, citations, and provenance:
 
@@ -131,7 +130,6 @@ Now pass the `$evidence` response from the approved research step into the agent
 ```php
 use App\Ai\Agents\TechnicalAdvisor;
 
-// A separate paid AI SDK model call; authorize this cost too.
 $answer = (new TechnicalAdvisor($evidence))->prompt(
     'Recommend a pooling approach for our workers and explain the tradeoffs.',
 );
@@ -172,6 +170,6 @@ $current = Librarium::find($runId)?->refresh();
 
 `queue()` stores the Run before dispatching one encrypted Laravel job with `tries = 1`. `find($runId)->refresh()` resumes saved durable handles; it never replays queued submissions. Where a provider supports webhooks, they are only wake hints; canonical retrieval remains evidence authority.
 
-Dispatch can incur provider charges. Preview and authorize first. On completion, persist the terminal response in your own storage, then pass it into an agent or a review screen. The [Laravel queue guide](/guides/laravel-queues) covers callbacks, transient status, failures, and testing without paid calls.
+On completion, persist the terminal response in your own storage, then pass it into an agent or a review screen. The [Laravel queue guide](/guides/laravel-queues) covers callbacks, transient status, failures, and testing without paid calls.
 
 Choose local filesystem, opt-in query-builder database, supported cache, memory, or a custom version-conditional RunStore. No migration runs automatically. Tenant ownership, retention, indexing, conversation memory, and the final product experience remain yours.

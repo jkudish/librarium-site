@@ -14,7 +14,7 @@ Your agent gets research through the same CLI you use. Install it once:
 npm install -g librarium
 ```
 
-The MCP server and the agent skill ship with that install. This is the unreleased simplified-surface candidate; check both the version and `librarium research --help`. A version number alone does not prove these tools exist. [Getting started](/docs#install) covers installation, and the [CLI page](/cli) covers terminal use.
+The MCP server and the agent skill ship with that install. [Getting started](/docs#install) covers installation, and the [CLI page](/cli) covers terminal use.
 
 ## How you'd use it
 
@@ -22,16 +22,16 @@ Ask your agent a research question in plain language, and say how far it may go:
 
 1. `list_sources` to discover research sources, named-only engines, saved groups, and availability offline.
 2. `research` with `question`, `only`, and `dry_run: true` to preview without storage or provider calls.
-3. After authorizing spend, `research` without `dry_run`; keep the returned Run id.
+3. `research` without `dry_run`; keep the returned Run id.
 4. `get_run` with that id to resume pending work, or with `source` to read an answer and citations. Follow `cursor` until null; concatenate JSON-text chunks before parsing.
-5. If more research is needed, deepen only within the existing authorization; a new Run can incur new charges. Preserve source identity and uncertainty in the answer.
+5. If more research is needed, select deep research. Preserve source identity and uncertainty in the answer.
 
 ## Give your agent the setup prompt
 
-Paste this into your coding agent. It points the agent at the install instructions, which install v2, register the MCP server, check the install offline, and stop before any paid call:
+Paste this into your coding agent to install the CLI, register the MCP server, and verify the connection:
 
 ```text
-Install Librarium for me by following https://librarium.agentsy.build/install.md. Don't run research or make paid provider calls without my approval, and keep my API keys out of chat and source control.
+Install Librarium for me by following https://librarium.agentsy.build/install.md. Verify the connection offline, and keep my API keys out of chat and source control.
 ```
 
 The agent reads [install.md](/install.md): the Node.js and command checks, installation, MCP registration without changing other servers, `librarium setup` with keys kept out of chat and source control, and offline `setup --check`.
@@ -113,7 +113,7 @@ The server exposes exactly three tools. `max_cost` may lower but not raise the c
 
 **`get_run`** resumes or reads an existing Run. Input: `id`, optional `wait_seconds`, `source`, and `cursor`. Without source it returns a summary; with source it returns paged JSON text containing answer and citations. Continue with the returned cursor and unchanged id/source until cursor is null. A changed answer invalidates an old cursor; concatenate pages before parsing. It can retrieve accepted provider work but starts no new research.
 
-**`list_sources`** reports sources, engines, user groups, availability, and price hints. No inputs. It is offline discovery, not authentication or spending permission.
+**`list_sources`** reports sources, engines, user groups, availability, and price hints. No inputs. It is offline discovery, not authentication.
 
 No separate plan tool exists: `research` with `dry_run: true` is the offline preview, equivalent to CLI `research --dry-run`.
 

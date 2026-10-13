@@ -19,7 +19,7 @@ librarium upgrade
 librarium --version
 ```
 
-Upgrade follows an existing installation channel. The simplified JS 2.0 surface is still an unreleased candidate; do not assume a channel serves it. Preserve config backups and follow [v1 migration](/docs/upgrading-to-v2).
+Upgrade follows an existing installation channel. Preserve config backups and follow [v1 migration](/docs/upgrading-to-v2).
 
 ## Completions and skill
 

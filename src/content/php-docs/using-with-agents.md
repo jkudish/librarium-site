@@ -1,6 +1,6 @@
 ---
 title: Using Laravel with agents
-description: Use JSON Artisan output and stored evidence within an explicit spending scope.
+description: Use JSON Artisan output and stored evidence with your coding agent.
 order: 8
 ---
 
@@ -11,12 +11,11 @@ php artisan librarium:sources --json
 php artisan librarium:research 'Compare memory systems' --only=exa --dry-run --json
 ```
 
-Credential presence and a valid dry run do not authorize spending. Authorize the question, source set, depth, and cap before dispatch. `--json` emits public Run data; keep stderr separate from the parser.
+`--json` emits public Run data; keep stderr separate from the parser.
 
 ## Dispatch and keep the id
 
 ```bash
-# Can incur charges:
 php artisan librarium:research 'Compare memory systems' --deep --only=exa --max-cost=1 --no-wait --json
 php artisan librarium:show <run-id> --wait --json
 php artisan librarium:show <run-id> --source=exa --json

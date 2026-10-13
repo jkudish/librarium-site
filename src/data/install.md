@@ -2,8 +2,6 @@
 
 These are step-by-step instructions for a coding agent installing Librarium v2 as a CLI and MCP tool on the user's machine. Follow them in order.
 
-This site describes the unreleased simplified-surface candidate. A published 2.x version alone does not prove this surface is present: confirm `librarium research --help` and `librarium setup --help`. Stop if either command is missing; do not install a Git candidate or replace an existing installation without authorization.
-
 ## Ground rules
 
 - Do not run research or make paid provider calls without the user's approval. Offline discovery, `setup --check`, and research `--dry-run` are free; `setup --live` and real `research` are not.
@@ -27,6 +25,8 @@ If Node.js is older or missing, tell the user and stop. Homebrew (`brew install 
 npm install -g librarium
 librarium --version
 # Must report major version 2
+librarium research --help
+librarium setup --help
 ```
 
 If the version is not 2.x, stop and report what is installed. Do not continue with a v1 install; [Upgrade from v1](https://librarium.agentsy.build/docs/upgrading-to-v2.md) covers migration.
@@ -123,7 +123,7 @@ librarium setup --check
 librarium sources --json
 ```
 
-Do not add `--live`. Credential presence is not authentication; live checks make provider requests and may incur charges.
+Use the offline checks above to verify configuration and credential presence.
 
 Then confirm the MCP connection from the agent: call `list_sources`. It is local and free, and does not authenticate a provider. The server exposes exactly `research`, `get_run`, and `list_sources`. The host may need a restart or a new session before the tools appear.
 

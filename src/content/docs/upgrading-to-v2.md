@@ -4,7 +4,7 @@ description: Automatic backed-up v3 config migration, renamed commands, and old 
 order: 2
 ---
 
-JS 2.0 is unreleased. Check the installed version and release channel before changing a working 1.x setup. npm needs Node.js 22.12 or newer. Preserve pending v1 tasks and their directories with a matching 1.x reader.
+npm needs Node.js 22.12 or newer. Preserve pending v1 tasks and their directories with a matching 1.x reader.
 
 ## Config migration
 
@@ -12,7 +12,7 @@ Loading an unversioned/1.x config saves its original bytes to `config.json.v1.ba
 
 Provider entries become flat sources; extra profiles become source options. For example, combined Grok becomes `grok` with `search: both`. Environment references become `env:ENV_VAR`. User groups keep their names; the old visibility roster becomes a saved engine group. Removed modes/fallback settings produce notices.
 
-Inspect notices and run `librarium setup --check` before spending. To roll back, preserve the new config, restore the backup, and run the matching 1.x binary. Do not overwrite pending Run data.
+Inspect notices and run `librarium setup --check` to verify the migrated config. To roll back, preserve the new config, restore the backup, and run the matching 1.x binary. Do not overwrite pending Run data.
 
 ## Replacements
 

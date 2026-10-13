@@ -37,4 +37,4 @@ Collectors are configuration: SearchAPI, PHP DataForSEO where supported, or the 
 
 ## Costs and credentials
 
-`setup --check` is offline; credential presence does not authenticate. Provider queries and selected options are sent upstream and can incur charges. Estimates come from package pricing, not the spec. Unknown reported cost stays `null`. With a cap, unpriced sources are skipped; in-flight work can exceed it. No failed source automatically substitutes another.
+`setup --check` is offline; credential presence does not authenticate. Provider queries and selected options are sent upstream. Estimates come from package pricing, not the spec. Unknown reported cost stays `null`. With a cap, unpriced sources are skipped; in-flight work can exceed it. No failed source automatically substitutes another.

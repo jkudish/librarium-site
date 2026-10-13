@@ -8,7 +8,6 @@ order: 2
 
 ```bash
 php artisan librarium:research 'Compare EU analytics tools' --deep --only=openai --dry-run --json
-# Can incur charges:
 php artisan librarium:research 'Compare EU analytics tools' --deep --only=openai --max-cost=1 --json
 php artisan librarium:research 'Prepare a cited report' --deep --only=openai --no-wait
 ```

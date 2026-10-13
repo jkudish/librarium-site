@@ -21,7 +21,7 @@ const steps = [
   {
     id: "preview", eyebrow: "Preview", heading: "See what would run before anything is paid.",
     body: "`research --dry-run` resolves selected sources and estimates offline. It stores nothing and does not test provider authentication. Quick is the default; engines join only when named.",
-    code: example("# Can incur charges").split("# Can incur charges")[0].trim(),
+    code: example("--dry-run --json"),
   },
   {
     id: "budget", eyebrow: "Set a ceiling", heading: "Admit only what fits the cap.",
@@ -30,8 +30,8 @@ const steps = [
   },
   {
     id: "run", eyebrow: "Research", heading: "Run the same question for real.",
-    body: "After authorizing provider charges, remove `--dry-run`. The Run is stored before dispatch. Each source retains its answer, citations, provenance, safe error, and honest cost. Unknown reported spend stays null, not zero.",
-    code: example("# Can incur charges").split("# Can incur charges, after approval:\n")[1].trim(),
+    body: "Remove `--dry-run` to research. The Run is stored before dispatch. Each source retains its answer, citations, provenance, safe error, and honest cost. Unknown reported spend stays null, not zero.",
+    code: example("--max-cost 0.10 --json"),
   },
   {
     id: "read", eyebrow: "Read the results", heading: "Every answer stays with its citations.",
@@ -45,14 +45,14 @@ const steps = [
   },
 ];
 const setup = [
-  { eyebrow: "Install", heading: "Check the candidate surface", body: "Requires Node.js 22.12+. This is the unreleased JS 2.0 candidate; published packages may still use the old surface. Check the commands as well as the version.", code: "npm install -g librarium\nlibrarium --version\nlibrarium research --help" },
+  { eyebrow: "Install", heading: "Install the CLI", body: "Requires Node.js 22.12+. The CLI includes the MCP server and agent skill.", code: "npm install -g librarium\nlibrarium --version\nlibrarium research --help" },
   { eyebrow: "Connect", heading: "Set up your sources", body: "Keep credentials out of chat and source control. `setup --auto` discovers existing credentials offline; groups are user-saved source lists with no built-ins.", code: "librarium setup" },
-  { eyebrow: "Check", heading: "Check it offline", body: "Local credential presence is not authentication. `setup --live` is a separate network operation that can incur charges.", code: example("librarium setup --check") },
+  { eyebrow: "Check", heading: "Check it offline", body: "Check local configuration and credential presence without calling a provider.", code: example("librarium setup --check") },
 ];
 const commands = [
-  { name: "research", example: 'librarium research "…" --only exa --dry-run --json', help: "Preview offline with dry-run; remove it to research after approval.", badge: "Can spend" },
+  { name: "research", example: 'librarium research "…" --only exa --dry-run --json', help: "Preview offline with dry-run; remove it to research.", badge: "Research" },
   { name: "show", example: "librarium show <run-id> --wait", help: "Resume accepted durable work or read a source answer and citations.", badge: "Resumes work" },
-  { name: "summarize", example: "librarium summarize --verify --source openai", help: "Create a separate summary Run with summary_of; does not overwrite original answers.", badge: "Can spend" },
+  { name: "summarize", example: "librarium summarize --verify --source openai", help: "Create a separate summary Run with summary_of; does not overwrite original answers.", badge: "Summary" },
   { name: "sources", example: "librarium sources --json", help: "Discover source variants, engines, availability, and price hints offline.", badge: "Offline" },
   { name: "groups", example: "librarium groups add editorial exa claude", help: "Save your own source lists. There are no built-in groups.", badge: "Local" },
   { name: "browse", example: "librarium browse", help: "Browse stored Runs.", badge: "Local" },
@@ -67,14 +67,14 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
   <Header />
   <main>
     <ProductHero title={title} description={description} ctaHref={ctaHref} ctaLabel={ctaLabel} markdownHref={markdownHref} secondary={{ href: "#session", label: "Walk through a session" }}>
-      <TerminalBlock title="Install" kind="illustrative" badge="Candidate instructions" lines={[{ cmd: "npm install -g librarium" }, { cmd: "librarium --version" }, { cmd: "librarium research --help" }]} caption="Published packages may not yet expose this candidate. Verify commands before proceeding." />
-      <p class="mt-4 text-sm/6 text-pretty text-neutral-600" set:html={inline("Requires Node.js 22.12 or newer. See [Getting started](/docs#install). These examples do not authorize provider charges.")} />
+      <TerminalBlock title="Install" kind="commands" badge="npm" lines={[{ cmd: "npm install -g librarium" }, { cmd: "librarium --version" }, { cmd: "librarium research --help" }]} />
+      <p class="mt-4 text-sm/6 text-pretty text-neutral-600" set:html={inline("Requires Node.js 22.12 or newer. See [Getting started](/docs#install).")} />
     </ProductHero>
 
     <section id="session" class="scroll-mt-6 py-16 sm:py-24" aria-labelledby="session-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="session-heading" class={sectionHeading}>Ask once. Keep the sources.</h2>
-        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">One question, start to finish: preview for free, set an admission cap, research after approval, read every answer, and pick up the slow sources later.</p>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">One question, start to finish: preview, set a budget, research, read every answer, and pick up the slow sources later.</p>
         <ol class="mt-14 space-y-16 sm:space-y-20">
           {steps.map((step) => (
             <li id={step.id} class="grid scroll-mt-6 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-12">

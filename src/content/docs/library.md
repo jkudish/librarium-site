@@ -11,7 +11,6 @@ const librarium = createLibrarium();
 const plan = await librarium.research('Compare database providers', {
   only: ['exa'], dryRun: true,
 });
-// Can incur provider charges:
 const started = await librarium.research('Compare database providers', {
   depth: 'deep', only: ['exa'], maxCost: '1.00', wait: false,
 });

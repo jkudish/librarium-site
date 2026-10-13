@@ -112,8 +112,8 @@ const tools = [
     lead: "Previews or starts a Run.",
     input: "a required `question`, plus optional `depth` (`quick` or `deep`), `only`, `skip`, `max_cost`, `dry_run`, and `wait_seconds`.",
     output: "a bounded summary with id, source statuses, citation counts, costs, skips, and a next hint. It does not paste whole answers into chat.",
-    use: "Use it inside the scope and budget already authorized; only steps beyond that scope need fresh approval.",
-    badge: "Can spend",
+    use: "Preview source selection with dry_run, then keep the returned Run id to read the results.",
+    badge: "Research",
   },
   {
     name: "get_run",
@@ -128,24 +128,24 @@ const tools = [
     lead: "Shows what can run.",
     input: "none.",
     output: "research sources, named-only engines, saved groups, availability, and price hints.",
-    use: "Offline discovery is not authentication or spending permission. Groups are user-saved source lists, with no built-ins.",
+    use: "Offline discovery does not authenticate providers. Groups are user-saved source lists, with no built-ins.",
     badge: "Local and free",
   },
 ];
 
-// Vetted agent-prompt wording, reused verbatim from the homepage use cases.
+// Practical agent prompts for source selection and complete evidence reading.
 const askPrompts = [
   {
     title: "Research a technical decision",
-    prompt: "Use the Librarium skill to run a quick research pass on SQLite or Postgres for a small team app — deployment, concurrent writes, operational overhead. Read the saved evidence, and if coverage is thin, deepen only within the scope and budget I already authorized; ask me before anything beyond that. Keep each provider’s findings and citations attached to that provider.",
+    prompt: "Use Librarium to compare SQLite and Postgres for a small team app. Start with quick research on deployment, concurrent writes, and operational overhead. Read the evidence and cite the sources behind your recommendation.",
   },
   {
     title: "Plan a provider matrix first",
-    prompt: "Using the Librarium MCP tools, list sources, then preview this API’s authentication, rate limits, and retry guidance with only the agreed sources, max_cost 2.00, and dry_run true. The tool can lower but not raise the configured cap; in-flight charges can exceed it. Wait for my approval, research once with the agreed matrix, and read the full evidence with get_run.",
+    prompt: "Before implementing this integration, use the Librarium MCP tools to research the API’s authentication, rate limits, and retry guidance. Discover sources with list_sources, preview the selection with dry_run, and read the full results with get_run. Cite the relevant documentation.",
   },
   {
     title: "See how answer engines describe you",
-    prompt: "Use the Librarium skill to compare explicitly named answer engines for a luxury villa rental service for a week on the Amalfi Coast — as a complement to, not a substitute for, research sources on the same question. Preview offline first. Keep each answer surface’s identity and citations attached to its findings.",
+    prompt: "Use Librarium to compare ChatGPT, Gemini, and Copilot answers about luxury villa rentals for a week on the Amalfi Coast. Which services appear, how are they described, and which sources get cited? Keep each engine’s findings separate.",
   },
 ];
 
@@ -157,7 +157,7 @@ type Turn =
   | { kind: "agent"; text: string }
   | { kind: "tool"; name: string; input: string; output: string; note?: string };
 const session: Turn[] = [
-  { kind: "user", text: "Before I add retries to our webhook client, research current guidance on exponential backoff, jitter, and idempotency keys. A quick pass, then a deep pass if coverage is thin — within the scope and spend I already authorized. Keep each source’s citations attached." },
+  { kind: "user", text: "Before I add retries to our webhook client, research current guidance on exponential backoff, jitter, and idempotency keys. Start with a quick pass, then go deeper if coverage is thin. Keep each source’s citations attached." },
   { kind: "agent", text: "First I’ll discover sources and preview the selection offline." },
   {
     kind: "tool",
@@ -178,7 +178,6 @@ const session: Turn[] = [
     name: "research",
     input: 'question: "Retry backoff, jitter, and idempotency keys", only: ["exa", "gemini"]',
     output: `id: "${quickRun}", status: "done", source statuses and citation counts`,
-    note: "Within existing authorization",
   },
   {
     kind: "tool",
@@ -187,7 +186,7 @@ const session: Turn[] = [
     output: 'content: "JSON-text chunk with answer and citations", cursor: "…"',
     note: "Read each source until cursor is null",
   },
-  { kind: "agent", text: "The quick answers support backoff with jitter but are thin on repeated idempotency keys. I’ll deepen within the authorized scope." },
+  { kind: "agent", text: "The quick answers support backoff with jitter but are thin on repeated idempotency keys. I’ll look for a deeper report on that part." },
   {
     kind: "tool",
     name: "research",
@@ -262,7 +261,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
     <section class="py-16 sm:py-24" aria-labelledby="usage-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="usage-heading" class={sectionHeading}>Ask a question. Your agent does the reading.</h2>
-        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">You ask in plain language. Your agent previews sources, researches within the authorized scope, resumes the slow ones, and reads every saved page before it answers, with each finding still tied to its source.</p>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">You ask in plain language. Your agent previews sources, researches, resumes the slow ones, and reads every saved page before it answers, with each finding still tied to its source.</p>
 
         <div class="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:gap-12">
           <figure class="min-w-0 overflow-hidden rounded-lg border border-neutral-200 bg-white">
@@ -322,12 +321,12 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
                 <p class="mt-4 text-pretty">Only the deep pass covered the IETF Idempotency-Key text, and it’s still a draft. Open it before you depend on its semantics.</p>
               </li>
             </ol>
-            <figcaption class="border-t border-neutral-200 px-4 py-3 text-xs/5 text-neutral-500 sm:px-6">Illustrative candidate session. The ids, summarized output, and findings are examples, not a captured Run. Verify that your install exposes these three tools.</figcaption>
+            <figcaption class="border-t border-neutral-200 px-4 py-3 text-xs/5 text-neutral-500 sm:px-6">Example session with illustrative ids, tool output, and findings.</figcaption>
           </figure>
 
           <div class="min-w-0 lg:sticky lg:top-8 lg:self-start">
             <h3 class="text-lg font-semibold text-neutral-950">Things to ask your agent</h3>
-            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Paste one of these once librarium is connected. Each keeps spend inside what you already authorized.</p>
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Paste one of these once librarium is connected.</p>
             <ul class="mt-6 space-y-4">
               {askPrompts.map((item, index) => (
                 <li class="rounded-md border border-neutral-200 bg-white p-4">
@@ -360,17 +359,17 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
               <div class="code-toolbar"><span>Terminal</span><button type="button" class="copy-btn group" data-copy="npm install -g librarium" data-copy-state="idle" aria-label="Copy install command"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy</span></button></div>
               <Code code="npm install -g librarium" lang="bash" theme="github-dark-default" />
             </div>
-            <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The MCP server and the agent skill ship with that install. There is nothing else to download. Check that `librarium --version` reports major version 2 before you connect an agent. [Getting started](/docs#install) covers other install channels, and the [CLI page](/cli) covers terminal use.")} />
+            <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The MCP server and the agent skill ship with that install. [Getting started](/docs#install) covers installation, and the [CLI page](/cli) covers terminal use.")} />
           </div>
           <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Or let your agent do it</p>
             <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Give your agent the setup prompt</h3>
-            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Paste this into your coding agent. It points the agent at the install instructions, which install v2, register the MCP server, check the install offline, and stop before any paid call:</p>
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Paste this into your coding agent to install the CLI, register the MCP server, and verify the connection:</p>
             <div class="code-panel mt-4">
               <div class="code-toolbar"><span>Setup prompt</span><button type="button" class="copy-btn group" data-copy={AGENT_SETUP_PROMPT} data-copy-state="idle" aria-label="Copy setup prompt"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy prompt</span></button></div>
               <p tabindex="0" class="max-h-56 overflow-y-auto px-5 py-4 font-mono text-xs/6 break-words whitespace-pre-wrap text-amber-100 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-300">{AGENT_SETUP_PROMPT}</p>
             </div>
-            <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The agent reads [install.md](/install.md): Node.js and candidate command checks, MCP registration without touching your other servers, `librarium setup` with keys kept out of chat and source control, and offline `setup --check`.")} />
+            <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The agent reads [install.md](/install.md) for Node.js requirements, MCP registration, source setup, and offline verification.")} />
           </div>
         </div>
 

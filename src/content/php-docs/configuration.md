@@ -8,7 +8,7 @@ order: 3
 php artisan vendor:publish --tag=librarium-config
 ```
 
-The simplified config has `sources`, `engines`, `groups`, `max_cost`, `runs`, and `timeout`. Source options replace public profile entries. PHP 1.0 is unreleased; there is no old PHP config migration.
+The config has `sources`, `engines`, `groups`, `max_cost`, `runs`, and `timeout`. Source options replace public profile entries.
 
 ```php
 // config/librarium.php
@@ -26,7 +26,7 @@ The simplified config has `sources`, `engines`, `groups`, `max_cost`, `runs`, an
 
 SDK sources read `ai.providers.<provider>.key`; focused HTTP sources read `services.<provider>.key`. Per-source `key` overrides belong in configuration, never request options. Use `env()` only inside Laravel config files. You.com reads `YOU_COM_API_KEY`, with `YDC_API_KEY` as a fallback. Collector credentials and location/language controls remain collector configuration.
 
-Setting `enabled: false` excludes a source. A key alone is not authentication or spending authorization. Discovery and dry runs are offline.
+Setting `enabled: false` excludes a source. A key alone is not authentication. Discovery and dry runs are offline.
 
 ## Supported stores
 

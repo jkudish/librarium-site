@@ -8,7 +8,7 @@ ctaLabel: Try a multi-provider query
 
 ## The short answer
 
-Librarium is one interface for many research sources. Instead of maintaining separate integrations for Exa, Perplexity, Gemini, Parallel, You.com, and the rest, you write one request: a question, quick or deep depth, and an optional source list. Each answer comes back in a shared Run with citations, honest cost, and provenance. This page describes the unreleased simplified-surface candidate; check installed commands and exports before following it.
+Librarium is one interface for many research sources. Instead of maintaining separate integrations for Exa, Perplexity, Gemini, Parallel, You.com, and the rest, you write one request: a question, quick or deep depth, and an optional source list. Each answer comes back in a shared Run with citations, honest cost, and provenance.
 
 The same model works where you build: the [CLI](/cli) and its MCP server for coding agents, the [JavaScript library](/javascript), and the native [Laravel package](/laravel). Adding a supported provider becomes a configuration change, not another integration. Librarium does not replace your provider accounts or their charges.
 
@@ -36,7 +36,7 @@ Each result kind (search, grounded answer, research report, surface observation)
 
 Suppose an agent needs to compare database options across three providers. With direct APIs, your integration picks each endpoint, translates the query three ways, handles accepted jobs and failures three ways, extracts sources from three formats, and decides how to feed it all back to the agent.
 
-With Librarium, the agent calls `list_sources`, previews `research` with `question`, `only`, and `dry_run: true`, then executes within authorized spend. Use `depth: "deep"` and `wait_seconds: 0` to return before reports finish; `get_run` resumes the id and pages source answers and citations. CLI preview is `research --dry-run`. Laravel uses `Librarium::research()->only()->dryRun()` before `run()` or `queue()`. Your application can expose approved evidence through [an AI SDK tool](/laravel#agent).
+With Librarium, the agent calls `list_sources`, previews `research` with `question`, `only`, and `dry_run: true`, then runs the research. Use `depth: "deep"` and `wait_seconds: 0` to return before reports finish; `get_run` resumes the id and pages source answers and citations. CLI preview is `research --dry-run`. Laravel uses `Librarium::research()->only()->dryRun()` before `run()` or `queue()`. Your application can expose approved evidence through [an AI SDK tool](/laravel#agent).
 
 Switching or adding a provider changes the selection, not the code that reads the results.
 

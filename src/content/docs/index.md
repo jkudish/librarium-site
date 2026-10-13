@@ -8,7 +8,7 @@ Ask a question, choose quick or deep research, and keep each source's answer, ci
 
 ## Install
 
-These docs describe the **unreleased JS 2.0 candidate**. npm, Homebrew, and standalone channels may still serve 1.x. Check the installed version; do not use these commands with a 1.x binary. npm requires Node.js 22.12 or newer.
+The JavaScript v2 npm package requires Node.js 22.12 or newer.
 
 ```bash
 npm install -g librarium
@@ -16,7 +16,7 @@ librarium --version
 librarium research --help
 ```
 
-Continue only when the installed binary reports major version 2 and exposes `research`; a version number alone does not prove this candidate surface is present. Existing 1.x users can read [legacy docs](/v1) and the [migration guide](/docs/upgrading-to-v2).
+Existing 1.x users can read [legacy docs](/v1) and the [migration guide](/docs/upgrading-to-v2).
 
 ## Configure sources
 
@@ -32,7 +32,6 @@ librarium sources --json
 
 ```bash
 librarium research "Compare current HTTP caching guidance" --only exa --dry-run --json
-# Can incur provider charges:
 librarium research "Compare current HTTP caching guidance" --only exa
 ```
 

@@ -1,10 +1,10 @@
 ---
 title: Connect a coding agent to Librarium
-description: Discover sources, preview offline, research within authorized spend, and read complete evidence before recommending code.
+description: Discover sources, preview offline, and read complete research evidence before recommending code.
 order: 2
 ---
 
-Use the MCP server when a coding agent needs current external evidence. This guide describes the unreleased simplified-surface candidate, not proof that a published version has these commands.
+Use the MCP server when a coding agent needs current external evidence.
 
 ## Connect and discover offline
 
@@ -12,7 +12,6 @@ Use the MCP server when a coding agent needs current external evidence. This gui
 npm install -g librarium
 librarium --version
 librarium research --help
-# Stop if research is unavailable.
 claude mcp add --scope user librarium -- librarium mcp
 ```
 
@@ -20,17 +19,17 @@ See [Agents & MCP](/agents#setup) for other host registrations and [installation
 
 ## Give the agent an evidence task
 
-> Research whether an authenticated JSON API behind Cloudflare should emit stale-while-revalidate. Compare standards, Cloudflare behavior, and security guidance. Preview offline first. Research only within the scope and spend I authorize. Inspect the primary sources behind each material claim, identify missing evidence, and distinguish shared URLs or collectors from independent corroboration.
+> Research whether an authenticated JSON API behind Cloudflare should emit stale-while-revalidate. Compare standards, Cloudflare behavior, and security guidance. Preview offline first. Inspect the primary sources behind each material claim, identify missing evidence, and distinguish shared URLs or collectors from independent corroboration.
 
 Have the agent follow this sequence:
 
 1. Call `list_sources` to discover sources, named-only engines, saved groups, and availability. Credential presence is not authentication.
 2. Call `research` with `question`, an explicit `only` list, and `dry_run: true`. This stores nothing and calls no providers. Review estimates, skips, and notices.
-3. After authorizing charges, call `research` without dry-run. Retain its Run `id`. `max_cost` may lower, not raise, the configured cap; in-flight charges can exceed it.
+3. Call `research` without dry-run. Retain its Run `id`. `max_cost` may lower, not raise, the configured cap; in-flight charges can exceed it.
 4. Call `get_run` with that `id` to resume accepted work. Waiting defaults to 45 seconds, maximum 50; zero does not wait.
 5. Read every completed source with `get_run` using `id` and `source`. Follow `cursor` with unchanged id/source until null. Concatenate JSON-text pages before parsing answer and citations. A changed answer invalidates an old cursor; restart paging.
 
-The first research response is a bounded summary, not full evidence. Completed source answers stay readable while other work remains pending. A new deep Run is new paid work, not a free retry; obtain approval only when it exceeds existing authorization.
+The first research response is a bounded summary, not full evidence. Completed source answers stay readable while other work remains pending. Deep research creates a new Run.
 
 ## Check sources before recommending code
 

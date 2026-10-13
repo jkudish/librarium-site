@@ -36,9 +36,9 @@ Librarium has first-party JavaScript/TypeScript and PHP/Laravel implementations.
 
 The pinned shared catalog has ${SOURCE_COUNT} research sources and ${ENGINE_COUNT} named-only engines. Quick/deep selects variants; groups are user-saved source lists, with no built-in groups or public profiles/modes/fallback reserves. Language and collector availability differs.
 
-This site describes the unreleased simplified-surface candidate. npm installs require Node.js 22.12.0 or newer; a version number alone does not establish this surface. Check \`librarium research --help\` and stop if unavailable. Publication and deployment are separate release gates.
+JavaScript v2 npm installs require Node.js 22.12.0 or newer. See the installation and v1 migration guides.
 
-Run \`librarium setup\`, then offline \`setup --check\` and \`research "…" --dry-run\`. Credential presence is not authentication. \`setup --live\` and real research can incur charges; dry runs neither store nor call providers. Quick is the default and usually inline, but collectors can also be durable. \`--deep --no-wait\` starts report work; \`show <run-id> --wait\` resumes accepted handles.
+Run \`librarium setup\`, then offline \`setup --check\` and \`research "…" --dry-run\`. Credential presence is not authentication. Dry runs neither store nor call providers. Quick is the default and usually inline, but collectors can also be durable. \`--deep --no-wait\` starts report work; \`show <run-id> --wait\` resumes accepted handles.
 
 \`max_cost\` skips unpriced sources and admits bounded estimates greedily in catalog order. Reported spend plus reservations stops unstarted work; in-flight calls can exceed the cap. Unknown reported USD is null, never zero. Ambiguous submission is not permission to repeat paid work. Summarization is a separate paid Run with \`summary_of\`.
 
@@ -58,7 +58,7 @@ Legacy v1 documentation is preserved at ${base}/v1 and marked as legacy. Use the
 
 ## PHP / Laravel
 
-The first-party package is \`jkudish/laravel-ai-librarium\`, requiring PHP 8.4, Laravel 13.30+, and Laravel AI SDK ^1.0.1. The unreleased PHP 1.0 candidate pins the spec package through a Composer repository consumers must also declare; see install requirements.
+The first-party package is \`jkudish/laravel-ai-librarium\`, requiring PHP 8.4, Laravel 13.30+, and Laravel AI SDK ^1.0.1. It pins the spec package through a Composer repository consumers must also declare; see install requirements.
 
 Use \`Librarium::research()->only()->dryRun()\` before approved \`run()\` or \`queue()\`. Queue stores a Run then dispatches one encrypted one-attempt job; \`find($id)?->refresh()\` observes saved durable handles. Run JSON is \`librarium.run/1\`, shared with JS; private execution is not interchangeable. Artisan research/show/sources/prune with --json is not MCP. Stores: local filesystem, optional query-builder database, process-local ArrayStore, standalone Redis 7+ with serialization/compression disabled, memory, or a custom RunStore. Unsupported disk/cache/cluster configurations fail closed. Apps own tenant access, queue operation, retention, signing-key custody, and evidence policy. The fake keeps normal request validation without calls.
 

@@ -9,7 +9,7 @@ ctaLabel: Explore the JavaScript API
 
 ## One client, three boundaries
 
-This describes the unreleased simplified-surface JS 2.0 candidate. Install a compatible release with `npm install librarium`; check its exports before using these examples.
+Install with `npm install librarium`.
 
 `librarium` and `librarium/node` construct a ready-to-use client with v3 config and filesystem storage. `librarium/core` is runtime-neutral: callers inject configuration, credentials, and a store; its default is process-local memory. Importing core never inspects process state or files.
 
@@ -23,7 +23,6 @@ const plan = await librarium.research('Lisbon or Porto without a car?', {
   only: ['exa', 'kagi'], maxCost: '0.10', dryRun: true,
 });
 console.log(plan.status, plan.results.map((result) => result.source));
-// After authorizing provider charges:
 const run = await librarium.research('Lisbon or Porto without a car?', {
   only: ['exa', 'kagi'], maxCost: '0.10',
 });

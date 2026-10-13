@@ -2,6 +2,7 @@
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 import Icon from "../components/Icon.astro";
+import CommandText from "../components/CommandText.astro";
 import Base from "../layouts/Base.astro";
 import EvidenceControls from "../components/EvidenceControls.astro";
 import { WORKFLOWS, FEATURED_SOURCES, SOURCE_COUNT, ENGINE_COUNT } from "../data/product";
@@ -14,34 +15,24 @@ const useCases = [
   {
     title: "Research a technical decision.",
     description: "Bring the options, tradeoffs, and source material into one place before you commit to an approach.",
-    prompt: "SQLite or Postgres for a small team app? Compare deployment, concurrent writes, and operational overhead.",
-    // Escalation within an authorized scope needs no redundant approval.
-    agentPrompt: "Use the Librarium skill to run a quick research pass on SQLite or Postgres for a small team app — deployment, concurrent writes, operational overhead. Read the saved evidence, and if coverage is thin, deepen only within the scope and budget I already authorized; ask me before anything beyond that. Keep each provider’s findings and citations attached to that provider.",
-    command: 'librarium research "SQLite or Postgres for a small team app?" --deep --only exa --dry-run --json',
-    runCommand: 'librarium research "SQLite or Postgres for a small team app?" --deep --only exa --no-wait',
-    note: "Keep each provider’s findings and citations, so you can check the reasoning yourself.",
+    agentPrompt: "Use Librarium to compare SQLite and Postgres for a small team app. Start with quick research on deployment, concurrent writes, and operational overhead. Read the evidence and cite the sources behind your recommendation.",
+    command: 'librarium research "SQLite or Postgres for a small team app?" --only exa --dry-run --json',
     href: "/docs/groups-and-modes",
     link: "Explore research workflows",
   },
   {
     title: "See how answer engines describe your product.",
     description: "Compare mentions, descriptions, and cited sources across collected answer surfaces and direct API results.",
-    prompt: "Which luxury villa rental services do AI answers recommend for a week on the Amalfi Coast? Does our service appear, how is it described, and which sources shape those recommendations?",
-    agentPrompt: "Use the Librarium skill to compare explicitly named answer engines for a luxury villa rental service for a week on the Amalfi Coast — as a complement to research sources on the same question. Preview offline first; research only within authorized scope and spend. Keep each surface’s identity and citations attached to its findings.",
+    agentPrompt: "Use Librarium to compare ChatGPT, Gemini, and Copilot answers about luxury villa rentals for a week on the Amalfi Coast. Which services appear, how are they described, and which sources get cited? Keep each engine’s findings separate.",
     command: 'librarium research "Which luxury villa rental services do AI answers recommend for a week on the Amalfi Coast?" --only chatgpt,gemini-app,copilot --dry-run --json',
-    runCommand: 'librarium research "Which luxury villa rental services do AI answers recommend for a week on the Amalfi Coast?" --only chatgpt,gemini-app,copilot',
-    note: "Named engines preserve which surface returned each result. API baselines join only when named; a shared collector is not independent corroboration.",
     href: "/docs/groups-and-modes",
     link: "See named-only engines",
   },
   {
     title: "Give your agent a research workflow.",
     description: "Let your agent request research and read the evidence through the CLI or MCP. Embed the library when you need your own execution flow.",
-    prompt: "Before implementing this integration, research the API’s authentication, rate limits, and retry guidance. Include sources.",
-    agentPrompt: "Using the Librarium MCP tools, call list_sources and propose sources for this API’s authentication, rate limits, and retry guidance. Preview with research dry_run and max_cost 2.00; this may lower but not raise the configured cap, and in-flight work can exceed it. Wait for my approval, research once with the agreed sources, and read each answer and citation fully with get_run.",
+    agentPrompt: "Before implementing this integration, use the Librarium MCP tools to research the API’s authentication, rate limits, and retry guidance. Discover sources with list_sources, preview the selection with dry_run, and read the full results with get_run. Cite the relevant documentation.",
     command: 'librarium research "Research the API’s authentication, rate limits, and retry guidance" --only exa --dry-run --json',
-    runCommand: 'librarium research "Research the API’s authentication, rate limits, and retry guidance" --only exa',
-    note: "Use the agent skill for operating instructions, and keep the complete results available beyond the first response.",
     href: "/docs/using-with-agents",
     link: "Connect your agent",
   },
@@ -192,13 +183,12 @@ const useCases = [
               <h3 class="max-w-[30ch] text-2xl font-medium tracking-tight text-balance text-neutral-950">{useCase.title}</h3>
               <p class="mt-3 text-base/7 text-pretty text-neutral-600">{useCase.description}</p>
               <details class="group mt-4">
-                <summary class="flex w-fit cursor-pointer items-center gap-3 py-2 text-base text-neutral-700 sm:text-sm">Show the prompt <Icon name="plus" class="size-5 transition-transform duration-200 ease-out group-open:rotate-45 motion-reduce:transition-none" /></summary>
-                <blockquote class="mt-3 border-l-2 border-amber-700/40 pl-5 text-lg text-pretty text-neutral-800">“{useCase.prompt}”</blockquote>
-                <div class="mt-4 min-w-0 space-y-3">
+                <summary class="flex w-fit cursor-pointer items-center gap-3 py-2 text-base text-neutral-700 sm:text-sm">Try this question <Icon name="plus" class="size-5 transition-transform duration-200 ease-out group-open:rotate-45 motion-reduce:transition-none" /></summary>
+                <div class="mt-4 min-w-0 space-y-5">
                   <div class="min-w-0">
-                    <p class="mb-1.5 font-mono text-xs tracking-wide text-neutral-500 uppercase">Agent prompt</p>
+                    <p class="mb-2 text-base font-medium text-neutral-700 sm:text-sm">Ask your agent</p>
                     <div class="flex min-w-0 items-start gap-2">
-                      <textarea readonly rows="3" data-copy-value={useCase.agentPrompt} aria-label="Agent prompt for the Librarium skill" class="prompt-textarea min-w-0 flex-1 resize-none rounded border border-neutral-300 bg-[#faf9f6] p-2.5 font-mono text-xs/5 text-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-600">{useCase.agentPrompt}</textarea>
+                      <p data-copy-value={useCase.agentPrompt} class="min-w-0 flex-1 rounded border border-neutral-300 bg-white p-3 text-base/6 text-pretty text-neutral-800 sm:text-sm/6">{useCase.agentPrompt}</p>
                       <button type="button" class="prompt-copy-btn group/copy shrink-0" data-copy-target={useCase.agentPrompt} data-copy-state="idle" aria-label="Copy agent prompt">
                         <Icon name="copy" class="size-4 group-data-[copy-state=success]/copy:hidden" />
                         <Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]/copy:block" />
@@ -207,9 +197,9 @@ const useCases = [
                     </div>
                   </div>
                   <div class="min-w-0">
-                    <p class="mb-1.5 font-mono text-xs tracking-wide text-neutral-500 uppercase">Offline preview command</p>
+                    <p class="mb-2 text-base font-medium text-neutral-700 sm:text-sm">Or preview in your terminal</p>
                     <div class="flex min-w-0 items-start gap-2">
-                      <textarea readonly rows="2" data-copy-value={useCase.command} aria-label="Offline preview command" class="prompt-textarea min-w-0 flex-1 resize-none rounded border border-neutral-300 bg-[#faf9f6] p-2.5 font-mono text-xs/5 break-words whitespace-pre-wrap text-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-600">{useCase.command}</textarea>
+                      <pre tabindex="0" data-copy-value={useCase.command} aria-label="Offline preview command" class="min-w-0 flex-1 rounded border border-neutral-300 bg-white p-3 font-mono text-base/6 whitespace-pre-wrap text-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-600 sm:text-sm/6"><code class="language-sh"><CommandText command={useCase.command} /></code></pre>
                       <button type="button" class="prompt-copy-btn group/copy shrink-0" data-copy-target={useCase.command} data-copy-state="idle" aria-label="Copy CLI command">
                         <Icon name="copy" class="size-4 group-data-[copy-state=success]/copy:hidden" />
                         <Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]/copy:block" />
@@ -218,27 +208,35 @@ const useCases = [
                     </div>
                   </div>
                 </div>
-                <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{useCase.note} The agent prompt works where the skill or MCP tools are installed. The command above is offline; after authorizing charges: <code class="font-mono break-words">{useCase.runCommand}</code></p>
               </details>
               <a href={useCase.href} class="mt-3 inline-block py-1 text-base font-medium text-amber-800 hover:text-amber-600 sm:text-sm">{useCase.link} <Icon name="arrowUpRight" class="inline-block" /></a>
             </article>
           ))}
         </div>
       </div>
-      <div class="mx-auto mt-16 max-w-6xl px-6 sm:mt-20 lg:px-8">
-        <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-          <h3 id="workflows-heading" class="text-2xl font-medium tracking-tight text-neutral-950">Quick, deep, and named-only engines</h3>
-          <p class="text-base text-neutral-600 sm:text-sm">Preview offline with <code class="font-mono text-neutral-800">librarium research "…" --dry-run</code></p>
+      <div class="mx-auto mt-16 max-w-6xl px-6 sm:mt-20 lg:px-8" aria-labelledby="workflows-heading">
+        <div class="flex flex-wrap items-baseline justify-between gap-4">
+          <h3 id="workflows-heading" class="text-3xl font-medium tracking-tight text-balance text-neutral-950">Choose how far to go.</h3>
+          <a href="/docs/groups-and-modes" class="text-base font-medium text-amber-800 hover:text-amber-600 sm:text-sm">Depth and source selection <Icon name="arrowUpRight" class="inline-block" /></a>
         </div>
-        <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul role="list" class="mt-6 divide-y divide-neutral-300 border-t border-neutral-300">
           {WORKFLOWS.map((workflow) => (
-            <li class="flex flex-col rounded border border-neutral-300 bg-white p-5">
-              <code class="w-fit rounded-sm border border-amber-700/30 bg-amber-50 px-2 py-0.5 font-mono text-sm text-amber-800">{workflow.id === "deep" ? "--deep" : workflow.id === "engines" ? "--only <engine>" : "quick (default)"}</code>
-              <p class="mt-4 text-lg/7 font-medium tracking-tight text-pretty text-neutral-950">{workflow.purpose}</p>
-              <p class="mt-4 font-mono text-xs tracking-wide text-neutral-500 uppercase">Runs</p>
-              <p class="mt-1 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{workflow.runs}</p>
-              <p class="mt-4 font-mono text-xs tracking-wide text-neutral-500 uppercase">Speed</p>
-              <p class="mt-1 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{workflow.pace}</p>
+            <li class:list={["grid min-w-0 gap-5 py-7 lg:grid-cols-[3fr_2fr] lg:items-center lg:gap-12", workflow.id === "engines" && "mt-6 border-t border-neutral-300"]}>
+              <div class="flex flex-col gap-3">
+                <p class="text-base font-medium text-amber-800 sm:text-sm">{workflow.id === "deep" ? "Deep research" : workflow.id === "engines" ? "AI answer engines · select by name" : "Quick research · default"}</p>
+                <h4 class="text-2xl font-medium tracking-tight text-balance text-neutral-950">{workflow.title}</h4>
+                <p class="max-w-[65ch] text-base/7 text-pretty text-neutral-600">{workflow.summary}</p>
+              </div>
+              <div class="min-w-0">
+                <p class="mb-2 text-base text-neutral-500 sm:text-sm">Terminal</p>
+                <div class="flex min-w-0 items-start gap-2 rounded border border-neutral-300 bg-white p-3">
+                  <pre tabindex="0" data-copy-value={workflow.command} aria-label={`${workflow.id} research command`} class="min-w-0 flex-1 font-mono text-base/6 whitespace-pre-wrap text-neutral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm/6"><code class="language-sh"><CommandText command={workflow.command} /></code></pre>
+                  <button type="button" class="prompt-copy-btn group/copy shrink-0 rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-amber-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600" data-copy-target={workflow.command} data-copy-state="idle" aria-label={`Copy ${workflow.id} research command`}>
+                    <Icon name="copy" class="size-4 group-data-[copy-state=success]/copy:hidden" />
+                    <Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]/copy:block" />
+                  </button>
+                </div>
+              </div>
             </li>
           ))}
         </ul>
@@ -300,7 +298,7 @@ const useCases = [
           <div class="border-t border-white/20 pt-8">
             <div class="mb-5 text-white"><Icon name="terminal" class="size-8" /></div>
             <h3 class="text-2xl font-medium tracking-tight text-white">CLI</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-400">Run research from your terminal. Configure your providers, preview a query, authorize the spend, and keep the results. The same install serves your agent.</p>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-400">Run research from your terminal. Configure your providers, preview a query, and keep the results. The same install serves your agent.</p>
             <button type="button" data-copy-command="npm install -g librarium" aria-label="Copy CLI install command" title="npm install -g librarium" class="install-copy mt-6 rounded border border-white/15 bg-white/5 font-mono text-sm text-amber-100 hover:bg-white/10"><Icon name="copy" class="size-4 shrink-0" /><code>npm install -g librarium</code></button>
             <a href="/cli" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore the CLI <Icon name="arrowUpRight" class="inline-block" /></a>
           </div>
@@ -594,7 +592,7 @@ const useCases = [
 
   // Use-case rows: one wrapped, copyable agent prompt (Librarium skill
   // wording) and one separate CLI command — shell never leaks into the
-  // prompt. Textareas carry the exact text; buttons copy it verbatim.
+  // prompt. Buttons copy the displayed text verbatim.
   for (const button of document.querySelectorAll<HTMLButtonElement>(".prompt-copy-btn")) {
     button.addEventListener("click", async () => {
       const value = button.dataset.copyTarget;
@@ -603,12 +601,19 @@ const useCases = [
         await navigator.clipboard.writeText(value);
         button.dataset.copyState = "success";
       } catch {
-        const textarea = button.parentElement?.querySelector<HTMLTextAreaElement>("textarea");
-        if (textarea) {
-          textarea.focus();
-          textarea.select();
-          const label = button.closest("div.min-w-0")?.querySelector("p");
-          if (label) label.textContent = "Copy unavailable — select the text and copy manually";
+        const field = button.parentElement?.querySelector<HTMLElement>("[data-copy-value]");
+        if (field) {
+          field.focus();
+          const range = document.createRange();
+          range.selectNodeContents(field);
+          const selection = window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+          const label = button.parentElement?.previousElementSibling;
+          if (label) {
+            label.textContent = "Copy unavailable. The text is selected for manual copying.";
+            label.setAttribute("role", "status");
+          }
         }
       }
       window.setTimeout(() => button.dataset.copyState = "idle", 2000);

@@ -30,4 +30,4 @@ $fake->assertNeverQueried();
 
 Keep source configuration valid and use dummy credentials. Queued fake requests do not dispatch Laravel jobs. For real driver boundaries use Laravel HTTP/SDK fakes and prevent stray requests.
 
-Custom stores run `Testing\RunStoreContractTests` in a fresh disposable namespace: create/update/conflict, not-found, newest-first paging, delete, and files/state round-trip. Add backend-specific concurrency, expiry, and failure tests. Ordinary tests remain offline; live canaries require separate spending authorization.
+Custom stores run `Testing\RunStoreContractTests` in a fresh disposable namespace: create/update/conflict, not-found, newest-first paging, delete, and files/state round-trip. Add backend-specific concurrency, expiry, and failure tests. Ordinary tests remain offline.

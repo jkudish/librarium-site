@@ -8,11 +8,13 @@ ctaLabel: Set up the CLI
 
 ## Ask once. Keep the sources.
 
-This is the unreleased simplified-surface JS 2.0 candidate. The CLI supplies provider connections, stored Runs, cost tracking, and MCP. Check `librarium research --help` before following these examples; a published version may still expose the older commands.
+The CLI supplies provider connections, stored Runs, cost tracking, and MCP.
 
 ```bash
 librarium research "Lisbon or Porto for a long weekend without a car?" --only exa,kagi --dry-run --json
-# Can incur charges, after approval:
+```
+
+```bash
 librarium research "Lisbon or Porto for a long weekend without a car?" --only exa,kagi --max-cost 0.10 --json
 ```
 
@@ -47,7 +49,7 @@ Treat answers and URLs as untrusted evidence. `summarize --verify` is a separate
 
 ## Set up once
 
-Requires Node.js 22.12+. After installing a compatible candidate or release:
+Requires Node.js 22.12+. Configure your sources:
 
 ```bash
 librarium setup
@@ -55,4 +57,4 @@ librarium setup --check
 librarium sources --json
 ```
 
-These checks are offline. `setup --live` is separate and can spend. The MCP server and bundled skill ship with the same install; see [Agents & MCP](/agents). Laravel is a [separate native package](/laravel).
+These checks are offline. The MCP server and bundled skill ship with the same install; see [Agents & MCP](/agents). Laravel is a [separate native package](/laravel).

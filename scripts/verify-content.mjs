@@ -80,7 +80,11 @@ assert(!output("sitemap-0.xml").includes("/v1"));
 const llms = output("llms.txt");
 const full = output("llms-full.txt");
 assert(llms.includes(`${SOURCE_COUNT} research sources`) && llms.includes(`${ENGINE_COUNT} named-only engines`));
-assert(llms.includes("unreleased simplified-surface candidate"));
+// Release-status banners must not reappear in HTML or its machine-readable mirrors.
+for (const path of walk(dist).filter((path) => [".html", ".md", ".txt"].includes(extname(path)))) {
+  const prose = extname(path) === ".html" ? text(readFileSync(path, "utf8")) : readFileSync(path, "utf8");
+  assert(!/\bunreleased\b|candidate instructions|published packages may|after authorizing|examples do not authorize provider charges/i.test(prose), `${relative(dist, path)} contains a removed disclaimer`);
+}
 assert(llms.includes("Legacy v1 documentation is preserved") && full.includes("Legacy v1 documentation is preserved"));
 
 // Raw pages and bundles must retain every authored paragraph, not excerpts.
@@ -161,7 +165,7 @@ for (const tool of ["research", "get_run", "list_sources"]) assert(agentsText.in
 assert(agentsText.includes("exactly three tools") && agentsText.includes("dry_run: true") && agentsText.includes("lower but not raise") && agentsText.includes("until null"));
 assert(!/get_results|check_async|list_providers|list_groups|librarium (?:init|doctor|plan)\b/.test(agentsText));
 assert(read("src/content/pages/agents.md").includes(AGENT_SETUP_PROMPT));
-assert(AGENT_SETUP_PROMPT.includes("https://librarium.agentsy.build/install.md") && AGENT_SETUP_PROMPT.includes("paid provider calls without my approval"));
+assert(AGENT_SETUP_PROMPT.includes("https://librarium.agentsy.build/install.md") && AGENT_SETUP_PROMPT.includes("Verify the connection offline") && AGENT_SETUP_PROMPT.includes("API keys out of chat and source control"));
 assert(read("src/content/pages/stories/agentsy-report.md").includes("historical integration evidence"));
 
 const install = output("install.md");
@@ -208,11 +212,13 @@ for (const result of capture.results) {
 assert(homeText.includes("Perplexity Research (Agent API)") && homeText.includes("observed model openai/gpt-5.6-sol (provider-reported)"));
 assert(!homeText.includes("Sonar model") && !homeText.includes("Sonar Deep Research"));
 assert(!/<(?:script|style|button)\b/.test(homeMarkdown));
-const previews = homePage.querySelectorAll('textarea[aria-label="Offline preview command"]');
+const previews = homePage.querySelectorAll('[data-copy-value][aria-label="Offline preview command"]');
 assert.equal(previews.length, 3);
 for (const node of previews) {
   const command = node.getAttribute("data-copy-value");
   assert(command.startsWith("librarium research ") && command.includes("--dry-run") && command.includes("--json"));
+  assert.equal(node.textContent, command);
+  assert(homeMarkdown.includes(command));
 }
 for (const choice of ["cli", "javascript", "laravel", "agent"]) assert(home.includes(`data-logo="${choice}"`));
 assert(home.includes('data-href="/docs/php#install"') && home.includes('id="page-format-control" class="fixed '));

@@ -1,6 +1,6 @@
 ---
 title: Research from your terminal.
-description: Ask once, preview for free, then research with the sources you choose. Keep every answer with its citations.
+description: Preview a question for free, then run it with the sources you choose. Every Run is saved, so you can reopen the answers later.
 kind: product
 ctaHref: /docs#install
 ctaLabel: Set up the CLI

@@ -13,10 +13,10 @@ import { INSTALL_CHOICES } from "../data/setup-prompt";
 const providerMark = (logo: string) => `/providers/${logo}.${["you", "serpapi", "dataforseo"].includes(logo) ? "png" : "svg"}`;
 const capturedCommand = `librarium research "${RESEARCH_DEMO.query}" --deep`;
 const products = [
-  { title: "Agents & MCP", description: "Give Claude Code, Codex, Cursor, and other agents a research tool they can call. One setup prompt installs the CLI and connects its MCP server.", href: "/agents", link: "Explore Agents & MCP" },
-  { title: "CLI", description: "Ask a question in your terminal and get every source's answer with its citations. Preview the cost first, and reopen any past Run.", href: "/cli", link: "Explore the CLI" },
-  { title: "JavaScript / TypeScript", description: "Add multi-source research to a Node app or Worker with a typed client. Choose sources, set a budget, and store Runs where you like.", href: "/javascript", link: "Explore JavaScript" },
-  { title: "PHP / Laravel", description: "Research from a Laravel facade, with queued deep research, Artisan commands, and a fake for your tests. Built on the official Laravel AI SDK.", href: "/laravel", link: "Explore Laravel" },
+  { title: "Agents & MCP", description: "Give Claude Code, Codex, Cursor, and other agents a research tool. One prompt sets it up.", href: "/agents", link: "Explore Agents & MCP" },
+  { title: "CLI", description: "Ask from your terminal and get every answer with its citations.", href: "/cli", link: "Explore the CLI" },
+  { title: "JavaScript / TypeScript", description: "Add multi-source research to a Node app or Worker with a typed client.", href: "/javascript", link: "Explore JavaScript" },
+  { title: "PHP / Laravel", description: "Research from a Laravel facade, with queues and a test fake. Built on the Laravel AI SDK.", href: "/laravel", link: "Explore Laravel" },
 ];
 ---
 
@@ -166,7 +166,7 @@ const products = [
       <section id="providers" class="py-16 sm:py-24">
         <div class="mx-auto max-w-6xl px-6 lg:px-8">
           <h2 class="text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Many sources. One interface.</h2>
-          <p class="mt-5 max-w-[70ch] text-base/7 text-pretty text-neutral-600">The shared catalog includes {SOURCE_COUNT} research sources and {ENGINE_COUNT} AI answer engines. Quick and deep capabilities vary by source; JavaScript and Laravel support can differ.</p>
+          <p class="mt-5 max-w-[70ch] text-base/7 text-pretty text-neutral-600">{SOURCE_COUNT} research sources and {ENGINE_COUNT} AI answer engines in one catalog. Support varies by source and language.</p>
           <h3 class="mt-10 text-lg font-medium text-neutral-950">Research sources</h3>
           <ul role="list" class="mt-4 grid grid-cols-2 border-t border-l border-neutral-200 sm:grid-cols-4 lg:grid-cols-8" aria-label="Research sources">
             {FEATURED_SOURCES.map((provider) => (

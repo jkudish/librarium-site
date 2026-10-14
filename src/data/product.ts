@@ -30,19 +30,19 @@ export const WORKFLOWS = [
   {
     id: "quick",
     title: "Get a first answer.",
-    summary: "Search results and cited answers for everyday questions. Uses your configured research sources by default.",
+    summary: "Fast, cited answers for everyday questions.",
     command: `librarium research "${exampleQuestion}"`,
   },
   {
     id: "deep",
     title: "Investigate further.",
-    summary: "For questions that need real digging. Deep research sources read widely and write full reports with citations, which can take several minutes. Start one, get on with your work, and pick it up later by its Run ID.",
+    summary: "Full, cited reports for questions that need real digging. Start one and pick it up later by its Run ID.",
     command: `librarium research "${exampleQuestion}" --deep`,
   },
   {
     id: "engines",
     title: "Check AI answer engines.",
-    summary: "See how ChatGPT, Gemini, and Copilot answer questions about your product or category: what they recommend and which pages they cite.",
+    summary: "See what ChatGPT, Gemini, and Copilot recommend in your category, and which pages they cite.",
     command: `librarium research "${exampleQuestion}" --only chatgpt,gemini-app,copilot`,
   },
 ] as const;

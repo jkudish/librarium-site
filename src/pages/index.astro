@@ -3,626 +3,258 @@ import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 import Icon from "../components/Icon.astro";
 import CommandText from "../components/CommandText.astro";
+import CodePanel from "../components/CodePanel.astro";
 import Base from "../layouts/Base.astro";
 import EvidenceControls from "../components/EvidenceControls.astro";
-import { WORKFLOWS, FEATURED_SOURCES, SOURCE_COUNT, ENGINE_COUNT } from "../data/product";
-import { RESEARCH_DEMO, formatElapsed, renderCapturedMarkdown } from "../data/research-demo";
+import { WORKFLOWS, FEATURED_SOURCES, FEATURED_ENGINES, SOURCE_COUNT, ENGINE_COUNT } from "../data/product";
+import { RESEARCH_DEMO, RUN_EXAMPLE, COMPARED_TOOLS, PROVIDER_COMPARISON, formatElapsed, renderCapturedMarkdown } from "../data/research-demo";
+import { INSTALL_CHOICES, PROMPT_EXPAND_LABEL } from "../data/setup-prompt";
 
 const providerMark = (logo: string) => `/providers/${logo}.${["you", "serpapi", "dataforseo"].includes(logo) ? "png" : "svg"}`;
-
-const featuredProviders = FEATURED_SOURCES;
-const useCases = [
-  {
-    title: "Research a technical decision.",
-    description: "Bring the options, tradeoffs, and source material into one place before you commit to an approach.",
-    agentPrompt: "Use Librarium to compare SQLite and Postgres for a small team app. Start with quick research on deployment, concurrent writes, and operational overhead. Read the evidence and cite the sources behind your recommendation.",
-    command: 'librarium research "SQLite or Postgres for a small team app?" --only exa --dry-run --json',
-    href: "/docs/groups-and-modes",
-    link: "Explore research workflows",
-  },
-  {
-    title: "See how answer engines describe your product.",
-    description: "Compare mentions, descriptions, and cited sources across collected answer surfaces and direct API results.",
-    agentPrompt: "Use Librarium to compare ChatGPT, Gemini, and Copilot answers about luxury villa rentals for a week on the Amalfi Coast. Which services appear, how are they described, and which sources get cited? Keep each engine’s findings separate.",
-    command: 'librarium research "Which luxury villa rental services do AI answers recommend for a week on the Amalfi Coast?" --only chatgpt,gemini-app,copilot --dry-run --json',
-    href: "/docs/groups-and-modes",
-    link: "See named-only engines",
-  },
-  {
-    title: "Give your agent a research workflow.",
-    description: "Let your agent request research and read the evidence through the CLI or MCP. Embed the library when you need your own execution flow.",
-    agentPrompt: "Before implementing this integration, use the Librarium MCP tools to research the API’s authentication, rate limits, and retry guidance. Discover sources with list_sources, preview the selection with dry_run, and read the full results with get_run. Cite the relevant documentation.",
-    command: 'librarium research "Research the API’s authentication, rate limits, and retry guidance" --only exa --dry-run --json',
-    href: "/docs/using-with-agents",
-    link: "Connect your agent",
-  },
+const capturedCommand = `librarium research "${RESEARCH_DEMO.query}" --deep`;
+const products = [
+  { title: "Agents & MCP", description: "Let your agent ask questions and read the answers through the bundled skill and MCP server.", href: "/agents", link: "Explore Agents & MCP" },
+  { title: "CLI", description: "Ask from your terminal, save a Run, and return to the evidence later.", href: "/cli", link: "Explore the CLI" },
+  { title: "JavaScript / TypeScript", description: "Build research into Node services, Workers, and your own execution flow with a typed client.", href: "/javascript", link: "Explore JavaScript" },
+  { title: "PHP / Laravel", description: "Use a native Laravel package with Artisan commands, encrypted queue jobs, and a testing fake.", href: "/laravel", link: "Explore Laravel" },
 ];
-
-// The demo's display fixtures live in src/data/research-demo.ts: the approved
-// analytics question across Exa, Perplexity, Gemini, Parallel, and You.com.
-// Captured excerpts and citations retain their provenance in the JSON fixture.
 ---
 
-<Base title="librarium — give your agent more than one source" description="Query search engines, AI answers, and deep-research APIs from one interface. Keep results and citations together with Librarium’s CLI, MCP server, and library." bodyClass="bg-[#faf9f6]">
-  <div>
-  <Header />
-
-  <main>
-    <section class="pt-14 sm:pt-24">
-      <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <div class="relative mx-auto max-w-4xl text-center">
-          <p class="text-base text-neutral-600 sm:text-sm">A meta harness for research queries</p>
-          <h1 class="mt-6 text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-7xl lg:text-[88px]">Give your agent more than one source.</h1>
-          <p class="mx-auto mt-7 max-w-[60ch] text-lg/8 text-pretty text-neutral-600">Use librarium to query search engines, check AI answers, and deep-research APIs. Review the results and citations together, without building a separate integration for every provider.</p>
-          <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <a id="setup-primary" href="/docs#install" class="rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm">Set up Librarium</a>
-            <a href="#research-example" class="px-3 py-3 text-base font-medium text-neutral-700 hover:text-neutral-950 sm:text-sm">See an example <Icon name="arrowUpRight" class="inline-block" /></a>
-          </div>
-          <div class="mx-auto mt-7 max-w-2xl">
-            <div class="relative inline-flex items-stretch rounded border border-neutral-200 bg-white text-neutral-700">
-              <button type="button" id="copy-install" aria-label="Copy setup prompt" title="Copy setup prompt" data-copy-state="idle" class="group flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-l px-3.5 text-sm hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
-                <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" />
-                <Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]:block" />
-                <span id="copy-action-label">Copy setup prompt</span>
-              </button>
-              <div id="setup-menu-container" class="border-l border-neutral-200">
-                <button id="setup-menu-toggle" type="button" aria-label="Setup and install options" aria-haspopup="menu" aria-expanded="false" aria-controls="setup-menu" class="flex h-full min-h-10 w-10 cursor-pointer items-center justify-center rounded-r hover:bg-neutral-100"><Icon name="caretDown" class="size-4" /></button>
-                <div id="setup-menu" role="menu" aria-label="Setup and install options" hidden class="absolute top-full left-1/2 z-60 mt-2 w-80 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded border border-neutral-200 bg-white p-1 text-left shadow-lg dark:shadow-none">
-                  {[
-                    { id: "agent", label: "Agent setup prompt", copy: "Copy setup prompt", value: "agent", href: "/docs/using-with-agents#mcp-server" },
-                    { id: "cli", label: "CLI install", copy: "Copy CLI install", value: "npm install -g librarium", href: "/docs#install" },
-                    { id: "javascript", label: "JavaScript / TypeScript", copy: "Copy JavaScript install", value: "npm install librarium", href: "/javascript" },
-                    { id: "laravel", label: "Laravel install", copy: "Copy Laravel install", value: "composer require jkudish/laravel-ai-librarium", href: "/docs/php#install" },
-                  ].map((choice, index) => (
-                    <>
-                      {index === 1 && <hr class="mx-2 my-1 border-neutral-200" />}
-                      <button type="button" role="menuitemradio" aria-checked={choice.id === "agent" ? "true" : "false"} tabindex="-1" data-logo={choice.id} data-value={choice.value} data-copy-label={choice.copy} data-href={choice.href} class="group flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-sm px-3 py-1.5 text-left text-sm text-neutral-700 hover:bg-neutral-100 focus-visible:bg-neutral-100">
-                      <span class="flex shrink-0 items-center">
-                      {choice.id === "agent" ? (
-                        <span class="agent-stack flex shrink-0 -space-x-2" role="img" aria-label="Claude, Codex, and Cursor" title="Claude, Codex, and Cursor">
-                          {["claude", "codex", "cursor"].map((name) => (
-                            <span class="relative rounded-full border border-neutral-200 bg-white p-1"><img src={`/${name === "claude" ? "providers" : "agents"}/${name}.svg`} alt="" width="16" height="16" class="size-4" /></span>
-                          ))}
-                        </span>
-                      ) : choice.id === "cli" ? <Icon name="terminal" class="size-5" /> : <img src={`/languages/${choice.id}.svg`} alt="" width="20" height="20" class="size-5" />}
-                      </span>
-                      <span class="flex-1 whitespace-nowrap">{choice.label}</span><Icon name="check" class="invisible size-4 group-aria-checked:visible" />
-                    </button>
-                    </>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div class="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-base sm:text-sm">
-              <button id="view-setup-prompt" type="button" aria-expanded="false" aria-controls="install-output" class="cursor-pointer py-1 text-neutral-500 underline underline-offset-4 hover:text-neutral-950">View prompt</button>
-              <span id="view-prompt-separator" aria-hidden="true" class="text-neutral-400">·</span>
-              <a id="install-methods" href="/docs#install" class="py-1 text-neutral-500 underline decoration-neutral-300 underline-offset-4 hover:text-neutral-950">Installation guide</a>
-            </div>
-            <p id="install-output" hidden tabindex="0" class="mt-3 whitespace-pre-wrap break-words rounded border border-neutral-200 bg-[#faf9f6] p-4 text-left font-mono text-sm/7 text-neutral-800"><span id="install-prefix" hidden class="text-neutral-400 select-none">$ </span><span id="install-command"></span></p>
-          </div>
-          <p id="copy-install-label" aria-live="polite" class="mt-1 text-base text-neutral-600 empty:sr-only sm:text-sm"></p>
-          <noscript><a href="/docs/php" class="mt-3 inline-block text-amber-700 underline">PHP / Laravel installation</a></noscript>
-        </div>
-
-        <div id="research-example" role="region" tabindex="-1" aria-label="Captured research demo — playback, not live" class="mt-12 min-w-0 scroll-mt-6 overflow-hidden border-x border-t border-neutral-300 bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-600 sm:mt-16">
-          <div class="flex flex-col justify-between gap-4 border-b border-neutral-200 px-5 pt-6 sm:flex-row sm:items-end sm:px-7 sm:pt-7">
-            <h2 class="max-w-[30ch] pb-5 text-2xl font-medium tracking-tight text-balance text-neutral-950 sm:pb-7">One question. Multiple providers.</h2>
-            <div id="example-tabs" role="tablist" aria-label="Example format" hidden class="shrink-0">
-              <button id="example-readable-tab" type="button" role="tab" aria-selected="true" aria-controls="example-readable" class="min-h-12 cursor-pointer border-b-2 border-transparent px-1 py-3 text-base font-medium text-neutral-500 aria-selected:border-amber-700 aria-selected:text-amber-800 hover:text-neutral-950 sm:text-sm">Readable result</button>
-              <button id="example-json-tab" type="button" role="tab" aria-selected="false" aria-controls="example-json" tabindex="-1" class="ml-6 min-h-12 cursor-pointer border-b-2 border-transparent px-1 py-3 text-base text-neutral-500 aria-selected:border-amber-700 aria-selected:text-amber-800 hover:text-neutral-950 sm:text-sm">JSON</button>
-            </div>
-          </div>
-          <div id="example-readable" role="tabpanel" aria-labelledby="example-readable-tab" tabindex="0" class="focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-700">
-            <div class="min-w-0 px-5 py-6 sm:px-7 sm:py-8">
-              <div class="flex min-h-12 items-center justify-between gap-4 rounded border border-neutral-200 bg-white px-4 py-3">
-                <p class="min-h-6 min-w-0 flex-1 font-mono text-base/6 break-words text-neutral-800"><span id="demo-typed">{RESEARCH_DEMO.query}</span><span id="demo-caret" class="demo-caret" aria-hidden="true"></span></p>
-                <span id="demo-action" class="shrink-0 rounded-sm border border-neutral-300 bg-white px-2.5 py-1 font-mono text-xs tracking-wide text-neutral-700 uppercase">research</span>
-              </div>
-              <div id="demo-providers" role="tablist" aria-label="Provider results" class="demo-tabs mt-5 flex min-h-10 gap-2 overflow-x-auto pb-0.5">
-                {RESEARCH_DEMO.results.map((result, index) => (
-                  <button type="button" role="tab" id={`demo-tab-${index}`} data-demo-tab={index} data-demo-state="done" aria-selected={index === 0 ? "true" : "false"} aria-controls={`demo-panel-${index}`} tabindex={index === 0 ? 0 : -1} title={result.provider} class="demo-tab flex min-h-10 shrink-0 cursor-pointer items-center gap-2 rounded border px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
-                    <img src={providerMark(result.logo)} alt="" width="20" height="20" class="size-5 shrink-0" />
-                    <span class="whitespace-nowrap font-medium">{result.shortName}</span>
-                    <span class="demo-dot size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
-                    <span class="demo-tab-status min-w-[7ch] text-left font-mono text-xs" data-demo-status>{result.status === "failed" ? "failed" : formatElapsed(result.elapsedSeconds)}</span>
-                  </button>
+<Base title="Librarium — give your agent more than one source" description="Query search engines, AI answer engines, and deep-research APIs from one interface, and keep every answer with its citations." bodyClass="bg-[#faf9f6]">
+  <div class="isolate antialiased">
+    <Header />
+    <main>
+      <section class="pt-14 sm:pt-24">
+        <div class="mx-auto max-w-6xl px-6 lg:px-8">
+          <div class="mx-auto max-w-4xl text-center">
+            <p class="text-base text-neutral-600 sm:text-sm">A meta harness for research queries</p>
+            <h1 class="mt-6 text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-7xl lg:text-[5.5rem]">Give your agent more than one source.</h1>
+            <p class="mx-auto mt-7 max-w-[60ch] text-lg/8 text-pretty text-neutral-600">Query search engines, AI answer engines, and deep-research APIs from one interface, and keep every answer with its citations.</p>
+            <div id="install" class="mx-auto mt-8 max-w-2xl scroll-mt-8 rounded-lg border border-neutral-300 bg-white p-4 text-left sm:p-5">
+              <h2 class="sr-only">Set up Librarium</h2>
+              <div id="install-tabs" role="tablist" aria-label="Install Librarium" class="grid grid-cols-4 gap-1 rounded bg-neutral-100 p-1">
+                {INSTALL_CHOICES.map((choice, index) => (
+                  <button id={`install-tab-${choice.id}`} type="button" role="tab" aria-selected={index === 0 ? "true" : "false"} aria-controls={`install-panel-${choice.id}`} tabindex={index === 0 ? 0 : -1} class="min-h-11 cursor-pointer rounded px-1 text-sm font-medium text-neutral-600 aria-selected:bg-white aria-selected:text-neutral-950 aria-selected:shadow-sm hover:text-neutral-950 sm:text-base">{choice.label}</button>
                 ))}
               </div>
-              <noscript><style>[data-demo-panel]{display:block !important}[data-demo-heading]{position:static !important;width:auto !important;height:auto !important;margin:1.5rem 0 0 !important;overflow:visible !important;clip:auto !important;clip-path:none !important;white-space:normal !important}</style></noscript>
-              {RESEARCH_DEMO.results.map((result, index) => (
-                <div id={`demo-panel-${index}`} role="tabpanel" aria-labelledby={`demo-tab-${index}`} data-demo-panel={index} data-demo-final={result.status === "failed" ? "failed" : formatElapsed(result.elapsedSeconds)} tabindex="0" hidden={index !== 0} class="demo-panel mt-3 flex h-[30rem] flex-col focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-700 sm:h-[26rem]">
-                  <h3 class="sr-only text-sm font-medium text-neutral-950" data-demo-heading>{result.provider}</h3>
-                  <div class="demo-pending hidden border-t border-neutral-200 pt-4" aria-hidden="true">
-                    <span class="block h-3 w-2/3 rounded-sm bg-neutral-100"></span>
-                    <span class="mt-3 block h-3 w-11/12 rounded-sm bg-neutral-100"></span>
-                    <span class="mt-3 block h-3 w-4/5 rounded-sm bg-neutral-100"></span>
-                    <span class="mt-3 block h-3 w-1/2 rounded-sm bg-neutral-100"></span>
+              {INSTALL_CHOICES.map((choice, index) => (
+                <div id={`install-panel-${choice.id}`} role="tabpanel" aria-labelledby={`install-tab-${choice.id}`} tabindex="0" hidden={index !== 0} data-install-panel data-install-method={choice.id}>
+                  <div class="mt-4 flex items-start gap-3">
+                    <pre id={`install-text-${choice.id}`} class:list={["min-w-0 flex-1 whitespace-pre-wrap break-words text-base/7 text-neutral-800 sm:text-sm/6", choice.id === "agent" ? "install-prompt font-sans" : "font-mono"]}><code>{choice.text}</code></pre>
+                    <button type="button" data-code-copy data-copy={choice.text} data-copy-state="idle" aria-label={`Copy ${choice.label === "Agent" ? "agent setup prompt" : `${choice.label} install commands`}`} class="group flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded border border-neutral-300 px-3 text-sm text-neutral-700 hover:bg-neutral-100">
+                      <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]:block" /><span class="copy-label">Copy</span>
+                    </button>
                   </div>
-                  <div data-demo-body class="min-h-0 flex-1 overflow-y-auto border-t border-neutral-200 pt-4 pr-1">
-                    {result.title && <h3 class="max-w-[60ch] text-lg font-medium text-balance text-neutral-950">{result.title}</h3>}
-                    <div class="demo-report mt-2 max-w-[75ch] text-sm/6 text-pretty text-neutral-600" set:html={renderCapturedMarkdown(result.displayContent)} />
-                    {result.citations.length > 0 && (
-                      <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1">
-                        {result.citations.slice(0, 3).map((citation) => (
-                          <a href={citation.url} target="_blank" rel="noopener noreferrer" class="py-0.5 text-xs text-neutral-500 underline decoration-neutral-300 underline-offset-4 hover:text-amber-800">
-                            {citation.title} <Icon name="arrowUpRight" class="inline-block" /><span class="sr-only"> (opens in a new tab)</span>
-                          </a>
-                        ))}
-                        {result.citations.length > 3 && <span class="py-0.5 font-mono text-xs text-neutral-400">+{result.citations.length - 3} more sources</span>}
-                      </div>
-                    )}
+                  <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-base text-amber-800 sm:text-sm">
+                    {choice.id === "agent" && <button id="expand-prompt" type="button" aria-expanded="false" aria-controls="install-text-agent" class="min-h-10 cursor-pointer underline underline-offset-4 hover:text-amber-600">{PROMPT_EXPAND_LABEL}</button>}
+                    <a href={choice.href} class="py-2 font-medium hover:text-amber-600">Full install guide →</a>
                   </div>
                 </div>
               ))}
-              <div class="mt-4 flex justify-end">
-                <button id="demo-replay" type="button" hidden class="shrink-0 cursor-pointer rounded border border-neutral-300 bg-white px-3 py-1.5 font-mono text-xs tracking-wide text-neutral-700 uppercase hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">Replay</button>
-              </div>
+              <p id="copy-status" role="status" class="mt-1 text-sm text-neutral-600 empty:sr-only"></p>
+              <noscript><style>[data-install-panel] { display: block !important; margin-top: 1rem; } .install-prompt { display: block !important; } #install-tabs { display: none; }</style></noscript>
             </div>
+            <p class="mt-4 text-base font-medium text-neutral-700 sm:text-sm"><a href="#research-example" class="py-3 hover:text-neutral-950">See an example <Icon name="arrowUpRight" class="inline-block" /></a></p>
           </div>
-          <div id="example-json" role="tabpanel" aria-labelledby="example-json-tab" tabindex="0" hidden class="bg-neutral-950 px-5 py-5 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-300 sm:px-7">
-            <p class="mb-4 text-base text-neutral-400 sm:text-sm">Excerpts of the captured reports, simplified for display — faithful prefixes of each full response, not the complete text and not the full API response schema.</p>
-            <pre class="whitespace-pre-wrap break-words font-mono text-base/7 text-amber-100 sm:text-sm/6"><code>{JSON.stringify(RESEARCH_DEMO, null, 2)}</code></pre>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <section class="border-t border-neutral-300 pt-16 pb-6 sm:pt-28 sm:pb-10" id="features">
-      <div class="mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[1fr_1.35fr] lg:px-8">
-        <div>
-          <h2 class="max-w-[16ch] text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Good research starts with your question.</h2>
-          <p class="mt-6 max-w-[34ch] text-lg/8 text-pretty text-neutral-600">Find sources for a quick answer, dig deeper with deep research into a topic, or see how AI answers describe your brand or product.</p>
-          <p class="mt-8 max-w-[34ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6">
-            Choose the capabilities and providers you need, or let your agent use librarium’s skill and MCP tools to effectively plan the research.
-            <a href="/docs/groups-and-modes" class="mt-3 block w-fit font-medium text-amber-800 hover:text-amber-600">Explore depth and source selection <Icon name="arrowUpRight" class="inline-block" /></a>
-          </p>
-        </div>
-        <div class="divide-y divide-neutral-300 border-t border-neutral-300">
-          {useCases.map((useCase) => (
-            <article class="py-8 last:pb-0">
-              <h3 class="max-w-[30ch] text-2xl font-medium tracking-tight text-balance text-neutral-950">{useCase.title}</h3>
-              <p class="mt-3 text-base/7 text-pretty text-neutral-600">{useCase.description}</p>
-              <details class="group mt-4">
-                <summary class="flex w-fit cursor-pointer items-center gap-3 py-2 text-base text-neutral-700 sm:text-sm">Try this question <Icon name="plus" class="size-5 transition-transform duration-200 ease-out group-open:rotate-45 motion-reduce:transition-none" /></summary>
-                <div class="mt-4 min-w-0 space-y-5">
-                  <div class="min-w-0">
-                    <p class="mb-2 text-base font-medium text-neutral-700 sm:text-sm">Ask your agent</p>
-                    <div class="flex min-w-0 items-start gap-2">
-                      <p data-copy-value={useCase.agentPrompt} class="min-w-0 flex-1 rounded border border-neutral-300 bg-white p-3 text-base/6 text-pretty text-neutral-800 sm:text-sm/6">{useCase.agentPrompt}</p>
-                      <button type="button" class="prompt-copy-btn group/copy shrink-0" data-copy-target={useCase.agentPrompt} data-copy-state="idle" aria-label="Copy agent prompt">
-                        <Icon name="copy" class="size-4 group-data-[copy-state=success]/copy:hidden" />
-                        <Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]/copy:block" />
-                        <span class="sr-only">Copy agent prompt</span>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="min-w-0">
-                    <p class="mb-2 text-base font-medium text-neutral-700 sm:text-sm">Or preview in your terminal</p>
-                    <div class="flex min-w-0 items-start gap-2">
-                      <pre tabindex="0" data-copy-value={useCase.command} aria-label="Offline preview command" class="min-w-0 flex-1 rounded border border-neutral-300 bg-white p-3 font-mono text-base/6 whitespace-pre-wrap text-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-600 sm:text-sm/6"><code class="language-sh"><CommandText command={useCase.command} /></code></pre>
-                      <button type="button" class="prompt-copy-btn group/copy shrink-0" data-copy-target={useCase.command} data-copy-state="idle" aria-label="Copy CLI command">
-                        <Icon name="copy" class="size-4 group-data-[copy-state=success]/copy:hidden" />
-                        <Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]/copy:block" />
-                        <span class="sr-only">Copy CLI command</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </details>
-              <a href={useCase.href} class="mt-3 inline-block py-1 text-base font-medium text-amber-800 hover:text-amber-600 sm:text-sm">{useCase.link} <Icon name="arrowUpRight" class="inline-block" /></a>
-            </article>
-          ))}
-        </div>
-      </div>
-      <div class="mx-auto mt-16 max-w-6xl px-6 sm:mt-20 lg:px-8" aria-labelledby="workflows-heading">
-        <div class="flex flex-wrap items-baseline justify-between gap-4">
-          <h3 id="workflows-heading" class="text-3xl font-medium tracking-tight text-balance text-neutral-950">Choose how far to go.</h3>
-          <a href="/docs/groups-and-modes" class="text-base font-medium text-amber-800 hover:text-amber-600 sm:text-sm">Depth and source selection <Icon name="arrowUpRight" class="inline-block" /></a>
-        </div>
-        <ul role="list" class="mt-6 divide-y divide-neutral-300 border-t border-neutral-300">
-          {WORKFLOWS.map((workflow) => (
-            <li class:list={["grid min-w-0 gap-5 py-7 lg:grid-cols-[3fr_2fr] lg:items-center lg:gap-12", workflow.id === "engines" && "mt-6 border-t border-neutral-300"]}>
-              <div class="flex flex-col gap-3">
-                <p class="text-base font-medium text-amber-800 sm:text-sm">{workflow.id === "deep" ? "Deep research" : workflow.id === "engines" ? "AI answer engines · select by name" : "Quick research · default"}</p>
-                <h4 class="text-2xl font-medium tracking-tight text-balance text-neutral-950">{workflow.title}</h4>
-                <p class="max-w-[65ch] text-base/7 text-pretty text-neutral-600">{workflow.summary}</p>
-              </div>
-              <div class="min-w-0">
-                <p class="mb-2 text-base text-neutral-500 sm:text-sm">Terminal</p>
-                <div class="flex min-w-0 items-start gap-2 rounded border border-neutral-300 bg-white p-3">
-                  <pre tabindex="0" data-copy-value={workflow.command} aria-label={`${workflow.id} research command`} class="min-w-0 flex-1 font-mono text-base/6 whitespace-pre-wrap text-neutral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600 sm:text-sm/6"><code class="language-sh"><CommandText command={workflow.command} /></code></pre>
-                  <button type="button" class="prompt-copy-btn group/copy shrink-0 rounded p-1 text-neutral-500 hover:bg-neutral-100 hover:text-amber-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600" data-copy-target={workflow.command} data-copy-state="idle" aria-label={`Copy ${workflow.id} research command`}>
-                    <Icon name="copy" class="size-4 group-data-[copy-state=success]/copy:hidden" />
-                    <Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]/copy:block" />
-                  </button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-
-    <section class="border-y border-neutral-300 bg-[#eeeae0] py-16 sm:py-24" aria-labelledby="controls-heading">
-      <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <h2 id="controls-heading" class="max-w-[24ch] text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Keep the evidence.<br />Keep control.</h2>
-        <EvidenceControls />
-      </div>
-    </section>
-
-    <section class="py-16 sm:py-28" id="providers">
-      <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <h2 class="max-w-[25ch] text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Many sources.<br />One interface.</h2>
-        <p class="mt-5 max-w-[65ch] text-base/7 text-pretty text-neutral-600">The shared catalog includes {SOURCE_COUNT} research sources and {ENGINE_COUNT} named-only engines. Language and collector availability differs. Add your own with <a href="/docs/custom-providers" class="underline decoration-neutral-300 underline-offset-4 hover:text-amber-800">our source guide</a>.</p>
-        <ul class="mt-12 grid grid-cols-2 border-t border-l border-neutral-200 sm:grid-cols-3 lg:grid-cols-6" aria-label="Supported provider families">
-          {featuredProviders.map((provider) => (
-            <li class="flex flex-col items-center justify-center gap-3 border-r border-b border-neutral-200 px-3 py-7">
-              <img src={`/providers/${provider.logo}.${["you", "serpapi", "dataforseo"].includes(provider.logo) ? "png" : "svg"}`} alt="" width="28" height="28" loading="lazy" class="logo-mono size-7 shrink-0 grayscale" />
-              <span class="text-base text-neutral-700 sm:text-sm">{provider.name}</span>
-            </li>
-          ))}
-          <li class="flex items-center justify-center border-r border-b border-neutral-200 bg-[#eeeae0] px-3 py-7 text-center"><a href="/docs/custom-providers" class="text-base text-neutral-800 hover:text-amber-800 sm:text-sm">Your own provider <Icon name="plus" class="mx-auto mt-2 block size-5" /></a></li>
-        </ul>
-        <div class="mt-6 flex flex-wrap items-baseline justify-end gap-4">
-          <div class="flex gap-5">
-            <a href="/docs/providers" class="text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">JavaScript providers <Icon name="arrowUpRight" class="inline-block" /></a>
-            <a href="/docs/php/providers" class="text-base font-medium text-amber-700 hover:text-amber-600 sm:text-sm">PHP providers <Icon name="arrowUpRight" class="inline-block" /></a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="bg-neutral-950 py-16 sm:py-24" id="library">
-      <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <h2 class="max-w-[24ch] text-4xl font-medium tracking-tight text-balance text-white sm:text-5xl">
-          Use Librarium where you build.
-        </h2>
-        <div class="install-cards mt-12 grid grid-cols-1 gap-12 xl:grid-cols-2">
-          <div class="border-t border-white/20 pt-8">
-            <div class="mb-5">
-              <span class="agent-stack flex -space-x-2" role="img" aria-label="Claude, Codex, OpenCode, Cursor, Grok, and Amp" title="Claude, Codex, OpenCode, Cursor, Grok, and Amp">
-                {["claude", "codex", "opencode", "cursor", "grok", "amp"].map((name) => (
-                  <span class="relative rounded-full border border-neutral-200 bg-white p-1.5"><img src={`/${["claude", "grok"].includes(name) ? "providers" : "agents"}/${name}.svg`} alt="" width="20" height="20" class="size-5" /></span>
+          <div id="research-example" role="region" tabindex="-1" aria-label="Captured research demo — playback, not live" class="mt-12 min-w-0 scroll-mt-6 overflow-hidden border border-neutral-300 bg-white sm:mt-16">
+            <div class="flex flex-col justify-between gap-4 border-b border-neutral-200 px-5 pt-6 sm:flex-row sm:items-end sm:px-7">
+              <h2 class="pb-4 text-2xl font-medium tracking-tight text-neutral-950 sm:pb-6">One question. Multiple providers.</h2>
+              <div id="example-tabs" role="tablist" aria-label="Example format" hidden class="flex shrink-0 gap-5">
+                {[{ id: "readable", label: "Answers" }, { id: "compare", label: "Compare" }, { id: "json", label: "JSON" }].map((tab, index) => (
+                  <button id={`example-${tab.id}-tab`} type="button" role="tab" aria-selected={index === 0 ? "true" : "false"} aria-controls={`example-${tab.id}`} tabindex={index === 0 ? 0 : -1} class="min-h-12 cursor-pointer border-b-2 border-transparent px-1 py-3 text-base font-medium text-neutral-500 aria-selected:border-amber-700 aria-selected:text-amber-800 hover:text-neutral-950 sm:text-sm">{tab.label}</button>
                 ))}
-              </span>
+              </div>
             </div>
-            <h3 class="text-2xl font-medium tracking-tight text-white">Agents &amp; MCP</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-400">Hand your coding agent the canonical setup prompt, connect over MCP, and keep every result and citation inspectable. The MCP server and agent skill ship with the CLI installation—not a separate package.</p>
-            <button type="button" id="copy-agent-prompt" data-copy-state="idle" class="group mt-6 flex min-h-10 w-full cursor-pointer items-center justify-center gap-2 rounded border border-white/15 bg-white/5 px-4 font-mono text-sm text-amber-100 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300">
-              <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" />
-              <Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" />
-              <span id="copy-agent-label">Copy agent setup prompt</span>
-            </button>
-            <a href="/agents" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore Agents &amp; MCP <Icon name="arrowUpRight" class="inline-block" /></a>
-          </div>
-          <div class="border-t border-white/20 pt-8">
-            <div class="mb-5 text-white"><Icon name="terminal" class="size-8" /></div>
-            <h3 class="text-2xl font-medium tracking-tight text-white">CLI</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-400">Run research from your terminal. Configure your providers, preview a query, and keep the results. The same install serves your agent.</p>
-            <button type="button" data-copy-command="npm install -g librarium" aria-label="Copy CLI install command" title="npm install -g librarium" class="install-copy mt-6 rounded border border-white/15 bg-white/5 font-mono text-sm text-amber-100 hover:bg-white/10"><Icon name="copy" class="size-4 shrink-0" /><code>npm install -g librarium</code></button>
-            <a href="/cli" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore the CLI <Icon name="arrowUpRight" class="inline-block" /></a>
-          </div>
-          <div class="border-t border-white/20 pt-8">
-            <div class="mb-5 flex items-center gap-4" aria-label="JavaScript and TypeScript">
-              <img src="/languages/javascript.svg" alt="JavaScript" width="32" height="32" class="size-8 invert" />
-              <img src="/languages/typescript.svg" alt="TypeScript" width="32" height="32" class="size-8 invert" />
+            <div class="border-b border-neutral-200 px-5 py-5 sm:px-7">
+              <p id="demo-action" class="text-base font-medium text-amber-800 sm:text-sm">Captured deep research</p>
+              <!-- The question is always complete, including during playback. -->
+              <p id="demo-query" class="mt-2 text-xl/7 font-medium break-words text-neutral-950">{RESEARCH_DEMO.query}</p>
+              <pre class="mt-3 whitespace-pre-wrap break-words font-mono text-sm/6 text-neutral-600"><code class="language-sh"><CommandText command={capturedCommand} /></code></pre>
+              <p class="mt-2 text-base/6 text-neutral-500 sm:text-sm/6">Captured September 18, 2026. Playback makes no provider calls; durations are historical, not a speed promise. Answers are excerpts of the captured reports.</p>
             </div>
-            <h3 class="text-2xl font-medium tracking-tight text-white">JavaScript / TypeScript</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-400">Build research into your application with the typed library. Use portable core modules in Workers or Node services for local configuration and artifacts.</p>
-            <button type="button" data-copy-command="npm install librarium" aria-label="Copy JavaScript install command" title="npm install librarium" class="install-copy mt-6 rounded border border-white/15 bg-white/5 font-mono text-sm text-amber-100 hover:bg-white/10"><Icon name="copy" class="size-4 shrink-0" /><code>npm install librarium</code></button>
-            <a href="/javascript" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore JavaScript <Icon name="arrowUpRight" class="inline-block" /></a>
-          </div>
-          <div class="border-t border-white/20 pt-8">
-            <div class="mb-5 flex items-center gap-4" aria-label="Laravel">
-              <img src="/languages/laravel.svg" alt="Laravel" width="32" height="32" class="size-8 invert" />
+            <div id="example-readable" role="tabpanel" aria-labelledby="example-readable-tab" tabindex="0" class="px-5 py-6 sm:px-7">
+              <div id="demo-providers" role="tablist" aria-label="Provider results" class="flex min-h-11 gap-2 overflow-x-auto pb-1">
+                {RESEARCH_DEMO.results.map((result, index) => (
+                  <button type="button" role="tab" id={`demo-tab-${index}`} data-demo-tab={index} data-demo-state="done" aria-selected={index === 0 ? "true" : "false"} aria-controls={`demo-panel-${index}`} tabindex={index === 0 ? 0 : -1} title={result.provider} class="demo-tab flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded border px-3 py-2 text-sm">
+                    <img src={providerMark(result.logo)} alt="" width="20" height="20" class="size-5 shrink-0" /><span class="whitespace-nowrap font-medium">{result.shortName}</span><span class="demo-dot size-1.5 shrink-0 rounded-full" aria-hidden="true"></span><span class="min-w-[7ch] text-left font-mono tabular-nums" data-demo-status>{formatElapsed(result.elapsedSeconds)}</span>
+                  </button>
+                ))}
+              </div>
+              <noscript><style>[data-demo-panel] { display: block !important; } [data-demo-heading] { position: static !important; width: auto !important; height: auto !important; clip-path: none !important; }</style></noscript>
+              {RESEARCH_DEMO.results.map((result, index) => (
+                <div id={`demo-panel-${index}`} role="tabpanel" aria-labelledby={`demo-tab-${index}`} data-demo-panel={index} data-demo-final={formatElapsed(result.elapsedSeconds)} tabindex="0" hidden={index !== 0} class="mt-4">
+                  <h3 class="sr-only" data-demo-heading>{result.provider}</h3>
+                  <div class="demo-pending hidden border-t border-neutral-200 py-8 text-neutral-500" aria-hidden="true">Playing captured answer…</div>
+                  <div data-demo-body class="max-h-[30rem] overflow-y-auto border-t border-neutral-200 pt-4 sm:max-h-[26rem]">
+                    {result.title && <h4 class="max-w-[60ch] text-lg font-medium text-pretty text-neutral-950">{result.title}</h4>}
+                    <p class="mt-1 text-sm/6 text-neutral-500">{result.modelLabel}</p>
+                    <div class="demo-report mt-3 text-base/7 text-neutral-600 sm:text-sm/6" set:html={renderCapturedMarkdown(result.displayContent)} />
+                    <div data-demo-citations class="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-neutral-500">
+                      {result.citations.filter((citation) => !citation.url.includes("vertexaisearch.cloud.google.com")).slice(0, 3).map((citation) => (
+                        <a href={citation.url} target="_blank" rel="noopener noreferrer" class="underline decoration-neutral-300 underline-offset-4 hover:text-amber-800">{citation.title} <Icon name="arrowUpRight" class="inline-block" /></a>
+                      ))}
+                      <span>{result.citations.length} citations in the capture</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div class="mt-4 flex justify-end"><button id="demo-replay" type="button" hidden class="min-h-10 cursor-pointer rounded border border-neutral-300 px-3 text-sm text-neutral-700 hover:bg-neutral-100">Replay capture</button></div>
             </div>
-            <h3 class="text-2xl font-medium tracking-tight text-white">PHP / Laravel</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-400">A native Laravel package with a fluent research API, Artisan commands, pricing previews, encrypted queue jobs, and a testing fake. Your application owns storage and workflows.</p>
-            <button type="button" data-copy-command="composer require jkudish/laravel-ai-librarium" aria-label="Copy Laravel install command" title="composer require jkudish/laravel-ai-librarium" class="install-copy mt-6 rounded border border-white/15 bg-white/5 font-mono text-sm text-amber-100 hover:bg-white/10"><Icon name="copy" class="size-4 shrink-0" /><code>composer require jkudish/laravel-ai-librarium</code></button>
-            <a href="/laravel" class="mt-5 inline-block py-2 text-base font-medium text-amber-200 hover:text-white">Explore Laravel <Icon name="arrowUpRight" class="inline-block" /></a>
+            <div id="example-compare" role="tabpanel" aria-labelledby="example-compare-tab" tabindex="0" hidden class="px-5 py-6 sm:px-7">
+              <div class="grid items-start gap-8 lg:grid-cols-[3fr_2fr]">
+                <div class="min-w-0">
+                  <h3 class="text-lg font-medium text-neutral-950">Which tools did each excerpt name?</h3>
+                  <p class="mt-2 text-base/6 text-neutral-600 sm:text-sm/6">A mention is not an endorsement. “—” means the tool is not in the displayed excerpt, not that the full report ruled it out.</p>
+                  <ul role="list" data-compare-list class="mt-4 divide-y divide-neutral-200 sm:hidden">
+                    {PROVIDER_COMPARISON.map((row) => <li class="py-3 text-base/6 text-neutral-700"><p class="font-medium">{row.provider}</p><p class="mt-1 text-neutral-500">{row.named.length ? row.named.join(", ") : "None of these four tools named in the excerpt"}</p></li>)}
+                  </ul>
+                  <div class="mt-4 overflow-x-auto max-sm:hidden">
+                    <table class="compare-table w-full text-left text-sm text-neutral-700">
+                      <thead><tr><th scope="col">Provider</th>{COMPARED_TOOLS.map((tool) => <th scope="col">{tool}</th>)}</tr></thead>
+                      <tbody>{PROVIDER_COMPARISON.map((row) => <tr><th scope="row">{row.provider}</th>{COMPARED_TOOLS.map((tool) => <td><span aria-label={row.named.includes(tool) ? "Named in excerpt" : "Not in excerpt"}>{row.named.includes(tool) ? "✓" : "—"}</span></td>)}</tr>)}</tbody>
+                    </table>
+                  </div>
+                </div>
+                <EvidenceControls agreement />
+              </div>
+            </div>
+            <div id="example-json" role="tabpanel" aria-labelledby="example-json-tab" tabindex="0" hidden class="px-5 py-6 sm:px-7">
+              <p class="mb-4 text-base/7 text-neutral-600 sm:text-sm/6">Current Run shape: an unchanged, single-result <code>librarium.run/1</code> contract fixture. This is a separate example, not the historical capture above.</p>
+              <CodePanel label="Run contract fixture" code={JSON.stringify(RUN_EXAMPLE, null, 2)} lang="json" scroll />
+            </div>
           </div>
         </div>
-        <p id="install-card-status" role="status" class="mt-3 text-sm text-amber-100 empty:hidden"></p>
-        <p class="mt-10 max-w-[72ch] text-base/7 text-pretty text-neutral-400 sm:text-sm/6">The CLI and JavaScript library share one implementation. Laravel is a separate native package. They share terminal response concepts, not identical provider coverage or execution behavior.</p>
-      </div>
-    </section>
+      </section>
 
-    <section class="border-y border-neutral-950/10 bg-[#efb86b] py-16 sm:py-24" aria-labelledby="setup-heading">
-      <div class="mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-6 lg:grid-cols-2 lg:px-8">
-        <div>
-          <h2 id="setup-heading" class="max-w-[16ch] text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-6xl">Put your sources to work.</h2>
-          <p class="mt-6 max-w-[50ch] text-base/7 text-pretty text-neutral-800">Install Librarium, connect your providers, and preview your first query. Use it yourself or hand the research to your agent.</p>
+      <section id="features" class="py-16 sm:py-24">
+        <div class="mx-auto max-w-6xl px-6 lg:px-8">
+          <div class="flex flex-wrap items-baseline justify-between gap-4">
+            <h2 class="text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Choose how far to go.</h2>
+            <p class="text-base font-medium text-amber-800 sm:text-sm"><a href="/docs/groups-and-modes" class="hover:text-amber-600">Depth and source selection <Icon name="arrowUpRight" class="inline-block" /></a></p>
+          </div>
+          <ul role="list" class="mt-8 divide-y divide-neutral-300 border-t border-neutral-300">
+            {WORKFLOWS.map((workflow) => (
+              <li data-workflow={workflow.id} class="grid min-w-0 gap-5 py-7 lg:grid-cols-[3fr_2fr] lg:items-center lg:gap-12">
+                <div>
+                  <p class="text-base font-medium text-amber-800 sm:text-sm">{workflow.id === "deep" ? "Deep research" : workflow.id === "engines" ? "AI answer engines · select by name" : "Quick research · default"}</p>
+                  <h3 class="mt-3 text-2xl font-medium tracking-tight text-neutral-950">{workflow.title}</h3>
+                  <p class="mt-3 max-w-[65ch] text-base/7 text-pretty text-neutral-600">{workflow.summary}</p>
+                </div>
+                <CodePanel label={`${workflow.id === "engines" ? "AI answer engines" : workflow.id} command`} code={workflow.command} lang="bash" />
+              </li>
+            ))}
+          </ul>
         </div>
-        <div class="lg:justify-self-end">
-          <a href="#library" class="group inline-flex items-center gap-x-3 rounded-md bg-neutral-950 px-8 py-4 text-lg font-medium text-white shadow-sm hover:bg-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-neutral-950 sm:px-10 sm:py-5 sm:text-xl">Set up Librarium<span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
-        </div>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <Footer />
+      <section class="border-y border-neutral-300 bg-[#eeeae0] py-16 sm:py-24" aria-labelledby="controls-heading">
+        <div class="mx-auto max-w-6xl px-6 lg:px-8">
+          <h2 id="controls-heading" class="text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Keep the evidence. Keep control.</h2>
+          <EvidenceControls />
+        </div>
+      </section>
+
+      <section id="providers" class="py-16 sm:py-24">
+        <div class="mx-auto max-w-6xl px-6 lg:px-8">
+          <h2 class="text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Many sources. One interface.</h2>
+          <p class="mt-5 max-w-[70ch] text-base/7 text-pretty text-neutral-600">The shared catalog includes {SOURCE_COUNT} research sources and {ENGINE_COUNT} AI answer engines. Quick and deep capabilities vary by source; JavaScript and Laravel support can differ.</p>
+          <h3 class="mt-10 text-lg font-medium text-neutral-950">Research sources</h3>
+          <ul role="list" class="mt-4 grid grid-cols-2 border-t border-l border-neutral-200 sm:grid-cols-4 lg:grid-cols-8" aria-label="Research sources">
+            {FEATURED_SOURCES.map((provider) => (
+              <li data-source={provider.id} class="flex flex-col items-center gap-3 border-r border-b border-neutral-200 px-2 py-6 text-center">
+                <div class="provider-logo"><img src={providerMark(provider.logo)} alt="" width="28" height="28" loading="lazy" class="logo-mono size-7 object-contain grayscale" /></div>
+                <p class="text-base text-neutral-700 sm:text-sm">{provider.name}</p><p class="text-sm text-neutral-500">{provider.hint}</p>
+              </li>
+            ))}
+          </ul>
+          <h3 class="mt-8 text-lg font-medium text-neutral-950">AI answer engines · choose by name</h3>
+          <ul role="list" class="mt-4 grid grid-cols-1 border-t border-l border-neutral-200 sm:grid-cols-5" aria-label="AI answer engines">
+            {FEATURED_ENGINES.map((engine) => (
+              <li data-engine={engine.id} class="flex items-center gap-3 border-r border-b border-neutral-200 p-4 text-base text-neutral-700 sm:flex-col sm:text-center sm:text-sm">
+                <div class="provider-logo">{engine.logo ? <img src={providerMark(engine.logo)} alt="" width="28" height="28" loading="lazy" class="logo-mono size-7 object-contain grayscale" /> : <span class="font-mono font-medium" aria-hidden="true">{engine.monogram}</span>}</div>
+                <p>{engine.name}</p>
+              </li>
+            ))}
+          </ul>
+          <div class="mt-6 flex flex-wrap gap-5 text-base font-medium text-amber-800 sm:text-sm">
+            <a href="/docs/providers" class="hover:text-amber-600">JavaScript provider capabilities →</a>
+            <a href="/docs/php/providers" class="hover:text-amber-600">Laravel provider capabilities →</a>
+            <a href="/docs/custom-providers" class="hover:text-amber-600">Add a custom source →</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="library" class="bg-neutral-950 py-16 sm:py-24">
+        <div class="mx-auto max-w-6xl px-6 lg:px-8">
+          <h2 class="text-4xl font-medium tracking-tight text-balance text-white sm:text-5xl">Use Librarium where you build.</h2>
+          <div class="mt-10 grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {products.map((product) => (
+              <article class="border-t border-white/20 pt-6">
+                <h3 class="text-xl font-medium text-white">{product.title}</h3>
+                <p class="mt-3 text-base/7 text-pretty text-neutral-400 sm:text-sm/6">{product.description}</p>
+                <p class="mt-4 text-base font-medium text-amber-200 sm:text-sm"><a href={product.href} class="py-2 hover:text-white">{product.link} <Icon name="arrowUpRight" class="inline-block" /></a></p>
+              </article>
+            ))}
+          </div>
+          <p class="mt-8 max-w-[75ch] text-base/7 text-neutral-400 sm:text-sm/6">The CLI and JavaScript library share one implementation. Laravel is a separate native package. Both return a Run with answers and citations; provider support and execution behavior can differ.</p>
+        </div>
+      </section>
+
+      <section class="bg-[#efb86b] py-16 sm:py-24" aria-labelledby="setup-heading">
+        <div class="mx-auto grid max-w-6xl items-center gap-8 px-6 lg:grid-cols-2 lg:px-8">
+          <div>
+            <h2 id="setup-heading" class="text-4xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl">Put your sources to work.</h2>
+            <p class="mt-6 max-w-[50ch] text-base/7 text-neutral-800">Install Librarium, connect your sources, and preview your first query. Use it yourself or hand the research to your agent.</p>
+          </div>
+          <p class="text-lg font-medium lg:justify-self-end"><a href="#install" class="inline-flex items-center gap-3 rounded-md bg-neutral-950 px-8 py-4 text-white hover:bg-neutral-800">Set up Librarium <span aria-hidden="true">→</span></a></p>
+        </div>
+      </section>
+    </main>
+    <Footer />
   </div>
 </Base>
 
 <style>
-  .install-cards > div { min-width: 0; }
-  .install-cards > div > div:first-child { height: 34px; }
-  .install-copy, #copy-agent-prompt, .prompt-copy {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    justify-self: start;
-    gap: 8px;
-    width: fit-content;
-    max-width: 100%;
-    height: 40px;
-    padding: 0 12px;
-    cursor: pointer;
-  }
-  .install-copy code, .prompt-copy code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .install-copy:focus-visible { outline: 2px solid #fcd34d; outline-offset: 2px; }
-  @media (min-width: 1280px) {
-    .install-cards { row-gap: 0; }
-    .install-cards > div {
-      display: grid;
-      grid-template-rows: subgrid;
-      grid-row: span 5;
-      padding-bottom: 48px;
-    }
-  }
-  /* Rendered captured-report excerpts inside demo cards. */
+  .install-prompt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .install-prompt[data-expanded="true"] { display: block; }
+  .provider-logo { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 3rem; height: 3rem; border: 1px solid var(--color-neutral-200); border-radius: var(--radius-md); background: var(--color-neutral-100); }
   .demo-report { overflow-x: auto; }
   .demo-report :global(a) { text-decoration: underline; text-underline-offset: 2px; color: inherit; }
-  .demo-report :global(a:hover) { text-decoration-thickness: 2px; }
   .demo-report > :global(* + *) { margin-top: 0.5rem; }
-  .demo-report :global(h4) { font-weight: var(--font-weight-medium); color: inherit; }
+  .demo-report :global(h4) { font-weight: 500; }
   .demo-report :global(ul) { list-style: disc; padding-left: 1.15rem; }
-  .demo-report :global(ul > li + li) { margin-top: 0.2rem; }
-  .demo-report :global(table) {
-    display: table;
-    width: 100%;
-    min-width: 40rem;
-    border-collapse: collapse;
-    font-size: var(--text-sm);
-    line-height: 1.4rem;
-    text-align: left;
-  }
-  .demo-report :global(th), .demo-report :global(td) {
-    border-bottom: 1px solid var(--color-neutral-200);
-    padding: 8px 12px;
-    vertical-align: top;
-    white-space: normal;
-  }
-  .demo-report :global(th) { white-space: nowrap; color: inherit; font-weight: var(--font-weight-medium); }
-  /* Provider chips: the chip is the only provider label above a result, so the
-     selected chip carries a strong state and its status (queued, running, or
-     the captured wall-clock duration). The dark palette is set here because
-     the shared dark overrides do not know these states. */
-  .demo-tab { border-color: var(--color-neutral-200); background: #fff; color: var(--color-neutral-700); }
+  .demo-report :global(table) { width: 100%; min-width: 40rem; border-collapse: collapse; text-align: left; }
+  .demo-report :global(th), .demo-report :global(td), .compare-table :is(th, td) { border-bottom: 1px solid var(--color-neutral-200); padding: 0.75rem; vertical-align: top; }
+  .compare-table th { font-weight: 500; }
+  .compare-table td { text-align: center; }
+  .demo-tab { border-color: var(--color-neutral-200); color: var(--color-neutral-700); }
   .demo-tab:hover { background: var(--color-neutral-100); }
-  .demo-tab-status { color: var(--color-neutral-500); }
-  .demo-tab[aria-selected="true"] {
-    border-color: var(--color-amber-700);
-    background: var(--color-amber-50);
-    box-shadow: inset 0 0 0 1px var(--color-amber-700);
-    color: var(--color-neutral-950);
-  }
-  .demo-tab[aria-selected="true"] .demo-tab-status { color: var(--color-amber-800); }
+  .demo-tab[aria-selected="true"] { border-color: var(--color-amber-700); background: var(--color-amber-50); color: var(--color-amber-800); }
   .demo-dot { background: var(--color-neutral-300); }
-  .demo-tab[data-demo-state="queued"] .demo-dot { background: transparent; box-shadow: inset 0 0 0 1px var(--color-neutral-400); }
-  .demo-tab[data-demo-state="running"] .demo-dot,
-  .demo-tab[aria-selected="true"] .demo-dot { background: var(--color-amber-600); box-shadow: none; }
+  .demo-tab[aria-selected="true"] .demo-dot { background: var(--color-amber-600); }
   [data-demo-panel]:is([data-demo-state="running"], [data-demo-state="queued"]) .demo-pending { display: block; }
-  :global(:root[data-theme="dark"]) .demo-tab { border-color: #3e403a; background: #191a19; color: #c9cbc4; }
-  :global(:root[data-theme="dark"]) .demo-tab:hover { background: #33352f; }
-  :global(:root[data-theme="dark"]) .demo-tab-status { color: #adb0a6; }
-  :global(:root[data-theme="dark"]) .demo-tab[aria-selected="true"] { border-color: #efc184; background: #2b2720; box-shadow: inset 0 0 0 1px #efc184; color: #f2f2ed; }
-  :global(:root[data-theme="dark"]) .demo-tab[aria-selected="true"] .demo-tab-status { color: #efc184; }
-  :global(:root[data-theme="dark"]) .demo-dot { background: #5a5d55; }
-  :global(:root[data-theme="dark"]) .demo-tab[data-demo-state="queued"] .demo-dot { background: transparent; box-shadow: inset 0 0 0 1px #6d7068; }
-  :global(:root[data-theme="dark"]) .demo-tab[data-demo-state="running"] .demo-dot,
-  :global(:root[data-theme="dark"]) .demo-tab[aria-selected="true"] .demo-dot { background: #efc184; box-shadow: none; }
+  :global(:root[data-theme="dark"]) .demo-tab[aria-selected="true"] { border-color: #efc184; background: #2b2720; color: #efc184; }
   @media (prefers-color-scheme: dark) {
-    :global(:root:not([data-theme])) .demo-tab { border-color: #3e403a; background: #191a19; color: #c9cbc4; }
-    :global(:root:not([data-theme])) .demo-tab:hover { background: #33352f; }
-    :global(:root:not([data-theme])) .demo-tab-status { color: #adb0a6; }
-    :global(:root:not([data-theme])) .demo-tab[aria-selected="true"] { border-color: #efc184; background: #2b2720; box-shadow: inset 0 0 0 1px #efc184; color: #f2f2ed; }
-    :global(:root:not([data-theme])) .demo-tab[aria-selected="true"] .demo-tab-status { color: #efc184; }
-    :global(:root:not([data-theme])) .demo-dot { background: #5a5d55; }
-    :global(:root:not([data-theme])) .demo-tab[data-demo-state="queued"] .demo-dot { background: transparent; box-shadow: inset 0 0 0 1px #6d7068; }
-    :global(:root:not([data-theme])) .demo-tab[data-demo-state="running"] .demo-dot,
-    :global(:root:not([data-theme])) .demo-tab[aria-selected="true"] .demo-dot { background: #efc184; box-shadow: none; }
+    :global(:root:not([data-theme])) .demo-tab[aria-selected="true"] { border-color: #efc184; background: #2b2720; color: #efc184; }
   }
-  /* Demo engine affordances; under reduced motion the engine never runs and
-     the server-rendered static output stands, so none of these activate. */
   @media (prefers-reduced-motion: no-preference) {
-    .demo-caret { display: none; width: 0.55em; height: 1.05em; margin-left: 2px; translate: 0 0.16em; background: #a69b89; }
-    #research-example[data-demo-phase="typing"] .demo-caret { display: inline-block; animation: demo-caret-blink 1s steps(2, start) infinite; }
-    #demo-action[data-engaged="true"] { border-color: var(--color-amber-700); color: var(--color-amber-800); }
-    /* Switching providers: the incoming panel eases in while it is "running". */
-    #research-example[data-demo-playing="true"] [data-demo-panel][data-demo-state="running"] { animation: demo-panel-in 480ms ease-out both; }
-    /* The answer streams in word by word, like model output; the script sets
-       each word's --demo-word index and the panel's --demo-word-ms pace. */
-    #research-example[data-demo-playing="true"] [data-demo-panel][data-demo-state="done"] :global([data-demo-word]) {
-      animation: demo-word 320ms ease-out both;
-      animation-delay: calc(var(--demo-word, 0) * var(--demo-word-ms, 30ms));
-    }
+    #research-example[data-demo-playing="true"] [data-demo-state="done"] :global([data-demo-word]) { animation: demo-word 320ms ease-out both; animation-delay: calc(var(--demo-word, 0) * var(--demo-word-ms, 30ms)); }
     @keyframes demo-word { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes demo-panel-in { from { opacity: 0; } to { opacity: 1; } }
-    .demo-tab[data-demo-state="running"] .demo-dot { animation: demo-pulse 1s ease-in-out infinite alternate; }
-    [data-demo-panel][data-demo-state="running"] .demo-pending { animation: demo-pulse 1s ease-in-out infinite alternate; }
-    @keyframes demo-caret-blink { to { visibility: hidden; } }
-    @keyframes demo-pulse { from { opacity: 1; } to { opacity: 0.35; } }
   }
+  /* Shared CodePanel preserves its toolbar/copy behavior; homepage commands
+     wrap instead of requiring a horizontal scroll on narrow screens. */
+  [data-workflow] :global(pre), #example-json :global(pre) { white-space: pre-wrap; overflow-wrap: anywhere; }
 </style>
 
 <script>
-  import { AGENT_SETUP_PROMPT } from "../data/setup-prompt";
+  import { PROMPT_EXPAND_LABEL } from "../data/setup-prompt";
   import { initResearchDemo } from "../scripts/research-demo";
   initResearchDemo();
-  const installButton = document.getElementById("copy-install");
-  const installLabel = document.getElementById("copy-install-label");
-  const installCommand = document.getElementById("install-command");
-  const menuToggle = document.querySelector<HTMLButtonElement>("#setup-menu-toggle");
-  const menu = document.getElementById("setup-menu");
-  const choices = [...document.querySelectorAll<HTMLButtonElement>("#setup-menu [role=menuitemradio]")];
-  let selected = choices[0];
-  function closeSetupMenu() {
-    if (menu) menu.hidden = true;
-    menuToggle?.setAttribute("aria-expanded", "false");
-  }
-  function openSetupMenu() {
-    if (menu) menu.hidden = false;
-    menuToggle?.setAttribute("aria-expanded", "true");
-    selected?.focus();
-  }
-  menuToggle?.addEventListener("click", () => menu?.hidden ? openSetupMenu() : closeSetupMenu());
-  menuToggle?.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); openSetupMenu(); }
-  });
-  menu?.addEventListener("keydown", (event) => {
-    const index = choices.indexOf(document.activeElement as HTMLButtonElement);
-    if (event.key === "Escape") { closeSetupMenu(); menuToggle?.focus(); }
-    else if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
-      event.preventDefault();
-      const next = event.key === "Home" ? 0 : event.key === "End" ? choices.length - 1 : (index + (event.key === "ArrowDown" ? 1 : -1) + choices.length) % choices.length;
-      choices[next].focus();
-    }
-  });
-  document.addEventListener("click", (event) => {
-    if (!document.getElementById("setup-menu-container")?.contains(event.target as Node)) closeSetupMenu();
-  });
-  document.addEventListener("focusin", (event) => {
-    if (!document.getElementById("setup-menu-container")?.contains(event.target as Node)) closeSetupMenu();
-  });
-  const promptToggle = document.getElementById("view-setup-prompt");
-  const installOutput = document.getElementById("install-output");
-  function showPrompt(show: boolean) {
-    if (installOutput) installOutput.hidden = !show;
-    promptToggle?.setAttribute("aria-expanded", String(show));
-    if (promptToggle) promptToggle.textContent = show ? "Hide prompt" : "View prompt";
-  }
-  promptToggle?.addEventListener("click", () => showPrompt(installOutput?.hidden === true));
-  const setupPrompt = AGENT_SETUP_PROMPT;
-  let copyFeedbackTimeout: ReturnType<typeof setTimeout>;
-  function selectSetup(option: HTMLButtonElement) {
-    selected = option;
-    const agent = option.dataset.value === "agent";
-    for (const choice of choices) choice.setAttribute("aria-checked", String(choice === option));
-    if (promptToggle) promptToggle.hidden = !agent;
-    document.getElementById("view-prompt-separator")?.toggleAttribute("hidden", !agent);
-    showPrompt(!agent);
-    if (installCommand) installCommand.textContent = agent ? setupPrompt : option.dataset.value!;
-    const prefix = document.getElementById("install-prefix");
-    if (prefix) prefix.hidden = agent;
-    installButton?.setAttribute("aria-label", agent ? "Copy setup prompt" : "Copy install command");
-    installButton?.setAttribute("title", agent ? "Copy setup prompt" : "Copy install command");
-    const actionLabel = document.getElementById("copy-action-label");
-    if (actionLabel) actionLabel.textContent = option.dataset.copyLabel!;
-    clearTimeout(copyFeedbackTimeout);
-    if (installButton) installButton.dataset.copyState = "idle";
-    if (installLabel) installLabel.textContent = "";
-    const href = option.dataset.href!;
-    document.getElementById("setup-primary")?.setAttribute("href", href);
-    document.getElementById("install-methods")?.setAttribute("href", href);
-  }
-  for (const choice of choices) choice.addEventListener("click", () => {
-    selectSetup(choice);
-    closeSetupMenu();
-    menuToggle?.focus();
-  });
-  if (selected) selectSetup(selected);
-  installButton?.addEventListener("click", async () => {
-    if (!installCommand?.textContent || !installLabel) return;
-    const copied = installCommand.textContent.trim();
-    clearTimeout(copyFeedbackTimeout);
-    try {
-      await navigator.clipboard.writeText(copied);
-      if (installCommand.textContent.trim() !== copied) return;
-      installLabel.textContent = selected?.dataset.value === "agent" ? "Copied. Paste into your coding agent." : "Copied";
-      installButton.dataset.copyState = "success";
-    } catch {
-      if (installCommand.textContent.trim() !== copied) return;
-      showPrompt(true);
-      document.getElementById("install-output")?.focus();
-      const range = document.createRange();
-      range.selectNodeContents(installCommand);
-      window.getSelection()?.removeAllRanges();
-      window.getSelection()?.addRange(range);
-      installLabel.textContent = "Select text to copy";
-      installButton.dataset.copyState = "error";
-    }
-    copyFeedbackTimeout = setTimeout(() => {
-      installButton.dataset.copyState = "idle";
-      installLabel.textContent = "";
-    }, 2000);
-  });
 
-  const agentPromptButton = document.querySelector<HTMLButtonElement>("#copy-agent-prompt");
-  const agentPromptLabel = document.getElementById("copy-agent-label");
-  let agentPromptTimeout: ReturnType<typeof setTimeout>;
-  agentPromptButton?.addEventListener("click", async () => {
-    if (!agentPromptLabel) return;
-    clearTimeout(agentPromptTimeout);
-    try {
-      await navigator.clipboard.writeText(AGENT_SETUP_PROMPT);
-      agentPromptLabel.textContent = "Copied. Paste into your coding agent.";
-      agentPromptButton.dataset.copyState = "success";
-    } catch {
-      agentPromptLabel.textContent = "Copy unavailable. Use View prompt above.";
-    }
-    agentPromptTimeout = setTimeout(() => {
-      agentPromptLabel.textContent = "Copy agent setup prompt";
-      agentPromptButton.dataset.copyState = "idle";
-    }, 2000);
-  });
-
-  const cardStatus = document.getElementById("install-card-status");
-  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-copy-command]")) {
-    button.addEventListener("click", async () => {
-      if (!cardStatus) return;
-      try {
-        await navigator.clipboard.writeText(button.dataset.copyCommand!);
-        cardStatus.textContent = "Install command copied.";
-      } catch {
-        cardStatus.textContent = `Copy unavailable. Select and copy: ${button.dataset.copyCommand}`;
-      }
-    });
-  }
-
-  // Use-case rows: one wrapped, copyable agent prompt (Librarium skill
-  // wording) and one separate CLI command — shell never leaks into the
-  // prompt. Buttons copy the displayed text verbatim.
-  for (const button of document.querySelectorAll<HTMLButtonElement>(".prompt-copy-btn")) {
-    button.addEventListener("click", async () => {
-      const value = button.dataset.copyTarget;
-      if (!value) return;
-      try {
-        await navigator.clipboard.writeText(value);
-        button.dataset.copyState = "success";
-      } catch {
-        const field = button.parentElement?.querySelector<HTMLElement>("[data-copy-value]");
-        if (field) {
-          field.focus();
-          const range = document.createRange();
-          range.selectNodeContents(field);
-          const selection = window.getSelection();
-          selection?.removeAllRanges();
-          selection?.addRange(range);
-          const label = button.parentElement?.previousElementSibling;
-          if (label) {
-            label.textContent = "Copy unavailable. The text is selected for manual copying.";
-            label.setAttribute("role", "status");
-          }
-        }
-      }
-      window.setTimeout(() => button.dataset.copyState = "idle", 2000);
-    });
-  }
-
-  const tablist = document.getElementById("example-tabs");
-  const tabs = [...document.querySelectorAll<HTMLButtonElement>("#example-tabs [role=tab]")];
-  function selectExampleTab(selected: HTMLButtonElement) {
+  // Each tab owns its visible payload and guide link. Selection never changes
+  // any unrelated navigation target, including the final setup CTA.
+  function activate(tabs: HTMLButtonElement[], selected: HTMLButtonElement) {
     for (const tab of tabs) {
       const active = tab === selected;
       tab.setAttribute("aria-selected", String(active));
@@ -631,21 +263,33 @@ const useCases = [
       if (panel) panel.hidden = !active;
     }
   }
-  for (const [index, tab] of tabs.entries()) {
-    tab.addEventListener("click", () => selectExampleTab(tab));
-    tab.addEventListener("keydown", (event) => {
-      let next: number;
-      switch (event.key) {
-        case "ArrowRight": next = (index + 1) % tabs.length; break;
-        case "ArrowLeft": next = (index + tabs.length - 1) % tabs.length; break;
-        case "Home": next = 0; break;
-        case "End": next = tabs.length - 1; break;
-        default: return;
-      }
-      event.preventDefault();
-      selectExampleTab(tabs[next]);
-      tabs[next].focus();
-    });
+  for (const id of ["install-tabs", "example-tabs"]) {
+    const list = document.getElementById(id);
+    const tabs = [...list?.querySelectorAll<HTMLButtonElement>("[role=tab]") ?? []];
+    for (const [index, tab] of tabs.entries()) {
+      tab.addEventListener("click", () => activate(tabs, tab));
+      tab.addEventListener("keydown", (event) => {
+        let next: number;
+        switch (event.key) {
+          case "ArrowRight": next = (index + 1) % tabs.length; break;
+          case "ArrowLeft": next = (index + tabs.length - 1) % tabs.length; break;
+          case "Home": next = 0; break;
+          case "End": next = tabs.length - 1; break;
+          default: return;
+        }
+        event.preventDefault();
+        activate(tabs, tabs[next]);
+        tabs[next].focus();
+      });
+    }
+    if (list) list.hidden = false;
   }
-  if (tablist) tablist.hidden = false;
+  const expand = document.getElementById("expand-prompt");
+  const prompt = document.getElementById("install-text-agent");
+  expand?.addEventListener("click", () => {
+    const expanded = expand.getAttribute("aria-expanded") !== "true";
+    expand.setAttribute("aria-expanded", String(expanded));
+    if (prompt) prompt.dataset.expanded = String(expanded);
+    expand.textContent = expanded ? "Show less" : PROMPT_EXPAND_LABEL;
+  });
 </script>

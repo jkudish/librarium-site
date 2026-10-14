@@ -2,6 +2,7 @@ import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { HTMLElement as HTMLElementClass, type HTMLElement, parse } from "node-html-parser";
 import { RESEARCH_DEMO } from "../data/research-demo";
+import { INSTALL_CHOICES } from "../data/setup-prompt";
 import Home from "../pages/index.astro";
 
 const SITE = "https://librarium.agentsy.build/";
@@ -13,7 +14,7 @@ const SITE = "https://librarium.agentsy.build/";
 const DECORATIVE = [
   "script", "style", "noscript", "template", "svg", "img", "button", "select", "label",
   '[aria-hidden="true"]', ".select-none", '[role="menu"]', '[role="tablist"]',
-  "a .sr-only", "#demo-action", "#demo-caret",
+  "a .sr-only", ".code-toolbar", "#demo-caret",
 ].join(", ");
 
 const BLOCK = "p, div, ul, ol, li, pre, table, blockquote, h1, h2, h3, h4, h5, h6";
@@ -46,16 +47,40 @@ function escapeLinkText(text: string): string {
 function sourcesMarkdown(index: number): string {
   const citations = RESEARCH_DEMO.results[index]?.citations ?? [];
   if (citations.length === 0) return "";
-  const items = citations.map(({ title, url }) => {
+  const redirects = citations.filter(({ url }) => new URL(url).hostname === "vertexaisearch.cloud.google.com");
+  const direct = citations.filter((citation) => !redirects.includes(citation));
+  const items = direct.slice(0, 5).map(({ title, url }) => {
     const target = /[\s()<>]/.test(url) ? `<${url}>` : url;
     return `- [${escapeLinkText(title || new URL(url).hostname)}](${target})`;
   });
-  return `**Sources (${citations.length})**\n\n${items.join("\n")}`;
+  const counts = [
+    direct.length > 5 ? `${direct.length - 5} more citations in the capture` : "",
+    redirects.length ? `${redirects.length} Google grounding redirect citations (URLs omitted)` : "",
+  ].filter(Boolean);
+  return `**Sources (${citations.length} in the capture; up to 5 shown)**\n\n${items.join("\n")}\n\n${counts.join("; ")}`.trim();
 }
 
 // Restructure the rendered page into reading order before conversion.
 function prepare(main: HTMLElement): Map<string, string> {
   const placeholders = new Map<string, string>();
+
+  // The machine view contains all install choices, not just the initial tab.
+  const install = main.querySelector("#install");
+  install?.querySelector("h2")?.insertAdjacentHTML("afterend", '<p>Follow the <a href="/install.md">agent setup instructions</a>.</p>');
+  for (const choice of INSTALL_CHOICES) {
+    const panel = main.querySelector(`#install-panel-${choice.id}`);
+    panel?.insertAdjacentHTML("afterbegin", `<h3>${choice.label}</h3>`);
+  }
+  // Workflow rows are sections of prose plus fenced commands, not list items
+  // with indented code. Toolbar labels are UI chrome, not reading content.
+  for (const row of main.querySelectorAll("[data-workflow]")) {
+    row.tagName = "div";
+  }
+  const workflows = main.querySelector("[data-workflow]")?.parentNode;
+  if (workflows instanceof HTMLElementClass) workflows.tagName = "div";
+  main.querySelector("#example-json")?.remove();
+  // The narrow comparison list and wide table contain the same data.
+  main.querySelector("[data-compare-list]")?.remove();
 
   // Copyable install controls carry real commands: keep them as code blocks.
   for (const button of main.querySelectorAll("button[data-copy-command]")) {
@@ -75,19 +100,18 @@ function prepare(main: HTMLElement): Map<string, string> {
 
   // Raw JSON dumps duplicate the rendered content; prose views win.
   for (const pre of main.querySelectorAll("pre")) {
-    if (pre.text.length > 1000 && codeLanguage(pre.text) === "json") pre.remove();
+    const language = codeLanguage(pre.text);
+    if (pre.text.length > 1000 && language === "json") pre.remove();
+    else if (language === "sh") pre.replaceWith(codeBlock(pre.text));
   }
 
-  // Demo query box → quoted question.
-  const typed = main.querySelector("#demo-typed");
-  typed?.parentNode.replaceWith(`<blockquote><p>${typed.innerHTML}</p></blockquote>`);
+  // The question is full prose, independent of animated playback.
+  const query = main.querySelector("#demo-query");
+  query?.replaceWith(`<blockquote><p>${query.innerHTML}</p></blockquote>`);
 
-  // Each provider panel: "### Provider — 2m 02s", report headings one level
-  // below it, and the complete source list instead of the first three links.
+  // Each provider panel: "### Provider — 2m 02s", with report headings
+  // beneath it and at most five direct citations instead of a redirect dump.
   for (const panel of main.querySelectorAll("[data-demo-panel]")) {
-    for (const heading of panel.querySelectorAll("h1, h2, h3, h4, h5")) {
-      heading.tagName = `h${Math.min(6, Number(heading.tagName.slice(1)) + 1)}`;
-    }
     // The visible provider label and duration live on the (dropped) tab chip;
     // the panel's own heading carries the full provider name.
     const heading = panel.querySelector("[data-demo-heading]");
@@ -98,9 +122,7 @@ function prepare(main: HTMLElement): Map<string, string> {
     }
     const index = Number(panel.getAttribute("data-demo-panel"));
     // The citation strip is the body's link-only row, not links inside the report.
-    const body = panel.querySelector("[data-demo-body]");
-    const links = body?.childNodes.find((child): child is HTMLElement =>
-      child instanceof HTMLElementClass && !child.classList.contains("demo-report") && child.querySelector("a[href]") !== null);
+    const links = panel.querySelector("[data-demo-citations]");
     const sources = sourcesMarkdown(index);
     if (links && sources) {
       const key = `LIBRARIUMSOURCES${index}X`;

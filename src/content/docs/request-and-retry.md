@@ -1,6 +1,6 @@
 ---
 title: Requests and recovery
-description: Budget admission, durable task custody, and safe recovery without duplicate submissions.
+description: Save research progress and recover the same Run without duplicate submissions.
 order: 7
 ---
 
@@ -12,16 +12,16 @@ Librarium validates the question and source options, expands saved groups, remov
 librarium research "Compare database hosting" --deep --only exa,openai --max-cost 1 --dry-run --json
 ```
 
-With a cap, unbounded estimates are skipped as `unpriced`; bounded sources run if they fit the remaining budget, otherwise `over_budget`. Reported spend plus reservations stops unstarted work. In-flight work may exceed the cap and failed calls may bill. No failed source launches a substitute.
+See [costs and limits](/docs/costs-and-limits) for selection under a budget and billing caveats.
 
-## Resume accepted work
+## Resume in-progress research
 
 ```bash
 librarium research "Compare database hosting" --deep --only exa --no-wait
 librarium show <run-id> --wait
 ```
 
-Signed accepted task handles live in private state. `show`, library `get`, and MCP `get_run` resume existing work, rather than submitting another paid task. Keep the same Run id and signing key.
+Signed provider task references live in private state. `show`, library `get`, and MCP `get_run` resume existing work rather than submitting another paid task. Keep the same Run ID and signing key.
 
 A failed connection does not establish whether the provider accepted a submission. Do not create a second Run merely to retry an uncertain task. Preserve the Run, inspect provider state, and reconcile the existing attempt. Storage transport failure can also leave a commit outcome uncertain.
 

@@ -20,9 +20,9 @@ $run->diagnostics();
 $run->toArray();
 ```
 
-`research()` takes a non-empty question. Quick is the default; `deep()` selects research-report variants. `only()` and `skip()` accept flat source, engine, or saved-group names. Unknown or explicitly unconfigured names fail; options are validated before storage or dispatch. There are no public profiles, selector modes, or fallback reserves.
+`research()` takes a non-empty question. Quick is the default; `deep()` selects research-report variants. `only()` and `skip()` accept source, AI answer engine, or saved-group names. Unknown or explicitly unconfigured names fail; options are validated before storage or dispatch.
 
-`run()` waits up to the configured timeout and returns a `Run`, which may still be running. `dryRun()` returns a planned Run without storage or calls. `maxCost()` accepts a decimal USD string; it is not a provider-enforced billing ceiling.
+`run()` waits up to the configured timeout and returns a `Run`, which may still be running. `dryRun()` returns a planned Run without storage or calls. `maxCost()` accepts a decimal USD string; see [costs and limits](/docs/php/costs-and-limits) for budget selection and money fields.
 
 ## Queue and resume
 
@@ -42,8 +42,8 @@ Your callback and `storeSnapshot` are application-owned. `queue()` stores a runn
 
 `Run::toArray()` follows `librarium.run/1`: id, question, depth, status, timestamps, costs, per-source results, skips, and notices. Status is `planned`, `running`, `done`, `partial`, or `failed`. Results contain `source`, `observation`, answer, citations, costs, provenance, and safe errors. `Run::fromArray()` validates the same schema and preserves JS summary Runs' `summary_of`; PHP does not synthesize them.
 
-Reported USD is a decimal string or `null`. Evidence contains redacted exchanges separately from public JSON. Treat answers and URLs as untrusted; your app owns authentication, tenant access, evidence policy, retention, and UI.
+Evidence contains redacted exchanges separately from public JSON. Treat answers and URLs as untrusted; your app owns authentication, tenant access, evidence policy, retention, and UI.
 
 ## RunStore
 
-The package supplies local filesystem, opt-in database, supported cache, and memory stores. Custom stores implement `find`, version-conditional `save`, newest-first `list`, and idempotent `delete`. Register with `Librarium::extendStore()` or a container-resolved class name. See [storage configuration](/docs/php/configuration).
+The package supplies local filesystem, opt-in database, supported cache, and memory stores. Custom stores implement `find`, `save` that rejects stale writes, newest-first `list`, and idempotent `delete`. Register with `Librarium::extendStore()` or a container-resolved class name. See [storage configuration](/docs/php/configuration).

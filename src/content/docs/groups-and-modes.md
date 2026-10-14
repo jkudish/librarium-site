@@ -6,7 +6,7 @@ order: 6
 
 ## Depth chooses variants
 
-`quick` is the default: search and cited answers, usually inline. `deep` selects durable research reports, often taking minutes. A source without a deep variant is skipped as `no_deep_variant`. Execution type belongs to the variant or collector, not depth: quick engine collectors can also use durable tasks.
+`quick` is the default: search and cited answers, usually in the calling process. `deep` selects research reports, often taking minutes. A source without a deep variant is skipped as `no_deep_variant`. Recovery support depends on the variant or retrieval service, not depth: some quick requests can also be resumed.
 
 ```bash
 librarium research "Current WebGPU support" --only exa,gemini --dry-run
@@ -14,7 +14,7 @@ librarium research "Current WebGPU support" --deep --only exa,gemini --no-wait
 librarium show <run-id> --wait
 ```
 
-There are no public execution modes, built-in workflow groups, or fallback reserves.
+Choose depth for the type of research and save groups for recurring source selections.
 
 ## Select sources
 
@@ -34,17 +34,17 @@ librarium groups remove editorial
 
 A group name is an ordinary name, with no `custom:` prefix. It must not conflict with a source or engine. Its members are source names, not provider/profile paths.
 
-## Answer-engine visibility
+## AI answer-engine visibility
 
-Name consumer engines explicitly:
+Choose AI answer engines by name:
 
 ```bash
 librarium research "Which analytics tools do AI answers recommend?" --only chatgpt,google-ai-mode
 librarium groups add visibility chatgpt gemini-app google-ai-mode
 ```
 
-Engines return `observation: surface`; research APIs return `observation: api`. The collector is configuration, not part of the name. No API baseline joins an engine query automatically. Add a research source yourself if you want a comparison. Shared collectors produce correlated observations, not independent corroboration or a promise about a particular account.
+AI answer engines return `observation: surface`; research APIs return `observation: api`. Configure the retrieval service separately from the engine name. Add a research source if you want an API comparison. Engines retrieved through the same service are correlated observations, not independent confirmation or a promise about a particular account.
 
 ## Budget admission
 
-With `--max-cost`, sources without bounded estimates are `unpriced`. Remaining sources are considered in the order of the shared catalog; each runs if its estimate fits the remaining budget, otherwise it is `over_budget`. Without a cap, unpriced sources can run and the total estimate is `null`. Reported spend plus reservations stops unstarted work; in-flight calls can exceed the cap.
+Use `--max-cost` to limit which sources start; see [costs and limits](/docs/costs-and-limits) for the exact rules and billing caveats.

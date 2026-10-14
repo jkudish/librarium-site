@@ -7,7 +7,7 @@ import Footer from "../components/Footer.astro";
 import Icon from "../components/Icon.astro";
 import ProductHero from "../components/ProductHero.astro";
 import CodePanel from "../components/CodePanel.astro";
-import TerminalBlock from "../components/TerminalBlock.astro";
+import ResearchSteps from "../components/ResearchSteps.astro";
 import { inline } from "../lib/inline-markup";
 import { fencedBlocks, pickBlock } from "../lib/markdown-code";
 
@@ -20,17 +20,17 @@ const example = (marker: string) => pickBlock(blocks, "bash", marker, "pages/cli
 const steps = [
   {
     id: "preview", eyebrow: "Preview", heading: "See what would run before anything is paid.",
-    body: "`research --dry-run` resolves selected sources and estimates offline. It stores nothing and does not test provider authentication. Quick is the default; engines join only when named.",
-    code: example("--dry-run --json"),
+    body: "Preview selected sources and estimates offline. Quick is the default; AI answer engines run when you choose them by name.",
+    code: example("--only exa,kagi --dry-run --json"),
   },
   {
-    id: "budget", eyebrow: "Set a ceiling", heading: "Admit only what fits the cap.",
-    body: "`--max-cost` skips unpriced sources and admits bounded estimates greedily in catalog order. It is not a cheapest-source optimization or a guarantee about the final bill. In-flight work can exceed it.",
+    id: "budget", eyebrow: "Set a budget", heading: "Choose a spending limit.",
+    body: "Use `--max-cost` to limit which sources start. See [costs and limits](/docs/costs-and-limits) for selection rules and billing caveats.",
     code: 'librarium research "Lisbon or Porto without a car?" --only exa,kagi --max-cost 0.10 --dry-run --json',
   },
   {
     id: "run", eyebrow: "Research", heading: "Run the same question for real.",
-    body: "Remove `--dry-run` to research. The Run is stored before dispatch. Each source retains its answer, citations, provenance, safe error, and honest cost. Unknown reported spend stays null, not zero.",
+    body: "Remove `--dry-run` when you are ready to spend. Librarium saves the Run before starting and keeps each source's answer, citations, provenance, errors, and reported cost.",
     code: example("--max-cost 0.10 --json"),
   },
   {
@@ -40,21 +40,20 @@ const steps = [
   },
   {
     id: "async", eyebrow: "Come back later", heading: "Start deep research, then walk away.",
-    body: "`--deep --no-wait` returns without waiting for reports. Keep the Run id and use `show <run-id> --wait` to resume accepted handles, not a fresh paid submission. Quick no-wait is rejected except for dry runs.",
+    body: "`--deep --no-wait` returns while deep research continues. Keep the Run ID and use `show <run-id> --wait` to pick up the same work later. Use quick research with the default wait behavior.",
     code: example("--no-wait"),
   },
 ];
 const setup = [
-  { eyebrow: "Install", heading: "Install the CLI", body: "Requires Node.js 22.12+. The CLI includes the MCP server and agent skill.", code: "npm install -g librarium\nlibrarium --version\nlibrarium research --help" },
-  { eyebrow: "Connect", heading: "Set up your sources", body: "Keep credentials out of chat and source control. `setup --auto` discovers existing credentials offline; groups are user-saved source lists with no built-ins.", code: "librarium setup" },
+  { eyebrow: "Connect", heading: "Use your existing keys", body: "Keep credentials out of chat and source control. `setup --auto` discovers existing credentials offline; save your own source lists as groups.", code: "librarium setup --auto" },
   { eyebrow: "Check", heading: "Check it offline", body: "Check local configuration and credential presence without calling a provider.", code: example("librarium setup --check") },
 ];
 const commands = [
   { name: "research", example: 'librarium research "…" --only exa --dry-run --json', help: "Preview offline with dry-run; remove it to research.", badge: "Research" },
-  { name: "show", example: "librarium show <run-id> --wait", help: "Resume accepted durable work or read a source answer and citations.", badge: "Resumes work" },
+  { name: "show", example: "librarium show <run-id> --wait", help: "Pick up in-progress deep research or read a source answer and citations.", badge: "Resumes work" },
   { name: "summarize", example: "librarium summarize --verify --source openai", help: "Create a separate summary Run with summary_of; does not overwrite original answers.", badge: "Summary" },
   { name: "sources", example: "librarium sources --json", help: "Discover source variants, engines, availability, and price hints offline.", badge: "Offline" },
-  { name: "groups", example: "librarium groups add editorial exa claude", help: "Save your own source lists. There are no built-in groups.", badge: "Local" },
+  { name: "groups", example: "librarium groups add editorial exa claude", help: "Save your own source lists for later questions.", badge: "Local" },
   { name: "browse", example: "librarium browse", help: "Browse stored Runs.", badge: "Local" },
   { name: "html", example: "librarium html <run-id> --output report.html", help: "Export a self-contained report locally.", badge: "Local" },
   { name: "usage", example: "librarium usage", help: "Total known reported spend without inventing missing costs.", badge: "Local" },
@@ -63,12 +62,11 @@ const commands = [
 const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl";
 ---
 
-<Base title={`${title} | librarium`} description={description} includeSoftwareMetadata={false}>
+<Base title={`${title} | Librarium`} description={description} includeSoftwareMetadata={false}>
   <Header />
   <main>
     <ProductHero title={title} description={description} ctaHref={ctaHref} ctaLabel={ctaLabel} markdownHref={markdownHref} secondary={{ href: "#session", label: "Walk through a session" }}>
-      <TerminalBlock title="Install" kind="commands" badge="npm" lines={[{ cmd: "npm install -g librarium" }, { cmd: "librarium --version" }, { cmd: "librarium research --help" }]} />
-      <p class="mt-4 text-sm/6 text-pretty text-neutral-600" set:html={inline("Requires Node.js 22.12 or newer. See [Getting started](/docs#install).")} />
+      <ResearchSteps />
     </ProductHero>
 
     <section id="session" class="scroll-mt-6 py-16 sm:py-24" aria-labelledby="session-heading">
@@ -95,12 +93,12 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="setup-heading" class={sectionHeading}>Set it up once.</h2>
         <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">The CLI supplies source connections, stored Runs, cost tracking, and the tools your agent uses too.</p>
-        <ul class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <ul class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
           {setup.map((card) => (
             <li class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
               <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">{card.eyebrow}</p>
               <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">{card.heading}</h3>
-              <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">{card.body}</p>
+              <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline(card.body)} />
               <CodePanel class="mt-auto" label="Terminal" lang="bash" code={card.code} />
             </li>
           ))}
@@ -133,9 +131,9 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="long-heading" class={sectionHeading}>Long research does not need a long chat message.</h2>
         <div class="mt-12 grid grid-cols-1 gap-12 border-t border-neutral-950/15 pt-8 lg:grid-cols-3">
-          <div><h3 class="text-lg font-semibold text-neutral-950">Keep the accepted handle</h3><p class="mt-3 text-base/7 text-pretty text-neutral-600">Recover the existing Run. Ambiguous submission is not permission to pay for a duplicate. Failed calls can still bill; unknown costs remain unknown.</p></div>
-          <div><h3 class="text-lg font-semibold text-neutral-950">Interruption detaches</h3><p class="mt-3 text-base/7 text-pretty text-neutral-600">Ctrl-C prints a show command. It does not prove that upstream work stopped or that no charge occurred.</p></div>
-          <div><h3 class="text-lg font-semibold text-neutral-950">The same install serves your agent</h3><p class="mt-3 text-base/7 text-pretty text-neutral-600" set:html={inline("MCP and the bundled skill ship with the CLI; see [Agents & MCP](/agents). [Laravel](/laravel) is a separate native package; Artisan is not an MCP server.")} /></div>
+          <div><h3 class="text-lg font-semibold text-neutral-950">Keep the Run ID</h3><p class="mt-3 text-base/7 text-pretty text-neutral-600">Pick up the existing Run instead of starting duplicate research. The saved state keeps track of in-progress deep research.</p></div>
+          <div><h3 class="text-lg font-semibold text-neutral-950">Come back after Ctrl-C</h3><p class="mt-3 text-base/7 text-pretty text-neutral-600">Ctrl-C prints a show command so you can check the Run later. Upstream research may continue after you leave the terminal.</p></div>
+          <div><h3 class="text-lg font-semibold text-neutral-950">The same install serves your agent</h3><p class="mt-3 text-base/7 text-pretty text-neutral-600" set:html={inline("MCP and the bundled skill ship with the CLI; see [Agents & MCP](/agents). [Laravel](/laravel) provides a native facade, queues, and Artisan commands.")} /></div>
         </div>
         <div class="mt-12 flex flex-wrap items-center gap-x-7 gap-y-4">
           <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>

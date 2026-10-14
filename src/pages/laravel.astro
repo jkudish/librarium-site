@@ -5,8 +5,7 @@
 // is read from that file's fenced blocks, so the page and its Markdown
 // cannot drift apart.
 //
-// This page describes the unreleased PHP 1.0 candidate. Output examples
-// below are illustrative; no live provider result is implied.
+// Output examples are illustrative; no live provider result is implied.
 import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Header from "../components/Header.astro";
@@ -14,6 +13,7 @@ import Footer from "../components/Footer.astro";
 import Icon from "../components/Icon.astro";
 import ProductHero from "../components/ProductHero.astro";
 import CodePanel from "../components/CodePanel.astro";
+import ResearchSteps from "../components/ResearchSteps.astro";
 import TerminalBlock, { type TerminalLine } from "../components/TerminalBlock.astro";
 import { inline } from "../lib/inline-markup";
 import { fencedBlocks, pickBlock } from "../lib/markdown-code";
@@ -27,12 +27,7 @@ const blocks = fencedBlocks(entry.body ?? "");
 const previewCode = pickBlock(blocks, "php", "$research = Librarium::research(", source);
 const resultsCode = pickBlock(blocks, "php", "$evidence->result('exa')", source);
 const queueCode = pickBlock(blocks, "php", "->then(function ($response)", source);
-const toolCode = pickBlock(blocks, "php", "final class ResearchEvidence", source);
-const agentCode = pickBlock(blocks, "php", "final class TechnicalAdvisor", source);
 const promptCode = pickBlock(blocks, "php", "(new TechnicalAdvisor($evidence))->prompt(", source);
-
-const install = "composer require jkudish/laravel-ai-librarium";
-const publish = "php artisan vendor:publish --tag=librarium-config";
 
 const previewSession: TerminalLine[] = [
   { prompt: ">", cmd: "$preview->status()" },
@@ -54,70 +49,24 @@ const agentModeJson: TerminalLine[] = [
 const queueFlow = [
   { label: "Store, then dispatch", body: "`queue()` stores a running Run before dispatch and returns its `id()`." },
   { label: "One encrypted job", body: "A single Laravel job with `tries = 1` and `failOnTimeout`. A failure is never retried automatically, so paid work is not silently repeated." },
-  { label: "Poll the provider", body: "Polling is authoritative for terminal content. Where a provider supports webhooks, they are only wake-up hints." },
+  { label: "Wait for the report", body: "Polling retrieves the completed report. Provider webhooks can prompt another check." },
   { label: "Your callback", body: "`then()` receives the Run; `catch()` receives the failure. Your app controls tenant access and workflows." },
 ];
 
-const configExcerpt = `return [
-    'sources' => [],
-    'groups' => ['editorial' => ['exa', 'gemini']],
-    'max_cost' => '1.00',
-    'timeout' => 6900,
-    'runs' => ['store' => 'filesystem', 'disk' => 'local',
-        'path' => 'librarium', 'encrypt' => true, 'keep_days' => null],
-    'queue' => [
-        'connection' => null,
-        'name' => 'research',
-        'timeout' => 7200,
-    ],
-    // … other source and collector configuration
-];`;
-
-const servicesExcerpt = `// config/services.php
-return [
-    'exa' => ['key' => env('EXA_API_KEY')],
-    'kagi' => ['key' => env('KAGI_API_KEY')],
-    'perplexity' => ['key' => env('PERPLEXITY_API_KEY')],
-    // … one entry per focused HTTP provider you use
-];`;
-
 const useCases = [
   { title: "A technical advisor", body: "Compare current platform documentation before proposing an architecture. Require the cited passage to support each material claim." },
-  { title: "A product analyst", body: "Inspect how answer surfaces describe a luxury rental service, retaining the surface and collector behind each observation. Our [Agentsy Report field note](/stories/agentsy-report) shows the application-owned evidence boundary." },
+  { title: "A product analyst", body: "Inspect how AI answer engines describe a luxury rental service, keeping each engine and retrieval service with its observation. Our [Agentsy Report field note](/stories/agentsy-report) shows how an application stores this evidence." },
   { title: "An editorial agent", body: "Collect source material first, then draft with citations and explicit gaps. Provider output is evidence to verify, not permission to publish its claims." },
 ];
 
 const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl";
-const chipCopy = "chip-copy group";
 ---
 
-<Base title={`${title} | librarium`} description={description} includeSoftwareMetadata={false}>
+<Base title={`${title} | Librarium`} description={description} includeSoftwareMetadata={false}>
   <Header />
   <main>
     <ProductHero title={title} description={description} ctaHref={ctaHref} ctaLabel={ctaLabel} markdownHref={markdownHref} secondary={{ href: "#preview", label: "See it in code" }}>
-      <div class="rounded-lg border border-neutral-200 bg-white p-5">
-        <div class="flex items-center gap-3">
-          <img src="/languages/laravel.svg" alt="" width="24" height="24" class="size-6" />
-          <p class="text-sm font-medium text-neutral-950">First-party Laravel package</p>
-        </div>
-        <div class="mt-4 space-y-2">
-          {[install, publish].map((command) => (
-            <div class="cmd-chip flex min-w-0 items-center gap-2 rounded-md bg-neutral-950 py-1.5 pr-1.5 pl-3">
-              <code class="min-w-0 flex-1 truncate font-mono text-xs text-amber-100" title={command}><span class="text-neutral-400 select-none">$ </span>{command}</code>
-              <button type="button" class={chipCopy} data-code-copy data-copy={command} data-copy-state="idle" aria-label={`Copy ${command}`}>
-                <Icon name="copy" class="size-3.5 group-data-[copy-state=success]:hidden" />
-                <Icon name="check" class="hidden size-3.5 text-amber-300 group-data-[copy-state=success]:block" />
-              </button>
-            </div>
-          ))}
-        </div>
-        <ul class="mt-4 flex flex-wrap gap-2" aria-label="Requirements">
-          {["PHP 8.4", "Laravel 13.30+", "Laravel AI SDK ^1.0.1"].map((requirement) => (
-            <li class="rounded-sm border border-neutral-200 bg-neutral-50 px-2 py-0.5 font-mono text-xs text-neutral-700">{requirement}</li>
-          ))}
-        </ul>
-        <p class="mt-3 text-base text-pretty text-neutral-500 sm:text-sm" set:html={inline("[Install and configure Laravel](/docs/php#install).")} />
-      </div>
+      <ResearchSteps platform="laravel" />
     </ProductHero>
 
     <!-- Preview, then run. -->
@@ -135,15 +84,11 @@ const chipCopy = "chip-copy group";
         </div>
         <CodePanel class="mt-10" label="Research step" lang="php" code={previewCode} />
         <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-          <TerminalBlock class="lg:self-start" title="Inspecting $preview" kind="illustrative" badge="Illustrative" lines={previewSession} caption="Illustrative dry-run fields; estimates and admission depend on your configuration." />
+          <TerminalBlock class="lg:self-start" title="Inspecting $preview" kind="illustrative" badge="Illustrative" lines={previewSession} caption="Selected fields from an example preview." />
           <div class="space-y-4">
             <div class="rounded-lg border border-neutral-200 bg-white p-5">
-              <p class="text-sm font-semibold text-neutral-950">Known is not the same as bounded</p>
-              <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("With `maxCost('0.25')`, unpriced sources are skipped. Bounded estimates are admitted greedily in catalog order, not by a cheapest-source optimization.")} />
-            </div>
-            <div class="rounded-lg border border-neutral-200 bg-white p-5">
-              <p class="text-sm font-semibold text-neutral-950">The rule</p>
-              <p class="mt-2 text-sm/6 text-pretty text-neutral-600">An admission cap is not a vendor billing guarantee. In-flight work can exceed it; missing reported spend stays null, never zero.</p>
+              <p class="text-sm font-semibold text-neutral-950">Set a budget before research</p>
+              <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("Use `maxCost('0.25')` to limit which sources start. See [costs and limits](/docs/php/costs-and-limits) for selection rules and billing caveats.")} />
             </div>
           </div>
         </div>
@@ -157,7 +102,7 @@ const chipCopy = "chip-copy group";
           <div>
             <h2 id="response-heading" class={sectionHeading}>Every result keeps its sources.</h2>
             <p class="mt-5 text-base/7 text-pretty text-neutral-600" set:html={inline("`run()` returns an immutable `Run`. Each result keeps its source, answer, citations, provenance, and safe error.")} />
-            <p class="mt-4 text-base/7 text-pretty text-neutral-600" set:html={inline("`toArray()` is the same terminal shape the JavaScript package validates, so a PHP response and a TypeScript response describe evidence the same way. The runtimes themselves are not interchangeable.")} />
+            <p class="mt-4 text-base/7 text-pretty text-neutral-600" set:html={inline("`toArray()` uses the public Run format the JavaScript package validates. PHP and TypeScript describe evidence the same way while executing in their own runtimes.")} />
             <p class="mt-4 text-base/7 text-pretty text-neutral-600">Provider content and URLs remain untrusted evidence. Escape content for its output context and verify important claims against their cited sources.</p>
           </div>
           <CodePanel class="lg:self-start" label="Reading the response" lang="php" code={resultsCode} />
@@ -169,7 +114,7 @@ const chipCopy = "chip-copy group";
     <section id="queue" class="scroll-mt-6 py-16 sm:py-24" aria-labelledby="queue-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="queue-heading" class={sectionHeading}>Queue longer research, then hand it to an agent.</h2>
-        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">On completion, persist the terminal response in your own storage, then pass it into an agent or a review screen.</p>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">Save the completed Run in your own storage, then pass it into an agent or a review screen.</p>
         <div class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <CodePanel class="lg:self-start" label="Queued research" lang="php" code={queueCode} />
           <ol class="relative space-y-6 border-l border-neutral-300 pl-6 lg:mt-2" aria-label="What happens after queue()">
@@ -185,11 +130,11 @@ const chipCopy = "chip-copy group";
         <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div class="rounded-lg border border-neutral-200 bg-white p-5">
             <p class="text-sm font-semibold text-neutral-950">Recover the stored Run</p>
-            <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("`Librarium::find($id)?->refresh()` returns a new snapshot and observes saved durable handles. It never submits queued sources or replays paid work. Choose retention that preserves pending-task custody.")} />
+            <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("`Librarium::find($id)?->refresh()` checks the saved research and returns a new snapshot without starting it again. Keep the stored Run while research is in progress.")} />
           </div>
           <div class="rounded-lg border border-neutral-200 bg-white p-5">
             <p class="text-sm font-semibold text-neutral-950">Your app owns the rest</p>
-            <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("RunStore provides version-conditional storage; database migration is opt-in and never automatic. Tenant ownership, retention, conversation memory, and the product experience remain yours. See [the queue guide](/guides/laravel-queues).")} />
+            <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("RunStore rejects stale writes. Your application chooses storage and retention and controls tenant access, conversation memory, and the product experience. See [the queue guide](/guides/laravel-queues).")} />
           </div>
         </div>
       </div>
@@ -199,17 +144,7 @@ const chipCopy = "chip-copy group";
     <section id="agent" class="scroll-mt-6 border-t border-neutral-200 bg-[#faf9f6] py-16 sm:py-24" aria-labelledby="agent-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="agent-heading" class={sectionHeading}>Let an AI SDK agent inspect the evidence.</h2>
-        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">A useful first integration separates research from reasoning. Run one approved research request, then give an agent a read-only tool over that terminal response. The tool cannot launch more research or silently enlarge the provider set.</p>
-        <div class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div class="min-w-0">
-            <p class="mb-3 text-sm text-neutral-600" set:html={inline("Create this application-owned tool in `app/Ai/Tools/ResearchEvidence.php`:")} />
-            <CodePanel label="ResearchEvidence.php" lang="php" code={toolCode} scroll />
-          </div>
-          <div class="min-w-0">
-            <p class="mb-3 text-sm text-neutral-600" set:html={inline("Attach it to an agent in `app/Ai/Agents/TechnicalAdvisor.php`:")} />
-            <CodePanel label="TechnicalAdvisor.php" lang="php" code={agentCode} scroll />
-          </div>
-        </div>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">Separate research from reasoning. Run an approved research request, then give an AI SDK agent a read-only tool over the completed Run.</p>
         <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <div class="min-w-0">
             <p class="mb-3 text-sm text-neutral-600" set:html={inline("Pass the `$evidence` response from the approved research step into the agent:")} />
@@ -220,7 +155,7 @@ const chipCopy = "chip-copy group";
             <p class="mt-2 text-sm/6 text-pretty text-neutral-700" set:html={inline("The SDK owns the agent's model and provider. Its model call has a separate budget from Librarium's research.")} />
           </div>
         </div>
-        <p class="mt-8 max-w-[75ch] text-base/7 text-pretty text-neutral-600" set:html={inline("For large responses, store evidence in your application and expose authorized, bounded result and citation pages instead of returning everything to the model at once. These classes follow the SDK's [Tool](https://github.com/laravel/ai/blob/v1.0.1/src/Contracts/Tool.php), [HasTools](https://github.com/laravel/ai/blob/v1.0.1/src/Contracts/HasTools.php), and [Promptable](https://github.com/laravel/ai/blob/v1.0.1/src/Promptable.php) contracts. They are example application code, not built-in Librarium agents.")} />
+        <p class="mt-8 max-w-[75ch] text-base/7 text-pretty text-neutral-600" set:html={inline("The [Laravel agent docs](/docs/php/using-with-agents#build-a-read-only-sdk-agent) include the complete `ResearchEvidence` tool and `TechnicalAdvisor` agent. For large responses, expose authorized result and citation pages instead of returning everything to the model at once.")} />
 
         <h3 class="mt-16 text-2xl font-medium tracking-tight text-neutral-950">Use the same pattern for different jobs</h3>
         <ul class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -246,21 +181,21 @@ const chipCopy = "chip-copy group";
           <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Defaults</p>
             <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Publish only what you change</h3>
-            <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Quick depth is the default, with no built-in groups. Wait timeout is 6,900 seconds; encrypted job timeout is 7,200. Your app owns worker supervision and compatible retry_after.</p>
-            <CodePanel class="mt-auto" label="config/librarium.php (excerpt)" lang="php" code={configExcerpt} />
+            <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Start with quick research. Save groups for recurring source selections and choose a store that works across your web and queue workers.</p>
+            <a href="/docs/php/configuration" class="text-sm text-amber-700 underline">Storage, queue settings, and deadlines</a>
           </div>
           <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Credentials</p>
             <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Keys stay where Laravel keeps them</h3>
             <p class="mt-2 mb-5 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("SDK sources read `config/ai.php`; focused HTTP sources read `config/services.php`. Source `key` overrides belong in config, never request options. Explicitly selecting an unconfigured source fails preflight.")} />
-            <CodePanel class="mt-auto" label="config/services.php" lang="php" code={servicesExcerpt} />
+            <a href="/docs/php/configuration#credentials" class="text-sm text-amber-700 underline">Credential configuration</a>
           </div>
         </div>
         <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
           <div class="rounded-lg border border-neutral-200 bg-white p-6 lg:self-start">
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Artisan</p>
             <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Preview from the command line</h3>
-            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("`librarium:research --dry-run --json` is offline. Remove `--dry-run` to dispatch, or add `--no-wait` to queue. JSON Artisan output is not an MCP server.")} />
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("`librarium:research --dry-run --json` previews offline. Remove `--dry-run` to research, or add `--no-wait` to queue. Your coding agent can read the structured JSON output.")} />
             <p class="mt-4 text-sm/6 text-pretty text-neutral-600" set:html={inline("See [Artisan commands](/docs/php/commands) for show, sources, and prune.")} />
           </div>
           <TerminalBlock title="Artisan dry run" kind="illustrative" badge="Illustrative · excerpt" lines={agentModeJson} caption="Selected fields illustrate the Run contract, not a complete JSON payload or captured provider response." />
@@ -274,7 +209,7 @@ const chipCopy = "chip-copy group";
         <h2 id="native-heading" class={sectionHeading}>Laravel-native, not a wrapper.</h2>
         <div class="mt-12 grid grid-cols-1 gap-12 border-t border-neutral-950/15 pt-8 lg:grid-cols-2">
           <p class="text-base/7 text-pretty text-neutral-600">This is a first-party Laravel package built on the Laravel AI SDK, not a Node process in disguise. Collect research through the facade, hand it to your agents as a tool, and move long runs into encrypted queue jobs. Your app owns storage and workflows.</p>
-          <p class="text-base/7 text-pretty text-neutral-600" set:html={inline("It complements the SDK: the SDK owns your agent and model interaction; Librarium supplies research results with their citations attached. Your application decides what that evidence supports. Requires PHP 8.4, Laravel 13, and Laravel AI SDK `^1.0.1`.")} />
+          <p class="text-base/7 text-pretty text-neutral-600" set:html={inline("It complements the SDK: the SDK owns your agent and model interaction; Librarium supplies research results with their citations attached. Your application decides what that evidence supports. Requires PHP 8.4+, Laravel 13.30+, and Laravel AI SDK `^1.0.1`.")} />
         </div>
         <div class="mt-12 flex flex-wrap items-center gap-x-7 gap-y-4">
           <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
@@ -287,24 +222,6 @@ const chipCopy = "chip-copy group";
   </main>
   <Footer />
 </Base>
-
-<style>
-  .chip-copy {
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    border-radius: var(--radius-sm);
-    padding: 0.375rem;
-    cursor: pointer;
-    color: #d4d4d4;
-  }
-  .chip-copy:hover { color: #ffd230; background: rgb(255 255 255 / 0.08); }
-  .chip-copy:focus-visible { outline: 2px solid #ffd230; outline-offset: 2px; }
-  :global(:root[data-theme="dark"]) .cmd-chip { box-shadow: 0 0 0 1px #3e403a; }
-  @media (prefers-color-scheme: dark) {
-    :global(:root:not([data-theme])) .cmd-chip { box-shadow: 0 0 0 1px #3e403a; }
-  }
-</style>
 
 <script>
   import "../scripts/copy-buttons";

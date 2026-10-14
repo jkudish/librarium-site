@@ -1,10 +1,10 @@
 ---
 title: Sources and engines
-description: Flat research source names, quick/deep variants, engine collectors, and availability.
+description: Research sources, quick/deep variants, AI answer engines, and availability.
 order: 5
 ---
 
-The shared catalog has 16 research sources and five named-only engines. The website grid and counts read pinned `librarium-spec/sources.json`; `librarium sources --json` reports what your installation can actually use.
+The shared catalog has 16 research sources and five AI answer engines chosen by name. The website grid and counts read pinned `librarium-spec/sources.json`; `librarium sources --json` reports what your installation can actually use.
 
 ## Research sources
 
@@ -15,7 +15,7 @@ The shared catalog has 16 research sources and five named-only engines. The webs
 | `exa` | Search | Research | — |
 | `firecrawl` | Search | — | `sources`, `limit` |
 | `gemini` | Grounded or chat | Deep Research | `quick` |
-| `google` | SERP collector | — | `collector`, `vertical` |
+| `google` | Search results | — | `collector`, `vertical` |
 | `grok` | Web, X, or both | — | `search` |
 | `jina` | Search | — | — |
 | `kagi` | FastGPT | — | — |
@@ -27,14 +27,14 @@ The shared catalog has 16 research sources and five named-only engines. The webs
 | `valyu` | Search | Research | `mode`, `output` |
 | `you` | Answer or research | Research | `quick` |
 
-Options replace public profile selectors. Every source has at most one selected quick and deep variant. Variant and option availability differs by language; the catalog's legacy mapping is not proof that every option is executable in every package. Inspect local discovery before selection. Deep variants are durable tasks; quick variants usually run inline.
+Every source has at most one selected quick and deep variant. Variant and option availability differs by language. Inspect local discovery before selection. Deep variants support recovery; quick variants usually run in the calling process.
 
-## Engines
+## AI answer engines
 
-`chatgpt`, `gemini-app`, `google-ai-mode`, `google-ai-overview`, and `copilot` observe consumer answer surfaces. They only run when named in `only`, directly or through a saved group, and have no deep variant.
+ChatGPT (`chatgpt`), Gemini (`gemini-app`), Google AI Mode (`google-ai-mode`), Google AI Overview (`google-ai-overview`), and Copilot (`copilot`) return observations of consumer AI answers. Choose them by name in `only`, directly or through a saved group. They support quick research.
 
-Collectors are configuration: SearchAPI, PHP DataForSEO where supported, or the PHP Firecrawl browser adapter. Multiple engines can share one collector. Their results use `observation: surface`, not official research API output. A collector does not promise parity with a user's account, location, or subscription.
+Configure the retrieval service separately: SearchAPI, PHP DataForSEO where supported, or the PHP Firecrawl browser adapter. Multiple engines can use the same service. Their results use `observation: surface`, distinct from research API output. Retrieved observations may differ from a user's account, location, or subscription.
 
 ## Costs and credentials
 
-`setup --check` is offline; credential presence does not authenticate. Provider queries and selected options are sent upstream. Estimates come from package pricing, not the spec. Unknown reported cost stays `null`. With a cap, unpriced sources are skipped; in-flight work can exceed it. No failed source automatically substitutes another.
+`setup --check` checks credentials offline, not authentication. Queries and selected options are sent to your sources. See [costs and limits](/docs/costs-and-limits) before paid research.

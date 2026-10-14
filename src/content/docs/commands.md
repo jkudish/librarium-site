@@ -17,12 +17,12 @@ librarium research "Compare managed PostgreSQL services" --deep --no-wait
 | `--deep` | Choose deep variants; quick is the default |
 | `--only <names>` | Comma-separated sources, engines, or saved groups |
 | `--skip <names>` | Remove names after group expansion |
-| `--max-cost <usd>` | Admit bounded estimates greedily in catalog order and stop unstarted work as reported spend and reservations consume the cap |
+| `--max-cost <usd>` | Limit which sources start using a USD budget |
 | `--dry-run` | Return a planned Run without provider calls or storage |
 | `--no-wait` | Detach deep work; invalid for quick except dry runs |
 | `--json` | Write the public Run as JSON |
 
-With a cap, unpriced sources are skipped, not guessed free. In-flight work can finish above the cap. A named source without credentials is an error. Failed sources are not replaced by other sources.
+See [costs and limits](/docs/costs-and-limits) for budget selection and billing caveats. A named source without credentials is an error.
 
 ## Read and summarize
 
@@ -32,7 +32,7 @@ librarium show <run-id> --source exa
 librarium summarize <run-id> --source openai --verify --json
 ```
 
-`show` and `summarize` use the latest Run when no id is supplied. `show --wait` finishes saved durable work; old 1.x folders are not readable. `summarize` makes a new paid Run linked by `summary_of`; the source Run stays unchanged. Verification uses the same synthesis source and can also spend. Source choice is configured `summarize.source`, then `--source`, then the first set-up source in `openai`, `claude`, `gemini`, `openrouter` order. There is no failure cascade.
+`show` and `summarize` use the latest Run when no id is supplied. `show --wait` picks up in-progress research. `summarize` makes a new paid Run linked by `summary_of`; the source Run stays unchanged. Verification uses the same synthesis source and can also spend. Source choice is configured `summarize.source`, then `--source`, then the first set-up source in `openai`, `claude`, `gemini`, `openrouter` order. A failed summary preserves its error instead of trying another source.
 
 ## Discover and configure
 
@@ -45,7 +45,7 @@ librarium setup --check
 librarium mcp
 ```
 
-Groups are user-saved source lists; there are no built-ins. Offline setup checks inspect credential presence; `setup --live` checks authentication with providers. The MCP server exposes exactly `research`, `get_run`, and `list_sources`.
+Save recurring selections as groups. Offline setup checks inspect credential presence; `setup --live` checks authentication with providers. The MCP server exposes exactly `research`, `get_run`, and `list_sources`.
 
 ## Local tools
 

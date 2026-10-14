@@ -5,8 +5,8 @@ import { extname, join, relative, resolve } from "node:path";
 import { parse } from "node-html-parser";
 import catalog from "librarium-spec/sources.json" with { type: "json" };
 import { NODE_FLOOR, PRODUCT_VERSION, SOURCES, ENGINES, SOURCE_COUNT, ENGINE_COUNT, FEATURED_SOURCES, WORKFLOWS } from "../src/data/product.ts";
-import { AGENT_SETUP_PROMPT } from "../src/data/setup-prompt.ts";
-import { RESEARCH_DEMO, renderCapturedMarkdown } from "../src/data/research-demo.ts";
+import { AGENT_SETUP_PROMPT, INSTALL_CHOICES } from "../src/data/setup-prompt.ts";
+import { RESEARCH_DEMO, RUN_EXAMPLE, cleanCitationMarkers, renderCapturedMarkdown } from "../src/data/research-demo.ts";
 
 const root = resolve(import.meta.dirname, "..");
 const dist = join(root, "dist");
@@ -178,8 +178,12 @@ const homePage = parse(home, parseOptions);
 const homeText = homePage.textContent;
 const homeMarkdown = output("index.md");
 assert(full.includes(homeMarkdown.trim()));
-for (const fact of ["Give your agent more than one source.", "composer require jkudish/laravel-ai-librarium", "Amalfi Coast"]) assert(home.includes(fact) && homeMarkdown.includes(fact));
-assert(homeText.includes(`${SOURCE_COUNT} research sources`) && homeText.includes(`${ENGINE_COUNT} named-only engines`));
+for (const fact of ["Give your agent more than one source.", "composer require jkudish/laravel-ai-librarium", "What are the best alternatives to Google Analytics?", "php artisan vendor:publish --tag=librarium-config"]) assert(homeText.includes(fact) && homeMarkdown.includes(fact));
+assert(homeText.includes(`${SOURCE_COUNT} research sources`) && homeText.includes(`${ENGINE_COUNT} AI answer engines`));
+assert.equal(homePage.querySelectorAll("main > section").length, 6);
+assert.equal(homePage.querySelectorAll("[data-source]").length, SOURCE_COUNT);
+assert.deepEqual(homePage.querySelectorAll("[data-engine]").map((node) => node.getAttribute("data-engine")), ENGINES.map((engine) => engine.id));
+for (const engine of ENGINES) assert(homeText.includes(engine.name), `missing engine ${engine.id}`);
 for (const source of FEATURED_SOURCES) {
   assert(homeText.includes(source.name), `missing catalog source ${source.id}`);
   const mark = `/providers/${source.logo}.${["you", "serpapi", "dataforseo"].includes(source.logo) ? "png" : "svg"}`;
@@ -188,40 +192,61 @@ for (const source of FEATURED_SOURCES) {
 assert(homePage.querySelector("#research-example"));
 assert.equal(homePage.querySelectorAll('[role="tab"][id^="demo-tab-"]').length, 5);
 assert.equal(homePage.querySelectorAll('[role="tabpanel"][data-demo-panel]').length, 5);
-assert(home.includes("not the full API response schema") && home.includes("faithful prefixes"));
+assert(homeText.includes("separate example, not the historical capture"));
 const example = JSON.parse(homePage.querySelector("#example-json pre code").textContent);
-assert.equal(example.illustrative, true);
-assert.equal(example.fixture, "captured");
-assert.equal(example.results.length, 5);
+assert.deepEqual(example, RUN_EXAMPLE);
+assert.deepEqual(example, JSON.parse(read("node_modules/librarium-spec/fixtures/runs/valid/quick-done.json")));
+assert.equal(example.spec, "librarium.run/1");
+assert.equal(homePage.querySelector("#demo-query").textContent, RESEARCH_DEMO.query);
+assert.equal(homePage.querySelector("#demo-action").textContent, "Captured deep research");
 const capture = JSON.parse(read("src/data/provider-display-fixture.json"));
 // Keep block boundaries and Markdown link destinations when comparing the
 // rendered report with its capture; DOM textContent retains neither.
 const captureText = text(home.replace(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g, " $2 $1 ").replace(/<[^>]*>/g, " "));
 for (const result of capture.results) {
-  const shown = example.results.find((entry) => entry.profile === result.profile);
-  assert(shown && shown.content === result.content, `changed captured wording ${result.profile}`);
   const displayed = RESEARCH_DEMO.results.find((entry) => entry.profile === result.profile);
-  assert(flatten(captureText).includes(flatten(displayed.displayContent)), `missing rendered capture ${result.profile}`);
-  assert(flatten(homeMarkdown).includes(flatten(result.content)), `missing Markdown capture ${result.profile}`);
-  for (const citation of result.citations.slice(0, 3)) {
+  assert.equal(displayed.content, result.content, `changed captured wording ${result.profile}`);
+  assert(flatten(captureText).includes(flatten(cleanCitationMarkers(displayed.displayContent))), `missing rendered capture ${result.profile}`);
+  assert(flatten(homeMarkdown).includes(flatten(cleanCitationMarkers(displayed.displayContent))), `missing Markdown capture ${result.profile}`);
+  if (result.title) assert(homeMarkdown.includes(result.title), `missing capture title ${result.profile}`);
+  for (const citation of result.citations.filter((citation) => !citation.url.includes("vertexaisearch.cloud.google.com")).slice(0, 3)) {
     const label = citation.title ?? new URL(citation.url).hostname;
-    assert(shown.citations.some((entry) => entry.url === citation.url && entry.title === label));
+    assert(displayed.citations.some((entry) => entry.url === citation.url && entry.title === label));
     assert(home.includes(citation.url) && homeMarkdown.includes(citation.url));
   }
 }
 assert(homeText.includes("Perplexity Research (Agent API)") && homeText.includes("observed model openai/gpt-5.6-sol (provider-reported)"));
 assert(!homeText.includes("Sonar model") && !homeText.includes("Sonar Deep Research"));
 assert(!/<(?:script|style|button)\b/.test(homeMarkdown));
-const previews = homePage.querySelectorAll('[data-copy-value][aria-label="Offline preview command"]');
-assert.equal(previews.length, 3);
-for (const node of previews) {
-  const command = node.getAttribute("data-copy-value");
-  assert(command.startsWith("librarium research ") && command.includes("--dry-run") && command.includes("--json"));
-  assert.equal(node.textContent, command);
-  assert(homeMarkdown.includes(command));
+assert(!/\[(?:web:|cite:)|vertexaisearch\.cloud\.google\.com|^Terminal$|Try this question/m.test(homeMarkdown));
+assert(homeMarkdown.includes(AGENT_SETUP_PROMPT) && homeMarkdown.includes("https://librarium.agentsy.build/install.md"));
+assert.equal((homeMarkdown.match(/^# /gm) ?? []).length, 1);
+const headingLevels = [...homeMarkdown.matchAll(/^(#{1,6}) /gm)].map((match) => match[1].length);
+for (let i = 1; i < headingLevels.length; i++) assert(headingLevels[i] <= headingLevels[i - 1] + 1, "homepage Markdown skips a heading level");
+for (const section of homeMarkdown.split(/\*\*Sources \(/).slice(1)) {
+  const sourceList = section.split(/^### /m)[0];
+  assert((sourceList.match(/^- \[/gm) ?? []).length <= 5, "too many provider citations");
 }
-for (const choice of ["cli", "javascript", "laravel", "agent"]) assert(home.includes(`data-logo="${choice}"`));
-assert(home.includes('data-href="/docs/php#install"') && home.includes('id="page-format-control" class="fixed '));
+for (const workflow of WORKFLOWS) assert(homeMarkdown.includes(`\`\`\`sh\n${workflow.command}\n\`\`\``));
+for (const choice of INSTALL_CHOICES) {
+  const panel = homePage.querySelector(`#install-panel-${choice.id}`);
+  assert.equal(panel.querySelector("pre code").textContent, choice.text);
+  assert.equal(panel.querySelector("button[data-code-copy]").getAttribute("data-copy"), choice.text);
+  assert.equal(panel.querySelector("a").getAttribute("href"), choice.href);
+  assert(homeMarkdown.includes(choice.text));
+}
+assert(homeMarkdown.includes("[Set up Librarium](https://librarium.agentsy.build/#install)"));
+const agreement = homePage.querySelector('[data-evidence-card="agreement"]');
+assert.equal(agreement.querySelectorAll("li").length, 5);
+assert(agreement.textContent.includes("named in 4 of 5 provider excerpts"));
+assert.equal(agreement.querySelectorAll("li")[2].textContent, "GeminiNot in excerpt");
+assert.deepEqual(homePage.querySelectorAll(".compare-table tbody tr").map((row) => row.querySelectorAll("td").map((cell) => cell.textContent)), [
+  ["✓", "—", "—", "—"], ["✓", "✓", "✓", "—"], ["—", "—", "—", "—"], ["✓", "✓", "—", "—"], ["✓", "✓", "—", "✓"],
+]);
+for (const card of homePage.querySelectorAll("[data-evidence-card]")) {
+  assert(card.innerHTML.indexOf("<h3") < card.innerHTML.indexOf("<figure"), "evidence heading must precede figure");
+}
+assert(home.includes('href="/docs/costs-and-limits"') && home.includes('id="page-format-control" class="fixed '));
 
 // Both dark-mode paths must retain the same palette when either is changed.
 const css = read("src/styles/global.css");

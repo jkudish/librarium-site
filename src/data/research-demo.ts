@@ -22,6 +22,14 @@
 //   local run paths) are not carried into display data.
 
 import fixture from "./provider-display-fixture.json" with { type: "json" };
+import runFixture from "librarium-spec/fixtures/runs/valid/quick-done.json" with { type: "json" };
+
+// A current, schema-valid contract fixture, not a conversion of the historical
+// capture. Keep its real required fields; its single result is already concise.
+export const RUN_EXAMPLE = runFixture;
+
+export const cleanCitationMarkers = (text: string): string =>
+  text.replace(/\[(?:web:\s*\d+|cite:\s*[\d,\s]+|\d+(?:,\s*\d+)*)\]/g, "");
 
 export type DemoCitation = { title: string; url: string };
 
@@ -79,7 +87,7 @@ export function renderCapturedMarkdown(source: string): string {
     .replace(/"/g, "&quot;")
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-  const lines = source.split("\n");
+  const lines = cleanCitationMarkers(source).split("\n");
   const out: string[] = [];
   let listOpen = false;
   const closeList = () => { if (listOpen) { out.push("</ul>"); listOpen = false; } };
@@ -154,8 +162,8 @@ export const RESEARCH_DEMO: {
     const content = failed ? result.note ?? "" : result.content;
     // Display excerpt: when a report's verbatim content opens with the same
     // H1 or H2 the card already renders as its title, drop that one leading
-    // line from the readable card. `content` above stays byte-verbatim for
-    // the JSON view and verification; nothing else is removed or reworded.
+    // line from the readable card. `content` stays byte-verbatim for capture
+    // verification; citation markers are removed only during rendering.
     const firstLine = content.split("\n", 1)[0];
     const displayContent = result.title && !failed && (firstLine === `# ${result.title}` || firstLine === `## ${result.title}`)
       ? content.slice(firstLine.length).replace(/^\n/, "")
@@ -179,3 +187,12 @@ export const RESEARCH_DEMO: {
     };
   }),
 };
+
+// Presence is checked only in the archived display excerpts, never inferred
+// from citations or a provider's full report that the homepage does not show.
+export const COMPARED_TOOLS = ["Plausible", "Matomo", "PostHog", "Fathom"] as const;
+export const PROVIDER_COMPARISON = RESEARCH_DEMO.results.map((result) => ({
+  provider: result.shortName,
+  logo: result.logo,
+  named: COMPARED_TOOLS.filter((tool) => new RegExp(`\\b${tool}\\b`, "i").test(result.content)),
+}));

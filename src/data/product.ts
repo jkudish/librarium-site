@@ -14,25 +14,35 @@ export const FEATURED_SOURCES = SOURCES.map((source) => ({
   id: source.id,
   logo: logos[source.id] ?? source.id,
   docs: source.docs,
+  hint: "deep" in source.variants ? "Quick + deep" : "Quick",
 }));
 
+const engineLogos: Record<string, string> = { chatgpt: "openai", "gemini-app": "gemini" };
+export const FEATURED_ENGINES = ENGINES.map((engine) => ({
+  id: engine.id,
+  name: engine.name,
+  logo: engineLogos[engine.id],
+  monogram: engine.id === "copilot" ? "MC" : "GA",
+}));
+
+const exampleQuestion = "What are the best alternatives to Google Analytics?";
 export const WORKFLOWS = [
   {
     id: "quick",
     title: "Get a first answer.",
     summary: "Search results and cited answers for everyday questions. Uses your configured research sources by default.",
-    command: 'librarium research "Your question"',
+    command: `librarium research "${exampleQuestion}"`,
   },
   {
     id: "deep",
     title: "Investigate further.",
-    summary: "Longer reports from sources that support deep research. Start the work, keep the Run id, and return to the results.",
-    command: 'librarium research "Your question" --deep',
+    summary: "Longer reports from sources that support deep research. Start the work, keep the Run ID, and return to the results.",
+    command: `librarium research "${exampleQuestion}" --deep`,
   },
   {
     id: "engines",
     title: "Check AI answer engines.",
-    summary: "See what consumer AI surfaces say about your product or category. Choose engines by name; they run only when you select them.",
-    command: 'librarium research "Your question" --only chatgpt,gemini-app,copilot',
+    summary: "See which tools AI answer engines name and which pages they cite. Choose engines by name; they run only when you select them.",
+    command: `librarium research "${exampleQuestion}" --only chatgpt,gemini-app,copilot`,
   },
 ] as const;

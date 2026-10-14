@@ -10,11 +10,21 @@ Facade `dryRun()` and Artisan `--dry-run` resolve selection and estimates locall
 
 ## How a cap selects sources
 
-`maxCost('0.10')` and Artisan `--max-cost=0.10` set a USD admission cap. Sources without bounded estimates are skipped as `unpriced`. Librarium considers remaining sources in shared catalog order, not request order or cheapest-first order. Each source is selected if its estimate fits the remaining budget; otherwise it is skipped as `over_budget`, and later sources are still considered.
+`maxCost('0.10')` and Artisan `--max-cost=0.10` set a USD admission cap. Admission uses shared catalog order, not request order or cheapest-first order.
 
-For example, a $0.10 cap with catalog-ordered estimates of $0.06, $0.05, and $0.03 selects the first and third sources. This example is illustrative, not a price quote. Without a cap, unpriced sources may run and the total estimate can be `null`.
+| Estimate | Admission |
+| --- | --- |
+| No bounded estimate | Skip as `unpriced` |
+| Fits remaining budget | Select |
+| Exceeds remaining budget | Skip as `over_budget`; consider later sources |
 
-PHP executes selected sources sequentially. Reported spend and reservations stop unstarted work when the budget is used. Failed sources are not automatically replaced.
+### Illustrative selection
+
+A $0.10 cap with catalog-ordered estimates of $0.06, $0.05, and $0.03 selects the first and third sources. This is not a price quote.
+
+### Unpriced and already-started work
+
+Without a cap, unpriced sources may run and the total estimate can be `null`. PHP executes selected sources sequentially; reported spend and reservations stop unstarted work when the budget is used, without replacing failed sources.
 
 ## A cap is not a final-bill guarantee
 
@@ -22,7 +32,15 @@ In-flight work can exceed a cap. Failed, interrupted, or timed-out calls can sti
 
 ## Read money and unknowns
 
-Money is an exact USD decimal string. `cost.estimated` is not a receipt. `cost.reported` is provider-reported spend only; `null` means unknown, never zero. Estimates do not fill in missing charges. `cost.complete` requires every result to report a cost.
+Money is an exact USD decimal string. Estimates do not fill in missing charges.
+
+| Field | Meaning |
+| --- | --- |
+| `cost.estimated` | Estimate, not a receipt |
+| `cost.reported` | Provider-reported spend only; `null` means unknown, never zero |
+| `cost.complete` | Requires every result to report a cost |
+
+### Pricing and separate budgets
 
 Estimates come from `jkudish/laravel-ai-pricing`. Pricing synchronization is explicit, not a dry-run side effect. Your SDK agent's model calls have a separate budget from Librarium research. Your application owns authorization and total spend limits across repeated requests.
 

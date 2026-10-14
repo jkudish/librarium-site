@@ -4,21 +4,28 @@ description: Store a Run before dispatch, observe it by Run ID, and recover in-p
 order: 3
 ---
 
-Queued research can outlive an HTTP response. Librarium stores a Run before dispatching one encrypted Laravel job. Applications own queue workers, authorization, retention, and domain records.
+## Prepare shared storage
 
-Follow [installation](/docs/php#install), configure Exa, and choose a durable [supported store](/docs/php/configuration). Process-local memory and ArrayStore cannot share Runs with a separate worker. Run a worker for the configured queue; the default queue is `research`.
+Follow [installation](/docs/php#install), configure Exa, and choose a durable [supported store](/docs/php/configuration). Your application owns workers, authorization, retention, and domain records.
+
+| Before dispatch | Requirement |
+| --- | --- |
+| Store | Shared durable storage, not memory or ArrayStore |
+| Worker | Process the configured queue; default `research` |
+| Other runtimes | [MCP](/docs/using-with-agents) or [JavaScript](/docs/library) can resume stored deep research, not Laravel jobs |
 
 ## Preview before dispatch
 
 ```php
 use Jkudish\LaravelAiLibrarium\Facades\Librarium;
 
-$question = 'Compare PostgreSQL connection-pooling options for Laravel workers.';
+$question = 'Compare PostgreSQL pooling for workers';
 $plan = Librarium::research($question)
-    ->deep()->only(['exa'])->maxCost('0.50')->dryRun();
+    ->deep()->only(['exa'])->maxCost('0.50')
+    ->dryRun();
 ```
 
-Dry-run is offline and stores nothing. Inspect estimates, selected sources, skips, and notices. See [costs and limits](/docs/php/costs-and-limits) before dispatching; keep your cap when reviewing an empty preview.
+Dry-run is offline and stores nothing; inspect estimates, selected sources, skips, and notices. Keep your cap when reviewing an empty preview ([budget rules](/docs/php/costs-and-limits)).
 
 ## Queue the research
 
@@ -33,13 +40,17 @@ $run = Librarium::find($id)?->refresh();
 $payload = $run?->toArray();
 ```
 
-Authorize access to the Run ID in your application before reading it. `refresh()` checks in-progress research rather than submitting it again. A Run can be `running`, `done`, `partial`, or `failed`; persist only the domain facts your application needs, keeping failures, citations, and uncertainty visible. The optional query-builder database store is package storage, not an application evidence model.
+Authorize the Run ID before reading it; `refresh()` observes existing work, not a new submission. Persist only needed domain facts and keep [status, failures, citations, and uncertainty](/docs/php/library#shared-run-json) visible; package storage is not your evidence model.
 
 ## Recover without duplicate spend
 
-The encrypted job has one attempt. If a worker stops, inspect the stored Run and its errors before starting another job: a provider may already be doing paid research. Use `refresh()` to check existing research instead of submitting a duplicate request.
+The encrypted job has one attempt; worker loss can leave paid upstream work running. Inspect the stored Run and use `refresh()` before considering another submission ([recovery reference](/docs/php/request-and-retry)).
 
-Research that runs entirely in the calling process depends on that process staying alive. Recovery requires valid saved state and signing keys; keep those keys stable and private. If a local writer crashes, remove its ownership marker only after confirming that the writer cannot resume. The marker's age alone is not enough.
+| Failure | Recovery boundary |
+| --- | --- |
+| Calling process stops | Inline work depends on that process staying alive |
+| Saved state or signing key lost | Recovery needs valid state and stable private keys |
+| Local writer crashes | Remove its marker only after proving it cannot resume; age is not enough |
 
 ## Test without provider calls
 
@@ -47,9 +58,10 @@ Research that runs entirely in the calling process depends on that process stayi
 config()->set('librarium.sources.exa.key', 'testing-only');
 $fake = Librarium::fake()->preventStrayQueries();
 
-Librarium::research('Produce a report')->deep()->only(['exa'])->queue();
+Librarium::research('Produce a report')
+    ->deep()->only(['exa'])->queue();
 $fake->assertQueued('Produce a report');
 $fake->assertNeverQueried();
 ```
 
-Queued fake requests record the request without dispatching jobs. Fake assertion closures receive request arrays. For queue infrastructure tests use Laravel's queue fake and disposable stores. See [testing](/docs/php/testing) and [recovery reference](/docs/php/request-and-retry).
+Queued fakes record requests without dispatching jobs; assertion closures receive request arrays. Use Laravel's queue fake and disposable stores for infrastructure tests ([testing reference](/docs/php/testing)).

@@ -47,7 +47,7 @@
   }
 
   & h2 {
-    margin-top: --spacing(14);
+    margin-top: --spacing(10);
     font-size: var(--text-3xl);
     line-height: var(--text-3xl--line-height);
   }
@@ -106,12 +106,21 @@
     line-height: --spacing(6);
   }
 
+  /* Shell lines wrap only at whitespace, never inside a command token. */
+  & pre:is([data-language="bash"], [data-language="sh"], [data-language="shell"]) {
+    white-space: pre-wrap;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
   & pre code {
     background-color: transparent;
     color: inherit;
     font-size: inherit;
     padding: 0;
     border-radius: 0;
+    overflow-wrap: normal;
+    word-break: normal;
   }
 
   & ul {
@@ -189,6 +198,12 @@
 
 .docs-code-toolbar button:hover { color: var(--color-amber-300); }
 .prose .docs-code pre { margin: 0; border-radius: 0; }
+.prose pre .shell-token { white-space: nowrap; }
+
+@media (max-width: 639px) {
+  .prose pre { padding: --spacing(4); font-size: var(--text-terminal); }
+  .docs-code-toolbar { padding: --spacing(3) --spacing(4); }
+}
 
 /* Leave room for the floating page-format control at the end of every page. */
 body { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }

@@ -20,11 +20,11 @@ const { title, description, headings, kind, redirect, ctaHref = "/docs", ctaLabe
 const markdownHref = `${Astro.url.pathname.replace(/\/$/, "")}.md`;
 ---
 
-<Base title={`${title} | librarium`} description={description} includeSoftwareMetadata={false} redirect={redirect}>
+<Base title={`${title} | Librarium`} description={description} includeSoftwareMetadata={false} redirect={redirect}>
   <Header />
   <main>
     <div class="border-b border-neutral-200 bg-[#faf9f6]">
-      <div class="mx-auto max-w-6xl px-6 pt-10 pb-12 sm:pt-14 sm:pb-16 lg:px-8">
+      <div class="mx-auto max-w-6xl px-6 pt-8 pb-8 sm:pt-10 sm:pb-10 lg:px-8">
         {kind !== "product" && <a href="/guides" class="mb-9 inline-flex items-center gap-2 text-base text-neutral-500 hover:text-amber-700 sm:text-sm"><Icon name="arrowLeft" /> Guides & field notes</a>}
         <h1 class="max-w-[21ch] text-4xl/[1.08] font-medium tracking-[-0.045em] text-pretty text-neutral-950 sm:text-6xl/[1.06]">{title}</h1>
         <p class="mt-6 max-w-[58ch] text-lg/8 text-pretty text-neutral-600">{description}</p>
@@ -34,7 +34,7 @@ const markdownHref = `${Astro.url.pathname.replace(/\/$/, "")}.md`;
         </div>
       </div>
     </div>
-    <div class="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-6 py-12 lg:grid-cols-[minmax(0,1fr)_216px] lg:px-8 lg:py-16">
+    <div class="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_216px] lg:px-8 lg:py-10">
       <article class="prose min-w-0 max-w-[75ch]"><slot /></article>
       {!redirect && (
         <aside class="hidden lg:block">
@@ -56,3 +56,7 @@ const markdownHref = `${Astro.url.pathname.replace(/\/$/, "")}.md`;
   </main>
   <Footer />
 </Base>
+
+<script>
+  import "../scripts/wrap-shell-code";
+</script>

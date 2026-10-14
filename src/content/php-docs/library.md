@@ -9,7 +9,9 @@ use Jkudish\LaravelAiLibrarium\Facades\Librarium;
 
 $run = Librarium::research('Compare current memory architectures')
     ->deep()->only(['exa', 'openai'])->skip(['exa'])
-    ->maxCost('1.00')->options(['openai' => ['effort' => 'high']])->run();
+    ->maxCost('1.00')
+    ->options(['openai' => ['effort' => 'high']])
+    ->run();
 
 $run->id();
 $run->status();

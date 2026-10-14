@@ -52,7 +52,7 @@ const next = navItems[currentIndex + 1];
 ---
 
 <Base
-  title={language === "php" ? `${title} | librarium PHP docs` : version === "v1" ? `${title} | librarium v1 legacy docs` : `${title} | librarium JavaScript docs`}
+  title={language === "php" ? `${title} | Librarium PHP docs` : version === "v1" ? `${title} | Librarium v1 legacy docs` : `${title} | Librarium JavaScript docs`}
   description={pageDescription}
   robots={version === "v1" ? "noindex, follow" : undefined}
   includeSoftwareMetadata={version !== "v1" && language !== "php"}
@@ -87,7 +87,7 @@ const next = navItems[currentIndex + 1];
       </details>
     </nav>
 
-    <div class="grid grid-cols-1 gap-10 py-10 lg:grid-cols-[232px_minmax(0,1fr)] lg:gap-12 lg:py-14 xl:grid-cols-[248px_minmax(0,1fr)_192px] xl:gap-14">
+    <div class="grid grid-cols-1 gap-8 py-8 lg:grid-cols-[232px_minmax(0,1fr)] lg:gap-10 lg:py-10 xl:grid-cols-[232px_minmax(0,1fr)_176px] xl:gap-10">
       <!-- Sidebar (desktop only) -->
       <aside class="hidden lg:block">
         <div class="docs-sidebar sticky top-8 -ml-1 max-h-[calc(100dvh-4rem)] space-y-7 overflow-y-auto pr-2 pb-2 pl-1">
@@ -113,7 +113,7 @@ const next = navItems[currentIndex + 1];
           {title}
         </h1>
         {description && <p class="mt-5 max-w-[60ch] text-base/7 text-pretty text-neutral-500">{description}</p>}
-        <div class="mt-6 mb-10 flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-neutral-200 pb-6 text-base text-neutral-500 sm:text-sm">
+        <div class="mt-5 mb-8 flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-neutral-200 pb-5 text-base text-neutral-500 sm:text-sm">
           <CopyPageButton href={markdownHref} />
           <a href={`${root}/all.md`} class="hidden hover:text-amber-700 lg:inline">All {language === "php" ? "PHP" : "JavaScript"} docs</a>
           <a href="/llms.txt" class="hidden hover:text-amber-700 lg:inline">Agent index</a>
@@ -143,6 +143,8 @@ const next = navItems[currentIndex + 1];
 </Base>
 
 <script>
+  import "../scripts/wrap-shell-code";
+
   async function copy(button: HTMLButtonElement, text: string) {
     const labelElement = button.querySelector<HTMLElement>("[data-copy-label]") ?? button;
     const label = labelElement.textContent;

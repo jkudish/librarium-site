@@ -10,11 +10,21 @@ order: 8
 
 ## How a cap selects sources
 
-`--max-cost`, library `maxCost`, and MCP `max_cost` set a USD admission cap. Sources with no bounded estimate are skipped as `unpriced`. Librarium considers the remaining sources in shared catalog order, not your selection order or cheapest-first order. It selects a source when its estimate fits the remaining budget; otherwise it skips it as `over_budget` and continues considering later sources.
+`--max-cost`, library `maxCost`, and MCP `max_cost` set a USD admission cap. Admission uses shared catalog order, not selection order or cheapest-first order.
 
-For example, with a $0.10 cap and catalog-ordered estimates of $0.06, $0.05, and $0.03, the first and third sources fit. This example is illustrative, not a price quote. Without a cap, unpriced sources may run and the total estimate can be `null`.
+| Estimate | Admission |
+| --- | --- |
+| No bounded estimate | Skip as `unpriced` |
+| Fits remaining budget | Select |
+| Exceeds remaining budget | Skip as `over_budget`; consider later sources |
 
-Reported spend and reservations for work already started stop further work from starting when the budget is used. A failed source is not automatically replaced by another source.
+### Illustrative selection
+
+With a $0.10 cap, catalog-ordered estimates of $0.06, $0.05, and $0.03 select the first and third sources. This is not a price quote.
+
+### Unpriced and already-started work
+
+Without a cap, unpriced sources may run and the total estimate can be `null`. Reported spend and reservations for started work stop further starts when the budget is used; failed sources are not automatically replaced.
 
 ## A cap is not a final-bill guarantee
 
@@ -24,7 +34,13 @@ MCP calls can lower but not raise the configured cap. MCP waiting defaults to 45
 
 ## Read money and unknowns
 
-Money is an exact USD decimal string. `cost.estimated` is an estimate, not a receipt. `cost.reported` records only provider-reported spend; `null` means unknown, never zero. Estimates never replace missing reported charges. `cost.complete` is true only when every result reports its cost. Usage totals cannot establish a complete bill when costs are missing.
+Money is an exact USD decimal string. Usage totals cannot establish a complete bill when costs are missing.
+
+| Field | Meaning |
+| --- | --- |
+| `cost.estimated` | Estimate, not a receipt; never replaces missing reported charges |
+| `cost.reported` | Provider-reported spend only; `null` means unknown, never zero |
+| `cost.complete` | True only when every result reports its cost |
 
 ## Examples and approval
 

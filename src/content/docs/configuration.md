@@ -11,14 +11,28 @@ order: 7
   "version": 3,
   "sources": {
     "exa": { "key": "env:EXA_API_KEY" },
-    "parallel": { "key": "env:PARALLEL_API_KEY", "processor": "pro" },
-    "grok": { "key": "env:XAI_API_KEY", "search": "both", "enabled": false }
+    "parallel": {
+      "key": "env:PARALLEL_API_KEY",
+      "processor": "pro"
+    },
+    "grok": {
+      "key": "env:XAI_API_KEY",
+      "search": "both",
+      "enabled": false
+    }
   },
-  "engines": { "collector": "searchapi", "key": "env:SEARCHAPI_API_KEY" },
+  "engines": {
+    "collector": "searchapi",
+    "key": "env:SEARCHAPI_API_KEY"
+  },
   "groups": { "editorial": ["exa", "claude"] },
   "summarize": { "source": "openai" },
   "max_cost": "1.00",
-  "runs": { "store": "filesystem", "path": "./agents/librarium", "keep_days": null }
+  "runs": {
+    "store": "filesystem",
+    "path": "./agents/librarium",
+    "keep_days": null
+  }
 }
 ```
 
@@ -26,7 +40,14 @@ A source is set up when it has a resolved key and `enabled` is not false. Enviro
 
 ## Source options
 
-Examples: `grok.search` selects `web`, `x`, or `both`; `brave.results` selects `answer` or `search`; `parallel.processor` defaults to `pro`; `openai.effort` configures reasoning effort. A call can override options through `{ options: { parallel: { processor: 'ultra' } } }`.
+| Option | Values or purpose |
+| --- | --- |
+| `grok.search` | `web`, `x`, or `both` |
+| `brave.results` | `answer` or `search` |
+| `parallel.processor` | Defaults to `pro` |
+| `openai.effort` | Reasoning effort |
+
+A call can override options through `{ options: { parallel: { processor: 'ultra' } } }`.
 
 Google's retrieval service is SearchAPI, SerpAPI, or Serpbase. Set it with the source option below; AI answer-engine retrieval is configured separately and may be overridden per engine. Availability differs by language and retrieval service; check local discovery before selection.
 

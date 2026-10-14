@@ -13,7 +13,7 @@ import { INSTALL_CHOICES } from "../data/setup-prompt";
 const providerMark = (logo: string) => `/providers/${logo}.${["you", "serpapi", "dataforseo"].includes(logo) ? "png" : "svg"}`;
 const capturedCommand = `librarium research "${RESEARCH_DEMO.query}" --deep`;
 const products = [
-  { title: "Agents & MCP", description: "Give Claude Code, Codex, Cursor, and other agents a research tool they can call. One setup prompt installs the CLI, MCP server, and agent skill.", href: "/agents", link: "Explore Agents & MCP" },
+  { title: "Agents & MCP", description: "Give Claude Code, Codex, Cursor, and other agents a research tool they can call. One setup prompt installs the CLI and connects its MCP server.", href: "/agents", link: "Explore Agents & MCP" },
   { title: "CLI", description: "Ask a question in your terminal and get every source's answer with its citations. Preview the cost first, and reopen any past Run.", href: "/cli", link: "Explore the CLI" },
   { title: "JavaScript / TypeScript", description: "Add multi-source research to a Node app or Worker with a typed client. Choose sources, set a budget, and store Runs where you like.", href: "/javascript", link: "Explore JavaScript" },
   { title: "PHP / Laravel", description: "Research from a Laravel facade, with queued deep research, Artisan commands, and a fake for your tests. Built on the official Laravel AI SDK.", href: "/laravel", link: "Explore Laravel" },
@@ -205,7 +205,7 @@ const products = [
               </article>
             ))}
           </div>
-          <p class="mt-8 max-w-[75ch] text-base/7 text-neutral-400 sm:text-sm/6">The CLI and JavaScript library share one implementation, and the Laravel package is native PHP. Both follow the open <a href="https://github.com/jkudish/librarium-spec" class="text-amber-200 underline underline-offset-4 hover:text-white">Librarium spec</a>: the same source names and options, and the same Run format, so a Run folder saved by one can be read by the other. Source coverage differs slightly between languages.</p>
+          <p class="mt-8 max-w-[75ch] text-base/7 text-neutral-400 sm:text-sm/6">The CLI and JavaScript library share one implementation, and the Laravel package is native PHP. Both follow the open <a href="https://github.com/jkudish/librarium-spec" class="text-amber-200 underline underline-offset-4 hover:text-white">Librarium spec</a>: the same source names and the same Run format, and an unencrypted Run folder saved by one can be read by the other. Which sources and options are available differs slightly between languages.</p>
         </div>
       </section>
 

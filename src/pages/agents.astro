@@ -43,59 +43,115 @@ interface Host {
 // Registration strings are copied verbatim from agents.md. Keep them in sync.
 const hosts: Host[] = [
   {
+    id: "amp", name: "Amp", logo: "/agents/amp.svg",
+    docs: [{ label: "MCP docs", href: "https://ampcode.com/docs/customize/mcp" }],
+    intro: "User-wide: add it by command, or merge into `~/.config/amp/settings.json`. For this project, merge into `.amp/settings.json` instead, then approve with `amp mcp approve librarium`.",
+    blocks: [
+      { label: "Terminal (user-wide)", lang: "bash", code: "amp mcp add librarium -- librarium mcp" },
+      { label: "Amp settings", lang: "json", code: '{\n  "amp.mcpServers": {\n    "librarium": {\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' },
+    ],
+    note: "User settings do not require workspace-server approval. Preserve every other server when merging configuration.",
+  },
+  {
     id: "claude-code",
     name: "Claude Code",
     logo: "/providers/claude.svg",
     docs: [{ label: "MCP docs", href: "https://code.claude.com/docs/en/mcp" }],
-    intro: "Register it once for your user, from any terminal:",
+    intro: "Use `--scope user` for user-wide; use `--scope local` for this project privately, or `--scope project` for a shared `.mcp.json`.",
     blocks: [{ label: "Terminal", lang: "bash", code: "claude mcp add --scope user librarium -- librarium mcp" }],
+  },
+  {
+    id: "claude-desktop", name: "Claude Desktop", logo: "/providers/claude.svg",
+    docs: [{ label: "local server docs", href: "https://modelcontextprotocol.io/docs/develop/connect-local-servers" }],
+    intro: "Open Settings → Developer → Edit Config. Merge this user-wide entry into `claude_desktop_config.json`: macOS `~/Library/Application Support/Claude/claude_desktop_config.json`; Windows `%APPDATA%\\Claude\\claude_desktop_config.json`.",
+    blocks: [{ label: "claude_desktop_config.json", lang: "json", code: '{\n  "mcpServers": {\n    "librarium": {\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
+    note: "Completely quit and restart Claude Desktop. The linked docs do not document a project-only scope; do not substitute a project file.",
   },
   {
     id: "codex",
     name: "Codex",
     logo: "/agents/codex.svg",
-    docs: [{ label: "MCP docs", href: "https://developers.openai.com/codex/mcp" }],
-    intro: "Add it by command, or edit `~/.codex/config.toml` (project-scoped: `.codex/config.toml`):",
-    blocks: [
-      { label: "Terminal", lang: "bash", code: "codex mcp add librarium -- librarium mcp" },
-      { label: "~/.codex/config.toml", lang: "toml", code: '[mcp_servers.librarium]\ncommand = "librarium"\nargs = ["mcp"]' },
-    ],
+    docs: [{ label: "MCP docs", href: "https://learn.chatgpt.com/codex/extend/mcp" }],
+    intro: "Merge into `~/.codex/config.toml` for user-wide, or `.codex/config.toml` for this project (trusted projects only).",
+    blocks: [{ label: "config.toml", lang: "toml", code: '[mcp_servers.librarium]\ncommand = "librarium"\nargs = ["mcp"]' }],
+  },
+  {
+    id: "command-code", name: "Command Code", logo: "/agents/command-code.svg",
+    docs: [{ label: "MCP docs", href: "https://commandcode.ai/docs/mcp" }],
+    intro: "Use `--scope user` for user-wide (`~/.commandcode/mcp.json`); use `--scope local` for this project privately, or `--scope project` for a shared `.mcp.json`. Flags go before the server name.",
+    blocks: [{ label: "Terminal", lang: "bash", code: "cmd mcp add --scope user librarium -- librarium mcp" }],
   },
   {
     id: "cursor",
     name: "Cursor",
     logo: "/agents/cursor.svg",
     docs: [{ label: "MCP docs", href: "https://cursor.com/docs/mcp" }],
-    intro: "Create `.cursor/mcp.json` in your project, or `~/.cursor/mcp.json` to add it everywhere:",
-    blocks: [{ label: ".cursor/mcp.json", lang: "json", code: '{\n  "mcpServers": {\n    "librarium": {\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
+    intro: "Merge into `~/.cursor/mcp.json` for user-wide, or `.cursor/mcp.json` for this project.",
+    blocks: [{ label: "mcp.json", lang: "json", code: '{\n  "mcpServers": {\n    "librarium": {\n      "type": "stdio",\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
+  },
+  {
+    id: "gemini-cli", name: "Gemini CLI", logo: "/providers/gemini.svg",
+    docs: [{ label: "MCP docs", href: "https://geminicli.com/docs/tools/mcp-server/" }],
+    intro: "Use `--scope user` for user-wide (`~/.gemini/settings.json`), or `--scope project` for this project (`.gemini/settings.json`).",
+    blocks: [{ label: "Terminal", lang: "bash", code: "gemini mcp add --scope user librarium librarium mcp" }],
+  },
+  {
+    id: "hermes", name: "Hermes Agent", logo: "/agents/hermes.png",
+    docs: [{ label: "MCP docs", href: "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp" }],
+    intro: "Merge into `~/.hermes/config.yaml` for user-wide.",
+    blocks: [{ label: "~/.hermes/config.yaml", lang: "yaml", code: 'mcp_servers:\n  librarium:\n    command: "librarium"\n    args: ["mcp"]' }],
+    note: "The linked MCP docs do not document a project-only config file. If that scope is required, ask rather than inventing one.",
+  },
+  {
+    id: "openclaw", name: "OpenClaw", logo: "/agents/openclaw.svg",
+    docs: [{ label: "MCP registry docs", href: "https://docs.openclaw.ai/cli/mcp/registry" }],
+    intro: "Save it in OpenClaw's user configuration. The local Gateway must be stopped before CLI mutations; ask before stopping a running Gateway, or use its Control UI.",
+    blocks: [{ label: "Terminal", lang: "bash", code: "openclaw mcp add librarium --command librarium --arg mcp" }],
+    note: "The linked registry docs do not document a project-only registration scope.",
   },
   {
     id: "opencode",
     name: "OpenCode",
     logo: "/agents/opencode.svg",
     docs: [
-      { label: "config docs", href: "https://opencode.ai/docs/mcp-servers/" },
-      { label: "v2 docs", href: "https://v2.opencode.ai/mcp" },
+      { label: "v2 MCP docs", href: "https://opencode.ai/v2/docs/mcp-servers/" },
+      { label: "config locations", href: "https://opencode.ai/v2/docs/config/" },
+      { label: "v1 MCP docs", href: "https://opencode.ai/docs/mcp-servers/" },
     ],
-    intro: "Add it under `mcp` in `opencode.json` (`~/.config/opencode/opencode.json`, or your project root). OpenCode v2 moves servers under `mcp.servers` ([v2 docs](https://v2.opencode.ai/mcp)):",
-    blocks: [{ label: "opencode.json", lang: "json", code: '{\n  "mcp": {\n    "librarium": {\n      "type": "local",\n      "command": ["librarium", "mcp"]\n    }\n  }\n}' }],
+    intro: "For v2, use `--global` for user-wide; omit it for this project. Or merge under `mcp.servers` in `~/.config/opencode/opencode.json` for user-wide, or `opencode.json` in this project.",
+    blocks: [
+      { label: "Terminal (v2)", lang: "bash", code: "opencode mcp add librarium --global -- librarium mcp" },
+      { label: "opencode.json (v2)", lang: "json", code: '{\n  "mcp": {\n    "servers": {\n      "librarium": {\n        "type": "local",\n        "command": ["librarium", "mcp"]\n      }\n    }\n  }\n}' },
+    ],
+    note: "For OpenCode v1, put `librarium` directly under `mcp`, without the `servers` wrapper. Keep the same `type` and `command` fields; do not apply the v2 layout to v1.",
   },
   {
-    id: "amp",
-    name: "Amp",
-    logo: "/agents/amp.svg",
-    docs: [{ label: "MCP manual", href: "https://ampcode.com/manual/mcp" }],
-    intro: "Register it from your terminal:",
-    blocks: [{ label: "Terminal", lang: "bash", code: "amp mcp add librarium -- librarium mcp" }],
-    note: "Servers added to your global config (`~/.config/amp/settings.json`) run without approval; servers declared in a project's `.amp/settings.json` are approved once with `amp mcp approve librarium`.",
+    id: "pi", name: "Pi", logo: "/agents/pi.svg",
+    docs: [{ label: "MCP docs", href: "https://pi.dev/docs/latest/mcp" }],
+    intro: "Current Pi has native MCP support. User-wide is the default (`~/.pi/agent/mcp.json`); add `--local` for this project (`.pi/mcp.json`, loaded after project trust).",
+    blocks: [{ label: "Terminal", lang: "bash", code: "pi mcp add librarium -- librarium mcp" }],
+    note: "An extension that registers `/mcp` replaces Pi's built-in MCP support. Resolve that conflict with the user first. Run `/reload` after changing configuration outside a session.",
   },
   {
-    id: "hermes",
-    name: "Hermes Agent",
-    logo: "/agents/hermes.svg",
-    docs: [{ label: "MCP docs", href: "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp" }],
-    intro: "Add it to `~/.hermes/config.yaml`:",
-    blocks: [{ label: "~/.hermes/config.yaml", lang: "yaml", code: 'mcp_servers:\n  librarium:\n    command: "librarium"\n    args: ["mcp"]' }],
+    id: "vscode", name: "VS Code (GitHub Copilot)", logo: "/agents/vscode.png",
+    docs: [{ label: "MCP docs", href: "https://code.visualstudio.com/docs/copilot/customization/mcp-servers" }],
+    intro: "Run MCP: Open User Configuration for user-wide within the active VS Code profile; for this project, edit `.vscode/mcp.json`. Merge this VS Code-format entry.",
+    blocks: [{ label: "mcp.json (VS Code format)", lang: "json", code: '{\n  "servers": {\n    "librarium": {\n      "type": "stdio",\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
+    note: "For portable Copilot/Agent Host configuration, use `~/.copilot/mcp-config.json` user-wide or `.mcp.json` in this project, with `mcpServers` instead of `servers`.",
+  },
+  {
+    id: "windsurf", name: "Windsurf", logo: "/agents/windsurf.svg",
+    docs: [{ label: "Cascade MCP docs", href: "https://docs.windsurf.com/windsurf/cascade/mcp" }],
+    intro: "These current docs apply to legacy Cascade, not the default Devin Local agent. Open Cascade's Actions → Open MCP config file and merge this user-wide entry. Current documented locations: macOS/Linux `~/.config/devin/mcp_config.json`; Windows `%APPDATA%\\devin\\mcp_config.json`.",
+    blocks: [{ label: "mcp_config.json (Cascade)", lang: "json", code: '{\n  "mcpServers": {\n    "librarium": {\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
+    note: "No project-only scope is documented here. Do not use these instructions for Devin Local.",
+  },
+  {
+    id: "zed", name: "Zed", logo: "/agents/zed.png",
+    docs: [{ label: "MCP docs", href: "https://zed.dev/docs/ai/mcp" }],
+    intro: "Open zed: open settings file and merge this user-wide entry into settings.",
+    blocks: [{ label: "Zed settings", lang: "json", code: '{\n  "context_servers": {\n    "librarium": {\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
+    note: "The linked MCP docs do not document project-only server registration; do not assume project settings support it.",
   },
   {
     id: "other",
@@ -368,15 +424,16 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
           <div class="px-6 pt-6">
             <h3 class="text-xl font-medium tracking-tight text-neutral-950">Register the MCP server in your agent</h3>
             <p class="mt-2 max-w-[70ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Every host launches the same local command: `librarium mcp`. The registration spelling differs per host, so use your own agent's form below.")} />
+            <p class="mt-2 max-w-[70ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Default to user-wide unless you ask for this project only. Your agent uses its known client, asks only if it cannot tell or you want a different one, and confirms the client and scope before changing configuration. Merge entries without replacing other servers. If a host cannot find `librarium`, use the absolute path printed by `command -v librarium`.")} />
           </div>
           <noscript><style is:inline>[data-host-panel][hidden]{display:block !important}#host-tabs{display:none !important}</style></noscript>
-          <div id="host-tabs" role="tablist" aria-label="Coding agent" class="host-tabs mt-5 flex gap-1 overflow-x-auto border-b border-neutral-200 px-4 sm:px-5">
+          <div id="host-tabs" role="tablist" aria-label="Coding agent" class="host-tabs mt-5 grid grid-cols-2 gap-2 border-b border-neutral-200 px-4 pb-4 sm:grid-cols-3 sm:px-5 lg:grid-cols-5">
             {hosts.map((host, index) => (
-              <button type="button" role="tab" id={`host-tab-${host.id}`} aria-selected={index === 0 ? "true" : "false"} aria-controls={`host-panel-${host.id}`} tabindex={index === 0 ? 0 : -1} class="-mb-px flex min-h-12 shrink-0 cursor-pointer items-center gap-2 border-b-2 border-transparent px-3 py-2 text-sm text-neutral-500 hover:text-neutral-950 aria-selected:border-amber-700 aria-selected:font-medium aria-selected:text-neutral-950 focus-visible:outline-offset-[-2px]">
+              <button type="button" role="tab" id={`host-tab-${host.id}`} aria-selected={index === 0 ? "true" : "false"} aria-controls={`host-panel-${host.id}`} tabindex={index === 0 ? 0 : -1} class="flex min-h-12 min-w-0 cursor-pointer items-center gap-2 rounded-md border border-neutral-200 px-3 py-2 text-left text-sm text-neutral-500 hover:text-neutral-950 aria-selected:border-amber-700 aria-selected:font-medium aria-selected:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700">
                 {host.logo
-                  ? <span class="logo-tile flex size-6 items-center justify-center rounded"><img src={host.logo} alt="" width="16" height="16" class="size-4" /></span>
+                  ? <span class="logo-tile flex size-6 shrink-0 items-center justify-center rounded"><img src={host.logo} alt="" width="16" height="16" class="size-4" /></span>
                   : <span class="flex size-6 items-center justify-center rounded border border-neutral-200 text-neutral-600"><Icon name="plus" class="size-3.5" /></span>}
-                <span class="whitespace-nowrap">{host.name}</span>
+                <span>{host.name}</span>
               </button>
             ))}
           </div>
@@ -488,8 +545,9 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
 
 <style>
   /* Brand marks keep their own colors on a light tile in both themes. */
-  .logo-tile { background: #fbfaf7; }
-  .host-tabs { scrollbar-width: thin; }
+  .logo-tile { background: #fbfaf7; color-scheme: light; }
+  /* Keep the selected host visible above the global dark neutral borders. */
+  #host-tabs [aria-selected="true"] { border-color: var(--color-amber-700); }
   .code-panel {
     overflow: hidden;
     border-radius: var(--radius-lg);
@@ -506,8 +564,8 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
     font-family: var(--font-mono);
     font-size: var(--text-xs);
   }
-  .code-toolbar > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .code-toolbar .copy-btn { color: var(--color-neutral-300); padding: 0.375rem 0.5rem; }
+  .code-toolbar > span { min-width: 0; }
+  .code-toolbar .copy-btn { flex-shrink: 0; white-space: nowrap; color: var(--color-neutral-300); padding: 0.375rem 0.5rem; }
   .code-toolbar .copy-btn:hover { color: var(--color-amber-300); background: rgb(255 255 255 / 0.06); }
   .code-panel :global(pre) {
     margin: 0;
@@ -585,6 +643,8 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
       switch (event.key) {
         case "ArrowRight": next = (index + 1) % tabs.length; break;
         case "ArrowLeft": next = (index + tabs.length - 1) % tabs.length; break;
+        case "ArrowDown": next = (index + 1) % tabs.length; break;
+        case "ArrowUp": next = (index + tabs.length - 1) % tabs.length; break;
         case "Home": next = 0; break;
         case "End": next = tabs.length - 1; break;
         default: return;

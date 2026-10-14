@@ -133,6 +133,20 @@ These dedicated MCP files apply from v3000.3 (Local 3.6); older versions store `
 gemini mcp add --scope user librarium librarium mcp
 ```
 
+**Grok Build** ([MCP docs](https://docs.x.ai/build/features/mcp-servers)): register user-wide with the terminal coding agent; add `--scope project` before the server name for this project:
+
+```bash
+grok mcp add librarium -- librarium mcp
+```
+
+For manual registration, merge this into `~/.grok/config.toml` for user-wide, or `.grok/config.toml` for this project:
+
+```toml
+[mcp_servers.librarium]
+command = "librarium"
+args = ["mcp"]
+```
+
 **Hermes Agent** ([MCP docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp)): merge this into `~/.hermes/config.yaml` for user-wide. These MCP docs do not document a project-only config file; if that scope is required, stop and ask rather than inventing one:
 
 ```yaml
@@ -141,6 +155,8 @@ mcp_servers:
     command: "librarium"
     args: ["mcp"]
 ```
+
+**Muse** ([official page](https://muse.ai/)): Muse doesn't document a manual MCP config. If Muse can register a local stdio server, follow the generic "Any other MCP host" guidance below; otherwise stop and report that limitation. Do not invent a config file or claim a verified connection.
 
 **OpenClaw** ([MCP registry docs](https://docs.openclaw.ai/cli/mcp/registry)): save it in OpenClaw's user configuration. The local Gateway must be stopped before CLI mutations; ask before stopping a running Gateway, or use its Control UI. These docs do not document a project-only registration scope:
 

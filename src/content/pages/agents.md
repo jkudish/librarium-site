@@ -142,6 +142,16 @@ Install Librarium for me in Gemini CLI by following https://librarium.agentsy.bu
 gemini mcp add --scope user librarium librarium mcp
 ```
 
+**Grok Build** ([MCP docs](https://docs.x.ai/build/features/mcp-servers)): register user-wide from your terminal.
+
+```text
+Install Librarium for me in Grok Build by following https://librarium.agentsy.build/install.md
+```
+
+```bash
+grok mcp add librarium -- librarium mcp
+```
+
 **Hermes Agent** ([MCP docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp)): merge into `~/.hermes/config.yaml` for user-wide.
 
 ```text
@@ -153,6 +163,12 @@ mcp_servers:
   librarium:
     command: "librarium"
     args: ["mcp"]
+```
+
+**Muse** ([official page](https://muse.ai/)): Muse doesn't document a manual MCP config; let Muse follow [install.md](/install.md).
+
+```text
+Install Librarium for me in Muse by following https://librarium.agentsy.build/install.md
 ```
 
 **OpenClaw** ([MCP registry docs](https://docs.openclaw.ai/cli/mcp/registry)): register in OpenClaw's user configuration.

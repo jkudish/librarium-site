@@ -228,7 +228,8 @@ const agentPage = parse(agents, parseOptions);
 const agentHosts = [
   ["amp", "Amp"], ["claude-code", "Claude Code"], ["claude-desktop", "Claude Desktop"],
   ["codex", "Codex"], ["command-code", "Command Code"], ["cursor", "Cursor"],
-  ["devin", "Devin"], ["gemini-cli", "Gemini CLI"], ["hermes", "Hermes Agent"],
+  ["devin", "Devin"], ["gemini-cli", "Gemini CLI"], ["grok-build", "Grok Build"],
+  ["hermes", "Hermes Agent"], ["muse", "Muse"],
   ["openclaw", "OpenClaw"],
   ["opencode", "OpenCode"], ["pi", "Pi"], ["vscode", "VS Code (GitHub Copilot)"],
   ["zed", "Zed"],
@@ -264,7 +265,20 @@ for (const [id, host] of [...agentHosts, ["other", "my coding agent"]]) {
   const snippets = (section) => [...section.matchAll(/^```(bash|json|toml|yaml)\n([\s\S]*?)\n```/gm)].map((match) => match[2]);
   assert.deepEqual(panel.querySelectorAll("pre code").map((code) => code.textContent), snippets(mdSection), `${host} HTML/Markdown snippet drift`);
   // /agents shows one working registration; install.md retains scope/version alternatives.
-  assert.equal(snippets(mdSection).length, id === "other" ? 0 : 1, `${host} must show one manual registration`);
+  // Muse is explicitly prompt-only: no documented manual MCP configuration.
+  assert.equal(snippets(mdSection).length, ["other", "muse"].includes(id) ? 0 : 1, `${host} manual registration count drift`);
+  if (id === "muse") {
+    const limitation = "Muse doesn't document a manual MCP config";
+    assert(panel.textContent.includes(limitation) && mdSection.includes(limitation) && installSection.includes(limitation));
+    assert(!panel.textContent.includes("Or register it yourself"));
+    assert.equal(snippets(installSection).length, 0);
+    assert(installSection.includes('If Muse can register a local stdio server') && installSection.includes('"Any other MCP host"'));
+  }
+  if (id === "grok-build") {
+    assert.deepEqual(snippets(mdSection), ["grok mcp add librarium -- librarium mcp"]);
+    assert(snippets(installSection).includes('[mcp_servers.librarium]\ncommand = "librarium"\nargs = ["mcp"]'));
+    assert(installSection.includes("~/.grok/config.toml") && installSection.includes(".grok/config.toml") && installSection.includes("--scope project"));
+  }
   for (const snippet of snippets(mdSection)) assert(snippets(installSection).includes(snippet), `${host} install/Markdown snippet drift`);
   for (const link of panel.querySelectorAll('a[href^="https:"]')) {
     const href = link.getAttribute("href");

@@ -69,14 +69,14 @@ const links = [
   </div>
   <div id="page-format-control" class="fixed bottom-5 right-5 z-50">
     <nav aria-label="Page format" class="flex rounded border border-neutral-300 bg-white p-0.5 font-mono text-xs shadow-lg dark:shadow-none">
-      <a id="human-view" href={Astro.url.pathname} aria-current="page" class="group flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 uppercase tracking-wide text-neutral-600 hover:text-neutral-950 aria-[current=page]:bg-neutral-950 aria-[current=page]:text-white">
-        <span aria-hidden="true" class="flex size-3.5 shrink-0 items-center justify-center rounded-full border border-current p-0.5">
+      <a id="human-view" href={Astro.url.pathname} aria-current="page" class="group flex items-center gap-1.5 rounded-sm px-2 py-1 text-[11px] uppercase sm:px-2.5 sm:py-1.5 sm:text-xs tracking-wide text-neutral-600 hover:text-neutral-950 aria-[current=page]:bg-neutral-950 aria-[current=page]:text-white">
+        <span aria-hidden="true" class="flex size-3.5 shrink-0 max-sm:hidden items-center justify-center rounded-full border border-current p-0.5">
           <span class="block size-full rounded-full bg-current opacity-0 transition-opacity group-aria-[current=page]:opacity-100 motion-reduce:transition-none"></span>
         </span>
         Human
       </a>
-      <a id="machine-view" href={markdownHref} class="group flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 uppercase tracking-wide text-neutral-600 hover:text-neutral-950 aria-[current=page]:bg-neutral-950 aria-[current=page]:text-white">
-        <span aria-hidden="true" class="flex size-3.5 shrink-0 items-center justify-center rounded-full border border-current p-0.5">
+      <a id="machine-view" href={markdownHref} class="group flex items-center gap-1.5 rounded-sm px-2 py-1 text-[11px] uppercase sm:px-2.5 sm:py-1.5 sm:text-xs tracking-wide text-neutral-600 hover:text-neutral-950 aria-[current=page]:bg-neutral-950 aria-[current=page]:text-white">
+        <span aria-hidden="true" class="flex size-3.5 shrink-0 max-sm:hidden items-center justify-center rounded-full border border-current p-0.5">
           <span class="block size-full rounded-full bg-current opacity-0 transition-opacity group-aria-[current=page]:opacity-100 motion-reduce:transition-none"></span>
         </span>
         Machine
@@ -112,18 +112,6 @@ const links = [
 </section>
 
 <style>
-  #page-format-control {
-    transition: opacity 160ms ease, transform 160ms ease;
-  }
-  #page-format-control[data-scroll-hidden="true"] {
-    opacity: 0;
-    transform: translateY(1rem);
-    visibility: hidden;
-    pointer-events: none;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    #page-format-control { transition: none; }
-  }
   :global(html[data-page-view="machine"] header ~ *:not(#machine-panel)) {
     display: none !important;
   }
@@ -143,29 +131,15 @@ const links = [
   function positionFormatControl() {
     if (!formatControl || !viewport) return;
     const rightInset = Math.max(0, window.innerWidth - viewport.offsetLeft - viewport.width);
-    formatControl.style.right = `calc(${rightInset}px + 1.25rem + env(safe-area-inset-right))`;
+    const gap = window.innerWidth < 640 ? "0.75rem" : "1.25rem";
+    formatControl.style.right = `calc(${rightInset}px + ${gap} + env(safe-area-inset-right))`;
     const inset = Math.max(0, window.innerHeight - viewport.offsetTop - viewport.height);
-    formatControl.style.bottom = `calc(${inset}px + 1.25rem + env(safe-area-inset-bottom))`;
+    formatControl.style.bottom = `calc(${inset}px + ${gap} + env(safe-area-inset-bottom))`;
   }
   viewport?.addEventListener("resize", positionFormatControl);
   viewport?.addEventListener("scroll", positionFormatControl);
   window.addEventListener("resize", positionFormatControl);
   positionFormatControl();
-  let previousScroll = window.scrollY;
-  function updateFormatVisibility() {
-    const currentScroll = window.scrollY;
-    const nearEnd = currentScroll + window.innerHeight >= document.documentElement.scrollHeight - 160;
-    if (formatControl) {
-      const hide = currentScroll > 32 && !nearEnd && currentScroll > previousScroll;
-      if (currentScroll !== previousScroll || currentScroll <= 32 || nearEnd) {
-        formatControl.dataset.scrollHidden = String(hide);
-        formatControl.inert = hide;
-      }
-    }
-    previousScroll = currentScroll;
-  }
-  window.addEventListener("scroll", updateFormatVisibility, { passive: true });
-  window.addEventListener("resize", updateFormatVisibility);
   const human = document.querySelector<HTMLAnchorElement>("#human-view");
   const machine = document.querySelector<HTMLAnchorElement>("#machine-view");
   const panel = document.querySelector<HTMLElement>("#machine-panel");

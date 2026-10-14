@@ -3,17 +3,16 @@
 // fails the build if the page copy drifts from it. The full install, verify,
 // and MCP-registration steps live in src/data/install.md, served at /install.md.
 export const AGENT_SETUP_PROMPT =
-  "Install Librarium for me by following https://librarium.agentsy.build/install.md. Verify the connection offline, and keep my API keys out of chat and source control.";
+  "Install Librarium for me by following https://librarium.agentsy.build/install.md";
 
-// Labels and expansion copy are independent of the payload; a shorter Agent
-// label can be chosen without changing what Copy places on the clipboard.
+// The prompt stays one sentence; install.md carries the credential, approval,
+// and offline-verification rules the agent must follow.
 export const INSTALL_CHOICES = [
   { id: "agent", label: "Agent", text: AGENT_SETUP_PROMPT, href: "/docs/using-with-agents#mcp-server" },
   { id: "cli", label: "CLI", text: "npm install -g librarium", href: "/docs#install" },
   { id: "javascript", label: "JavaScript", text: "npm install librarium", href: "/docs#install" },
   { id: "laravel", label: "Laravel", text: "composer require jkudish/laravel-ai-librarium\nphp artisan vendor:publish --tag=librarium-config", href: "/docs/php#install" },
 ] as const;
-export const PROMPT_EXPAND_LABEL = "Show full prompt";
 
 /** The same prompt, naming the agent the user is pasting it into. */
 export const agentSetupPromptFor = (host: string): string =>

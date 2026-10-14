@@ -5,7 +5,8 @@ These are step-by-step instructions for a coding agent installing Librarium v2 a
 ## Ground rules
 
 - Do not run research or make paid provider calls without the user's approval. Offline discovery, `setup --check`, and research `--dry-run` are free; `setup --live` and real `research` are not.
-- Never ask the user to paste an API key into chat, and never write credentials into source control or into a project file that is committed.
+- Keep the user's API keys out of chat and source control. Never ask the user to paste a key into chat, never echo a key back, and never write credentials into a committed file. The user enters keys in the setup wizard or their own environment.
+- Verify the installation offline (step 6) before reporting success. Offline checks confirm configuration and credential presence without calling a provider.
 - Preserve the user's existing MCP servers. Add `librarium` alongside them; do not replace or reorder other entries.
 - Ask before changing anything outside the steps below.
 

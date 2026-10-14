@@ -254,12 +254,12 @@ for (const route of ["laravel.md", "docs/php/index.md", "install.md", "guides/fi
   assert(markdown.includes("composer require jkudish/laravel-ai-librarium") && markdown.includes("php artisan vendor:publish --tag=librarium-config"));
   assert(!markdown.includes("Composer does not inherit repositories") && !markdown.includes('"repositories"') && !markdown.includes("dev-spec-"));
 }
-assert(AGENT_SETUP_PROMPT.includes("https://librarium.agentsy.build/install.md") && AGENT_SETUP_PROMPT.includes("Verify the connection offline") && AGENT_SETUP_PROMPT.includes("API keys out of chat and source control"));
+assert.equal(AGENT_SETUP_PROMPT, "Install Librarium for me by following https://librarium.agentsy.build/install.md");
 assert(read("src/content/pages/stories/agentsy-report.md").includes("historical integration evidence"));
 
 const install = output("install.md");
 assert.equal(install, read("src/data/install.md"));
-for (const fact of ["22.12.0", "npm install -g librarium", "librarium research --help", "librarium setup --help", "paid provider calls without the user's approval", "never write credentials into source control", "Never ask the user to paste an API key into chat", "Preserve the user's existing MCP servers", "librarium setup --check", "list_sources"]) assert(install.includes(fact), `install.md missing ${fact}`);
+for (const fact of ["22.12.0", "npm install -g librarium", "librarium research --help", "librarium setup --help", "paid provider calls without the user's approval", "Keep the user's API keys out of chat and source control", "Never ask the user to paste a key into chat", "never write credentials into a committed file", "Verify the installation offline", "Preserve the user's existing MCP servers", "librarium setup --check", "list_sources"]) assert(install.includes(fact), `install.md missing ${fact}`);
 for (const route of ["/install.md", "/index.md", "/docs/all.md", "/docs/php/all.md", "/v1/all.md"]) assert(llms.includes(route));
 
 const home = output("index.html");
@@ -298,7 +298,8 @@ assert.deepEqual(example, RUN_EXAMPLE);
 assert.deepEqual(example, JSON.parse(read("node_modules/librarium-spec/fixtures/runs/valid/quick-done.json")));
 assert.equal(example.spec, "librarium.run/1");
 assert.equal(homePage.querySelector("#demo-query").textContent, RESEARCH_DEMO.query);
-assert.equal(homePage.querySelector("#demo-action").textContent, "Captured deep research");
+assert.equal(homePage.querySelector("#demo-action").textContent, "Deep research");
+assert(homeText.includes("Captured September 18, 2026"));
 const capture = JSON.parse(read("src/data/provider-display-fixture.json"));
 // Keep block boundaries and Markdown link destinations when comparing the
 // rendered report with its capture; DOM textContent retains neither.
@@ -330,7 +331,7 @@ for (const section of homeMarkdown.split(/\*\*Sources \(/).slice(1)) {
 for (const workflow of WORKFLOWS) assert(homeMarkdown.includes(`\`\`\`sh\n${workflow.command}\n\`\`\``));
 for (const choice of INSTALL_CHOICES) {
   const panel = homePage.querySelector(`#install-panel-${choice.id}`);
-  assert.equal(panel.querySelector("pre code").textContent, choice.text);
+  assert.equal(panel.querySelector(`#install-text-${choice.id}`).textContent, choice.text);
   assert.equal(panel.querySelector("button[data-code-copy]").getAttribute("data-copy"), choice.text);
   assert.equal(panel.querySelector("a").getAttribute("href"), choice.href);
   assert(homeMarkdown.includes(choice.text));

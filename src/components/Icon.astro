@@ -11,9 +11,11 @@ import moon from "@phosphor-icons/core/assets/regular/moon.svg?raw";
 import plus from "@phosphor-icons/core/assets/regular/plus.svg?raw";
 import sun from "@phosphor-icons/core/assets/regular/sun.svg?raw";
 import terminal from "@phosphor-icons/core/assets/regular/terminal.svg?raw";
+import terminalWindow from "@phosphor-icons/core/assets/regular/terminal-window.svg?raw";
+import robot from "@phosphor-icons/core/assets/regular/robot.svg?raw";
 import markdownLogo from "@phosphor-icons/core/assets/regular/markdown-logo.svg?raw";
 
-const icons = { arrowUpRight, arrowLeft, arrowRight, caretDown, copy, check, githubLogo, list, moon, plus, sun, terminal, markdownLogo };
+const icons = { arrowUpRight, arrowLeft, arrowRight, caretDown, copy, check, githubLogo, list, moon, plus, sun, terminal, terminalWindow, robot, markdownLogo };
 interface Props { name: keyof typeof icons; class?: string; }
 const { name, class: className } = Astro.props;
 // Trusted package assets only; keep Phosphor's paths and shared 256px viewBox.

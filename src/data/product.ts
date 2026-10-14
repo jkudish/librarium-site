@@ -17,7 +17,7 @@ export const FEATURED_SOURCES = SOURCES.map((source) => ({
   hint: "deep" in source.variants ? "Quick + deep" : "Quick",
 }));
 
-const engineLogos: Record<string, string> = { chatgpt: "openai", "gemini-app": "gemini" };
+const engineLogos: Record<string, string> = { chatgpt: "openai", "gemini-app": "gemini", "google-ai-mode": "google", "google-ai-overview": "google", copilot: "copilot" };
 export const FEATURED_ENGINES = ENGINES.map((engine) => ({
   id: engine.id,
   name: engine.name,
@@ -36,13 +36,13 @@ export const WORKFLOWS = [
   {
     id: "deep",
     title: "Investigate further.",
-    summary: "Longer reports from sources that support deep research. Start the work, keep the Run ID, and return to the results.",
+    summary: "For questions that need real digging. Deep research sources read widely and write full reports with citations, which can take several minutes. Start one, get on with your work, and pick it up later by its Run ID.",
     command: `librarium research "${exampleQuestion}" --deep`,
   },
   {
     id: "engines",
     title: "Check AI answer engines.",
-    summary: "See which tools AI answer engines name and which pages they cite. Choose engines by name; they run only when you select them.",
+    summary: "See how ChatGPT, Gemini, and Copilot answer questions about your product or category: what they recommend and which pages they cite. Engines never run by default; name the ones you want to check.",
     command: `librarium research "${exampleQuestion}" --only chatgpt,gemini-app,copilot`,
   },
 ] as const;

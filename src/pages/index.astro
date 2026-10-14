@@ -8,15 +8,15 @@ import Base from "../layouts/Base.astro";
 import EvidenceControls from "../components/EvidenceControls.astro";
 import { WORKFLOWS, FEATURED_SOURCES, FEATURED_ENGINES, SOURCE_COUNT, ENGINE_COUNT } from "../data/product";
 import { RESEARCH_DEMO, RUN_EXAMPLE, COMPARED_TOOLS, PROVIDER_COMPARISON, formatElapsed, renderCapturedMarkdown } from "../data/research-demo";
-import { INSTALL_CHOICES, PROMPT_EXPAND_LABEL } from "../data/setup-prompt";
+import { INSTALL_CHOICES } from "../data/setup-prompt";
 
 const providerMark = (logo: string) => `/providers/${logo}.${["you", "serpapi", "dataforseo"].includes(logo) ? "png" : "svg"}`;
 const capturedCommand = `librarium research "${RESEARCH_DEMO.query}" --deep`;
 const products = [
-  { title: "Agents & MCP", description: "Let your agent ask questions and read the answers through the bundled skill and MCP server.", href: "/agents", link: "Explore Agents & MCP" },
-  { title: "CLI", description: "Ask from your terminal, save a Run, and return to the evidence later.", href: "/cli", link: "Explore the CLI" },
-  { title: "JavaScript / TypeScript", description: "Build research into Node services, Workers, and your own execution flow with a typed client.", href: "/javascript", link: "Explore JavaScript" },
-  { title: "PHP / Laravel", description: "Use a native Laravel package with Artisan commands, encrypted queue jobs, and a testing fake.", href: "/laravel", link: "Explore Laravel" },
+  { title: "Agents & MCP", description: "Give Claude Code, Codex, Cursor, and other agents a research tool they can call. One setup prompt installs the CLI, MCP server, and agent skill.", href: "/agents", link: "Explore Agents & MCP" },
+  { title: "CLI", description: "Ask a question in your terminal and get every source's answer with its citations. Preview the cost first, and reopen any past Run.", href: "/cli", link: "Explore the CLI" },
+  { title: "JavaScript / TypeScript", description: "Add multi-source research to a Node app or Worker with a typed client. Choose sources, set a budget, and store Runs where you like.", href: "/javascript", link: "Explore JavaScript" },
+  { title: "PHP / Laravel", description: "Research from a Laravel facade, with queued deep research, Artisan commands, and a fake for your tests. Built on the official Laravel AI SDK.", href: "/laravel", link: "Explore Laravel" },
 ];
 ---
 
@@ -34,25 +34,29 @@ const products = [
               <h2 class="sr-only">Set up Librarium</h2>
               <div id="install-tabs" role="tablist" aria-label="Install Librarium" class="grid grid-cols-4 gap-1 rounded bg-neutral-100 p-1">
                 {INSTALL_CHOICES.map((choice, index) => (
-                  <button id={`install-tab-${choice.id}`} type="button" role="tab" aria-selected={index === 0 ? "true" : "false"} aria-controls={`install-panel-${choice.id}`} tabindex={index === 0 ? 0 : -1} class="min-h-11 cursor-pointer rounded px-1 text-sm font-medium text-neutral-600 aria-selected:bg-white aria-selected:text-neutral-950 aria-selected:shadow-sm hover:text-neutral-950 sm:text-base">{choice.label}</button>
+                  <button id={`install-tab-${choice.id}`} type="button" role="tab" aria-selected={index === 0 ? "true" : "false"} aria-controls={`install-panel-${choice.id}`} tabindex={index === 0 ? 0 : -1} class="install-tab flex min-h-11 cursor-pointer flex-col items-center justify-center gap-1 rounded px-1 py-1.5 text-sm font-medium text-neutral-600 aria-selected:bg-white aria-selected:text-neutral-950 aria-selected:shadow-sm hover:text-neutral-950 sm:flex-row sm:gap-2 sm:py-0 sm:text-base">
+                    {choice.id === "agent" && <Icon name="robot" class="size-5" />}
+                    {choice.id === "cli" && <Icon name="terminalWindow" class="size-5" />}
+                    {(choice.id === "javascript" || choice.id === "laravel") && <img src={`/languages/${choice.id}.svg`} alt="" width="18" height="18" class="size-[18px]" />}
+                    <span>{choice.label}</span>
+                  </button>
                 ))}
               </div>
               {INSTALL_CHOICES.map((choice, index) => (
                 <div id={`install-panel-${choice.id}`} role="tabpanel" aria-labelledby={`install-tab-${choice.id}`} tabindex="0" hidden={index !== 0} data-install-panel data-install-method={choice.id}>
-                  <div class:list={["mt-4 flex gap-3", choice.id === "agent" ? "items-start" : "flex-col items-start sm:flex-row"]}>
-                    <pre id={`install-text-${choice.id}`} class:list={["min-w-0 max-w-full flex-1 overflow-x-auto whitespace-pre-wrap break-words text-base/7 text-neutral-800 sm:text-sm/6", choice.id === "agent" ? "install-prompt font-sans" : "font-mono"]}><code>{choice.id === "agent" ? choice.text : <CommandText command={choice.text} />}</code></pre>
+                  <div class="mt-4 flex flex-col items-start gap-3 sm:flex-row">
+                    <pre id={`install-text-${choice.id}`} class:list={["min-w-0 max-w-full flex-1 overflow-x-auto text-base/7 text-neutral-800 sm:text-sm/6", choice.id === "agent" ? "whitespace-normal font-sans" : "whitespace-pre-wrap font-mono"]}>{choice.id === "agent" ? <Fragment>{choice.text.replace(/\/install\.md$/, "")}<wbr />{"/install.md"}</Fragment> : <code><CommandText command={choice.text} /></code>}</pre>
                     <button type="button" data-code-copy data-copy={choice.text} data-copy-state="idle" aria-label={`Copy ${choice.label === "Agent" ? "agent setup prompt" : `${choice.label} install commands`}`} class="group flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded border border-neutral-300 px-3 text-sm text-neutral-700 hover:bg-neutral-100">
                       <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]:block" /><span class="copy-label">Copy</span>
                     </button>
                   </div>
                   <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-base text-amber-800 sm:text-sm">
-                    {choice.id === "agent" && <button id="expand-prompt" type="button" aria-expanded="false" aria-controls="install-text-agent" class="min-h-10 cursor-pointer underline underline-offset-4 hover:text-amber-600">{PROMPT_EXPAND_LABEL}</button>}
                     <a href={choice.href} class="py-2 font-medium hover:text-amber-600">Full install guide →</a>
                   </div>
                 </div>
               ))}
               <p id="copy-status" role="status" class="mt-1 text-sm text-neutral-600 empty:sr-only"></p>
-              <noscript><style>[data-install-panel] { display: block !important; margin-top: 1rem; } .install-prompt { display: block !important; } #install-tabs { display: none; }</style></noscript>
+              <noscript><style>[data-install-panel] { display: block !important; margin-top: 1rem; } #install-tabs { display: none; }</style></noscript>
             </div>
             <p class="mt-4 text-base font-medium text-neutral-700 sm:text-sm"><a href="#research-example" class="py-3 hover:text-neutral-950">See an example <Icon name="arrowUpRight" class="inline-block" /></a></p>
           </div>
@@ -66,18 +70,22 @@ const products = [
                 ))}
               </div>
             </div>
-            <div class="border-b border-neutral-200 px-5 py-5 sm:px-7">
-              <p id="demo-action" class="text-base font-medium text-amber-800 sm:text-sm">Captured deep research</p>
+            <div class="px-5 pt-6 sm:px-7 sm:pt-8">
               <!-- The question is always complete, including during playback. -->
-              <p id="demo-query" class="mt-2 text-xl/7 font-medium break-words text-neutral-950">{RESEARCH_DEMO.query}</p>
-              <pre class="mt-3 whitespace-pre-wrap break-words font-mono text-sm/6 text-neutral-600"><code class="language-sh"><CommandText command={capturedCommand} /></code></pre>
-              <p class="mt-2 text-base/6 text-neutral-500 sm:text-sm/6">Captured September 18, 2026. Playback makes no provider calls; durations are historical, not a speed promise. Answers are excerpts of the captured reports.</p>
+              <div class="flex min-h-12 flex-col items-start gap-3 rounded border border-neutral-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <p id="demo-query" class="min-w-0 flex-1 font-mono text-base/6 break-words text-neutral-800">{RESEARCH_DEMO.query}</p>
+                <span id="demo-action" class="shrink-0 rounded-sm border border-neutral-300 bg-white px-2.5 py-1 font-mono text-xs tracking-wide text-neutral-700 uppercase">Deep research</span>
+              </div>
+              <p class="mt-3 text-sm/6 text-neutral-500">Captured September 18, 2026<span class="max-sm:hidden"> with <code class="font-mono"><CommandText command={capturedCommand} /></code></span>. Playback makes no provider calls; durations are historical.</p>
             </div>
-            <div id="example-readable" role="tabpanel" aria-labelledby="example-readable-tab" tabindex="0" class="px-5 py-6 sm:px-7">
-              <div id="demo-providers" role="tablist" aria-label="Provider results" class="flex min-h-11 gap-2 overflow-x-auto pb-1">
+            <div id="example-readable" role="tabpanel" aria-labelledby="example-readable-tab" tabindex="0" class="px-5 pt-5 pb-6 sm:px-7 sm:pb-8">
+              <div id="demo-providers" role="tablist" aria-label="Provider results" class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 {RESEARCH_DEMO.results.map((result, index) => (
-                  <button type="button" role="tab" id={`demo-tab-${index}`} data-demo-tab={index} data-demo-state="done" aria-selected={index === 0 ? "true" : "false"} aria-controls={`demo-panel-${index}`} tabindex={index === 0 ? 0 : -1} title={result.provider} class="demo-tab flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded border px-3 py-2 text-sm">
-                    <img src={providerMark(result.logo)} alt="" width="20" height="20" class="size-5 shrink-0" /><span class="whitespace-nowrap font-medium">{result.shortName}</span><span class="demo-dot size-1.5 shrink-0 rounded-full" aria-hidden="true"></span><span class="min-w-[7ch] text-left font-mono tabular-nums" data-demo-status>{formatElapsed(result.elapsedSeconds)}</span>
+                  <button type="button" role="tab" id={`demo-tab-${index}`} data-demo-tab={index} data-demo-state="done" aria-selected={index === 0 ? "true" : "false"} aria-controls={`demo-panel-${index}`} tabindex={index === 0 ? 0 : -1} title={result.provider} class="demo-tab flex min-h-10 min-w-0 shrink-0 cursor-pointer flex-wrap items-center gap-x-2 gap-y-0.5 rounded border px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
+                    <img src={providerMark(result.logo)} alt="" width="20" height="20" class="logo-mono size-5 shrink-0 grayscale" />
+                    <span class="whitespace-nowrap font-medium">{result.shortName}</span>
+                    <span class="demo-dot size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                    <span class="demo-tab-status min-w-[7ch] text-left font-mono text-xs" data-demo-status>{formatElapsed(result.elapsedSeconds)}</span>
                   </button>
                 ))}
               </div>
@@ -86,7 +94,7 @@ const products = [
                 <div id={`demo-panel-${index}`} role="tabpanel" aria-labelledby={`demo-tab-${index}`} data-demo-panel={index} data-demo-final={formatElapsed(result.elapsedSeconds)} tabindex="0" hidden={index !== 0} class="mt-4">
                   <h3 class="sr-only" data-demo-heading>{result.provider}</h3>
                   <div class="demo-pending hidden border-t border-neutral-200 py-8 text-neutral-500" aria-hidden="true">Playing captured answer…</div>
-                  <div data-demo-body class="max-h-[30rem] overflow-y-auto border-t border-neutral-200 pt-4 sm:max-h-[26rem]">
+                  <div data-demo-body class="min-h-[26rem] border-t border-neutral-200 pt-4">
                     {result.title && <h4 class="max-w-[60ch] text-lg font-medium text-pretty text-neutral-950">{result.title}</h4>}
                     <p class="mt-1 text-sm/6 text-neutral-500">{result.modelLabel}</p>
                     <div class="demo-report mt-3 text-base/7 text-neutral-600 sm:text-sm/6" set:html={renderCapturedMarkdown(result.displayContent)} />
@@ -141,7 +149,7 @@ const products = [
                   <h3 class="mt-3 text-2xl font-medium tracking-tight text-neutral-950">{workflow.title}</h3>
                   <p class="mt-3 max-w-[65ch] text-base/7 text-pretty text-neutral-600">{workflow.summary}</p>
                 </div>
-                <CodePanel label={`${workflow.id === "engines" ? "AI answer engines" : workflow.id} command`} code={workflow.command} lang="bash" />
+                <CodePanel label={`${workflow.id === "engines" ? "AI answer engines" : workflow.id} command`} code={workflow.command} lang="bash" wrap />
               </li>
             ))}
           </ul>
@@ -197,7 +205,7 @@ const products = [
               </article>
             ))}
           </div>
-          <p class="mt-8 max-w-[75ch] text-base/7 text-neutral-400 sm:text-sm/6">The CLI and JavaScript library share one implementation. Laravel is a separate native package. Both return a Run with answers and citations; provider support and execution behavior can differ.</p>
+          <p class="mt-8 max-w-[75ch] text-base/7 text-neutral-400 sm:text-sm/6">The CLI and JavaScript library share one implementation, and the Laravel package is native PHP. Both follow the open <a href="https://github.com/jkudish/librarium-spec" class="text-amber-200 underline underline-offset-4 hover:text-white">Librarium spec</a>: the same source names and options, and the same Run format, so a Run folder saved by one can be read by the other. Source coverage differs slightly between languages.</p>
         </div>
       </section>
 
@@ -216,8 +224,6 @@ const products = [
 </Base>
 
 <style>
-  .install-prompt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-  .install-prompt[data-expanded="true"] { display: block; }
   .provider-logo { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 3rem; height: 3rem; border: 1px solid var(--color-neutral-200); border-radius: var(--radius-md); background: var(--color-neutral-100); }
   .demo-report { overflow-x: auto; }
   .demo-report :global(a) { text-decoration: underline; text-underline-offset: 2px; color: inherit; }
@@ -228,24 +234,57 @@ const products = [
   .demo-report :global(th), .demo-report :global(td), .compare-table :is(th, td) { border-bottom: 1px solid var(--color-neutral-200); padding: 0.75rem; vertical-align: top; }
   .compare-table th { font-weight: 500; }
   .compare-table td { text-align: center; }
-  .demo-tab { border-color: var(--color-neutral-200); color: var(--color-neutral-700); }
+  .demo-tab { border-color: var(--color-neutral-200); background: #fff; color: var(--color-neutral-700); }
   .demo-tab:hover { background: var(--color-neutral-100); }
-  .demo-tab[aria-selected="true"] { border-color: var(--color-amber-700); background: var(--color-amber-50); color: var(--color-amber-800); }
+  .demo-tab-status { color: var(--color-neutral-500); }
+  .demo-tab[aria-selected="true"] {
+    border-color: var(--color-amber-700);
+    background: var(--color-amber-50);
+    box-shadow: inset 0 0 0 1px var(--color-amber-700);
+    color: var(--color-neutral-950);
+  }
+  .demo-tab[aria-selected="true"] .demo-tab-status { color: var(--color-amber-800); }
   .demo-dot { background: var(--color-neutral-300); }
-  .demo-tab[aria-selected="true"] .demo-dot { background: var(--color-amber-600); }
+  .demo-tab[data-demo-state="queued"] .demo-dot { background: transparent; box-shadow: inset 0 0 0 1px var(--color-neutral-400); }
+  .demo-tab[data-demo-state="running"] .demo-dot,
+  .demo-tab[aria-selected="true"] .demo-dot { background: var(--color-amber-600); box-shadow: none; }
   [data-demo-panel]:is([data-demo-state="running"], [data-demo-state="queued"]) .demo-pending { display: block; }
-  :global(:root[data-theme="dark"]) .demo-tab[aria-selected="true"] { border-color: #efc184; background: #2b2720; color: #efc184; }
+  :global(:root[data-theme="dark"]) .demo-tab { border-color: #3e403a; background: #191a19; color: #c9cbc4; }
+  :global(:root[data-theme="dark"]) .demo-tab:hover { background: #33352f; }
+  :global(:root[data-theme="dark"]) .demo-tab-status { color: #adb0a6; }
+  :global(:root[data-theme="dark"]) .demo-tab[aria-selected="true"] { border-color: #efc184; background: #2b2720; box-shadow: inset 0 0 0 1px #efc184; color: #f2f2ed; }
+  :global(:root[data-theme="dark"]) .demo-tab[aria-selected="true"] .demo-tab-status { color: #efc184; }
+  :global(:root[data-theme="dark"]) .demo-dot { background: #5a5d55; }
+  :global(:root[data-theme="dark"]) .demo-tab[data-demo-state="queued"] .demo-dot { background: transparent; box-shadow: inset 0 0 0 1px #6d7068; }
+  :global(:root[data-theme="dark"]) .demo-tab[data-demo-state="running"] .demo-dot,
+  :global(:root[data-theme="dark"]) .demo-tab[aria-selected="true"] .demo-dot { background: #efc184; box-shadow: none; }
   @media (prefers-color-scheme: dark) {
-    :global(:root:not([data-theme])) .demo-tab[aria-selected="true"] { border-color: #efc184; background: #2b2720; color: #efc184; }
+    :global(:root:not([data-theme])) .demo-tab { border-color: #3e403a; background: #191a19; color: #c9cbc4; }
+    :global(:root:not([data-theme])) .demo-tab:hover { background: #33352f; }
+    :global(:root:not([data-theme])) .demo-tab-status { color: #adb0a6; }
+    :global(:root:not([data-theme])) .demo-tab[aria-selected="true"] { border-color: #efc184; background: #2b2720; box-shadow: inset 0 0 0 1px #efc184; color: #f2f2ed; }
+    :global(:root:not([data-theme])) .demo-tab[aria-selected="true"] .demo-tab-status { color: #efc184; }
+    :global(:root:not([data-theme])) .demo-dot { background: #5a5d55; }
+    :global(:root:not([data-theme])) .demo-tab[data-demo-state="queued"] .demo-dot { background: transparent; box-shadow: inset 0 0 0 1px #6d7068; }
+    :global(:root:not([data-theme])) .demo-tab[data-demo-state="running"] .demo-dot,
+    :global(:root:not([data-theme])) .demo-tab[aria-selected="true"] .demo-dot { background: #efc184; box-shadow: none; }
+  }
+  /* Demo engine affordances; under reduced motion the engine never runs and
+     the server-rendered static output stands, so none of these activate. */
+  /* The selected install segment is a raised dark pill, not the light-mode white. */
+  :global(:root[data-theme="dark"]) .install-tab[aria-selected="true"] { background: #3a3c36; color: #f7f7f2; box-shadow: inset 0 0 0 1px #5a5d54; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) .install-tab[aria-selected="true"] { background: #3a3c36; color: #f7f7f2; box-shadow: inset 0 0 0 1px #5a5d54; }
   }
   @media (prefers-reduced-motion: no-preference) {
     #research-example[data-demo-playing="true"] [data-demo-state="done"] :global([data-demo-word]) { animation: demo-word 320ms ease-out both; animation-delay: calc(var(--demo-word, 0) * var(--demo-word-ms, 30ms)); }
     @keyframes demo-word { from { opacity: 0; } to { opacity: 1; } }
+    .demo-tab[data-demo-state="running"] .demo-dot { animation: demo-pulse 1s ease-in-out infinite alternate; }
+    @keyframes demo-pulse { from { opacity: 1; } to { opacity: 0.35; } }
   }
 </style>
 
 <script>
-  import { PROMPT_EXPAND_LABEL } from "../data/setup-prompt";
   import { initResearchDemo } from "../scripts/research-demo";
   initResearchDemo();
 
@@ -281,12 +320,4 @@ const products = [
     }
     if (list) list.hidden = false;
   }
-  const expand = document.getElementById("expand-prompt");
-  const prompt = document.getElementById("install-text-agent");
-  expand?.addEventListener("click", () => {
-    const expanded = expand.getAttribute("aria-expanded") !== "true";
-    expand.setAttribute("aria-expanded", String(expanded));
-    if (prompt) prompt.dataset.expanded = String(expanded);
-    expand.textContent = expanded ? "Show less" : PROMPT_EXPAND_LABEL;
-  });
 </script>

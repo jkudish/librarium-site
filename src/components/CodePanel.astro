@@ -14,12 +14,14 @@ interface Props {
   copyLabel?: string;
   /** Scroll long examples inside the panel instead of growing the page. */
   scroll?: boolean;
+  /** Wrap long lines at spaces (never inside a token) instead of scrolling sideways. */
+  wrap?: boolean;
   class?: string;
 }
-const { label, code, lang, copy, copyLabel = "Copy", scroll = false, class: className } = Astro.props;
+const { label, code, lang, copy, copyLabel = "Copy", scroll = false, wrap = false, class: className } = Astro.props;
 ---
 
-<div class:list={["code-panel min-w-0", scroll && "code-panel-scroll", className]}>
+<div class:list={["code-panel min-w-0", scroll && "code-panel-scroll", wrap && "code-panel-wrap", className]}>
   <div class="code-toolbar">
     <span>{label}</span>
     <button type="button" class="copy-btn group" data-code-copy data-copy={copy ?? code} data-copy-state="idle" aria-label={`Copy ${label}`}>
@@ -70,6 +72,7 @@ const { label, code, lang, copy, copyLabel = "Copy", scroll = false, class: clas
     line-height: 1.4rem;
   }
   .code-panel-scroll :global(pre) { max-height: 28rem; overflow-y: auto; }
+  .code-panel-wrap :global(pre) { white-space: pre-wrap; overflow-wrap: normal; word-break: normal; }
   .code-panel :global(pre:focus-visible) { outline: 2px solid var(--color-amber-300, #ffd230); outline-offset: -2px; }
   :global(:root[data-theme="dark"]) .code-panel { box-shadow: 0 0 0 1px #3e403a; }
   @media (prefers-color-scheme: dark) {

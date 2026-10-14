@@ -75,20 +75,29 @@ export function initResearchDemo(): void {
   for (const panel of panels) {
     const body = bodyOf(panel);
     if (!body) continue;
-    const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
-    const nodes: Text[] = [];
+    // Reveal text and inline icons (citation arrows) in document order so an
+    // icon never appears before the words it follows. Each word span carries
+    // its trailing space, so link underlines also appear with their words.
+    const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, {
+      acceptNode: (node) =>
+        node instanceof SVGElement && !(node instanceof SVGSVGElement)
+          ? NodeFilter.FILTER_REJECT
+          : NodeFilter.FILTER_ACCEPT,
+    });
+    const nodes: (Text | SVGSVGElement)[] = [];
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-      if ((node.textContent ?? "").trim() !== "") nodes.push(node as Text);
+      if (node instanceof SVGSVGElement) nodes.push(node);
+      else if (node.nodeType === Node.TEXT_NODE && (node.textContent ?? "").trim() !== "") nodes.push(node as Text);
     }
     let index = 0;
     for (const node of nodes) {
+      if (node instanceof SVGSVGElement) {
+        node.dataset.demoWord = "";
+        node.style.setProperty("--demo-word", String(index++));
+        continue;
+      }
       const fragment = document.createDocumentFragment();
-      for (const part of (node.textContent ?? "").split(/(\s+)/)) {
-        if (part === "") continue;
-        if (/^\s+$/.test(part)) {
-          fragment.append(part);
-          continue;
-        }
+      for (const part of (node.textContent ?? "").match(/\s*\S+\s*/g) ?? []) {
         const word = document.createElement("span");
         word.dataset.demoWord = "";
         word.style.setProperty("--demo-word", String(index++));

@@ -5,23 +5,34 @@ const { href } = Astro.props;
 ---
 
 <button hidden type="button" data-copy-page={href} data-copy-state="idle" class="group inline-flex cursor-pointer items-center gap-2 py-2 text-base text-neutral-500 hover:text-amber-700 data-[copy-state=success]:text-amber-800 sm:text-sm" aria-live="polite"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 group-data-[copy-state=success]:block" /><span data-copy-label>Copy page as markdown</span></button>
+<a hidden data-copy-page-fallback href={href} class="inline-flex items-center py-2 text-base text-amber-700 underline underline-offset-4 hover:text-amber-600 sm:text-sm">Open Markdown</a>
 
 <script>
   for (const button of document.querySelectorAll<HTMLButtonElement>("[data-copy-page]")) {
     const label = button.querySelector<HTMLElement>("[data-copy-label]")!;
     let reset: ReturnType<typeof setTimeout>;
     button.hidden = false;
+    const fallback = button.nextElementSibling instanceof HTMLAnchorElement && button.nextElementSibling.matches("[data-copy-page-fallback]") ? button.nextElementSibling : null;
     button.addEventListener("click", async () => {
       clearTimeout(reset);
-      try {
-        const response = await fetch(button.dataset.copyPage!);
+      // Start the clipboard write inside the click gesture; Safari rejects a
+      // write that only begins after the fetch resolves.
+      const markdown = fetch(button.dataset.copyPage!).then((response) => {
         if (!response.ok) throw new Error("Markdown unavailable");
-        await navigator.clipboard.writeText(await response.text());
+        return response.text();
+      });
+      try {
+        if (typeof ClipboardItem !== "undefined" && navigator.clipboard.write) {
+          await navigator.clipboard.write([new ClipboardItem({ "text/plain": markdown.then((text) => new Blob([text], { type: "text/plain" })) })]);
+        } else {
+          await navigator.clipboard.writeText(await markdown);
+        }
         button.dataset.copyState = "success";
         label.textContent = "Copied";
       } catch {
         button.dataset.copyState = "error";
         label.textContent = "Could not copy Markdown";
+        if (fallback) fallback.hidden = false;
       }
       reset = setTimeout(() => {
         button.dataset.copyState = "idle";

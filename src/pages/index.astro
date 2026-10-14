@@ -39,8 +39,8 @@ const products = [
               </div>
               {INSTALL_CHOICES.map((choice, index) => (
                 <div id={`install-panel-${choice.id}`} role="tabpanel" aria-labelledby={`install-tab-${choice.id}`} tabindex="0" hidden={index !== 0} data-install-panel data-install-method={choice.id}>
-                  <div class="mt-4 flex items-start gap-3">
-                    <pre id={`install-text-${choice.id}`} class:list={["min-w-0 flex-1 whitespace-pre-wrap break-words text-base/7 text-neutral-800 sm:text-sm/6", choice.id === "agent" ? "install-prompt font-sans" : "font-mono"]}><code>{choice.text}</code></pre>
+                  <div class:list={["mt-4 flex gap-3", choice.id === "agent" ? "items-start" : "flex-col items-start sm:flex-row"]}>
+                    <pre id={`install-text-${choice.id}`} class:list={["min-w-0 max-w-full flex-1 overflow-x-auto whitespace-pre-wrap break-words text-base/7 text-neutral-800 sm:text-sm/6", choice.id === "agent" ? "install-prompt font-sans" : "font-mono"]}><code>{choice.id === "agent" ? choice.text : <CommandText command={choice.text} />}</code></pre>
                     <button type="button" data-code-copy data-copy={choice.text} data-copy-state="idle" aria-label={`Copy ${choice.label === "Agent" ? "agent setup prompt" : `${choice.label} install commands`}`} class="group flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded border border-neutral-300 px-3 text-sm text-neutral-700 hover:bg-neutral-100">
                       <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-800 group-data-[copy-state=success]:block" /><span class="copy-label">Copy</span>
                     </button>
@@ -242,9 +242,6 @@ const products = [
     #research-example[data-demo-playing="true"] [data-demo-state="done"] :global([data-demo-word]) { animation: demo-word 320ms ease-out both; animation-delay: calc(var(--demo-word, 0) * var(--demo-word-ms, 30ms)); }
     @keyframes demo-word { from { opacity: 0; } to { opacity: 1; } }
   }
-  /* Shared CodePanel preserves its toolbar/copy behavior; homepage commands
-     wrap instead of requiring a horizontal scroll on narrow screens. */
-  [data-workflow] :global(pre), #example-json :global(pre) { white-space: pre-wrap; overflow-wrap: anywhere; }
 </style>
 
 <script>

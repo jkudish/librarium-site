@@ -20,14 +20,16 @@ interface Props {
   redirect?: string;
 }
 
+const productDescription = "Query search engines, AI answer engines, and deep-research APIs from one interface, and keep every answer with its citations.";
 const {
   title,
-  description = "Librarium fans one research query out to search engines, AI-grounded answers, and deep-research APIs in parallel, then merges everything into one structured output.",
+  description = productDescription,
   robots,
   includeSoftwareMetadata = true,
   bodyClass = "bg-white",
   redirect,
 } = Astro.props;
+const metaDescription = Astro.url.pathname === "/" ? productDescription : description;
 
 const canonical = redirect
   ? new URL(redirect, Astro.site ?? Astro.url).href
@@ -37,28 +39,28 @@ const canonical = redirect
 // Agents fetching HTML can discover the page's Markdown twin (the static
 // assets host cannot negotiate on Accept: text/markdown).
 const markdownAlternate = new URL(markdownHrefFor(Astro.url.pathname), Astro.site ?? Astro.url).href;
-const productDescription = "The meta harness for research queries.";
 
 const jsonLd = JSON.stringify([
   ...(includeSoftwareMetadata ? [{
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "librarium",
+    name: "Librarium",
     description: productDescription,
     applicationCategory: "DeveloperApplication",
     operatingSystem: "macOS, Linux, Windows",
     softwareVersion: PRODUCT_VERSION,
-    runtimePlatform: `Node.js ${NODE_FLOOR}+`,
+    runtimePlatform: [`JavaScript / npm / Node.js ${NODE_FLOOR}+`, "PHP 8.4+ / Laravel 13.30+"],
+    codeRepository: ["https://github.com/jkudish/librarium", "https://github.com/jkudish/laravel-ai-librarium"],
     featureList: [
-      `${SOURCE_COUNT} research sources and ${ENGINE_COUNT} named-only engines`,
+      `${SOURCE_COUNT} research sources and ${ENGINE_COUNT} AI answer engines`,
       "Quick and deep variants with stored Runs",
       "CLI, three-tool MCP server, agent skill, and runtime-neutral core",
-      "Source, provider, variant, model, and collector provenance",
+      "Source, variant, model, and AI answer engine provenance",
     ],
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     license: "https://github.com/jkudish/librarium/blob/main/LICENSE",
     url: Astro.site?.href,
-    sameAs: ["https://github.com/jkudish/librarium"],
+    sameAs: ["https://github.com/jkudish/librarium", "https://github.com/jkudish/laravel-ai-librarium"],
     author: { "@type": "Person", name: "Joey Kudish", url: "https://jkudish.com" },
   }] : []),
   {
@@ -94,13 +96,13 @@ const jsonLd = JSON.stringify([
       })();
     </script>
     <title>{title}</title>
-    <meta name="description" content={description} />
+    <meta name="description" content={metaDescription} />
     {redirect && <meta http-equiv="refresh" content={`0; url=${redirect}`} />}
     {robots && <meta name="robots" content={robots} />}
     {canonical && <link rel="canonical" href={canonical} />}
     <link rel="alternate" type="text/markdown" href={markdownAlternate} title="Markdown" />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={metaDescription} />
     <meta property="og:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -110,14 +112,18 @@ const jsonLd = JSON.stringify([
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />
     <meta name="twitter:image:alt" content="Librarium: the meta harness for research queries" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <script is:inline type="application/ld+json" set:html={jsonLd} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="icon" href="/icon-512.png" type="image/png" sizes="512x512" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#C4501E" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -125,7 +131,7 @@ const jsonLd = JSON.stringify([
       rel="stylesheet"
     />
   </head>
-  <body class:list={["font-sans text-neutral-600", bodyClass]}>
+  <body class:list={["font-sans text-neutral-600 pb-[calc(5rem+env(safe-area-inset-bottom))]", bodyClass]}>
     <div class="isolate">
       <slot />
     </div>

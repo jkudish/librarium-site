@@ -5,6 +5,8 @@ import { markdownHrefFor } from "../lib/markdown-href";
 interface Props { wide?: boolean; }
 const { wide = false } = Astro.props;
 const markdownHref = markdownHrefFor(Astro.url.pathname);
+const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+const isActive = (href: string) => !href.includes("#") && (pathname === href || pathname.startsWith(`${href}/`));
 const links = [
   { href: "/agents", label: "Agents & MCP" },
   { href: "/cli", label: "CLI" },
@@ -25,7 +27,7 @@ const links = [
     <nav class="flex items-center gap-x-7" aria-label="Primary navigation">
       <div class="flex items-center gap-x-5 text-sm text-neutral-600 max-lg:hidden lg:gap-x-7">
         {links.map((link) => (
-          <a href={link.href} class="hover:text-neutral-950">{link.label}</a>
+          <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined} class="hover:text-neutral-950 aria-[current=page]:font-medium aria-[current=page]:text-amber-800 aria-[current=page]:underline aria-[current=page]:underline-offset-4">{link.label}</a>
         ))}
       </div>
       <a
@@ -61,11 +63,11 @@ const links = [
   <div id="mobile-menu" hidden class="border-t border-neutral-950/10 lg:hidden!">
     <nav class="mx-auto flex max-w-6xl flex-col gap-y-1 px-4 py-3" aria-label="Mobile navigation">
       {links.map((link) => (
-        <a href={link.href} class="rounded-sm px-2 py-2 text-base text-neutral-700 hover:bg-neutral-950/3 hover:text-neutral-950">{link.label}</a>
+        <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined} class="rounded-sm px-2 py-2 text-base text-neutral-700 hover:bg-neutral-950/3 hover:text-neutral-950 aria-[current=page]:bg-amber-50 aria-[current=page]:font-medium aria-[current=page]:text-amber-800">{link.label}</a>
       ))}
     </nav>
   </div>
-  <div id="page-format-control" class="fixed bottom-5 left-1/2 z-50 -translate-x-1/2">
+  <div id="page-format-control" class="fixed bottom-5 right-5 z-50">
     <nav aria-label="Page format" class="flex rounded border border-neutral-300 bg-white p-0.5 font-mono text-xs shadow-lg dark:shadow-none">
       <a id="human-view" href={Astro.url.pathname} aria-current="page" class="group flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 uppercase tracking-wide text-neutral-600 hover:text-neutral-950 aria-[current=page]:bg-neutral-950 aria-[current=page]:text-white">
         <span aria-hidden="true" class="flex size-3.5 shrink-0 items-center justify-center rounded-full border border-current p-0.5">
@@ -86,7 +88,7 @@ const links = [
 <section id="machine-panel" hidden class="mx-auto max-w-4xl px-6 pt-10 pb-28 lg:px-8" aria-labelledby="machine-heading">
   <div class="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
     <div class="min-w-0">
-      <h1 id="machine-heading" class="flex items-center gap-2 font-mono text-lg font-medium text-neutral-950"><Icon name="markdownLogo" class="size-5 text-neutral-500" />Markdown</h1>
+      <p id="machine-heading" class="flex items-center gap-2 font-mono text-lg font-medium text-neutral-950"><Icon name="markdownLogo" class="size-5 text-neutral-500" />Markdown</p>
       <p class="mt-1 font-mono text-xs text-neutral-500"><span class="break-all">{markdownHref}</span><span id="machine-meta"></span></p>
     </div>
     <div class="flex shrink-0 items-center gap-2">
@@ -110,6 +112,18 @@ const links = [
 </section>
 
 <style>
+  #page-format-control {
+    transition: opacity 160ms ease, transform 160ms ease;
+  }
+  #page-format-control[data-scroll-hidden="true"] {
+    opacity: 0;
+    transform: translateY(1rem);
+    visibility: hidden;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #page-format-control { transition: none; }
+  }
   :global(html[data-page-view="machine"] header ~ *:not(#machine-panel)) {
     display: none !important;
   }
@@ -128,7 +142,8 @@ const links = [
   const viewport = window.visualViewport;
   function positionFormatControl() {
     if (!formatControl || !viewport) return;
-    formatControl.style.left = `${viewport.offsetLeft + viewport.width / 2}px`;
+    const rightInset = Math.max(0, window.innerWidth - viewport.offsetLeft - viewport.width);
+    formatControl.style.right = `calc(${rightInset}px + 1.25rem + env(safe-area-inset-right))`;
     const inset = Math.max(0, window.innerHeight - viewport.offsetTop - viewport.height);
     formatControl.style.bottom = `calc(${inset}px + 1.25rem + env(safe-area-inset-bottom))`;
   }
@@ -136,6 +151,21 @@ const links = [
   viewport?.addEventListener("scroll", positionFormatControl);
   window.addEventListener("resize", positionFormatControl);
   positionFormatControl();
+  let previousScroll = window.scrollY;
+  function updateFormatVisibility() {
+    const currentScroll = window.scrollY;
+    const nearEnd = currentScroll + window.innerHeight >= document.documentElement.scrollHeight - 160;
+    if (formatControl) {
+      const hide = currentScroll > 32 && !nearEnd && currentScroll > previousScroll;
+      if (currentScroll !== previousScroll || currentScroll <= 32 || nearEnd) {
+        formatControl.dataset.scrollHidden = String(hide);
+        formatControl.inert = hide;
+      }
+    }
+    previousScroll = currentScroll;
+  }
+  window.addEventListener("scroll", updateFormatVisibility, { passive: true });
+  window.addEventListener("resize", updateFormatVisibility);
   const human = document.querySelector<HTMLAnchorElement>("#human-view");
   const machine = document.querySelector<HTMLAnchorElement>("#machine-view");
   const panel = document.querySelector<HTMLElement>("#machine-panel");

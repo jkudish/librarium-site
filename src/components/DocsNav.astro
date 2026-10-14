@@ -13,14 +13,10 @@ interface Props {
 const { navItems, currentSlug } = Astro.props;
 const groups = [
   { title: "Getting started", slugs: ["", "configuration", "upgrading-to-v2"] },
-  { title: "Research", slugs: ["providers", "groups-and-modes", "commands"] },
+  { title: "Research", slugs: ["providers", "groups-and-modes", "costs-and-limits", "commands"] },
   { title: "Build with Librarium", slugs: ["library", "using-with-agents", "custom-providers", "testing"] },
   { title: "Reference", slugs: ["request-and-retry", "output-formats", "maintenance"] },
 ];
-const labels: Record<string, string> = {
-  "": "Introduction",
-  "library": "Library API", "using-with-agents": "Agent workflows", "request-and-retry": "Requests & retries",
-};
 ---
 
 {groups.map((group) => (
@@ -43,7 +39,7 @@ const labels: Record<string, string> = {
             ]}
             aria-current={isActive ? "page" : undefined}
           >
-            {labels[item.slug] ?? item.title}
+            {item.title}
           </a>
         </li>
       );

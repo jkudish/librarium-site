@@ -58,16 +58,26 @@ const next = navItems[currentIndex + 1];
 
   <div class="mx-auto max-w-[1440px] px-6 lg:px-10">
     <!-- Mobile nav -->
-    <nav aria-label="Documentation controls" class="space-y-4 border-b border-neutral-950/10 py-6 lg:hidden">
-      <DocsLanguagePicker language={language} jsHref={v2Href} phpHref={phpHref} />
-      {language === "js" && <DocsVersionPicker id="docs-version-mobile" version={version} v1Href={v1Href} v2Href={v2Href} />}
-      <details class="group border-t border-neutral-950/10 pt-4">
+    <nav aria-label="Documentation controls" class="border-b border-neutral-950/10 py-3 lg:hidden">
+      <details class="group">
         <summary
-          class="flex cursor-pointer list-none items-center justify-between py-2 text-base font-medium text-neutral-950"
+          class="flex cursor-pointer list-none items-center justify-between py-2 text-sm font-medium text-neutral-950"
         >
-          <span>Browse documentation</span>
-          <Icon name="caretDown" class="size-4 text-neutral-600 transition-transform group-open:rotate-180" />
+          <span>{language === "php" ? "PHP & Laravel" : `JavaScript · ${version}`} docs</span>
+          <span class="flex items-center gap-2 text-neutral-500">Browse <Icon name="caretDown" class="size-4 transition-transform group-open:rotate-180 motion-reduce:transition-none" /></span>
         </summary>
+        <div class="mt-4 space-y-4">
+          <DocsLanguagePicker language={language} jsHref={v2Href} phpHref={phpHref} />
+          {language === "js" && <DocsVersionPicker id="docs-version-mobile" version={version} v1Href={v1Href} v2Href={v2Href} />}
+          <div class="flex gap-5 text-sm">
+            <a href={`${root}/all.md`} class="hover:text-amber-700">All {language === "php" ? "PHP" : "JavaScript"} docs</a>
+            <a href="/llms.txt" class="hover:text-amber-700">Agent index</a>
+          </div>
+          <nav aria-label="On this page">
+            <p class="mb-3 text-sm font-medium text-neutral-950">On this page</p>
+            <DocsOutline headings={headings} />
+          </nav>
+        </div>
         <nav class="mt-5 space-y-6" aria-label="Documentation pages">
           <DocsNav navItems={navItems} currentSlug={currentSlug} />
         </nav>
@@ -101,12 +111,11 @@ const next = navItems[currentIndex + 1];
         </h1>
         {description && <p class="mt-5 max-w-[60ch] text-base/7 text-pretty text-neutral-500">{description}</p>}
         <div class="mt-6 mb-10 flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-neutral-200 pb-6 text-base text-neutral-500 sm:text-sm">
-          <a href={markdownHref} class="underline decoration-neutral-300 underline-offset-4 hover:text-amber-700">View as Markdown</a>
-          <button hidden data-copy-page={markdownHref} class="cursor-pointer hover:text-amber-700" aria-live="polite">Copy page</button>
-          <a href={`${root}/all.md`} class="hover:text-amber-700">All {language === "php" ? "PHP" : "JavaScript"} docs</a>
-          <a href="/llms.txt" class="hover:text-amber-700">Agent index</a>
+          <button hidden data-copy-page={markdownHref} data-copy-state="idle" class="group inline-flex cursor-pointer items-center gap-2 hover:text-amber-700 data-[copy-state=success]:text-amber-800" aria-live="polite"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 group-data-[copy-state=success]:block" /><span data-copy-label>Copy page as markdown</span></button>
+          <a href={`${root}/all.md`} class="hidden hover:text-amber-700 lg:inline">All {language === "php" ? "PHP" : "JavaScript"} docs</a>
+          <a href="/llms.txt" class="hidden hover:text-amber-700 lg:inline">Agent index</a>
         </div>
-        <details class="mb-10 border-b border-neutral-200 pb-5 xl:hidden">
+        <details class="mb-10 hidden border-b border-neutral-200 pb-5 lg:block xl:hidden">
           <summary class="cursor-pointer text-base font-medium text-neutral-950">On this page</summary>
           <nav class="mt-4" aria-label="On this page"><DocsOutline headings={headings} /></nav>
         </details>
@@ -132,14 +141,17 @@ const next = navItems[currentIndex + 1];
 
 <script>
   async function copy(button: HTMLButtonElement, text: string) {
-    const label = button.textContent;
+    const labelElement = button.querySelector<HTMLElement>("[data-copy-label]") ?? button;
+    const label = labelElement.textContent;
     try {
       await navigator.clipboard.writeText(text);
-      button.textContent = "Copied";
+      labelElement.textContent = "Copied";
+      button.dataset.copyState = "success";
     } catch {
-      button.textContent = "Select text to copy";
+      labelElement.textContent = "Clipboard unavailable";
+      button.dataset.copyState = "error";
     }
-    setTimeout(() => { button.textContent = label; }, 2000);
+    setTimeout(() => { labelElement.textContent = label; button.dataset.copyState = "idle"; }, 2000);
   }
   for (const pre of document.querySelectorAll<HTMLPreElement>("[data-docs-prose] pre")) {
     const code = pre.querySelector("code");
@@ -168,7 +180,11 @@ const next = navItems[currentIndex + 1];
         if (!response.ok) throw new Error("Markdown unavailable");
         await copy(pageCopy, await response.text());
       } catch {
-        pageCopy.textContent = "Use Markdown link";
+        const label = pageCopy.querySelector<HTMLElement>("[data-copy-label]");
+        if (label) {
+          label.textContent = "Markdown unavailable";
+          setTimeout(() => { label.textContent = "Copy page as markdown"; }, 2000);
+        }
       }
     });
   }

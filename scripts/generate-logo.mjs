@@ -39,9 +39,9 @@ const svg = (fill, id, extra = '') => {
   const { defs, out } = body(fill, id);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"${extra}><defs>${defs}</defs>${out}</svg>\n`;
 };
-const icon = (bg, fill, id) => {
+const icon = (bg, fill, id, rounded = true) => {
   const { defs, out } = body(fill, id);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs>${defs}</defs><rect width="100" height="100" rx="22" fill="${bg}"/><g transform="translate(18 18) scale(0.64)">${out}</g></svg>\n`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs>${defs}</defs><rect width="100" height="100"${rounded ? ' rx="22"' : ''} fill="${bg}"/><g transform="translate(18 18) scale(0.64)">${out}</g></svg>\n`;
 };
 
 writeFileSync(`${OUT}/brand/librarium-mark.svg`, svg('currentColor', 'lm'));
@@ -49,16 +49,12 @@ writeFileSync(`${OUT}/brand/librarium-mark-ink.svg`, svg('#0B0B0B', 'lm'));
 writeFileSync(`${OUT}/brand/librarium-mark-paper.svg`, svg('#F9F8F5', 'lm'));
 writeFileSync(`${OUT}/brand/librarium-mark-orange.svg`, svg('#C4501E', 'lm'));
 writeFileSync(`${OUT}/brand/librarium-icon-orange.svg`, icon('#C4501E', '#FFFFFF', 'li'));
+writeFileSync(`${OUT}/brand/librarium-icon-orange-square.svg`, icon('#C4501E', '#FFFFFF', 'li', false));
 writeFileSync(`${OUT}/brand/librarium-icon-ink.svg`, icon('#0B0B0B', '#F9F8F5', 'li'));
 
-// Adaptive favicon: ink on light browser chrome, paper on dark.
-{
-  const { defs, out } = body('#0B0B0B', 'fav');
-  writeFileSync(
-    `${OUT}/favicon.svg`,
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.m polygon{fill:#0B0B0B}@media (prefers-color-scheme:dark){.m polygon{fill:#F2F2ED}}</style><defs>${defs}</defs><g class="m">${out}</g></svg>\n`,
-  );
-}
+// Browser chrome uses the rounded orange tile; operating systems round the
+// full-bleed square app variant themselves.
+writeFileSync(`${OUT}/favicon.svg`, icon('#C4501E', '#FFFFFF', 'li'));
 
 // Astro component: inherits text colour; mask ids are namespaced by a prop so
 // several instances can share a page.

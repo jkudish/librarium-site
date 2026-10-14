@@ -52,9 +52,20 @@ for (const path of htmlFiles) {
   const html = readFileSync(path, "utf8");
   const page = parse(html, parseOptions);
   const label = relative(dist, path);
+  assert.equal(page.querySelectorAll("h1").length, 1, `${label} must have exactly one H1, including hidden panels`);
+  assert.equal(page.querySelectorAll("footer h1, footer h2, footer h3, footer h4, footer h5, footer h6").length, 0, `${label} footer must not add outline headings`);
+  const pageCopy = page.querySelector("[data-copy-page], [data-copy-article]");
+  if (pageCopy) {
+    assert.equal(pageCopy.querySelector("[data-copy-label]")?.textContent, "Copy page as markdown");
+    assert(pageCopy.querySelector('[data-icon="copy"]') && pageCopy.querySelector('[data-icon="check"]'));
+  }
   for (const selector of ["title", 'meta[name="description"]', 'link[rel="canonical"]', 'meta[property="og:image"]', 'meta[name="twitter:card"]', 'script[type="application/ld+json"]']) {
     assert(page.querySelector(selector), `${label} missing ${selector}`);
   }
+  for (const href of ["/favicon.svg", "/favicon.png", "/apple-touch-icon.png", "/icon-192.png", "/icon-512.png", "/site.webmanifest"]) {
+    assert(page.querySelector(`head link[href="${href}"]`), `${label} missing icon/manifest link ${href}`);
+  }
+  assert.equal(page.querySelector('meta[name="theme-color"]')?.getAttribute("content"), "#C4501E");
   const machine = page.querySelector("#machine-view")?.getAttribute("href");
   assert(machine?.endsWith(".md") && existsSync(outputPath(machine)), `${label} missing Markdown destination`);
   const legacy = label.startsWith("v1/");
@@ -76,6 +87,23 @@ for (const path of htmlFiles) {
 }
 for (const file of ["llms.txt", "llms-full.txt", "robots.txt", "sitemap-index.xml", "og.jpg", "demo.gif"]) assert(existsSync(join(dist, file)), `missing ${file}`);
 assert(!output("sitemap-0.xml").includes("/v1"));
+assert(!output("sitemap-0.xml").includes("/cli-mcp"));
+for (const [file, size] of [["favicon.png", 64], ["apple-touch-icon.png", 180], ["icon-192.png", 192], ["icon-512.png", 512]]) {
+  const png = readFileSync(join(dist, file));
+  assert.equal(png.subarray(0, 8).toString("hex"), "89504e470d0a1a0a", `${file} must be PNG`);
+  assert.equal(png.readUInt32BE(16), size, `${file} width`);
+  assert.equal(png.readUInt32BE(20), size, `${file} height`);
+}
+assert.equal(output("favicon.svg"), output("brand/librarium-icon-orange.svg"));
+assert(!output("brand/librarium-icon-orange-square.svg").includes('rx="22"'));
+const manifest = JSON.parse(output("site.webmanifest"));
+assert.equal(manifest.name, "Librarium");
+assert.equal(manifest.theme_color, "#C4501E");
+assert.equal(manifest.background_color, "#F9F8F5");
+assert.deepEqual(manifest.icons, [
+  { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
+  { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
+]);
 
 const llms = output("llms.txt");
 const full = output("llms-full.txt");
@@ -176,6 +204,17 @@ for (const route of ["/install.md", "/index.md", "/docs/all.md", "/docs/php/all.
 const home = output("index.html");
 const homePage = parse(home, parseOptions);
 const homeText = homePage.textContent;
+const productDescription = "Query search engines, AI answer engines, and deep-research APIs from one interface, and keep every answer with its citations.";
+for (const selector of ['meta[name="description"]', 'meta[property="og:description"]', 'meta[name="twitter:description"]']) {
+  assert.equal(homePage.querySelector(selector)?.getAttribute("content"), productDescription);
+}
+const software = JSON.parse(homePage.querySelector('script[type="application/ld+json"]').textContent).find((entry) => entry["@type"] === "SoftwareApplication");
+assert.equal(software.description, productDescription);
+assert.equal(software.offers.price, "0");
+assert.equal(software.offers.priceCurrency, "USD");
+assert.equal(software.softwareVersion, "2.0.0");
+assert.deepEqual(software.runtimePlatform, ["JavaScript / npm / Node.js 22.12.0+", "PHP 8.4+ / Laravel 13.30+"]);
+assert.deepEqual(software.sameAs, ["https://github.com/jkudish/librarium", "https://github.com/jkudish/laravel-ai-librarium"]);
 const homeMarkdown = output("index.md");
 assert(full.includes(homeMarkdown.trim()));
 for (const fact of ["Give your agent more than one source.", "composer require jkudish/laravel-ai-librarium", "Amalfi Coast"]) assert(home.includes(fact) && homeMarkdown.includes(fact));

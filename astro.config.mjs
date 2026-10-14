@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   site: "https://librarium.agentsy.build",
-  integrations: [sitemap({ filter: (page) => !new URL(page).pathname.startsWith("/v1") })],
+  integrations: [sitemap({ filter: (page) => !new URL(page).pathname.startsWith("/v1") && new URL(page).pathname.replace(/\/$/, "") !== "/cli-mcp" })],
   vite: {
     plugins: [tailwindcss()],
   },

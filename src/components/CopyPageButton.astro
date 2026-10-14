@@ -1,0 +1,32 @@
+---
+import Icon from "./Icon.astro";
+interface Props { href: string; }
+const { href } = Astro.props;
+---
+
+<button hidden type="button" data-copy-page={href} data-copy-state="idle" class="group inline-flex cursor-pointer items-center gap-2 py-2 text-base text-neutral-500 hover:text-amber-700 data-[copy-state=success]:text-amber-800 sm:text-sm" aria-live="polite"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 group-data-[copy-state=success]:block" /><span data-copy-label>Copy page as markdown</span></button>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>("[data-copy-page]")) {
+    const label = button.querySelector<HTMLElement>("[data-copy-label]")!;
+    let reset: ReturnType<typeof setTimeout>;
+    button.hidden = false;
+    button.addEventListener("click", async () => {
+      clearTimeout(reset);
+      try {
+        const response = await fetch(button.dataset.copyPage!);
+        if (!response.ok) throw new Error("Markdown unavailable");
+        await navigator.clipboard.writeText(await response.text());
+        button.dataset.copyState = "success";
+        label.textContent = "Copied";
+      } catch {
+        button.dataset.copyState = "error";
+        label.textContent = "Could not copy Markdown";
+      }
+      reset = setTimeout(() => {
+        button.dataset.copyState = "idle";
+        label.textContent = "Copy page as markdown";
+      }, 2000);
+    });
+  }
+</script>

@@ -23,7 +23,7 @@ librarium research "Lisbon or Porto without a car?" --only exa --json
 
 The MCP server and the agent skill ship with that install. [Getting started](/docs#install) covers installation, and the [CLI page](/cli) covers terminal use.
 
-## How you'd use it
+## Ask a question. Your agent does the reading.
 
 Requires Node.js 22.12+. Ask your agent a research question in plain language and approve how far it may go: a quick pass, then a deep pass if coverage is thin, inside the budget your Librarium configuration sets. A typical session over MCP:
 
@@ -33,7 +33,7 @@ Requires Node.js 22.12+. Ask your agent a research question in plain language an
 4. `get_run` with that id to resume pending work, or with `source` to read an answer and citations. Follow `cursor` until null; concatenate JSON-text chunks before parsing.
 5. If more research is needed, select deep research. Preserve source identity and uncertainty in the answer.
 
-## Choose your agent below
+## Set it up once.
 
 Each host below has its own setup prompt and manual registration instructions. Choose your host, then paste its prompt into your coding agent to install and verify Librarium.
 
@@ -154,7 +154,9 @@ Use `research` with `dry_run: true` for an offline preview.
 - **Preview a source selection first:** discover sources, preview an API integration's authentication, rate limits, and retry guidance, then read complete results with `get_run`.
 - **See how AI answer engines describe you:** compare ChatGPT, Gemini, and Copilot recommendations for luxury villa rentals on the Amalfi Coast, keeping each engine's findings separate.
 
-## Ask for the whole answer
+## Read everything. Then check it.
+
+### Ask for the whole answer
 
 The first response to `research` is an index, not the findings. A good agent follows the pages until it has everything: completed results stay readable while slower providers finish. Tell it to. The [coding-agent guide](/guides/agent-research) walks a real engineering question through this loop.
 

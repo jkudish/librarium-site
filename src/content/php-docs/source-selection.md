@@ -1,5 +1,5 @@
 ---
-title: Depth, sources, and groups
+title: Source selection
 description: Choose quick or deep research, select AI answer engines by name, and save source lists.
 order: 5
 ---

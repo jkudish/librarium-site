@@ -6,6 +6,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import Icon from "../components/Icon.astro";
 import ProductHero from "../components/ProductHero.astro";
+import CopyPageButton from "../components/CopyPageButton.astro";
 import CodePanel from "../components/CodePanel.astro";
 import ResearchSteps from "../components/ResearchSteps.astro";
 import { inline } from "../lib/inline-markup";
@@ -91,7 +92,7 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
 
     <section id="setup" class="scroll-mt-6 border-t border-neutral-200 bg-[#faf9f6] py-16 sm:py-24" aria-labelledby="setup-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <h2 id="setup-heading" class={sectionHeading}>Set it up once.</h2>
+        <h2 id="setup-heading" class={sectionHeading}>Set up once.</h2>
         <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">The CLI supplies source connections, stored Runs, cost tracking, and the tools your agent uses too.</p>
         <ul class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
           {setup.map((card) => (
@@ -138,7 +139,7 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
         <div class="mt-12 flex flex-wrap items-center gap-x-7 gap-y-4">
           <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
           <a href="/agents" class="inline-flex items-center gap-2 py-2 text-base font-medium text-neutral-700 hover:text-neutral-950 sm:text-sm">Connect your agent</a>
-          <a href={markdownHref} class="inline-flex items-center gap-2 py-2 text-base text-neutral-600 hover:text-amber-700 sm:text-sm"><Icon name="markdownLogo" class="size-5" /> Read as Markdown</a>
+          <CopyPageButton href={markdownHref} />
         </div>
       </div>
     </section>

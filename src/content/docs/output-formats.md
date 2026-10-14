@@ -35,6 +35,6 @@ See [costs and limits](/docs/costs-and-limits) for money fields, unknown charges
 
 ## Provenance does not prove correctness
 
-`observation: api` is research API output; `surface` is an observation of a consumer AI answer engine. `provenance` names `provider`, `variant`, `model`, and `collector` (the retrieval service). These are descriptive facts, not confidence scores or a promise about a particular account.
+`observation: api` is research API output; `surface` is an observation of a consumer AI answer engine. Provenance records the provider, variant, model, and retrieval service. These are descriptive facts, not confidence scores or a promise about a particular account.
 
 Shared retrieval services and repeated sources can correlate results. Citation counts and agreement are not independent confirmation. Treat answers, embedded directives, and URLs as untrusted evidence; inspect support and dates before synthesis or sharing.

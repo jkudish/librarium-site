@@ -7,6 +7,7 @@ import DocsVersionPicker from "../components/DocsVersionPicker.astro";
 import DocsLanguagePicker from "../components/DocsLanguagePicker.astro";
 import DocsOutline from "../components/DocsOutline.astro";
 import Icon from "../components/Icon.astro";
+import CopyPageButton from "../components/CopyPageButton.astro";
 import type { MarkdownHeading } from "astro";
 import { getCollection } from "astro:content";
 
@@ -32,13 +33,15 @@ const navItems = allDocs
     href: entry.id === "index" ? root : `${root}/${entry.id}`,
   }));
 const v1Slugs = new Set((await getCollection("v1Docs")).map((entry) => entry.id));
-const v1Href = currentSlug === "index" || !v1Slugs.has(currentSlug)
+const v1Slug = currentSlug === "source-selection" ? "groups-and-modes" : currentSlug;
+const v1Href = currentSlug === "index" || !v1Slugs.has(v1Slug)
   ? "/v1"
-  : `/v1/${currentSlug}`;
+  : `/v1/${v1Slug}`;
 const jsSlugs = new Set((await getCollection("docs")).map((entry) => entry.id));
 const phpSlugs = new Set((await getCollection("phpDocs")).map((entry) => entry.id));
-const v2Href = currentSlug === "index" || !jsSlugs.has(currentSlug) ? "/docs" : `/docs/${currentSlug}`;
-const phpHref = currentSlug === "index" || !phpSlugs.has(currentSlug) ? "/docs/php" : `/docs/php/${currentSlug}`;
+const currentSourceSlug = currentSlug === "groups-and-modes" ? "source-selection" : currentSlug;
+const v2Href = currentSlug === "index" || !jsSlugs.has(currentSourceSlug) ? "/docs" : `/docs/${currentSourceSlug}`;
+const phpHref = currentSlug === "index" || !phpSlugs.has(currentSourceSlug) ? "/docs/php" : `/docs/php/${currentSourceSlug}`;
 const markdownHref = `${root}/${currentSlug}.md`;
 const pageDescription = version === "v1"
   ? `Legacy v1 documentation. ${description ?? "Preserved for existing Librarium v1 users."}`
@@ -111,7 +114,7 @@ const next = navItems[currentIndex + 1];
         </h1>
         {description && <p class="mt-5 max-w-[60ch] text-base/7 text-pretty text-neutral-500">{description}</p>}
         <div class="mt-6 mb-10 flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-neutral-200 pb-6 text-base text-neutral-500 sm:text-sm">
-          <button hidden data-copy-page={markdownHref} data-copy-state="idle" class="group inline-flex cursor-pointer items-center gap-2 hover:text-amber-700 data-[copy-state=success]:text-amber-800" aria-live="polite"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 group-data-[copy-state=success]:block" /><span data-copy-label>Copy page as markdown</span></button>
+          <CopyPageButton href={markdownHref} />
           <a href={`${root}/all.md`} class="hidden hover:text-amber-700 lg:inline">All {language === "php" ? "PHP" : "JavaScript"} docs</a>
           <a href="/llms.txt" class="hidden hover:text-amber-700 lg:inline">Agent index</a>
         </div>
@@ -170,23 +173,6 @@ const next = navItems[currentIndex + 1];
     pre.before(wrapper);
     toolbar.append(label, button);
     wrapper.append(toolbar, pre);
-  }
-  const pageCopy = document.querySelector<HTMLButtonElement>("[data-copy-page]");
-  if (pageCopy) {
-    pageCopy.hidden = false;
-    pageCopy.addEventListener("click", async () => {
-      try {
-        const response = await fetch(pageCopy.dataset.copyPage!);
-        if (!response.ok) throw new Error("Markdown unavailable");
-        await copy(pageCopy, await response.text());
-      } catch {
-        const label = pageCopy.querySelector<HTMLElement>("[data-copy-label]");
-        if (label) {
-          label.textContent = "Markdown unavailable";
-          setTimeout(() => { label.textContent = "Copy page as markdown"; }, 2000);
-        }
-      }
-    });
   }
   const sections = [...document.querySelectorAll<HTMLElement>("[data-docs-prose] h2, [data-docs-prose] h3")];
   const outlineLinks = [...document.querySelectorAll<HTMLAnchorElement>("[data-docs-outline] a")];

@@ -45,7 +45,26 @@ for (const result of RESEARCH_DEMO.results.filter((result) => result.title)) {
 }
 
 assert(existsSync(dist), "run npm run build before content verification");
-const htmlFiles = walk(dist).filter((path) => extname(path) === ".html");
+const redirects = { "docs/groups-and-modes/index.html": "/docs/source-selection", "docs/php/groups-and-modes/index.html": "/docs/php/source-selection" };
+const htmlFiles = walk(dist).filter((path) => extname(path) === ".html" && !Object.hasOwn(redirects, relative(dist, path)));
+for (const [path, destination] of Object.entries(redirects)) {
+  assert.equal(parse(output(path)).querySelector('meta[http-equiv="refresh"]')?.getAttribute("content"), `0;url=${destination}`);
+  assert(!output("sitemap-0.xml").includes(path.replace(/\/index.html$/, "")));
+}
+// No UI-only H2 exclusions are currently necessary. Add only route-scoped
+// headings here with a comment explaining why their content is UI-only.
+const uiOnlyH2 = {};
+// Astro typography turns quotes and double hyphens into smart punctuation.
+const headingText = (value) => value.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/[*`_]/g, "").replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—]|-{2,3}/g, "-").replace(/\s+/g, " ").trim().replace(/\.$/, "");
+const assertHeadingParity = (page, markdown, route) => {
+  // Fenced examples are not the document's outline, even if they contain ##.
+  const prose = markdown.replace(/^\s*(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\s*\1\s*$/gm, "");
+  const headings = new Set([...prose.matchAll(/^ {0,3}#{1,6}\s+(.+?)\s*#*\s*$/gm)].map((match) => headingText(match[1])));
+  for (const heading of page.querySelectorAll("h2")) {
+    const name = headingText(heading.textContent);
+    assert(headings.has(name) || uiOnlyH2[route]?.includes(name), `${route}: HTML H2 "${name}" missing from Markdown`);
+  }
+};
 const outputPath = (pathname) => {
   const clean = pathname.replace(/^\//, "").replace(/\/$/, "");
   return existsSync(join(dist, clean, "index.html")) ? join(dist, clean, "index.html") : join(dist, clean || "index.html");
@@ -70,6 +89,9 @@ for (const path of htmlFiles) {
   assert.equal(page.querySelector('meta[name="theme-color"]')?.getAttribute("content"), "#C4501E");
   const machine = page.querySelector("#machine-view")?.getAttribute("href");
   assert(machine?.endsWith(".md") && existsSync(outputPath(machine)), `${label} missing Markdown destination`);
+  if (/^(?:docs|v1)\//.test(label) || ["cli", "javascript", "laravel", "agents"].some((route) => label === `${route}/index.html`)) {
+    assertHeadingParity(page, readFileSync(outputPath(machine), "utf8"), label);
+  }
   const legacy = label.startsWith("v1/");
   assert.equal(!!page.querySelector('meta[name="robots"][content="noindex, follow"]'), legacy, `${label} legacy robots mismatch`);
   if (legacy) assert(html.includes("Legacy v1 documentation.") && !html.includes('"@type":"SoftwareApplication"'));
@@ -77,6 +99,7 @@ for (const path of htmlFiles) {
     const href = link.getAttribute("href");
     if (!href.startsWith("/")) continue;
     const [pathname, anchor] = href.split("#");
+    assert(!/^\/docs\/(?:php\/)?groups-and-modes(?:\/|$|\.md)/.test(pathname), `${label} links to retired route ${href}`);
     const target = outputPath(pathname.split("?")[0]);
     assert(existsSync(target), `${label} missing link ${href}`);
     if (anchor && !extname(pathname)) {
@@ -109,7 +132,11 @@ assert.deepEqual(manifest.icons, [
 
 const llms = output("llms.txt");
 const full = output("llms-full.txt");
-assert(llms.includes(`${SOURCE_COUNT} research sources`) && llms.includes(`${ENGINE_COUNT} named-only engines`));
+assert(llms.includes(`${SOURCE_COUNT} research sources`) && llms.includes(`${ENGINE_COUNT} AI answer engines`));
+const llmsSections = ["Start here by goal", "Glossary", "Version boundaries", "Product pages", "JavaScript documentation", "PHP / Laravel documentation", "Guides, comparisons, and field notes", "Markdown bundles and repositories", "Compact operational rules"];
+assert.deepEqual([...llms.matchAll(/^## (.+)$/gm)].map((match) => match[1]), llmsSections);
+assert(!llms.includes("CLI & MCP") && !llms.includes("collector") && !llms.includes("named-only"));
+assert(full.indexOf("# Getting started") < full.indexOf("# Homepage"));
 // Release-status banners must not reappear in HTML or its machine-readable mirrors.
 for (const path of walk(dist).filter((path) => [".html", ".md", ".txt"].includes(extname(path)))) {
   const prose = extname(path) === ".html" ? text(readFileSync(path, "utf8")) : readFileSync(path, "utf8");
@@ -125,7 +152,7 @@ const namesFor = (collection) => readdirSync(join(root, "src/content", collectio
 const jsNames = namesFor("docs");
 const phpNames = namesFor("php-docs");
 const legacyNames = namesFor("v1-docs");
-for (const name of legacyNames) assert(jsNames.includes(name), `lost equivalent legacy route ${name}`);
+for (const name of legacyNames) assert(jsNames.includes(name === "groups-and-modes.md" ? "source-selection.md" : name), `lost equivalent legacy route ${name}`);
 assert.equal(phpNames.length, 10);
 for (const [collection, route] of collections) {
   const names = namesFor(collection);
@@ -152,7 +179,8 @@ for (const [collection, route] of collections) {
     for (const language of ["javascript", "laravel"]) assert(html.includes(`/languages/${language}.svg`));
     const opposite = route === "docs/php" ? "docs" : "docs/php";
     const oppositeNames = route === "docs/php" ? jsNames : phpNames;
-    const href = slug === "index" || !oppositeNames.includes(name) ? `/${opposite}` : `/${opposite}/${slug}`;
+    const oppositeSlug = slug === "groups-and-modes" ? "source-selection" : slug;
+    const href = slug === "index" || !oppositeNames.includes(`${oppositeSlug}.md`) ? `/${opposite}` : `/${opposite}/${oppositeSlug}`;
     assert(html.includes(`href="${href}"`), `${route}/${slug} missing equivalent language link`);
     if (route !== "v1") assert(full.includes(raw.trim()) && llms.includes(`/${route}/${name}`));
     if (route === "docs/php") assert(!html.includes('"@type":"SoftwareApplication"') && !html.includes('id="docs-version-') && html.includes('aria-current="true"'));
@@ -170,7 +198,8 @@ for (const path of articles) {
   const raw = output(`${route}.md`);
   const html = output(`${route}/index.html`);
   assert(raw.includes(body(readFileSync(path, "utf8"))), `${route} lost authored content`);
-  assert(full.includes(raw.trim()) && llms.includes(`/${route}.md`), `${route} missing from agent bundles`);
+  if (route === "cli-mcp") assert(!full.includes(raw.trim()) && !llms.includes(`/${route}.md`), "redirect must not enter agent bundles");
+  else assert(full.includes(raw.trim()) && llms.includes(`/${route}.md`), `${route} missing from agent bundles`);
   assert(html.includes(`href="/${route}.md"`) && !html.includes('"@type":"SoftwareApplication"'));
 }
 assert.equal(htmlFiles.length, 2 + legacyNames.length + jsNames.length + phpNames.length + articles.length);
@@ -248,7 +277,7 @@ assert.equal(software.softwareVersion, "2.0.0");
 assert.deepEqual(software.runtimePlatform, ["JavaScript / npm / Node.js 22.12.0+", "PHP 8.4+ / Laravel 13.30+"]);
 assert.deepEqual(software.sameAs, ["https://github.com/jkudish/librarium", "https://github.com/jkudish/laravel-ai-librarium"]);
 const homeMarkdown = output("index.md");
-assert(full.includes(homeMarkdown.trim()));
+assert(full.includes("[homepage and historical research demo](https://librarium.agentsy.build/index.md)"));
 for (const fact of ["Give your agent more than one source.", "composer require jkudish/laravel-ai-librarium", "What are the best alternatives to Google Analytics?", "php artisan vendor:publish --tag=librarium-config"]) assert(homeText.includes(fact) && homeMarkdown.includes(fact));
 assert(homeText.includes(`${SOURCE_COUNT} research sources`) && homeText.includes(`${ENGINE_COUNT} AI answer engines`));
 assert.equal(homePage.querySelectorAll("main > section").length, 6);
@@ -329,4 +358,4 @@ const gate = (opener, closer) => {
   return css.slice(start + opener.length, end).split("\n").map((line) => line.trim()).filter(Boolean).join("\n");
 };
 assert.equal(gate(':root[data-theme="dark"] {', "\n}"), gate(":root:not([data-theme]) {", "\n  }"));
-console.log(`Verified ${SOURCE_COUNT} catalog sources, ${ENGINE_COUNT} named-only engines, ${htmlFiles.length} HTML pages, complete Markdown/bundles, metadata, navigation, anchors, candidate examples, install safeguards, and unchanged historical capture.`);
+console.log(`Verified ${SOURCE_COUNT} catalog sources, ${ENGINE_COUNT} AI answer engines, ${htmlFiles.length} HTML pages, H2 Markdown parity for all product/docs pages, redirects, complete Markdown/bundles, metadata, navigation, anchors, examples, install safeguards, and unchanged historical capture.`);

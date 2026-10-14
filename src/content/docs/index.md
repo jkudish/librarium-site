@@ -48,4 +48,4 @@ librarium show <run-id> --wait --json
 
 Deep tasks keep recovery details in private Run state. `show` picks up the same research rather than submitting again. Quick work usually finishes in the calling process, though some retrieval services support recovery. CLI `--no-wait` requires `--deep`, except for a dry run. Ctrl-C prints a recovery command so you can check the Run later.
 
-Continue with [commands](/docs/commands), [source selection](/docs/groups-and-modes), or [agent integration](/docs/using-with-agents).
+Continue with [commands](/docs/commands), [source selection](/docs/source-selection), or [agent integration](/docs/using-with-agents).

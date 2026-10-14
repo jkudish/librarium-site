@@ -4,7 +4,11 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   site: "https://librarium.agentsy.build",
-  integrations: [sitemap({ filter: (page) => !new URL(page).pathname.startsWith("/v1") && new URL(page).pathname.replace(/\/$/, "") !== "/cli-mcp" })],
+  redirects: {
+    "/docs/groups-and-modes": "/docs/source-selection",
+    "/docs/php/groups-and-modes": "/docs/php/source-selection",
+  },
+  integrations: [sitemap({ filter: (page) => !new URL(page).pathname.startsWith("/v1") && !["/cli-mcp", "/docs/groups-and-modes", "/docs/php/groups-and-modes"].includes(new URL(page).pathname.replace(/\/$/, "")) })],
   vite: {
     plugins: [tailwindcss()],
   },

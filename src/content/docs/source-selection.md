@@ -1,5 +1,5 @@
 ---
-title: Depth, sources, and groups
+title: Source selection
 description: Choose quick or deep variants, name engines explicitly, and save source lists.
 order: 6
 ---

@@ -38,6 +38,6 @@ The root is Node-oriented. Use `librarium/core` for Workers or browsers; it does
 
 JSON uses snake_case, JS options camelCase. The Run records `spec`, `id`, `question`, `depth`, `status`, timestamps, `cost`, `results`, `skipped`, and `notices`. Run status is `planned`, `running`, `done`, `partial`, or `failed`; results have `queued`, `running`, `done`, or `failed`.
 
-Each result keeps a `source`, `observation`, Markdown `answer`, citations, cost, and provenance (`provider`, `variant`, `model`, `collector`). Errors are safe `{ code, message, retryable }` values. See [costs and limits](/docs/costs-and-limits) for money fields and unknown charges.
+Each result keeps a `source`, `observation`, Markdown `answer`, citations, cost, and provenance (provider, variant, model, and retrieval service). Errors are safe `{ code, message, retryable }` values. See [costs and limits](/docs/costs-and-limits) for money fields and unknown charges.
 
 The shared `librarium-spec` package owns schemas, source catalog, and semantic fixtures. It does not make private runtimes or task handles interchangeable. See [output and evidence](/docs/output-formats).

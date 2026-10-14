@@ -28,7 +28,11 @@ A source is set up when it has a resolved key and `enabled` is not false. Enviro
 
 Examples: `grok.search` selects `web`, `x`, or `both`; `brave.results` selects `answer` or `search`; `parallel.processor` defaults to `pro`; `openai.effort` configures reasoning effort. A call can override options through `{ options: { parallel: { processor: 'ultra' } } }`.
 
-`google.collector` is `searchapi`, `serpapi`, or `serpbase`. AI answer-engine retrieval is configured separately and may be overridden per engine. Availability differs by language and retrieval service; check local discovery before selection.
+Google's retrieval service is SearchAPI, SerpAPI, or Serpbase. Set it with the source option below; AI answer-engine retrieval is configured separately and may be overridden per engine. Availability differs by language and retrieval service; check local discovery before selection.
+
+```json
+{ "sources": { "google": { "collector": "searchapi" } } }
+```
 
 ## Storage and retention
 

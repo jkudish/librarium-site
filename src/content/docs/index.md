@@ -16,7 +16,7 @@ librarium --version
 librarium research --help
 ```
 
-Existing 1.x users can read [legacy docs](/v1) and the [migration guide](/docs/upgrading-to-v2).
+For an existing installation, see the [migration guide](/docs/upgrading-to-v2).
 
 ## Configure sources
 
@@ -37,7 +37,7 @@ librarium research "Compare current HTTP caching guidance" --only exa
 
 A dry run returns `status: planned`, estimates, and skips. It makes no provider calls and writes nothing to the store. Every real request is stored before its first provider call.
 
-Without `--only`, every set-up research source runs at quick depth; engines never join that default. Narrow with `--only` or `--skip`, and use `--max-cost` for catalog-ordered budget admission. Unknown reported cost is `null`, not zero. In-flight work can exceed a cap.
+Without `--only`, every configured research source runs at quick depth. Choose AI answer engines by name. Narrow with `--only` or `--skip`; see [costs and limits](/docs/costs-and-limits) before paid research.
 
 ## Come back to deep work
 
@@ -46,6 +46,6 @@ librarium research "Compare database hosting options" --deep --only exa --no-wai
 librarium show <run-id> --wait --json
 ```
 
-Deep tasks keep signed handles in private Run state. `show` resumes them rather than submitting again. Quick work usually runs inline, though some collectors are durable. CLI `--no-wait` requires `--deep`, except for a dry run. Ctrl-C detaches and prints a recovery command; it is not a billing guarantee.
+Deep tasks keep recovery details in private Run state. `show` picks up the same research rather than submitting again. Quick work usually finishes in the calling process, though some retrieval services support recovery. CLI `--no-wait` requires `--deep`, except for a dry run. Ctrl-C prints a recovery command so you can check the Run later.
 
 Continue with [commands](/docs/commands), [source selection](/docs/groups-and-modes), or [agent integration](/docs/using-with-agents).

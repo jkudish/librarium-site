@@ -1,6 +1,6 @@
 ---
 title: Laravel configuration and storage
-description: Sources, engine collectors, queues, and supported RunStore backends.
+description: Sources, AI answer-engine retrieval, queues, and supported RunStore backends.
 order: 3
 ---
 
@@ -8,7 +8,7 @@ order: 3
 php artisan vendor:publish --tag=librarium-config
 ```
 
-The config has `sources`, `engines`, `groups`, `max_cost`, `runs`, and `timeout`. Source options replace public profile entries.
+The config has `sources`, `engines`, `groups`, `max_cost`, `runs`, and `timeout`. Configure source behavior through source options.
 
 ```php
 // config/librarium.php
@@ -24,7 +24,7 @@ The config has `sources`, `engines`, `groups`, `max_cost`, `runs`, and `timeout`
 
 ## Credentials
 
-SDK sources read `ai.providers.<provider>.key`; focused HTTP sources read `services.<provider>.key`. Per-source `key` overrides belong in configuration, never request options. Use `env()` only inside Laravel config files. You.com reads `YOU_COM_API_KEY`, with `YDC_API_KEY` as a fallback. Collector credentials and location/language controls remain collector configuration.
+SDK sources read `ai.providers.<provider>.key`; focused HTTP sources read `services.<provider>.key`. Per-source `key` overrides belong in configuration, never request options. Use `env()` only inside Laravel config files. You.com reads `YOU_COM_API_KEY`, with `YDC_API_KEY` as a fallback. Configure retrieval-service credentials and location/language controls separately.
 
 Setting `enabled: false` excludes a source. A key alone is not authentication. Discovery and dry runs are offline.
 
@@ -35,7 +35,7 @@ Setting `enabled: false` excludes a source. A key alone is not authentication. D
 - **cache:** process-local Laravel ArrayStore or standalone RedisStore on Redis 7+ with connection serialization/compression disabled. Redis uses a native conditional commit for version, document TTL, and listing membership. Set `cache_store` and `ttl` (604800 seconds by default). Expiry loses recovery material.
 - **memory:** process-local tests, not shared workers.
 
-Unsupported disks, cache drivers, decorated/failover caches, and Redis Cluster fail closed. Use a custom `RunStore` for those backends. ArrayStore cannot supply persistence across queue workers. Shared production alternatives are database, supported standalone Redis, or a custom conditional store.
+Unsupported disks, cache drivers, decorated/failover caches, and Redis Cluster are rejected before research starts. Use a custom `RunStore` for those backends. ArrayStore cannot supply persistence across queue workers. Shared production alternatives are database, supported standalone Redis, or a custom conditional store.
 
 All stores compare the expected version and reject stale writers. `state.json` is written last; an uncertain transport outcome is not permission to repeat provider work. Preserve app/signing keys outside storage. Key rotation can prevent old ciphertext or handles from being recovered.
 
@@ -45,6 +45,6 @@ Wait timeout defaults to 6900 seconds; encrypted job timeout to 7200, with one a
 
 ## Pricing and redaction
 
-Estimates come from `jkudish/laravel-ai-pricing`; synchronization is an explicit operation, not a dry-run side effect. `maxCost()` skips unpriced work and admits bounded sources in catalog order. In-flight calls can exceed a cap; unknown reported USD remains `null`.
+See [costs and limits](/docs/php/costs-and-limits) for estimates, pricing synchronization, and billing caveats.
 
-Evidence is redacted before storage. Add application-private `redaction.paths` and `redaction.patterns` where needed. Source text can still be sensitive; control access and retention. There is no raw sensitive-capture API.
+Evidence is redacted before storage. Add application-private `redaction.paths` and `redaction.patterns` where needed. Source text can still be sensitive; control access and retention.

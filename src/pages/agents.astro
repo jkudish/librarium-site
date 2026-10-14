@@ -10,7 +10,8 @@ import Base from "../layouts/Base.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import Icon from "../components/Icon.astro";
-import { AGENT_SETUP_PROMPT, agentSetupPromptFor } from "../data/setup-prompt";
+import ResearchSteps from "../components/ResearchSteps.astro";
+import { agentSetupPromptFor } from "../data/setup-prompt";
 
 const entry = await getEntry("pages", "agents");
 if (!entry) throw new Error("src/content/pages/agents.md is missing");
@@ -109,27 +110,21 @@ const hosts: Host[] = [
 const tools = [
   {
     name: "research",
-    lead: "Previews or starts a Run.",
     input: "a required `question`, plus optional `depth` (`quick` or `deep`), `only`, `skip`, `max_cost`, `dry_run`, and `wait_seconds`.",
     output: "a bounded summary with id, source statuses, citation counts, costs, skips, and a next hint. It does not paste whole answers into chat.",
-    use: "Preview source selection with dry_run, then keep the returned Run id to read the results.",
-    badge: "Research",
+    use: "Use `dry_run: true` to preview offline. `max_cost` can lower but not raise the configured cap. Waiting defaults to 45 seconds, maximum 50.",
   },
   {
     name: "get_run",
-    lead: "Resumes work or reads saved evidence.",
     input: "the Run `id`, optionally `wait_seconds`, one `source`, and a `cursor`.",
     output: "a Run summary, or paged JSON text containing a source answer and citations.",
-    use: "Follow `cursor` with unchanged id/source until null; concatenate pages before parsing. A changed answer invalidates an old cursor. It can retrieve accepted provider work but starts no new research.",
-    badge: "No new research",
+    use: "Follow `cursor` with unchanged id/source until null; concatenate pages before parsing. A changed answer invalidates an old cursor. Retrieves in-progress research without starting new research.",
   },
   {
     name: "list_sources",
-    lead: "Shows what can run.",
     input: "none.",
-    output: "research sources, named-only engines, saved groups, availability, and price hints.",
-    use: "Offline discovery does not authenticate providers. Groups are user-saved source lists, with no built-ins.",
-    badge: "Local and free",
+    output: "research sources, AI answer engines chosen by name, saved groups, availability, and price hints.",
+    use: "Offline discovery checks local configuration, not provider authentication. Save your own source lists as groups.",
   },
 ];
 
@@ -226,14 +221,16 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
 const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 underline-offset-[3px] hover:text-amber-600";
 ---
 
-<Base title={`${title} | librarium`} description={description} includeSoftwareMetadata={false}>
+<Base title={`${title} | Librarium`} description={description} includeSoftwareMetadata={false}>
   <Header />
   <main>
     <!-- Hero: same pieces and classes ArticleLayout uses for kind: product. -->
     <div class="border-b border-neutral-200 bg-[#faf9f6]">
       <div class="mx-auto grid max-w-6xl gap-12 px-6 pt-10 pb-12 sm:pt-14 sm:pb-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-end lg:px-8">
         <div>
+          <p class="mb-4 font-mono text-xs tracking-wide text-amber-700 uppercase">A meta harness for research queries</p>
           <h1 class="max-w-[21ch] text-4xl/[1.08] font-medium tracking-[-0.045em] text-pretty text-neutral-950 sm:text-6xl/[1.06]">{title}</h1>
+          <p class="mt-6 max-w-[58ch] text-lg/8 text-pretty text-neutral-600">Query search engines, AI answer engines, and deep-research APIs from one interface, and keep every answer with its citations.</p>
           <p class="mt-6 max-w-[58ch] text-lg/8 text-pretty text-neutral-600">{description}</p>
           <div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
             <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
@@ -268,7 +265,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
             <div class="flex items-center justify-between gap-4 border-b border-neutral-200 bg-[#faf9f6] px-4 py-3 sm:px-5">
               <div class="flex items-center gap-2">
                 <span class="flex gap-1.5" aria-hidden="true"><span class="size-2.5 rounded-full bg-neutral-300 dark:bg-neutral-600"></span><span class="size-2.5 rounded-full bg-neutral-300 dark:bg-neutral-600"></span><span class="size-2.5 rounded-full bg-neutral-300 dark:bg-neutral-600"></span></span>
-                <span class="ml-2 font-mono text-xs whitespace-nowrap text-neutral-500"><span class="max-sm:hidden">your agent · </span>librarium MCP</span>
+                <span class="ml-2 font-mono text-xs whitespace-nowrap text-neutral-500"><span class="max-sm:hidden">your agent · </span>Librarium MCP</span>
               </div>
               <span class="rounded-sm border border-neutral-200 px-1.5 py-0.5 font-mono text-[11px] tracking-wide text-neutral-500 uppercase">Example session</span>
             </div>
@@ -286,7 +283,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
                   <li class="tool-call min-w-0 rounded-md border border-neutral-200 bg-neutral-50 font-mono text-xs/5">
                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-neutral-200 px-3 py-2">
                       <Icon name="terminal" class="size-3.5 text-amber-700" />
-                      <span class="text-neutral-500">librarium</span>
+                      <span class="text-neutral-500">Librarium</span>
                       <span class="font-semibold text-neutral-950">{turn.name}</span>
                       {turn.note && <span class="ml-auto font-sans text-[11px] text-neutral-500">{turn.note}</span>}
                     </div>
@@ -326,7 +323,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
 
           <div class="min-w-0 lg:sticky lg:top-8 lg:self-start">
             <h3 class="text-lg font-semibold text-neutral-950">Things to ask your agent</h3>
-            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Paste one of these once librarium is connected.</p>
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Paste one of these once Librarium is connected.</p>
             <ul class="mt-6 space-y-4">
               {askPrompts.map((item, index) => (
                 <li class="rounded-md border border-neutral-200 bg-white p-4">
@@ -355,20 +352,13 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">One install, two ways to work</p>
             <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Install the CLI</h3>
             <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Your agent gets research through the same CLI you use. Install it once:</p>
-            <div class="code-panel mt-4">
-              <div class="code-toolbar"><span>Terminal</span><button type="button" class="copy-btn group" data-copy="npm install -g librarium" data-copy-state="idle" aria-label="Copy install command"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy</span></button></div>
-              <Code code="npm install -g librarium" lang="bash" theme="github-dark-default" />
-            </div>
+            <div class="mt-4"><ResearchSteps /></div>
             <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The MCP server and the agent skill ship with that install. [Getting started](/docs#install) covers installation, and the [CLI page](/cli) covers terminal use.")} />
           </div>
           <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Or let your agent do it</p>
-            <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Give your agent the setup prompt</h3>
-            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Paste this into your coding agent to install the CLI, register the MCP server, and verify the connection:</p>
-            <div class="code-panel mt-4">
-              <div class="code-toolbar"><span>Setup prompt</span><button type="button" class="copy-btn group" data-copy={AGENT_SETUP_PROMPT} data-copy-state="idle" aria-label="Copy setup prompt"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy prompt</span></button></div>
-              <p tabindex="0" class="max-h-56 overflow-y-auto px-5 py-4 font-mono text-xs/6 break-words whitespace-pre-wrap text-amber-100 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-300">{AGENT_SETUP_PROMPT}</p>
-            </div>
+            <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Choose your agent below</h3>
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Each agent tab has its own setup prompt and manual registration instructions. Choose your host, then copy its prompt to install and verify Librarium.</p>
             <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The agent reads [install.md](/install.md) for Node.js requirements, MCP registration, source setup, and offline verification.")} />
           </div>
         </div>
@@ -448,28 +438,25 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-12">
           <div class="lg:sticky lg:top-8 lg:self-start">
             <h2 id="tools-heading" class={sectionHeading}>What your agent can call</h2>
-            <p class="mt-5 text-base/7 text-pretty text-neutral-600">The server exposes exactly three tools. Research can lower but not raise the configured max_cost. In-flight calls can exceed admission caps; unknown reported spend remains null. Waiting defaults to 45 seconds, maximum 50.</p>
+            <p class="mt-5 text-base/7 text-pretty text-neutral-600">The server exposes exactly three tools. Preview, start research, and read saved evidence without filling the chat with whole reports.</p>
+            <p class="mt-4 text-sm/6 text-neutral-600" set:html={inline("See [costs and limits](/docs/costs-and-limits) before paid research.")} />
             <div class="mt-8 rounded-md border border-neutral-200 bg-neutral-50 p-5">
-              <p class="text-sm font-semibold text-neutral-950">There is no <code class="font-mono">plan</code> tool.</p>
-              <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Use `research` with `dry_run: true` for an offline preview. Equivalent CLI: `librarium research \"…\" --dry-run --json`. Neither stores a Run nor calls providers.")} />
+              <p class="text-sm font-semibold text-neutral-950">Preview before spending</p>
+              <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Use `research` with `dry_run: true` for an offline preview. The shared CLI workflow shows the same steps.")} />
             </div>
           </div>
-          <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {tools.map((tool, index) => (
-              <li class:list={["flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-5", index === 0 && "sm:col-span-2"]}>
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <p class="font-mono text-base font-semibold text-neutral-950">{tool.name}</p>
-                  <span class="rounded-sm bg-amber-50 px-2 py-0.5 text-xs text-amber-800">{tool.badge}</span>
-                </div>
-                <p class="mt-1 text-sm text-neutral-500">{tool.lead}</p>
-                <dl class="mt-4 space-y-3 text-sm/6">
-                  <div><dt class="inline font-medium text-neutral-950">Input: </dt><dd class="inline text-pretty text-neutral-600" set:html={inline(tool.input)} /></div>
-                  <div><dt class="inline font-medium text-neutral-950">Output: </dt><dd class="inline text-pretty text-neutral-600" set:html={inline(tool.output)} /></div>
-                </dl>
-                <p class="mt-3 border-t border-neutral-200 pt-3 text-sm/6 text-pretty text-neutral-600" set:html={inline(tool.use)} />
-              </li>
-            ))}
-          </ul>
+          <div class="min-w-0 overflow-x-auto rounded-lg border border-neutral-200 bg-white" tabindex="0" aria-label="MCP tool reference">
+            <table class="w-full min-w-[640px] text-left text-sm/6">
+              <caption class="sr-only">What your agent can call: tools, inputs, outputs, and limits</caption>
+              <thead class="bg-neutral-50 text-neutral-950"><tr>{["Tool", "Inputs", "Outputs", "Limits"].map((label) => <th scope="col" class="p-4">{label}</th>)}</tr></thead>
+              <tbody>{tools.map((tool) => <tr class="border-t border-neutral-200 align-top">
+                <th scope="row" class="p-4 font-mono text-neutral-950">{tool.name}</th>
+                <td class="p-4 text-neutral-600" set:html={inline(tool.input)} />
+                <td class="p-4 text-neutral-600" set:html={inline(tool.output)} />
+                <td class="p-4 text-neutral-600" set:html={inline(tool.use)} />
+              </tr>)}</tbody>
+            </table>
+          </div>
         </div>
       </div>
     </section>

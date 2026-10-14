@@ -10,7 +10,7 @@ order: 8
 librarium cleanup --dry-run
 ```
 
-`runs.keep_days` defaults to unset. Preview retention before deleting terminal Runs. Pending task state is custody, not disposable output; removing it does not cancel upstream work. Your application owns privacy and retention policy.
+`runs.keep_days` defaults to unset. Preview retention before deleting completed Runs. Keep stored progress while research is in progress; removing it does not cancel upstream work. Your application owns privacy and retention policy.
 
 ## Upgrade
 

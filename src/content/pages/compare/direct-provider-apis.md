@@ -8,7 +8,7 @@ ctaLabel: Try a multi-provider query
 
 ## The short answer
 
-Librarium is one interface for many research sources. Instead of maintaining separate integrations for Exa, Perplexity, Gemini, Parallel, You.com, and the rest, you write one request: a question, quick or deep depth, and an optional source list. Each answer comes back in a shared Run with citations, honest cost, and provenance.
+Librarium is one interface for many research sources. Instead of maintaining separate integrations for Exa, Perplexity, Gemini, Parallel, You.com, and the rest, you write one request: a question, quick or deep depth, and an optional source list. Each answer comes back in a shared Run with citations, reported cost, and provenance.
 
 The same model works where you build: the [CLI](/cli) and its MCP server for coding agents, the [JavaScript library](/javascript), and the native [Laravel package](/laravel). Adding a supported provider becomes a configuration change, not another integration. Librarium does not replace your provider accounts or their charges.
 
@@ -24,13 +24,13 @@ Every direct integration repeats the same work. Librarium does it once, behind o
 | Credentials | Read and check each key yourself | Configure with `librarium setup` or Laravel config; offline presence is not authentication |
 | Results | Map each payload into your own types | One Run with source answers, citations, costs, provenance, and safe errors |
 | Citations | Extract them from each format: inline markers, annotations, or source lists | A citation list on every result, attached to the provider that returned it |
-| Long-running jobs | Submit, poll, retrieve, and persist accepted handles | CLI: `--deep --no-wait`, then `show <run-id> --wait`; MCP: `get_run`; Laravel: encrypted `queue()` then `find($id)?->refresh()` |
-| Recovery | Reconcile failures and possible charges | Resume signed accepted handles; ambiguous submission is not permission to repeat paid work |
-| Spend | Interpret each pricing model and usage report | Dry-run offline; `max_cost` skips unpriced sources and admits bounded estimates in catalog order; unknown reported USD stays null |
-| Provenance | Decide which provider, model, surface, and collector facts to keep | Structured provenance distinguishes API sources from collected engines |
+| Long-running jobs | Submit, poll, retrieve, and save recovery details | CLI: `--deep --no-wait`, then `show <run-id> --wait`; MCP: `get_run`; Laravel: encrypted `queue()` then `find($id)?->refresh()` |
+| Recovery | Reconcile failures and possible charges | Pick up in-progress research rather than starting duplicate work |
+| Spend | Interpret each pricing model and usage report | Preview offline, set a budget, keep estimates separate from reported spending |
+| Provenance | Decide which provider, model, AI answer engine, and retrieval-service facts to keep | Structured provenance distinguishes API sources from AI answer engines |
 | Agent access | A tool per provider | MCP has exactly `research`, `get_run`, `list_sources`; Laravel apps can expose an AI SDK tool over approved evidence |
 
-Each result kind (search, grounded answer, research report, surface observation) keeps its own semantics inside that contract. Librarium does not flatten every provider into an identical capability set, and neither route makes a citation correct just because a model returned it: inspect the sources.
+Each result kind (search, grounded answer, research report, AI answer-engine observation) stays distinct inside that contract. Source capabilities still differ, and citations still need checking against the original material.
 
 ## A concrete example: research for an agent
 
@@ -51,9 +51,9 @@ Mixing is normal: use Librarium for research and a native SDK for the rest of th
 
 The [JavaScript CLI runtime](/cli) includes built-in adapters, concurrent research, saved Runs, durable recovery, and MCP. The [JavaScript core](/javascript) constructs a research client with caller-injected configuration, credentials, and stores; it never inspects Node process state or files.
 
-The [Laravel package](/laravel) is native PHP: Laravel AI SDK integration, stored Runs, and encrypted queue jobs. It is not a Node wrapper or MCP server. Both share semantic interchange, not private execution state; applications own domain records, authorization, and retention.
+The [Laravel package](/laravel) provides native Laravel AI SDK integration, stored Runs, and encrypted queue jobs. Both share the public Run format and keep runtime execution separate; applications own domain records, authorization, and retention.
 
-Both implementations distinguish unknown pricing from zero. Their budget controls are admission checks, not a promise about the final provider bill. Provider coverage and operational behavior are documented separately; inspect the relevant docs before switching.
+See [costs and limits](/docs/costs-and-limits) for spending controls. Provider coverage and operational behavior are documented separately; inspect the relevant docs before switching.
 
 ## Start small
 

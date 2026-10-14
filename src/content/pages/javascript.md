@@ -7,11 +7,26 @@ ctaHref: /docs/library
 ctaLabel: Explore the JavaScript API
 ---
 
+*A meta harness for research queries*
+
+Query search engines, AI answer engines, and deep-research APIs from one interface, and keep every answer with its citations.
+
 ## One client, three boundaries
 
 Install with `npm install librarium`.
 
+The npm package is v2, its configuration is version 3, and its public Run format is `librarium.run/1`. These version numbers describe different contracts. The Node client requires Node.js 22.12+.
+
 `librarium` and `librarium/node` construct a ready-to-use client with v3 config and filesystem storage. `librarium/core` is runtime-neutral: callers inject configuration, credentials, and a store; its default is process-local memory. Importing core never inspects process state or files.
+
+For Node source configuration, install the [CLI](/cli) too and run `librarium setup`. The shared first workflow is:
+
+```ts
+import { createLibrarium } from 'librarium';
+const librarium = createLibrarium();
+await librarium.research('Lisbon or Porto without a car?', { only: ['exa'], dryRun: true });
+await librarium.research('Lisbon or Porto without a car?', { only: ['exa'] });
+```
 
 ## Preview, then research
 
@@ -28,7 +43,7 @@ const run = await librarium.research('Lisbon or Porto without a car?', {
 });
 ```
 
-Dry runs are offline and not stored. Real Runs are stored before dispatch. Quick is the default; choose `depth: 'deep'` for reports and `wait: false` to return before completion. `get(id, { wait: true })` resumes saved durable handles, not a new submission. In-flight calls can exceed an admission cap.
+Dry runs are offline and not stored. Real Runs are stored before starting. Quick is the default; choose `depth: 'deep'` for reports and `wait: false` to return before completion. `get(id, { wait: true })` picks up saved research instead of submitting again. See [costs and limits](/docs/costs-and-limits) for estimates and billing caveats.
 
 ## Read the shared Run
 
@@ -81,6 +96,12 @@ const client = createLibrarium({
 client.sources();
 ```
 
-A production Worker needs a durable custom `RunStore` with expected-version CAS, not process-local memory. `librarium/testing` exports `runStoreContract` for disposable store checks. Your application owns tenant access, signing-key custody, retention, and the UI. JS and Laravel share semantic interchange, not private runtime execution.
+A production Worker needs a persistent custom `RunStore` that rejects stale writes, rather than process-local memory. `librarium/testing` exports `runStoreContract` for disposable store checks. Your application owns tenant access, persistent keys for recovery, retention, and the UI. JS and Laravel share the public Run format while executing in their own runtimes.
+
+## Preserve the distinctions that matter
+
+Research a technical decision, compare AI answer engines, or collect evidence for a feature. Keep search results, grounded answers, and research reports distinct inside the shared Run format.
+
+Keep content and citations from each successful source. Record the source, variant, model, and retrieval service; answers retrieved through the same service are not independent confirmation. Your application owns tenant access, persistent keys for recovery, retention, and the interface.
 
 See [the library reference](/docs/library), [custom sources and stores](/docs/custom-providers), and [application-owned visibility evidence](/stories/agentsy-report).

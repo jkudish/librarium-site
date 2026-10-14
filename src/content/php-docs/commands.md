@@ -25,7 +25,9 @@ php artisan librarium:prune
 
 `show` defaults to the latest Run when no id is supplied, observes pending tasks, and optionally waits. `--source` reads one result. `sources` reports configuration and variants offline. `prune` uses `runs.keep_days`; choose retention longer than task life because deleting a handle does not cancel upstream work.
 
-`--json` emits unformatted public data; keep stderr separate. These are Artisan commands, not an MCP server. The Laravel AI `Tools\RunEvidence` tool reads stored Runs.
+`--json` emits unformatted public data your coding agent can read; keep stderr separate. The Laravel AI `Tools\RunEvidence` tool reads stored Runs.
+
+See [costs and limits](/docs/php/costs-and-limits) before paid research.
 
 ## Exit codes and interruption
 

@@ -19,7 +19,7 @@ Private signed handles bind Run, provider, variant, driver, model, options, and 
 
 ## Ambiguous submission
 
-Lost POST responses and worker loss can occur after provider acceptance but before handle persistence. A local store cannot make that window exactly-once. Do not blindly retry a job or submit a new Run. Preserve existing state, inspect provider activity and possible spend, and reconcile the accepted attempt. Unknown cost is not zero.
+Lost POST responses and worker loss can occur after provider acceptance but before recovery details are saved. A local store cannot guarantee one submission in that window. Do not blindly retry a job or submit a new Run. Preserve existing state, inspect provider activity, and reconcile the existing attempt. See [costs and limits](/docs/php/costs-and-limits) for spending caveats.
 
 Webhooks are verified wake hints; canonical retrieval remains evidence authority. No fallback or automatic paid resubmission is inferred from a transport failure.
 
@@ -27,4 +27,4 @@ Webhooks are verified wake hints; canonical retrieval remains evidence authority
 
 The wait timeout defaults to 6900 seconds, the encrypted job timeout to 7200, with one attempt. Your app owns compatible worker supervision, retry_after, failed-job policy, and access controls. Inline work without a saved handle becomes interrupted after process loss; durable work remains recoverable. Local timeouts do not stop upstream work or billing.
 
-Version-conditional stores reject stale writers. Local filesystem markers never expire by age; remove a crashed owner's marker only after establishing the owner cannot resume. Cache expiry can destroy paid-task custody. Prefer persistent shared storage where that loss is unacceptable.
+Stores reject stale writers using the expected version. Local filesystem markers never expire by age; remove a crashed owner's marker only after establishing the owner cannot resume. Cache expiry can destroy the details needed to recover paid research. Prefer persistent shared storage where that loss is unacceptable.

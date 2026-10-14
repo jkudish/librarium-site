@@ -4,35 +4,11 @@ description: Research, store, queue, and recover Runs through the Laravel facade
 order: 1
 ---
 
-Librarium is a Laravel-native research abstraction built on the official Laravel AI SDK. Every real request becomes a stored Run with answers, citations, honest reported cost, and redacted evidence.
+Librarium is a Laravel-native research abstraction built on the official Laravel AI SDK. Every real request becomes a stored Run with answers, citations, reported cost, and redacted evidence.
 
 ## Install
 
-PHP 8.4+, Laravel 13.30+, and Laravel AI SDK `^1.0.1`. The package pins `jkudish/librarium-spec`; consumers must copy its Composer package repository declaration because Composer does not inherit repositories.
-
-Merge this entry into your application's `composer.json` `repositories` array, preserving existing entries:
-
-```json
-{
-  "type": "package",
-  "package": {
-    "name": "jkudish/librarium-spec",
-    "version": "dev-spec-15c8a306",
-    "type": "library",
-    "license": "MIT",
-    "source": {
-      "type": "git",
-      "url": "https://github.com/jkudish/librarium-spec.git",
-      "reference": "15c8a30673b43b006944623be2ddf99f216b846c"
-    },
-    "dist": {
-      "type": "zip",
-      "url": "https://api.github.com/repos/jkudish/librarium-spec/zipball/15c8a30673b43b006944623be2ddf99f216b846c",
-      "reference": "15c8a30673b43b006944623be2ddf99f216b846c"
-    }
-  }
-}
-```
+PHP 8.4+, Laravel 13.30+, and Laravel AI SDK `^1.0.1`. Install the package from Packagist and publish its configuration:
 
 ```bash
 composer require jkudish/laravel-ai-librarium
@@ -53,9 +29,9 @@ $run = Librarium::research('Compare EU analytics tools')
 $run->toArray();
 ```
 
-`dryRun()` makes no provider call and stores nothing. Quick is the default; deep selects durable research variants. Omit `only()` to use all configured research sources, never engines. Groups are user-saved source lists without built-ins.
+`dryRun()` makes no provider call and stores nothing. Quick is the default; deep selects research reports. Omit `only()` to use all configured research sources. Choose AI answer engines by name and save recurring selections as groups.
 
-`maxCost()` admits bounded estimates greedily in catalog order; unpriced and over-budget sources are skipped. In-flight work can exceed the cap. Unknown reported cost is `null`, not zero.
+See [costs and limits](/docs/php/costs-and-limits) before paid research.
 
 ## Queue and recover
 

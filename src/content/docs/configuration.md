@@ -1,10 +1,10 @@
 ---
 title: Configuration
-description: Configure flat sources, engine collectors, saved groups, and Run storage in v3 JSON.
+description: Configure sources, AI answer-engine retrieval, saved groups, and Run storage in v3 JSON.
 order: 7
 ---
 
-`librarium setup` writes `~/.config/librarium/config.json`. The simplified API uses config **version 3**; version 2 never shipped. Loading v1 writes an original-byte backup before migrating.
+`librarium setup` writes `~/.config/librarium/config.json`. The npm v2 package uses config **version 3** and the public Run format `librarium.run/1`; these version numbers describe different contracts. See [migration](/docs/upgrading-to-v2) for existing configuration.
 
 ```json
 {
@@ -24,15 +24,15 @@ order: 7
 
 A source is set up when it has a resolved key and `enabled` is not false. Environment keys can work without a config file. Credentials must not be source options. Unknown options and invalid combinations fail before calls; `sources --json` reports the shared option catalog.
 
-## Options replace extra profiles
+## Source options
 
 Examples: `grok.search` selects `web`, `x`, or `both`; `brave.results` selects `answer` or `search`; `parallel.processor` defaults to `pro`; `openai.effort` configures reasoning effort. A call can override options through `{ options: { parallel: { processor: 'ultra' } } }`.
 
-`google.collector` is `searchapi`, `serpapi`, or `serpbase`. Engine collector configuration is separate and may be overridden per engine. Availability differs by language and collector; do not infer it from a logo or a key alone.
+`google.collector` is `searchapi`, `serpapi`, or `serpbase`. AI answer-engine retrieval is configured separately and may be overridden per engine. Availability differs by language and retrieval service; check local discovery before selection.
 
 ## Storage and retention
 
-Relative Run paths resolve from the calling directory. `runs.keep_days: null` disables automatic retention. `cleanup` prunes terminal Runs. A custom store module path resolves relative to the config file:
+Relative Run paths resolve from the calling directory. `runs.keep_days: null` disables automatic retention. `cleanup` prunes completed Runs. A custom store module path resolves relative to the config file:
 
 ```json
 { "runs": { "store": { "module": "./stores/redis.js" } } }

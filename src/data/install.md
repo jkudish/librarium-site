@@ -112,7 +112,7 @@ Ask which sources the user wants, then have the user run the setup wizard in the
 librarium setup
 ```
 
-The user types keys into the wizard, not into chat. `setup --auto` discovers existing credentials offline; `setup --enable <names>` chooses sources explicitly. Configuration uses flat source names, options, and saved groups without built-in workflows. Engines are named-only.
+The user types keys into the wizard, not into chat. `setup --auto` discovers existing credentials offline; `setup --enable <names>` chooses sources explicitly. Configuration uses source names, options, and source lists saved as groups. Choose AI answer engines by name.
 
 Keys stored as environment-variable references must also be present in the MCP server's environment. Claude Code passes the shell environment. Codex passes only a small default set, so list the variables in `env_vars` under `[mcp_servers.librarium]`. In Cursor, add an `env` entry such as `"EXA_API_KEY": "${env:EXA_API_KEY}"`. Other hosts have their own `env` setting, such as `amp mcp add --env`. Reference variable names only; never write key values into a committed file.
 
@@ -137,3 +137,14 @@ Stop here and tell the user:
 - that no research or paid provider calls were made.
 
 Do not run a first query unless the user asks for one. When they do, `librarium research "<question>" --only exa --dry-run --json` previews it offline first. The [agent docs](https://librarium.agentsy.build/docs/using-with-agents.md) cover the MCP tools and how to read complete results.
+
+## Laravel applications
+
+For a native Laravel integration, use PHP 8.4+, Laravel 13.30+, and Laravel AI SDK `^1.0.1`:
+
+```bash
+composer require jkudish/laravel-ai-librarium
+php artisan vendor:publish --tag=librarium-config
+```
+
+Configure source keys through Laravel configuration and preview with `dryRun()` before approved paid research. The [PHP docs](https://librarium.agentsy.build/docs/php/index.md) cover storage, queues, and agents; [costs and limits](https://librarium.agentsy.build/docs/php/costs-and-limits.md) explain spending controls. Keep the same paid-call approval and key-handling ground rules.

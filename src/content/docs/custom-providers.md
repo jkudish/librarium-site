@@ -6,7 +6,7 @@ order: 10
 
 ## Custom sources
 
-Pass trusted instances to `createLibrarium({ customSources })`. Each entry has an `id`, optional `name`, and a quick and/or deep provider; `engine: true` makes it named-only. Built-in names are reserved. Instances belong to a client, not a global registry.
+Pass trusted instances to `createLibrarium({ customSources })`. Each entry has an `id`, optional `name`, and a quick and/or deep provider; `engine: true` requires callers to select it by name. Built-in names are reserved. Instances belong to a client, not a global registry.
 
 Inline providers implement `execute`; durable providers implement `submit`, `poll`, and `retrieve`. Deep variants must be durable. Return normalized content, citations, and provider-reported usage without inventing missing cost. Declare `requiresApiKey: false` only for a credential-free source.
 

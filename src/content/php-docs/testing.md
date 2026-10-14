@@ -19,7 +19,7 @@ it('researches the selected source', function () {
 });
 ```
 
-The default synthetic answer tests application flow, not provider quality. Supply scripted `Run` instances and `preventStrayQueries()` when every synchronous request must be accounted for. Closures in `assertQueried` and `assertQueued` receive request arrays, not the retired ResearchPlan.
+The default synthetic answer tests application flow, not provider quality. Supply scripted `Run` instances and `preventStrayQueries()` when every synchronous request must be accounted for. Closures in `assertQueried` and `assertQueued` receive request arrays.
 
 ```php
 $fake = Librarium::fake()->preventStrayQueries();

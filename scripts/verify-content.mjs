@@ -5,7 +5,9 @@ import { extname, join, relative, resolve } from "node:path";
 import { parse } from "node-html-parser";
 import catalog from "librarium-spec/sources.json" with { type: "json" };
 import { NODE_FLOOR, PRODUCT_VERSION, SOURCES, ENGINES, SOURCE_COUNT, ENGINE_COUNT, FEATURED_SOURCES, WORKFLOWS } from "../src/data/product.ts";
-import { AGENT_SETUP_PROMPT } from "../src/data/setup-prompt.ts";
+import { AGENT_SETUP_PROMPT, agentSetupPromptFor } from "../src/data/setup-prompt.ts";
+import { RESEARCH_COMMANDS } from "../src/data/research-commands.ts";
+import { READING_LABELS } from "../src/data/reading-labels.ts";
 import { RESEARCH_DEMO, renderCapturedMarkdown } from "../src/data/research-demo.ts";
 
 const root = resolve(import.meta.dirname, "..");
@@ -96,7 +98,7 @@ const jsNames = namesFor("docs");
 const phpNames = namesFor("php-docs");
 const legacyNames = namesFor("v1-docs");
 for (const name of legacyNames) assert(jsNames.includes(name), `lost equivalent legacy route ${name}`);
-assert.equal(phpNames.length, 9);
+assert.equal(phpNames.length, 10);
 for (const [collection, route] of collections) {
   const names = namesFor(collection);
   const bundle = output(`${route}/all.md`);
@@ -164,7 +166,37 @@ for (const spelling of ["claude mcp add --scope user librarium -- librarium mcp"
 for (const tool of ["research", "get_run", "list_sources"]) assert(agentsText.includes(tool));
 assert(agentsText.includes("exactly three tools") && agentsText.includes("dry_run: true") && agentsText.includes("lower but not raise") && agentsText.includes("until null"));
 assert(!/get_results|check_async|list_providers|list_groups|librarium (?:init|doctor|plan)\b/.test(agentsText));
-assert(read("src/content/pages/agents.md").includes(AGENT_SETUP_PROMPT));
+const agentPage = parse(agents, parseOptions);
+assert.equal(agentPage.querySelectorAll('[role="tabpanel"]').length, 7);
+assert.equal(agentPage.querySelectorAll('button[aria-label="Copy setup prompt"]').length, 0);
+for (const host of ["Claude Code", "Codex", "Cursor", "OpenCode", "Amp", "Hermes Agent", "my coding agent"]) {
+  const prompt = agentSetupPromptFor(host);
+  assert(agentsText.includes(prompt) && read("src/content/pages/agents.md").includes(prompt), `missing host prompt ${host}`);
+}
+assert.equal(agentPage.querySelectorAll('table tbody tr').length, 3);
+for (const [route, platform] of [["cli", "cli"], ["agents", "cli"], ["javascript", "javascript"], ["laravel", "laravel"]]) {
+  const page = parse(output(`${route}/index.html`), parseOptions);
+  const steps = page.querySelector(`[data-research-steps="${platform}"]`);
+  assert(steps, `${route} missing shared workflow`);
+  const commands = RESEARCH_COMMANDS[platform];
+  assert.equal(steps.querySelector('p').textContent, commands.requirement);
+  assert.deepEqual(steps.querySelectorAll('code').map((node) => node.textContent), [commands.install, commands.setup, commands.preview, commands.research]);
+  const markdown = output(`${route}.md`);
+  for (const command of [commands.install, commands.setup, commands.preview, commands.research]) assert(markdown.includes(command), `${route}.md missing canonical command ${command}`);
+  assert(page.querySelector('a[href$="/costs-and-limits"]'), `${route} missing costs reference`);
+}
+for (const [path, labels] of Object.entries(READING_LABELS)) {
+  for (const label of Object.values(labels)) assert(text(output("guides/index.html")).includes(label) && output("guides/index.md").includes(label), `missing reading label ${path}: ${label}`);
+}
+for (const route of ["docs", "docs/php"]) {
+  const costs = text(output(`${route}/costs-and-limits/index.html`));
+  for (const fact of ["catalog order", "unpriced", "over_budget", "In-flight work can exceed", "null", "Illustrative"]) assert(costs.includes(fact), `${route} missing cost rule ${fact}`);
+}
+for (const route of ["laravel.md", "docs/php/index.md", "install.md", "guides/first-query.md"]) {
+  const markdown = output(route);
+  assert(markdown.includes("composer require jkudish/laravel-ai-librarium") && markdown.includes("php artisan vendor:publish --tag=librarium-config"));
+  assert(!markdown.includes("Composer does not inherit repositories") && !markdown.includes('"repositories"') && !markdown.includes("dev-spec-"));
+}
 assert(AGENT_SETUP_PROMPT.includes("https://librarium.agentsy.build/install.md") && AGENT_SETUP_PROMPT.includes("Verify the connection offline") && AGENT_SETUP_PROMPT.includes("API keys out of chat and source control"));
 assert(read("src/content/pages/stories/agentsy-report.md").includes("historical integration evidence"));
 

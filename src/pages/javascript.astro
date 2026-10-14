@@ -5,8 +5,7 @@
 // example below is read from that file's fenced blocks, so the page and its
 // Markdown cannot drift apart.
 //
-// Examples describe the unreleased simplified-surface candidate. Provider
-// work is separately authorized; the JSON is illustrative, not a live receipt.
+// JSON examples are illustrative, not live provider receipts.
 import { getEntry } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Header from "../components/Header.astro";
@@ -15,6 +14,7 @@ import Icon from "../components/Icon.astro";
 import ProductHero from "../components/ProductHero.astro";
 import CodePanel from "../components/CodePanel.astro";
 import TerminalBlock from "../components/TerminalBlock.astro";
+import ResearchSteps from "../components/ResearchSteps.astro";
 import { inline } from "../lib/inline-markup";
 import { fencedBlocks, pickBlock } from "../lib/markdown-code";
 
@@ -38,7 +38,7 @@ const boundaries = [
   {
     path: "librarium/core",
     lead: "Runtime-neutral client.",
-    body: "Workers and browsers: supply config and credentials explicitly. Memory is the default store; inject durable version-conditional storage for recovery across processes.",
+    body: "Workers and browsers: supply config and credentials explicitly. Memory is the default store; supply persistent storage that rejects stale writes to recover across processes.",
     code: "import { createLibrarium, MemoryRunStore } from 'librarium/core';",
   },
   {
@@ -52,17 +52,17 @@ const boundaries = [
 // Field notes for the illustrative response, keyed to the contract.
 const fields = [
   { name: "status", note: "`planned`, `running`, `done`, `partial`, or `failed`. Keep partial and failed results visible." },
-  { name: "results[].source · observation", note: "Flat source identity and `api` or `surface` observation. Engines join only when named." },
-  { name: "results[].provenance", note: "Provider, variant, model, and collector. Descriptive, not a confidence vote." },
+  { name: "results[].source · observation", note: "Source name and `api` or `surface` observation. AI answer engines run when chosen by name." },
+  { name: "results[].provenance", note: "Provider, variant, model, and the service used to retrieve the answer. Descriptive, not a confidence score." },
   { name: "results[].citations", note: "URLs and optional titles attached to the source that returned them. Validate before rendering." },
-  { name: "cost", note: "Exact USD decimal strings or `null`. Reported means provider-reported; missing is not zero." },
+  { name: "cost", note: "Estimated and provider-reported spending, kept separately." },
   { name: "skipped · error", note: "Admission skips and safe per-source failures remain distinct from answers." },
 ];
 
 const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl";
 ---
 
-<Base title={`${title} | librarium`} description={description} includeSoftwareMetadata={false}>
+<Base title={`${title} | Librarium`} description={description} includeSoftwareMetadata={false}>
   <Header />
   <main>
     <ProductHero title={title} description={description} ctaHref={ctaHref} ctaLabel={ctaLabel} markdownHref={markdownHref} secondary={{ href: "#plan", label: "See it in code" }}>
@@ -71,7 +71,7 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
           <img src="/languages/typescript.svg" alt="" width="24" height="24" class="size-6" />
           <p class="text-sm font-medium text-neutral-950">Typed client · JavaScript / TypeScript</p>
         </div>
-        <CodePanel class="mt-4" label="Terminal" lang="bash" code="npm install librarium" copyLabel="Copy" />
+        <div class="mt-4"><ResearchSteps platform="javascript" /></div>
         <ul class="mt-4 space-y-2 text-sm/6 text-neutral-600" aria-label="Import boundaries">
           {boundaries.map((boundary) => (
             <li class="flex items-baseline gap-2"><code class="shrink-0 font-mono text-[0.85em] text-neutral-950">{boundary.path}</code><span class="text-neutral-400" aria-hidden="true">·</span><span>{boundary.lead}</span></li>
@@ -86,11 +86,11 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
         <div class="grid grid-cols-1 gap-x-12 gap-y-6 lg:grid-cols-2">
           <div class="min-w-0">
             <p class="font-mono text-xs tracking-wide text-amber-700 uppercase">Plan</p>
-            <h2 id="plan-heading" class={`mt-3 ${sectionHeading}`}>Plan a run before anything executes.</h2>
+            <h2 id="plan-heading" class={`mt-3 ${sectionHeading}`}>Preview a Run before starting research.</h2>
           </div>
           <div class="min-w-0 lg:pt-8">
             <p class="text-base/7 text-pretty text-neutral-600" set:html={inline("`research(question, { dryRun: true })` previews source selection and admission offline. It makes no provider call and stores nothing.")} />
-            <p class="mt-4 text-base/7 text-pretty text-neutral-600" set:html={inline("Use the same question and options without `dryRun` to research. The Run is stored before dispatch; `get(id)` resumes durable handles instead of submitting again.")} />
+            <p class="mt-4 text-base/7 text-pretty text-neutral-600" set:html={inline("Use the same question and options without `dryRun` to research. The Run is saved before starting; `get(id)` picks up in-progress research instead of submitting again.")} />
             <div class="mt-6 rounded-lg border border-neutral-200 bg-neutral-50 p-5">
               <p class="text-sm font-semibold text-neutral-950">One client for research and recovery.</p>
               <p class="mt-2 text-sm/6 text-pretty text-neutral-600" set:html={inline("The [CLI](/cli) and [MCP server](/agents) use the same client. Choose the Node or runtime-neutral boundary for your application.")} />
@@ -107,7 +107,7 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
               lines={[
                 { out: "planned [ 'exa', 'kagi' ]" },
               ]}
-              caption="Illustrative: source admission depends on configured credentials and bounded estimates. No captured provider call is shown."
+              caption="Preview fields from an example configuration."
             />
           </div>
           <div class="min-w-0">
@@ -115,8 +115,8 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
               <p class="text-sm font-semibold text-neutral-950">What the plan holds</p>
               <ul class="mt-3 space-y-2 text-sm/6 text-pretty text-neutral-600">
                 <li set:html={inline("`plan.results`: admitted sources and variants.")} />
-                <li set:html={inline("`plan.skipped`: exclusions, missing variants, unpriced or over-budget work.")} />
-                <li set:html={inline("`plan.cost`: exact USD estimates, cap, and honest unknowns.")} />
+                <li set:html={inline("`plan.skipped`: sources left out and why.")} />
+                <li set:html={inline("`plan.cost`: estimated spending and your limit.")} />
                 <li set:html={inline("The public shape is `librarium.run/1`; private execution state is separate.")} />
               </ul>
             </div>
@@ -128,17 +128,17 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
     <!-- Result shape. -->
     <section id="result" class="scroll-mt-6 border-t border-neutral-200 bg-[#faf9f6] py-16 sm:py-24" aria-labelledby="result-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
-        <h2 id="result-heading" class={sectionHeading}>Turn a terminal response into an application feature.</h2>
+        <h2 id="result-heading" class={sectionHeading}>Turn a completed Run into an application feature.</h2>
         <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">Validate a response at your application boundary, then render each result with its own citations. Keep raw content out of HTML sinks.</p>
         <CodePanel class="mt-12" label="evidence.ts" lang="ts" code={validateCode} />
         <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
           <div class="min-w-0">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <p class="text-sm font-medium text-neutral-950">What a terminal response looks like</p>
+              <p class="text-sm font-medium text-neutral-950">What a Run looks like</p>
               <span class="rounded-sm border border-neutral-200 bg-white px-1.5 py-0.5 font-mono text-[11px] tracking-wide text-neutral-500 uppercase">Illustrative</span>
             </div>
             <CodePanel label="Run" lang="json" code={responseJson} />
-            <p class="mt-3 text-xs/5 text-pretty text-neutral-500" set:html={inline("Illustrative empty plan, not a captured run. Validated by `RunSchema`.")} />
+            <p class="mt-3 text-xs/5 text-pretty text-neutral-500" set:html={inline("Empty preview validated by `RunSchema`.")} />
           </div>
           <dl class="self-start rounded-lg border border-neutral-200 bg-white lg:mt-9">
             {fields.map((field, index) => (
@@ -149,7 +149,8 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
             ))}
           </dl>
         </div>
-        <p class="mt-10 max-w-[72ch] text-base/7 text-pretty text-neutral-600">Your app still owns authentication, tenant boundaries, persistence, retention, and the interface around the evidence. Shared terminal contracts make that boundary explicit; they do not make the JavaScript and PHP runtimes interchangeable.</p>
+        <p class="mt-10 max-w-[72ch] text-base/7 text-pretty text-neutral-600">Your app owns authentication, tenant boundaries, persistence, retention, and the interface around the evidence. JavaScript and PHP share the public Run format, while each executes research in its own runtime.</p>
+        <p class="mt-4 text-sm/6 text-neutral-600" set:html={inline("See [costs and limits](/docs/costs-and-limits) for estimates and billing caveats.")} />
       </div>
     </section>
 
@@ -168,7 +169,7 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
             </li>
           ))}
         </ul>
-        <p class="mt-8 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Install the v2 library in your project with `npm install librarium`. For the command-line tool, see [CLI installation](/docs#install). The full map of each boundary is in the [JavaScript API docs](/docs/library).")} />
+        <p class="mt-8 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The npm package is v2, its configuration is version 3, and its public Run format is `librarium.run/1`. These version numbers describe different contracts. See [CLI installation](/docs#install) and the [JavaScript API docs](/docs/library).")} />
       </div>
     </section>
 
@@ -176,7 +177,7 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
     <section class="border-y border-neutral-300 bg-[#eeeae0] py-16 sm:py-24" aria-labelledby="distinctions-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="distinctions-heading" class={sectionHeading}>Preserve the distinctions that matter.</h2>
-        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">Research a technical decision, compare answer surfaces, or collect evidence for a feature. Librarium gives those results a shared shape without pretending a search result, a grounded answer, and a research report are the same thing.</p>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">Research a technical decision, compare AI answer engines, or collect evidence for a feature. Librarium keeps search results, grounded answers, and research reports distinct inside one shared format.</p>
         <div class="mt-12 grid grid-cols-1 gap-12 border-t border-neutral-950/15 pt-8 lg:grid-cols-3">
           <div>
             <h3 class="text-lg font-semibold text-neutral-950">Results, not just summaries</h3>
@@ -184,11 +185,11 @@ const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-ba
           </div>
           <div>
             <h3 class="text-lg font-semibold text-neutral-950">Provenance, not a confidence vote</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600">Record the source, variant, model, and collector. Shared collection is not independent corroboration.</p>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600">Record the source, variant, model, and retrieval service. Answers retrieved through the same service are not independent confirmation.</p>
           </div>
           <div>
             <h3 class="text-lg font-semibold text-neutral-950">Explicit execution policy</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600">The client supplies research and recovery. Your application owns tenant access, signing-key custody, retention, and the UI.</p>
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600">The client supplies research and recovery. Your application owns tenant access, persistent keys for recovery, retention, and the UI.</p>
           </div>
         </div>
         <p class="mt-10 max-w-[72ch] text-base/7 text-pretty text-neutral-600" set:html={inline("For a concrete application-owned evidence model, read [Building answer visibility in Agentsy Report](/stories/agentsy-report). For your first executable workflow, follow [the multi-provider query guide](/guides/first-query).")} />

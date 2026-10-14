@@ -228,7 +228,7 @@ const agentPage = parse(agents, parseOptions);
 const agentHosts = [
   ["amp", "Amp"], ["claude-code", "Claude Code"], ["claude-desktop", "Claude Desktop"],
   ["codex", "Codex"], ["command-code", "Command Code"], ["cursor", "Cursor"],
-  ["devin", "Devin"], ["gemini-cli", "Gemini CLI"], ["grok-build", "Grok Build"],
+  ["devin", "Devin"], ["gemini-cli", "Gemini CLI"], ["grok-bot", "Grok Bot"], ["grok-build", "Grok Build"],
   ["hermes", "Hermes Agent"], ["muse", "Muse"],
   ["openclaw", "OpenClaw"],
   ["opencode", "OpenCode"], ["pi", "Pi"], ["vscode", "VS Code (GitHub Copilot)"],
@@ -262,11 +262,25 @@ for (const [id, host] of [...agentHosts, ["other", "my coding agent"]]) {
   const index = id === "other" ? agentHosts.length : agentHosts.findIndex(([key]) => key === id);
   const mdSection = registrationSections(agentMarkdown)[index][0];
   const installSection = registrationSections(installMarkdown)[index][0];
-  const snippets = (section) => [...section.matchAll(/^```(bash|json|toml|yaml)\n([\s\S]*?)\n```/gm)].map((match) => match[2]);
+  const snippets = (section) => [...section.matchAll(/^```([^\n]*)\n([\s\S]*?)\n```/gm)]
+    .filter((match) => !(match[1] === "text" && match[2] === prompt))
+    .map((match) => {
+      assert(id === "grok-bot" ? match[1] === "text" : /^(bash|json|toml|yaml)$/.test(match[1]), `${host} unexpected registration snippet type: ${match[1]}`);
+      return match[2];
+    });
   assert.deepEqual(panel.querySelectorAll("pre code").map((code) => code.textContent), snippets(mdSection), `${host} HTML/Markdown snippet drift`);
   // /agents shows one working registration; install.md retains scope/version alternatives.
   // Muse is explicitly prompt-only: no documented manual MCP configuration.
   assert.equal(snippets(mdSection).length, ["other", "muse"].includes(id) ? 0 : 1, `${host} manual registration count drift`);
+  if (id === "grok-bot") {
+    assert.deepEqual(snippets(mdSection), ["Add a custom MCP server called librarium that runs: npx -y librarium@2 mcp"]);
+    assert.deepEqual(snippets(installSection), snippets(mdSection));
+    assert.equal(panel.querySelectorAll(".code-toolbar > span").at(-1).textContent, "Send in Grok Bot");
+    for (const required of ["EXA_API_KEY", "TAVILY_API_KEY", "PERPLEXITY_API_KEY", "environment variables on", "server entry", "never in chat text", "cloud computer", "localhost on your machine"]) {
+      assert(panel.textContent.includes(required) && mdSection.includes(required) && installSection.includes(required), `Grok Bot missing setup safeguard: ${required}`);
+    }
+    assert(installSection.includes("without a config file") && installSection.includes("account-wide"));
+  }
   if (id === "muse") {
     const limitation = "Muse doesn't document a manual MCP config";
     assert(panel.textContent.includes(limitation) && mdSection.includes(limitation) && installSection.includes(limitation));

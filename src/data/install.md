@@ -133,6 +133,16 @@ These dedicated MCP files apply from v3000.3 (Local 3.6); older versions store `
 gemini mcp add --scope user librarium librarium mcp
 ```
 
+**Grok Bot** ([computer docs](https://docs.x.ai/grok-bot/computer-and-apps), [add-in-chat guide](https://composio.dev/content/how-to-add-mcp-servers-to-grok-bot)): send this in Grok Bot and confirm when the bot asks. The server entry is account-wide:
+
+```text
+Add a custom MCP server called librarium that runs: npx -y librarium@2 mcp
+```
+
+Give the bot your provider API keys as environment variables on that server entry (`EXA_API_KEY`, `TAVILY_API_KEY`, `PERPLEXITY_API_KEY` for those sources), never in chat text. Librarium v2 reads those variables without a config file; only configure the sources you want. Keep `@2` so the command cannot resolve to v1.
+
+Grok Bot runs the server on its own cloud computer, so it can't use a config file or localhost on your machine.
+
 **Grok Build** ([MCP docs](https://docs.x.ai/build/features/mcp-servers)): register user-wide with the terminal coding agent; add `--scope project` before the server name for this project:
 
 ```bash

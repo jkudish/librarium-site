@@ -143,6 +143,20 @@ Install Librarium for me in Gemini CLI by following https://librarium.agentsy.bu
 gemini mcp add --scope user librarium librarium mcp
 ```
 
+**Grok Bot** ([computer docs](https://docs.x.ai/grok-bot/computer-and-apps), [setup guide](https://composio.dev/content/how-to-add-mcp-servers-to-grok-bot)): confirm when asked; add your provider keys (`EXA_API_KEY`, `TAVILY_API_KEY`, `PERPLEXITY_API_KEY`) as environment variables on the server entry, never in chat text.
+
+```text
+Install Librarium for me in Grok Bot by following https://librarium.agentsy.build/install.md
+```
+
+Send in Grok Bot:
+
+```text
+Add a custom MCP server called librarium that runs: npx -y librarium@2 mcp
+```
+
+Grok Bot runs the server on its own cloud computer, so it can't use a config file or localhost on your machine.
+
 **Grok Build** ([MCP docs](https://docs.x.ai/build/features/mcp-servers)): register user-wide from your terminal.
 
 ```text

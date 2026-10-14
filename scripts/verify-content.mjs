@@ -378,7 +378,9 @@ assert.deepEqual(homePage.querySelectorAll(".compare-table tbody tr").map((row) 
   ["✓", "—", "—", "—"], ["✓", "✓", "✓", "—"], ["—", "—", "—", "—"], ["✓", "✓", "—", "—"], ["✓", "✓", "—", "✓"],
 ]);
 for (const card of homePage.querySelectorAll("[data-evidence-card]")) {
-  assert(card.innerHTML.indexOf("<h3") < card.innerHTML.indexOf("<figure"), "evidence heading must precede figure");
+  const figureAt = card.innerHTML.indexOf("<figure");
+  assert(card.innerHTML.indexOf("<h3") === 0 || card.innerHTML.trimStart().startsWith("<h3"), "evidence card must open with its heading");
+  if (figureAt !== -1) assert(card.innerHTML.indexOf("<h3") < figureAt, "evidence heading must precede figure");
 }
 assert(home.includes('href="/docs/costs-and-limits"') && home.includes('id="page-format-control" class="fixed '));
 

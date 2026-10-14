@@ -1,5 +1,5 @@
 ---
-import CodePanel from "./CodePanel.astro";
+import InterfaceTabs from "./InterfaceTabs.astro";
 import { RESEARCH_DEMO, PROVIDER_COMPARISON, formatElapsed } from "../data/research-demo";
 
 interface Props { agreement?: boolean }
@@ -8,8 +8,19 @@ const subject = "Plausible";
 const namedCount = PROVIDER_COMPARISON.filter((row) => row.named.includes(subject)).length;
 const durations = [...RESEARCH_DEMO.results].sort((a, b) => a.elapsedSeconds - b.elapsedSeconds);
 const longest = Math.max(...durations.map((result) => result.elapsedSeconds));
-const preview = `librarium research "${RESEARCH_DEMO.query}" --deep --only parallel,you --max-cost 1 --dry-run`;
-const resume = `librarium research "${RESEARCH_DEMO.query}" --deep --no-wait\nlibrarium show <run-id> --wait`;
+const q = RESEARCH_DEMO.query;
+const previewExamples = [
+  { id: "agent", label: "Agent", panelLabel: "Ask your agent", lang: "text" as const, code: `Preview a $1 deep research run on "${q}" with Parallel and You.com. Show me the estimates; don't run it yet.` },
+  { id: "cli", label: "CLI", panelLabel: "Terminal", lang: "bash" as const, code: `librarium research "${q}" --deep --only parallel,you --max-cost 1 --dry-run` },
+  { id: "javascript", label: "JavaScript", panelLabel: "JavaScript", lang: "ts" as const, code: `await librarium.research('${q}', {\n  depth: 'deep',\n  only: ['parallel', 'you'],\n  maxCost: '1.00',\n  dryRun: true,\n});` },
+  { id: "laravel", label: "Laravel", panelLabel: "Laravel", lang: "php" as const, code: `Librarium::research('${q}')\n    ->deep()\n    ->only(['parallel', 'you'])\n    ->maxCost('1.00')\n    ->dryRun();` },
+];
+const resumeExamples = [
+  { id: "agent", label: "Agent", panelLabel: "Ask your agent", lang: "text" as const, code: `Start deep research on "${q}" without waiting, and give me the Run ID. I'll ask for the results later.` },
+  { id: "cli", label: "CLI", panelLabel: "Terminal", lang: "bash" as const, code: `librarium research "${q}" --deep --no-wait\nlibrarium show <run-id> --wait` },
+  { id: "javascript", label: "JavaScript", panelLabel: "JavaScript", lang: "ts" as const, code: `const started = await librarium.research('${q}', {\n  depth: 'deep',\n  wait: false,\n});\nconst later = await librarium.get(started.id, { wait: true });` },
+  { id: "laravel", label: "Laravel", panelLabel: "Laravel", lang: "php" as const, code: `$queued = Librarium::research('${q}')\n    ->deep()\n    ->queue();\n\n$run = Librarium::find($queued->id())?->refresh();` },
+];
 ---
 
 {agreement ? (
@@ -31,31 +42,22 @@ const resume = `librarium research "${RESEARCH_DEMO.query}" --deep --no-wait\nli
   <div class="mt-10 grid items-start gap-10 border-t border-neutral-300 pt-8 lg:grid-cols-2">
     <article data-evidence-card="preview">
       <h3 class="text-xl font-medium text-neutral-950">See what it will cost before it runs.</h3>
-      <p class="mt-3 text-base/7 text-neutral-600">Add <code class="font-mono text-[0.9em]">--dry-run</code> to any question. Librarium lists the sources it would call and what each is estimated to cost, without calling a provider or saving anything.</p>
-      <figure class="mt-5 rounded border border-neutral-300 bg-white p-5" aria-label="How a dry run with a one-dollar budget works">
-        <dl class="divide-y divide-neutral-200 text-base/6 sm:text-sm/6">
-          <div class="grid gap-1 py-2.5 first:pt-0 sm:grid-cols-[9rem_1fr] sm:gap-4"><dt class="font-mono text-neutral-950">--dry-run</dt><dd class="text-neutral-600">Shows the plan and estimates. No provider calls.</dd></div>
-          <div class="grid gap-1 py-2.5 sm:grid-cols-[9rem_1fr] sm:gap-4"><dt class="font-mono text-neutral-950">--max-cost 1</dt><dd class="text-neutral-600">Runs only sources whose estimates fit a $1 budget. Sources without a price estimate are skipped.</dd></div>
-          <div class="grid gap-1 py-2.5 last:pb-0 sm:grid-cols-[9rem_1fr] sm:gap-4"><dt class="text-neutral-950">Then</dt><dd class="text-neutral-600">Drop <code class="font-mono text-[0.9em]">--dry-run</code> when the plan looks right.</dd></div>
-        </dl>
-        <CodePanel class="mt-5" label="Preview a $1 deep run" code={preview} lang="bash" wrap />
-      </figure>
-      <p class="mt-3 text-base/6 text-neutral-600 sm:text-sm/6">Estimates aren't bills. <a href="/docs/costs-and-limits" class="text-amber-800 underline underline-offset-4 hover:text-amber-600">How budgets work →</a></p>
+      <p class="mt-3 text-base/7 text-neutral-600">Preview any question for free: see which sources would run and what each would cost, before anything is called. <a href="/docs/costs-and-limits" class="text-amber-800 underline underline-offset-4 hover:text-amber-600">How budgets work →</a></p>
+      <InterfaceTabs class="mt-5" id="preview-example" label="Preview example" examples={previewExamples} />
     </article>
     <article data-evidence-card="recovery">
       <h3 class="text-xl font-medium text-neutral-950">Come back to long-running research.</h3>
-      <p class="mt-3 text-base/7 text-neutral-600">Deep research can take minutes. Start it with <code class="font-mono text-[0.9em]">--no-wait</code>, close the terminal, and pick it up later by its Run ID. Resuming continues the task you already started instead of submitting another paid request. The CLI and JavaScript library save each Run locally; Laravel can run it in an encrypted queue job. <a href="/docs/request-and-retry" class="text-amber-800 underline underline-offset-4 hover:text-amber-600">How recovery works →</a></p>
-      <figure class="mt-5 rounded border border-neutral-300 bg-white p-5" aria-label="Historical captured durations, followed by illustrative recovery commands">
-        <figcaption class="text-base/6 text-neutral-600 sm:text-sm/6">Historical durations from the September 18 capture</figcaption>
-        <ul role="list" class="mt-4 flex flex-col gap-3" aria-label="Historical provider durations">
+      <p class="mt-3 text-base/7 text-neutral-600">Deep research can take minutes. Start it, walk away, and pick it up later by its Run ID. <a href="/docs/request-and-retry" class="text-amber-800 underline underline-offset-4 hover:text-amber-600">How recovery works →</a></p>
+      <figure class="mt-5 rounded border border-neutral-300 bg-white p-5" aria-label="Provider durations from the September 18, 2026 capture">
+        <ul role="list" class="flex flex-col gap-3" aria-label="Historical provider durations">
           {durations.map((result) => (
             <li class="grid grid-cols-[6rem_1fr_4rem] items-center gap-3 text-sm text-neutral-600">
               <span>{result.shortName}</span><span class="h-1.5 rounded-full bg-neutral-100"><span class="duration-bar" style={`--duration-width: ${Math.max(4, Math.round(result.elapsedSeconds / longest * 100))}%`}></span></span><span class="text-right font-mono tabular-nums">{formatElapsed(result.elapsedSeconds)}</span>
             </li>
           ))}
         </ul>
-        <CodePanel class="mt-5" label="Illustrative commands" code={resume} lang="bash" wrap />
       </figure>
+      <InterfaceTabs class="mt-5" id="resume-example" label="Resume example" examples={resumeExamples} />
     </article>
   </div>
 )}

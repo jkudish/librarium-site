@@ -1,0 +1,56 @@
+---
+// One example shown per interface (Agent, CLI, JavaScript, Laravel), so the
+// homepage cards are not CLI-only. Each panel is a wrapping CodePanel; the
+// tab script below is shared by every instance on the page.
+import CodePanel from "./CodePanel.astro";
+
+interface Example { id: string; label: string; panelLabel: string; code: string; lang: "bash" | "ts" | "php" | "text" }
+interface Props { id: string; label: string; examples: Example[]; class?: string }
+const { id, label, examples, class: className } = Astro.props;
+---
+
+<div class:list={["min-w-0", className]} data-interface-tabs>
+  <div role="tablist" aria-label={label} class="flex flex-wrap gap-1 text-sm">
+    {examples.map((example, index) => (
+      <button type="button" role="tab" id={`${id}-tab-${example.id}`} aria-controls={`${id}-panel-${example.id}`} aria-selected={index === 0 ? "true" : "false"} tabindex={index === 0 ? 0 : -1} class="min-h-9 cursor-pointer rounded px-3 text-neutral-600 hover:text-neutral-950 aria-selected:bg-neutral-100 aria-selected:font-medium aria-selected:text-neutral-950">{example.label}</button>
+    ))}
+  </div>
+  {examples.map((example, index) => (
+    <div id={`${id}-panel-${example.id}`} role="tabpanel" aria-labelledby={`${id}-tab-${example.id}`} hidden={index !== 0} class="mt-3">
+      <CodePanel label={example.panelLabel} code={example.code} lang={example.lang} wrap />
+    </div>
+  ))}
+</div>
+
+<style>
+  :global(:root[data-theme="dark"]) [data-interface-tabs] [aria-selected="true"] { background: #33352f; color: #f7f7f2; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) [data-interface-tabs] [aria-selected="true"] { background: #33352f; color: #f7f7f2; }
+  }
+</style>
+
+<script>
+  for (const group of document.querySelectorAll<HTMLElement>("[data-interface-tabs]")) {
+    const tabs = [...group.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const select = (tab: HTMLButtonElement) => {
+      for (const other of tabs) {
+        const active = other === tab;
+        other.setAttribute("aria-selected", String(active));
+        other.tabIndex = active ? 0 : -1;
+        const panel = document.getElementById(other.getAttribute("aria-controls") ?? "");
+        if (panel) panel.hidden = !active;
+      }
+    };
+    for (const [index, tab] of tabs.entries()) {
+      tab.addEventListener("click", () => select(tab));
+      tab.addEventListener("keydown", (event) => {
+        const keys: Record<string, number> = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: tabs.length - 1 };
+        if (!(event.key in keys)) return;
+        event.preventDefault();
+        const next = tabs[(keys[event.key] + tabs.length) % tabs.length];
+        select(next);
+        next.focus();
+      });
+    }
+  }
+</script>

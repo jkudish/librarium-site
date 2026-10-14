@@ -198,7 +198,7 @@
 
 .docs-code-toolbar button:hover { color: var(--color-amber-300); }
 .prose .docs-code pre { margin: 0; border-radius: 0; }
-.prose pre .shell-token { white-space: nowrap; }
+.prose pre .shell-token, .code-panel-wrap pre .shell-token { white-space: nowrap; }
 
 @media (max-width: 639px) {
   .prose pre { padding: --spacing(4); font-size: var(--text-terminal); }

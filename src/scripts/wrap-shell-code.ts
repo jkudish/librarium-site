@@ -1,7 +1,9 @@
-// Preserve Shiki colors and exact copy text, but only wrap shell tokens at spaces.
+// Preserve Shiki colors and exact copy text, but only wrap code at spaces:
+// shell blocks in prose, and every CodePanel/agents panel opted into wrapping.
 for (const line of document.querySelectorAll<HTMLElement>(
-  '.prose pre:is([data-language="bash"], [data-language="sh"], [data-language="shell"]) .line',
+  '.prose pre:is([data-language="bash"], [data-language="sh"], [data-language="shell"]) .line, .code-panel-wrap pre .line',
 )) {
+  if (line.querySelector('.shell-token')) continue;
   const output = document.createDocumentFragment();
   let token = document.createElement('span');
   token.className = 'shell-token';

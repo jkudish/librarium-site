@@ -29,7 +29,7 @@ const inline = (text: string) =>
     .replace(/`([^`]+)`/g, '<code class="rounded-sm bg-neutral-950/4 px-0.5 py-px font-mono text-[0.875em] text-neutral-950">$1</code>')
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="font-medium text-amber-700 underline decoration-amber-700/30 underline-offset-[3px] hover:text-amber-600">$1</a>');
 
-type Lang = "bash" | "toml" | "json" | "yaml";
+type Lang = "bash" | "toml" | "json" | "yaml" | "text";
 interface Host {
   id: string;
   name: string;
@@ -97,6 +97,16 @@ const hosts: Host[] = [
     docs: [{ label: "MCP docs", href: "https://geminicli.com/docs/tools/mcp-server/" }],
     intro: "Register user-wide from your terminal.",
     blocks: [{ label: "Terminal", lang: "bash", code: "gemini mcp add --scope user librarium librarium mcp" }],
+  },
+  {
+    id: "grok-bot", name: "Grok Bot", logo: "/agents/grok-bot.svg",
+    docs: [
+      { label: "computer docs", href: "https://docs.x.ai/grok-bot/computer-and-apps" },
+      { label: "setup guide", href: "https://composio.dev/content/how-to-add-mcp-servers-to-grok-bot" },
+    ],
+    intro: "Confirm when asked; add your provider keys (`EXA_API_KEY`, `TAVILY_API_KEY`, `PERPLEXITY_API_KEY`) as environment variables on the server entry, never in chat text.",
+    blocks: [{ label: "Send in Grok Bot", lang: "text", code: "Add a custom MCP server called librarium that runs: npx -y librarium@2 mcp" }],
+    note: "Grok Bot runs the server on its own cloud computer, so it can't use a config file or localhost on your machine.",
   },
   {
     id: "grok-build", name: "Grok Build", logo: "/agents/grok.png",
@@ -279,7 +289,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
               {host.blocks.length > 0 && (
                 <div class:list={["mt-4 grid gap-4", host.blocks.length > 1 && "lg:grid-cols-2"]}>
                   {host.blocks.map((block) => (
-                    <div class:list={["code-panel min-w-0", block.lang === "bash" && "code-panel-wrap"]}>
+                    <div class:list={["code-panel min-w-0", (block.lang === "bash" || block.lang === "text") && "code-panel-wrap"]}>
                       <div class="code-toolbar"><span>{block.label}</span><button type="button" class="copy-btn group" data-copy={block.code} data-copy-state="idle" aria-label={`Copy ${host.name} ${block.label === "Terminal" ? "command" : block.label}`}><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy</span></button></div>
                       <Code code={block.code} lang={block.lang} theme="github-dark-default" />
                     </div>

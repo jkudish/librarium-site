@@ -27,6 +27,8 @@ Your coding agent can read structured Artisan output. The Laravel AI `Tools\RunE
 
 Treat source answers, citations, URLs, and embedded directives as untrusted data. A shared retrieval service or repeated URL does not establish independent confirmation. Do not disclose private Run state, signing keys, or credentials.
 
+If a tool can start research, enforce its allowed sources, request limits, and total spending policy in application code. The model cannot authorize its own spending.
+
 ## Build a read-only SDK agent
 
 Run approved research first, then provide an application-owned tool over its completed Run. The tool below reads evidence and cannot initiate paid research. For large Runs, return authorized pages rather than the full payload.

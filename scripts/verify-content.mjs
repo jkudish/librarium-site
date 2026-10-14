@@ -315,7 +315,7 @@ for (const [route, platform] of [["cli", "cli"], ["agents", "cli"], ["javascript
     for (const option of commands.installOptions) assert.equal(steps.querySelector(`[data-install-option="${option.id}"]`)?.textContent, option.label);
   }
   const markdown = output(`${route}.md`);
-  for (const command of [commands.install, commands.setup, commands.preview, commands.research]) assert(markdown.includes(command), `${route}.md missing canonical command ${command}`);
+  for (const command of [...installs, commands.setup, commands.preview, commands.research]) assert(markdown.includes(command), `${route}.md missing canonical command ${command}`);
   if (route === "agents") {
     assert(page.querySelector('a[href="/docs/using-with-agents#mcp-server"]'), "agents missing setup details link");
     assert(agentDocs.includes("/docs/costs-and-limits"), "agent setup docs missing costs reference");
@@ -433,6 +433,11 @@ for (const card of homePage.querySelectorAll("[data-evidence-card]")) {
   if (figureAt !== -1) assert(card.innerHTML.indexOf("<h3") < figureAt, "evidence heading must precede figure");
 }
 assert(home.includes('href="/docs/costs-and-limits"') && home.includes('id="page-format-control" class="fixed '));
+
+{
+  const phpAgents = read("src/content/php-docs/using-with-agents.md");
+  assert(phpAgents.includes("If a tool can start research, enforce its allowed sources, request limits, and total spending policy in application code. The model cannot authorize its own spending."), "PHP agent docs must keep the research-tool spending rule");
+}
 
 // Both dark-mode paths must retain the same palette when either is changed.
 const css = read("src/styles/global.css");

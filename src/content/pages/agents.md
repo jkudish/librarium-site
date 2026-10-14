@@ -30,10 +30,11 @@ A recommendation grounded in deployment and concurrency evidence, with links to 
 
 The CLI includes the MCP server.
 
-Requires Node.js 22.12+:
+The npm install requires Node.js 22.12+; Homebrew includes its own runtime.
 
 ```bash
 npm install -g librarium
+# or: brew install jkudish/tap/librarium
 librarium setup
 librarium research "Lisbon or Porto without a car?" --only exa --dry-run --json
 librarium research "Lisbon or Porto without a car?" --only exa --json

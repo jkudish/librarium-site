@@ -85,14 +85,23 @@
     padding: 1px 4px;
   }
 
+  & :not(pre) > code {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: bottom;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    overflow-x: auto;
+  }
+
   & pre {
     background-color: var(--color-neutral-950) !important;
     border-radius: var(--radius-lg);
     padding: --spacing(6);
     overflow-x: auto;
-    /* Long single-line artifacts (the setup prompt) wrap instead of
-       scrolling; copy fidelity is unaffected. */
-    white-space: pre-wrap;
+    /* Preserve command tokens and indentation; wide lines scroll locally. */
+    white-space: pre;
+    overflow-wrap: normal;
     font-size: var(--text-sm);
     line-height: --spacing(6);
   }

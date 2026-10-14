@@ -90,7 +90,7 @@ const next = navItems[currentIndex + 1];
     <div class="grid grid-cols-1 gap-10 py-10 lg:grid-cols-[232px_minmax(0,1fr)] lg:gap-12 lg:py-14 xl:grid-cols-[248px_minmax(0,1fr)_192px] xl:gap-14">
       <!-- Sidebar (desktop only) -->
       <aside class="hidden lg:block">
-        <div class="sticky top-8 max-h-[calc(100dvh-4rem)] space-y-7 overflow-y-auto pr-2 pb-2">
+        <div class="docs-sidebar sticky top-8 -ml-1 max-h-[calc(100dvh-4rem)] space-y-7 overflow-y-auto pr-2 pb-2 pl-1">
           <DocsLanguagePicker language={language} jsHref={v2Href} phpHref={phpHref} />
           {language === "js" && <DocsVersionPicker id="docs-version-desktop" version={version} v1Href={v1Href} v2Href={v2Href} />}
           <nav aria-label="Documentation" class="space-y-7">
@@ -131,7 +131,7 @@ const next = navItems[currentIndex + 1];
         </nav>
       </main>
       <aside class="hidden xl:block">
-        <nav aria-label="On this page" class="sticky top-8 max-h-[calc(100dvh-4rem)] overflow-y-auto pb-2">
+        <nav aria-label="On this page" class="docs-sidebar sticky top-8 max-h-[calc(100dvh-4rem)] overflow-y-auto pb-2">
           <p class="mb-5 text-sm font-medium text-neutral-950">On this page</p>
           <DocsOutline headings={headings} />
         </nav>
@@ -191,3 +191,9 @@ const next = navItems[currentIndex + 1];
   }, { passive: true });
   updateOutline();
 </script>
+
+<style>
+  /* Sidebars stay sticky and scrollable, but without a second visible scrollbar. */
+  .docs-sidebar { scrollbar-width: none; }
+  .docs-sidebar::-webkit-scrollbar { display: none; }
+</style>

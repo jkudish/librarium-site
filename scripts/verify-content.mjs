@@ -267,8 +267,13 @@ for (const [route, platform] of [["cli", "cli"], ["agents", "cli"], ["javascript
   const steps = page.querySelector(`[data-research-steps="${platform}"]`);
   assert(steps, `${route} missing shared workflow`);
   const commands = RESEARCH_COMMANDS[platform];
+  const installs = "installOptions" in commands ? commands.installOptions.map((option) => option.install) : [commands.install];
   assert.equal(steps.querySelector('p').textContent, commands.requirement);
-  assert.deepEqual(steps.querySelectorAll('code').map((node) => node.textContent), [commands.install, commands.setup, commands.preview, commands.research]);
+  assert.deepEqual(steps.querySelectorAll('code').map((node) => node.textContent), [...installs, commands.setup, commands.preview, commands.research]);
+  if ("installOptions" in commands) {
+    assert.equal(commands.installOptions[0].install, commands.install, "npm stays the default CLI install");
+    for (const option of commands.installOptions) assert.equal(steps.querySelector(`[data-install-option="${option.id}"]`)?.textContent, option.label);
+  }
   const markdown = output(`${route}.md`);
   for (const command of [commands.install, commands.setup, commands.preview, commands.research]) assert(markdown.includes(command), `${route}.md missing canonical command ${command}`);
   assert(page.querySelector('a[href$="/costs-and-limits"]'), `${route} missing costs reference`);

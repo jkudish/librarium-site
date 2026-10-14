@@ -6,6 +6,11 @@ export const RESEARCH_COMMANDS = {
     setup: "librarium setup",
     preview: 'librarium research "Lisbon or Porto without a car?" --only exa --dry-run --json',
     research: 'librarium research "Lisbon or Porto without a car?" --only exa --json',
+    // The CLI also ships as a Homebrew formula with its own runtime.
+    installOptions: [
+      { id: "npm", label: "npm", requirement: "Node.js 22.12+", install: "npm install -g librarium" },
+      { id: "homebrew", label: "Homebrew", requirement: "No Node.js needed", install: "brew install jkudish/tap/librarium" },
+    ],
   },
   javascript: {
     requirement: "Node.js 22.12+ for the Node client",

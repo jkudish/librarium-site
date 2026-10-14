@@ -16,14 +16,14 @@ export const RESEARCH_COMMANDS = {
     requirement: "Node.js 22.12+ for the Node client",
     install: "npm install librarium",
     setup: "librarium setup",
-    preview: "await librarium.research('Lisbon or Porto without a car?', { only: ['exa'], dryRun: true });",
-    research: "await librarium.research('Lisbon or Porto without a car?', { only: ['exa'] });",
+    preview: "await librarium.research(\n  'Lisbon or Porto without a car?',\n  { only: ['exa'], dryRun: true },\n);",
+    research: "await librarium.research(\n  'Lisbon or Porto without a car?',\n  { only: ['exa'] },\n);",
   },
   laravel: {
     requirement: "PHP 8.4+ · Laravel 13.30+ · Laravel AI SDK ^1.0.1",
     install: "composer require jkudish/laravel-ai-librarium",
     setup: "php artisan vendor:publish --tag=librarium-config",
-    preview: "Librarium::research('Lisbon or Porto without a car?')->only(['exa'])->dryRun();",
-    research: "Librarium::research('Lisbon or Porto without a car?')->only(['exa'])->run();",
+    preview: "Librarium::research(\n    'Lisbon or Porto without a car?',\n)->only(['exa'])->dryRun();",
+    research: "Librarium::research(\n    'Lisbon or Porto without a car?',\n)->only(['exa'])->run();",
   },
 } as const;

@@ -25,7 +25,8 @@ use Jkudish\LaravelAiLibrarium\Facades\Librarium;
 $plan = Librarium::research('Compare EU analytics tools')
     ->only(['exa'])->dryRun();
 $run = Librarium::research('Compare EU analytics tools')
-    ->deep()->only(['exa'])->maxCost('1.00')->run();
+    ->deep()->only(['exa'])
+    ->maxCost('1.00')->run();
 $run->toArray();
 ```
 
@@ -37,8 +38,22 @@ See [costs and limits](/docs/php/costs-and-limits) before paid research.
 
 ```php
 $queued = Librarium::research('Prepare a cited report')
-    ->deep()->only(['openai'])->queue()->onQueue('research');
-$run = Librarium::find($queued->id())?->refresh();
+    ->deep()->only(['openai'])
+    ->queue()->onQueue('research');
+$id = $queued->id();
+$run = Librarium::find($id)?->refresh();
 ```
 
-The Run is stored before one encrypted, one-attempt job is dispatched. The application owns queue workers and infrastructure. Saved durable handles survive process loss; inline work cannot be resumed. See [library API](/docs/php/library), [Artisan](/docs/php/commands), and [configuration](/docs/php/configuration).
+The Run is stored before one encrypted, one-attempt job is dispatched; your application owns workers and infrastructure. Saved durable handles survive process loss; inline work cannot be resumed.
+
+## Choose your interface
+
+The facade is one way to research, not the only entry point. Other runtimes share the public Run contract, not private execution state.
+
+| Work from | Reference |
+| --- | --- |
+| Laravel code | [Library API](/docs/php/library) and [configuration](/docs/php/configuration) |
+| Coding agent in Laravel | [Artisan JSON and SDK tools](/docs/php/using-with-agents) |
+| MCP coding agent | [JavaScript MCP server](/docs/using-with-agents) |
+| JavaScript application | [Client API](/docs/library) |
+| Terminal | [Artisan commands](/docs/php/commands) |

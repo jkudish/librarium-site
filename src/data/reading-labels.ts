@@ -1,5 +1,5 @@
 export const READING_LABELS: Record<string, { platform: string; level: string; prerequisite: string }> = {
-  "guides/first-query": { platform: "CLI + Laravel", level: "Beginner", prerequisite: "One configured source" },
+  "guides/first-query": { platform: "MCP + JavaScript + Laravel + CLI", level: "Beginner", prerequisite: "One configured source" },
   "guides/agent-research": { platform: "MCP", level: "Beginner", prerequisite: "Coding agent with MCP support" },
   "guides/laravel-queues": { platform: "Laravel", level: "Intermediate", prerequisite: "Configured source, shared Run store, queue worker" },
   "compare/direct-provider-apis": { platform: "JavaScript + Laravel", level: "Overview", prerequisite: "Familiarity with API integrations" },

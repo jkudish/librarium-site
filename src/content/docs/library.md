@@ -8,11 +8,13 @@ order: 9
 import { createLibrarium } from 'librarium';
 
 const librarium = createLibrarium();
-const plan = await librarium.research('Compare database providers', {
+const question = 'Compare database providers';
+const plan = await librarium.research(question, {
   only: ['exa'], dryRun: true,
 });
-const started = await librarium.research('Compare database providers', {
-  depth: 'deep', only: ['exa'], maxCost: '1.00', wait: false,
+const started = await librarium.research(question, {
+  depth: 'deep', only: ['exa'],
+  maxCost: '1.00', wait: false,
 });
 const later = await librarium.get(started.id, { wait: true });
 librarium.sources();

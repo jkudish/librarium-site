@@ -32,33 +32,40 @@ librarium setup --help
 
 If the version is not 2.x, stop and report what is installed. Do not continue with a v1 install; [Upgrade from v1](https://librarium.agentsy.build/docs/upgrading-to-v2.md) covers migration.
 
-## 3. Ask which MCP client and scope
+## 3. Detect the MCP client and confirm scope
 
-Ask the user which MCP client they want Librarium in (Claude Code, Codex, Cursor, OpenCode, Amp, Hermes Agent, or another host) and which configuration scope: user-wide or this project only. Use their answer in the next step.
+If you know which MCP client you are running in, use that client. Ask which client only if you cannot tell, or if the user wants Librarium in a different one. Default to user-wide scope unless the user asks for this project only. Confirm the client and scope with the user before changing configuration. Do not inspect environment variables to identify the client.
 
 ## 4. Register the MCP server
 
 Every host launches the same local command: a stdio server named `librarium` with command `librarium` and args `["mcp"]`. Use the user's host and agreed scope. If a config file already exists, edit it in place and keep every other server.
 
-**Claude Code** ([MCP docs](https://code.claude.com/docs/en/mcp)). Use the agreed scope (`user`, `project`, or `local`):
+**Amp** ([MCP docs](https://ampcode.com/docs/customize/mcp)): user-wide registration:
+
+```bash
+amp mcp add librarium -- librarium mcp
+```
+
+For this project, merge the entry below into `.amp/settings.json` instead of user settings (`~/.config/amp/settings.json`), then approve it with `amp mcp approve librarium`. User settings do not require that approval.
+
+```json
+{
+  "amp.mcpServers": {
+    "librarium": {
+      "command": "librarium",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+**Claude Code** ([MCP docs](https://code.claude.com/docs/en/mcp)): use `--scope user` for user-wide; use `--scope local` for this project privately, or `--scope project` for a shared `.mcp.json`:
 
 ```bash
 claude mcp add --scope user librarium -- librarium mcp
 ```
 
-**Codex** ([MCP docs](https://developers.openai.com/codex/mcp)): add it by command, or edit `~/.codex/config.toml` (project-scoped: `.codex/config.toml`):
-
-```bash
-codex mcp add librarium -- librarium mcp
-```
-
-```toml
-[mcp_servers.librarium]
-command = "librarium"
-args = ["mcp"]
-```
-
-**Cursor** ([MCP docs](https://cursor.com/docs/mcp)): create or edit `.cursor/mcp.json` in the project, or `~/.cursor/mcp.json` for every project:
+**Claude Desktop** ([local server docs](https://modelcontextprotocol.io/docs/develop/connect-local-servers)): open Settings, then Developer, then Edit Config. Merge this user-wide entry into `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`; Windows: `%APPDATA%\Claude\claude_desktop_config.json`), then completely quit and restart Claude Desktop. These docs do not document a project-only scope; do not substitute a project file.
 
 ```json
 {
@@ -71,34 +78,126 @@ args = ["mcp"]
 }
 ```
 
-**OpenCode** ([config docs](https://opencode.ai/docs/mcp-servers/)): add it under `mcp` in `opencode.json` (`~/.config/opencode/opencode.json`, or the project root). OpenCode v2 moves servers under `mcp.servers` ([v2 docs](https://v2.opencode.ai/mcp)):
+**Codex** ([MCP docs](https://learn.chatgpt.com/codex/extend/mcp)): merge this into `~/.codex/config.toml` for user-wide, or `.codex/config.toml` for this project (trusted projects only):
+
+```toml
+[mcp_servers.librarium]
+command = "librarium"
+args = ["mcp"]
+```
+
+**Command Code** ([MCP docs](https://commandcode.ai/docs/mcp)): use `--scope user` for user-wide (`~/.commandcode/mcp.json`); use `--scope local` for this project privately, or `--scope project` for a shared `.mcp.json`. Flags go before the server name:
+
+```bash
+cmd mcp add --scope user librarium -- librarium mcp
+```
+
+**Cursor** ([MCP docs](https://cursor.com/docs/mcp)): merge this into `~/.cursor/mcp.json` for user-wide, or `.cursor/mcp.json` for this project:
 
 ```json
 {
-  "mcp": {
+  "mcpServers": {
     "librarium": {
-      "type": "local",
-      "command": ["librarium", "mcp"]
+      "type": "stdio",
+      "command": "librarium",
+      "args": ["mcp"]
     }
   }
 }
 ```
 
-**Amp** ([MCP manual](https://ampcode.com/manual/mcp)):
+**Gemini CLI** ([MCP docs](https://geminicli.com/docs/tools/mcp-server/)): use `--scope user` for user-wide (`~/.gemini/settings.json`), or `--scope project` for this project (`.gemini/settings.json`):
 
 ```bash
-amp mcp add librarium -- librarium mcp
+gemini mcp add --scope user librarium librarium mcp
 ```
 
-Servers in the global config (`~/.config/amp/settings.json`) run without approval; servers declared in a project's `.amp/settings.json` are approved once with `amp mcp approve librarium`.
-
-**Hermes Agent** ([MCP docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp)): add it to `~/.hermes/config.yaml`:
+**Hermes Agent** ([MCP docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp)): merge this into `~/.hermes/config.yaml` for user-wide. These MCP docs do not document a project-only config file; if that scope is required, stop and ask rather than inventing one:
 
 ```yaml
 mcp_servers:
   librarium:
     command: "librarium"
     args: ["mcp"]
+```
+
+**OpenClaw** ([MCP registry docs](https://docs.openclaw.ai/cli/mcp/registry)): save it in OpenClaw's user configuration. The local Gateway must be stopped before CLI mutations; ask before stopping a running Gateway, or use its Control UI. These docs do not document a project-only registration scope:
+
+```bash
+openclaw mcp add librarium --command librarium --arg mcp
+```
+
+**OpenCode** ([v2 MCP docs](https://opencode.ai/v2/docs/mcp-servers/), [config locations](https://opencode.ai/v2/docs/config/)): for v2, use `--global` for user-wide; omit it for this project:
+
+```bash
+opencode mcp add librarium --global -- librarium mcp
+```
+
+For manual v2 configuration, merge this into `~/.config/opencode/opencode.json` for user-wide, or `opencode.json` in the project root for this project:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "librarium": {
+        "type": "local",
+        "command": ["librarium", "mcp"]
+      }
+    }
+  }
+}
+```
+
+If the installed OpenCode is v1, its [v1 MCP docs](https://opencode.ai/docs/mcp-servers/) put `librarium` directly under `mcp`, without the `servers` wrapper. Keep the same `type` and `command` fields; do not apply the v2 layout to v1.
+
+**Pi** ([MCP docs](https://pi.dev/docs/latest/mcp)): current Pi has native MCP support. User-wide is the default (`~/.pi/agent/mcp.json`); add `--local` for this project (`.pi/mcp.json`, loaded after project trust):
+
+```bash
+pi mcp add librarium -- librarium mcp
+```
+
+An extension that registers `/mcp` replaces Pi's built-in MCP support. If one is installed, resolve that conflict with the user before using these native instructions. Run `/reload` after changing configuration outside a session.
+
+**VS Code (GitHub Copilot)** ([MCP docs](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)): run **MCP: Open User Configuration** for user-wide within the active VS Code profile; for this project, edit `.vscode/mcp.json`. Merge this VS Code-format entry:
+
+```json
+{
+  "servers": {
+    "librarium": {
+      "type": "stdio",
+      "command": "librarium",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+For portable Copilot/Agent Host configuration, the same docs also support `~/.copilot/mcp-config.json` user-wide or `.mcp.json` in this project, with `mcpServers` instead of `servers`.
+
+**Windsurf** ([Cascade MCP docs](https://docs.windsurf.com/windsurf/cascade/mcp)): these current official docs apply to legacy Cascade, not the default Devin Local agent. In Cascade's Actions, choose Open MCP config file and merge the user-wide entry below. The current documented locations are `~/.config/devin/mcp_config.json` on macOS/Linux and `%APPDATA%\devin\mcp_config.json` on Windows. No project-only scope is documented here; do not use these instructions for Devin Local:
+
+```json
+{
+  "mcpServers": {
+    "librarium": {
+      "command": "librarium",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+**Zed** ([MCP docs](https://zed.dev/docs/ai/mcp)): open **zed: open settings file** and merge this user-wide entry into settings. These MCP docs do not document project-only server registration; do not assume project settings support it:
+
+```json
+{
+  "context_servers": {
+    "librarium": {
+      "command": "librarium",
+      "args": ["mcp"]
+    }
+  }
+}
 ```
 
 **Any other MCP host**: register a stdio server named `librarium` with command `librarium` and args `["mcp"]`, following the host's own config format.

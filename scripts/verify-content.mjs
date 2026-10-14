@@ -219,16 +219,47 @@ for (const path of current) {
 }
 const agents = output("agents/index.html");
 const agentsText = text(agents);
-for (const spelling of ["claude mcp add --scope user librarium -- librarium mcp", "codex mcp add librarium -- librarium mcp", "[mcp_servers.librarium]", "mcpServers", "amp mcp add librarium -- librarium mcp", "mcp_servers:", "opencode.json"]) assert(agentsText.includes(spelling), `missing host registration ${spelling}`);
+for (const spelling of ["claude mcp add --scope user librarium -- librarium mcp", "[mcp_servers.librarium]", "mcpServers", "amp mcp add librarium -- librarium mcp", "mcp_servers:", "opencode.json", "cmd mcp add --scope user librarium -- librarium mcp", "gemini mcp add --scope user librarium librarium mcp", "openclaw mcp add librarium --command librarium --arg mcp", "opencode mcp add librarium --global -- librarium mcp", "pi mcp add librarium -- librarium mcp", "context_servers", "legacy Cascade", "Devin Local"]) assert(agentsText.includes(spelling), `missing host registration ${spelling}`);
 for (const tool of ["research", "get_run", "list_sources"]) assert(agentsText.includes(tool));
 assert(agentsText.includes("exactly three tools") && agentsText.includes("dry_run: true") && agentsText.includes("lower but not raise") && agentsText.includes("until null"));
 assert(!/get_results|check_async|list_providers|list_groups|librarium (?:init|doctor|plan)\b/.test(agentsText));
 const agentPage = parse(agents, parseOptions);
-assert.equal(agentPage.querySelectorAll('[role="tabpanel"]').length, 7);
+const agentHosts = [
+  ["amp", "Amp"], ["claude-code", "Claude Code"], ["claude-desktop", "Claude Desktop"],
+  ["codex", "Codex"], ["command-code", "Command Code"], ["cursor", "Cursor"],
+  ["gemini-cli", "Gemini CLI"], ["hermes", "Hermes Agent"], ["openclaw", "OpenClaw"],
+  ["opencode", "OpenCode"], ["pi", "Pi"], ["vscode", "VS Code (GitHub Copilot)"],
+  ["windsurf", "Windsurf"], ["zed", "Zed"],
+];
+const agentMarkdown = read("src/content/pages/agents.md");
+const installMarkdown = read("src/data/install.md");
+const registrationSections = (markdown) => [...markdown.matchAll(/^\*\*([^\n]+?)\*\*[^\n]*[\s\S]*?(?=^\*\*|^## |$(?![\s\S]))/gm)];
+const markdownHosts = [...agentHosts.map(([, name]) => name), "Any other MCP host"];
+assert.deepEqual(registrationSections(agentMarkdown).map((match) => match[1]), markdownHosts);
+assert.deepEqual(registrationSections(installMarkdown).map((match) => match[1]), markdownHosts);
+assert.deepEqual(agentPage.querySelectorAll('#host-tabs [role="tab"]').map((tab) => tab.id), [...agentHosts.map(([id]) => `host-tab-${id}`), "host-tab-other"]);
+assert.deepEqual(agentPage.querySelectorAll('[data-host-link]').map((link) => link.getAttribute("data-host-link")), agentHosts.map(([id]) => id));
+assert.equal(agentPage.querySelectorAll('[role="tabpanel"]').length, agentHosts.length + 1);
 assert.equal(agentPage.querySelectorAll('button[aria-label="Copy setup prompt"]').length, 0);
-for (const host of ["Claude Code", "Codex", "Cursor", "OpenCode", "Amp", "Hermes Agent", "my coding agent"]) {
+for (const [id, host] of [...agentHosts, ["other", "my coding agent"]]) {
+  const panel = agentPage.querySelector(`#host-panel-${id}`);
   const prompt = agentSetupPromptFor(host);
-  assert(agentsText.includes(prompt) && read("src/content/pages/agents.md").includes(prompt), `missing host prompt ${host}`);
+  assert.equal(panel.querySelector("button[data-copy]").getAttribute("data-copy"), prompt);
+  assert(agentsText.includes(prompt) && agentMarkdown.includes(`\`\`\`text\n${prompt}\n\`\`\``), `missing exact host prompt ${host}`);
+  const index = id === "other" ? agentHosts.length : agentHosts.findIndex(([key]) => key === id);
+  const mdSection = registrationSections(agentMarkdown)[index][0];
+  const installSection = registrationSections(installMarkdown)[index][0];
+  const snippets = (section) => [...section.matchAll(/^```(bash|json|toml|yaml)\n([\s\S]*?)\n```/gm)].map((match) => match[2]);
+  assert.deepEqual(panel.querySelectorAll("pre code").map((code) => code.textContent), snippets(mdSection), `${host} HTML/Markdown snippet drift`);
+  assert.deepEqual(snippets(mdSection), snippets(installSection), `${host} install/Markdown snippet drift`);
+  for (const link of panel.querySelectorAll('a[href^="https:"]')) {
+    const href = link.getAttribute("href");
+    assert(mdSection.includes(href) && installSection.includes(href), `${host} docs link drift: ${href}`);
+  }
+  if (id !== "other") {
+    const logo = panel.querySelector("img").getAttribute("src");
+    assert(existsSync(join(dist, logo)) && read("public/providers/SOURCES.md").includes(logo.split("/").at(-1)), `${host} logo missing or unattributed`);
+  }
 }
 assert.equal(agentPage.querySelectorAll('table tbody tr').length, 3);
 for (const [route, platform] of [["cli", "cli"], ["agents", "cli"], ["javascript", "javascript"], ["laravel", "laravel"]]) {
@@ -259,6 +290,8 @@ assert(read("src/content/pages/stories/agentsy-report.md").includes("historical 
 
 const install = output("install.md");
 assert.equal(install, read("src/data/install.md"));
+for (const fact of ["If you know which MCP client you are running in, use that client", "Ask which client only if you cannot tell", "Default to user-wide scope unless the user asks for this project only", "Confirm the client and scope with the user before changing configuration", "Do not inspect environment variables to identify the client", "command -v librarium"]) assert(install.includes(fact), `install.md missing auto-detection rule ${fact}`);
+assert(!install.includes("## 3. Ask which MCP client and scope"));
 for (const fact of ["22.12.0", "npm install -g librarium", "librarium research --help", "librarium setup --help", "paid provider calls without the user's approval", "Keep the user's API keys out of chat and source control", "Never ask the user to paste a key into chat", "never write credentials into a committed file", "Verify the installation offline", "Preserve the user's existing MCP servers", "librarium setup --check", "list_sources"]) assert(install.includes(fact), `install.md missing ${fact}`);
 for (const route of ["/install.md", "/index.md", "/docs/all.md", "/docs/php/all.md", "/v1/all.md"]) assert(llms.includes(route));
 

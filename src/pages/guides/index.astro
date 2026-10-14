@@ -3,6 +3,7 @@ import Base from "../../layouts/Base.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import Icon from "../../components/Icon.astro";
+import CopyPageButton from "../../components/CopyPageButton.astro";
 import { getReadingLists, guideTitle, guideDescription } from "../../lib/articles";
 import { READING_LABELS } from "../../data/reading-labels";
 const lists = await getReadingLists();
@@ -13,7 +14,7 @@ const lists = await getReadingLists();
   <main class="mx-auto max-w-6xl px-6 pt-12 pb-20 sm:pt-20 lg:px-8">
     <h1 class="text-4xl font-medium tracking-tight text-pretty text-neutral-950 sm:text-6xl">{guideTitle}</h1>
     <p class="mt-6 max-w-[50ch] text-lg/8 text-pretty text-neutral-600">{guideDescription}</p>
-    <a href="/guides/index.md" class="mt-6 inline-flex items-center gap-2 py-2 text-base text-amber-700 sm:text-sm"><Icon name="markdownLogo" class="size-5" /> Read as Markdown</a>
+    <div class="mt-6"><CopyPageButton href="/guides/index.md" /></div>
     {lists.map((list) => <section class="mt-14 grid grid-cols-1 gap-8 border-t border-neutral-200 pt-8 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-12">
       <h2 class="text-xl font-medium text-neutral-950">{list.title}</h2>
       <div class="divide-y divide-neutral-200">

@@ -7,7 +7,7 @@ const { platform = "cli" } = Astro.props;
 const commands = RESEARCH_COMMANDS[platform];
 const installOptions = "installOptions" in commands ? commands.installOptions : null;
 ---
-<div class="rounded-lg border border-neutral-200 bg-white p-5" data-research-steps={platform}>
+<div class="min-w-0" data-research-steps={platform}>
   {installOptions ? (
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div role="radiogroup" aria-label="Install with" class="inline-flex rounded bg-neutral-100 p-0.5 text-xs" data-install-toggle>
@@ -29,7 +29,7 @@ const installOptions = "installOptions" in commands ? commands.installOptions : 
           <Icon name="check" class="hidden size-3.5 group-data-[copy-state=success]:block" />
         </button>
       </div>
-      <code class="block rounded-md bg-neutral-950 p-3 font-mono text-xs/6 text-amber-100"><CommandText command={option.install} /></code>
+      <code class="block rounded-md bg-neutral-950 p-3 font-mono text-xs/6 whitespace-pre-wrap text-amber-100"><CommandText command={option.install} /></code>
     </li>)}
     {([
       ...(installOptions ? [] : [["Install", commands.install]]),
@@ -44,11 +44,10 @@ const installOptions = "installOptions" in commands ? commands.installOptions : 
           <Icon name="check" class="hidden size-3.5 group-data-[copy-state=success]:block" />
         </button>
       </div>
-      <code class="block rounded-md bg-neutral-950 p-3 font-mono text-xs/6 text-amber-100"><CommandText command={command} /></code>
+      <code class="block rounded-md bg-neutral-950 p-3 font-mono text-xs/6 whitespace-pre-wrap text-amber-100"><CommandText command={command} /></code>
     </li>)}
   </ol>
-  <p class="mt-4 text-sm/6 text-neutral-600">Configure your source credentials first. The preview makes no calls; research uses paid services.</p>
-  {platform === "javascript" && <p class="mt-2 text-sm/6 text-neutral-600">Create the client shown below. For the setup wizard, install the <a class="text-amber-700 underline" href="/cli">CLI</a> too.</p>}
+  <p class="mt-4 text-sm/6 text-neutral-600">Preview is free; research can spend. <a class="text-amber-700 underline" href="/docs/costs-and-limits">Costs and limits</a>.</p>
 </div>
 
 <style>

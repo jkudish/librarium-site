@@ -21,6 +21,7 @@ const { href } = Astro.props;
         if (!response.ok) throw new Error("Markdown unavailable");
         return response.text();
       });
+      markdown.catch(() => {}); // Observed here; the try block reports failures.
       try {
         if (typeof ClipboardItem !== "undefined" && navigator.clipboard.write) {
           await navigator.clipboard.write([new ClipboardItem({ "text/plain": markdown.then((text) => new Blob([text], { type: "text/plain" })) })]);

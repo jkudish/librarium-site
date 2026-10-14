@@ -207,6 +207,9 @@
 
 /* Leave room for the floating page-format control at the end of every page. */
 body { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+#page-format-control[data-placement="slot"] { position: static; inset: auto; z-index: auto; width: fit-content; }
+#page-format-control[data-placement="slot"] nav { box-shadow: none; }
+@media (max-width: 767px) { body { padding-bottom: env(safe-area-inset-bottom); } }
 #page-format-control { bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
 
 /* Two synchronized gates apply the dark palette: an explicit

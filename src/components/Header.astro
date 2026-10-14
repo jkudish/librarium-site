@@ -86,6 +86,7 @@ const links = [
 </header>
 
 <section id="machine-panel" hidden class="mx-auto max-w-4xl px-6 pt-10 pb-28 lg:px-8" aria-labelledby="machine-heading">
+  <div data-format-slot="machine" class="mb-6 empty:hidden md:hidden"></div>
   <div class="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
     <div class="min-w-0">
       <p id="machine-heading" class="flex items-center gap-2 font-mono text-lg font-medium text-neutral-950"><Icon name="markdownLogo" class="size-5 text-neutral-500" />Markdown</p>
@@ -130,6 +131,11 @@ const links = [
   const viewport = window.visualViewport;
   function positionFormatControl() {
     if (!formatControl || !viewport) return;
+    if (formatControl.dataset.placement === "slot") {
+      formatControl.style.removeProperty("right");
+      formatControl.style.removeProperty("bottom");
+      return;
+    }
     const rightInset = Math.max(0, window.innerWidth - viewport.offsetLeft - viewport.width);
     const gap = window.innerWidth < 640 ? "0.75rem" : "1.25rem";
     formatControl.style.right = `calc(${rightInset}px + ${gap} + env(safe-area-inset-right))`;
@@ -139,7 +145,28 @@ const links = [
   viewport?.addEventListener("resize", positionFormatControl);
   viewport?.addEventListener("scroll", positionFormatControl);
   window.addEventListener("resize", positionFormatControl);
-  positionFormatControl();
+  // Phones: the control sits in the footer (or atop the Markdown view, which
+  // hides the footer) instead of floating over content. Wider screens keep
+  // the fixed bottom-right dock. The same element moves, so listeners survive.
+  const phone = window.matchMedia("(max-width: 767px)");
+  const home = document.createComment("page-format-control");
+  formatControl?.before(home);
+  function placeFormatControl() {
+    if (!formatControl) return;
+    const machineMode = document.documentElement.dataset.pageView === "machine";
+    const slot = phone.matches ? document.querySelector<HTMLElement>(`[data-format-slot="${machineMode ? "machine" : "footer"}"]`) : null;
+    if (slot) {
+      if (formatControl.parentElement !== slot) slot.append(formatControl);
+      formatControl.dataset.placement = "slot";
+    } else {
+      if (formatControl.previousSibling !== home) home.after(formatControl);
+      delete formatControl.dataset.placement;
+    }
+    positionFormatControl();
+  }
+  phone.addEventListener("change", placeFormatControl);
+  new MutationObserver(placeFormatControl).observe(document.documentElement, { attributes: true, attributeFilter: ["data-page-view"] });
+  placeFormatControl();
   const human = document.querySelector<HTMLAnchorElement>("#human-view");
   const machine = document.querySelector<HTMLAnchorElement>("#machine-view");
   const panel = document.querySelector<HTMLElement>("#machine-panel");

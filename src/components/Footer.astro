@@ -32,6 +32,8 @@ const groups = [
     <div>
       <a href="/" aria-label="Homepage" class="inline-flex items-center gap-x-2 text-neutral-950"><LogoMark id="logo-footer" class="size-7 shrink-0" /><span class="font-mono text-lg font-semibold text-neutral-950">librarium</span></a>
       <p class="mt-4 max-w-[32ch] text-base/7 text-neutral-600 sm:text-sm/6">Give your agent more than one source.</p>
+      <!-- On phones the Human/Machine control moves here instead of floating over content. -->
+      <div data-format-slot="footer" class="mt-6 empty:hidden md:hidden"></div>
     </div>
     <nav class="grid grid-cols-2 gap-x-6 gap-y-8 text-base font-normal sm:grid-cols-4 sm:text-sm" aria-label="Footer navigation">
       {groups.map((group) => (

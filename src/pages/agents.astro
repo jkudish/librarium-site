@@ -456,14 +456,14 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
               </div>
               <div class="code-panel mt-4 min-w-0">
                 <div class="code-toolbar"><span>Paste into {host.id === "other" ? "your agent" : host.name}</span><button type="button" class="copy-btn group" data-copy={agentSetupPromptFor(host.id === "other" ? "my coding agent" : host.name)} data-copy-state="idle" aria-label={`Copy setup prompt for ${host.name}`}><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy prompt</span></button></div>
-                <p class="px-5 py-4 font-mono text-xs/6 break-words whitespace-pre-wrap text-amber-100">{agentSetupPromptFor(host.id === "other" ? "my coding agent" : host.name)}</p>
+                <p class="px-5 py-4 font-mono text-xs/6 break-words whitespace-pre-wrap text-amber-100">{agentSetupPromptFor(host.id === "other" ? "my coding agent" : host.name).replace(/\/install\.md$/, "")}<wbr />/install.md</p>
               </div>
               <p class="mt-6 text-sm font-medium text-neutral-950">Or register it yourself</p>
               <p class="mt-1 max-w-[75ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline(host.intro)} />
               {host.blocks.length > 0 && (
                 <div class:list={["mt-4 grid gap-4", host.blocks.length > 1 && "lg:grid-cols-2"]}>
                   {host.blocks.map((block) => (
-                    <div class="code-panel min-w-0">
+                    <div class:list={["code-panel min-w-0", block.lang === "bash" && "code-panel-wrap"]}>
                       <div class="code-toolbar"><span>{block.label}</span><button type="button" class="copy-btn group" data-copy={block.code} data-copy-state="idle" aria-label={`Copy ${host.name} ${block.label === "Terminal" ? "command" : block.label}`}><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" /><span class="copy-label">Copy</span></button></div>
                       <Code code={block.code} lang={block.lang} theme="github-dark-default" />
                     </div>
@@ -567,6 +567,8 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
   .code-toolbar > span { min-width: 0; }
   .code-toolbar .copy-btn { flex-shrink: 0; white-space: nowrap; color: var(--color-neutral-300); padding: 0.375rem 0.5rem; }
   .code-toolbar .copy-btn:hover { color: var(--color-amber-300); background: rgb(255 255 255 / 0.06); }
+  /* Shell commands wrap at spaces, never inside a token; config files keep their shape. */
+  .code-panel-wrap :global(pre) { white-space: pre-wrap; overflow-wrap: normal; word-break: normal; }
   .code-panel :global(pre) {
     margin: 0;
     padding: 1rem 1.25rem;

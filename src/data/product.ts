@@ -42,7 +42,7 @@ export const WORKFLOWS = [
   {
     id: "engines",
     title: "Check AI answer engines.",
-    summary: "See how ChatGPT, Gemini, and Copilot answer questions about your product or category: what they recommend and which pages they cite. Engines never run by default; name the ones you want to check.",
+    summary: "See how ChatGPT, Gemini, and Copilot answer questions about your product or category: what they recommend and which pages they cite.",
     command: `librarium research "${exampleQuestion}" --only chatgpt,gemini-app,copilot`,
   },
 ] as const;

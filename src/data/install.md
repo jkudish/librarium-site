@@ -106,6 +106,27 @@ cmd mcp add --scope user librarium -- librarium mcp
 }
 ```
 
+**Devin** ([MCP docs](https://docs.devin.ai/cli/extensibility/mcp/configuration)): use Devin for Terminal (the `devin` CLI) to run this local stdio server. Use `--scope user` for user-wide; use `--scope local` for this project privately, or `--scope project` for a shared configuration:
+
+```bash
+devin mcp add --scope user librarium -- librarium mcp
+```
+
+For manual configuration, merge this into `~/.config/devin/mcp_config.json` for user-wide (`%APPDATA%\devin\mcp_config.json` on Windows), `.devin/mcp_config.local.json` for this project privately, or `.devin/mcp_config.json` for a shared project configuration:
+
+```json
+{
+  "mcpServers": {
+    "librarium": {
+      "command": "librarium",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+These dedicated MCP files apply from v3000.3 (Local 3.6); older versions store `mcpServers` in their main `config.json` or `config.local.json` files and migrate on startup.
+
 **Gemini CLI** ([MCP docs](https://geminicli.com/docs/tools/mcp-server/)): use `--scope user` for user-wide (`~/.gemini/settings.json`), or `--scope project` for this project (`.gemini/settings.json`):
 
 ```bash
@@ -173,19 +194,6 @@ An extension that registers `/mcp` replaces Pi's built-in MCP support. If one is
 ```
 
 For portable Copilot/Agent Host configuration, the same docs also support `~/.copilot/mcp-config.json` user-wide or `.mcp.json` in this project, with `mcpServers` instead of `servers`.
-
-**Windsurf** ([Cascade MCP docs](https://docs.windsurf.com/windsurf/cascade/mcp)): these current official docs apply to legacy Cascade, not the default Devin Local agent. In Cascade's Actions, choose Open MCP config file and merge the user-wide entry below. The current documented locations are `~/.config/devin/mcp_config.json` on macOS/Linux and `%APPDATA%\devin\mcp_config.json` on Windows. No project-only scope is documented here; do not use these instructions for Devin Local:
-
-```json
-{
-  "mcpServers": {
-    "librarium": {
-      "command": "librarium",
-      "args": ["mcp"]
-    }
-  }
-}
-```
 
 **Zed** ([MCP docs](https://zed.dev/docs/ai/mcp)): open **zed: open settings file** and merge this user-wide entry into settings. These MCP docs do not document project-only server registration; do not assume project settings support it:
 

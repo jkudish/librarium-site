@@ -219,20 +219,32 @@ for (const path of current) {
 }
 const agents = output("agents/index.html");
 const agentsText = text(agents);
-for (const spelling of ["claude mcp add --scope user librarium -- librarium mcp", "[mcp_servers.librarium]", "mcpServers", "amp mcp add librarium -- librarium mcp", "mcp_servers:", "opencode.json", "cmd mcp add --scope user librarium -- librarium mcp", "gemini mcp add --scope user librarium librarium mcp", "openclaw mcp add librarium --command librarium --arg mcp", "opencode mcp add librarium --global -- librarium mcp", "pi mcp add librarium -- librarium mcp", "context_servers", "legacy Cascade", "Devin Local"]) assert(agentsText.includes(spelling), `missing host registration ${spelling}`);
+for (const spelling of ["claude mcp add --scope user librarium -- librarium mcp", "[mcp_servers.librarium]", "mcpServers", "amp mcp add librarium -- librarium mcp", "mcp_servers:", "cmd mcp add --scope user librarium -- librarium mcp", "devin mcp add --scope user librarium -- librarium mcp", "gemini mcp add --scope user librarium librarium mcp", "openclaw mcp add librarium --command librarium --arg mcp", "opencode mcp add librarium --global -- librarium mcp", "pi mcp add librarium -- librarium mcp", "context_servers"]) assert(agentsText.includes(spelling), `missing host registration ${spelling}`);
 for (const tool of ["research", "get_run", "list_sources"]) assert(agentsText.includes(tool));
-assert(agentsText.includes("exactly three tools") && agentsText.includes("dry_run: true") && agentsText.includes("lower but not raise") && agentsText.includes("until null"));
+const agentDocs = read("src/content/docs/using-with-agents.md");
+for (const contract of ["Exactly three tools", "dry_run: true", "can only lower", "45 seconds, maximum 50", "until null with unchanged id/source", "concatenate JSON-text pages", "invalidates an old cursor", "agreement are not independent confirmation"]) assert(agentDocs.includes(contract), `agent docs missing detailed contract ${contract}`);
 assert(!/get_results|check_async|list_providers|list_groups|librarium (?:init|doctor|plan)\b/.test(agentsText));
 const agentPage = parse(agents, parseOptions);
 const agentHosts = [
   ["amp", "Amp"], ["claude-code", "Claude Code"], ["claude-desktop", "Claude Desktop"],
   ["codex", "Codex"], ["command-code", "Command Code"], ["cursor", "Cursor"],
-  ["gemini-cli", "Gemini CLI"], ["hermes", "Hermes Agent"], ["openclaw", "OpenClaw"],
+  ["devin", "Devin"], ["gemini-cli", "Gemini CLI"], ["hermes", "Hermes Agent"],
+  ["openclaw", "OpenClaw"],
   ["opencode", "OpenCode"], ["pi", "Pi"], ["vscode", "VS Code (GitHub Copilot)"],
-  ["windsurf", "Windsurf"], ["zed", "Zed"],
+  ["zed", "Zed"],
 ];
 const agentMarkdown = read("src/content/pages/agents.md");
 const installMarkdown = read("src/data/install.md");
+const agentHeadings = ["Ask a question. Your agent does the reading.", "Set it up once.", "What your agent can call", "Read everything. Then check it."];
+assert.deepEqual(agentPage.querySelectorAll("main h2").map((heading) => heading.textContent), agentHeadings);
+assert.deepEqual([...agentMarkdown.matchAll(/^## (.+)$/gm)].map((match) => match[1]), agentHeadings);
+assert.equal(agentPage.querySelectorAll('figure[aria-label="Example prompt and outcome"]').length, 1);
+assert.equal(agentPage.querySelectorAll('figure blockquote').length, 1);
+assert.equal(agentPage.querySelectorAll('figure ol').length, 0);
+assert.equal(agentPage.querySelector('[data-agent-setup]').classList.contains("border"), false);
+assert.equal(agentPage.querySelector('[data-research-steps]').parentNode.parentNode.classList.contains("border"), false);
+for (const image of agentPage.querySelectorAll("main img")) assert(image.classList.contains("logo-mono") && image.classList.contains("grayscale"), `agent logo lacks monochrome treatment: ${image.getAttribute("src")}`);
+assert(!/<image\b|data:image/i.test(read("public/agents/amp.svg")), "Amp mark must be vector-only");
 const registrationSections = (markdown) => [...markdown.matchAll(/^\*\*([^\n]+?)\*\*[^\n]*[\s\S]*?(?=^\*\*|^## |$(?![\s\S]))/gm)];
 const markdownHosts = [...agentHosts.map(([, name]) => name), "Any other MCP host"];
 assert.deepEqual(registrationSections(agentMarkdown).map((match) => match[1]), markdownHosts);
@@ -251,7 +263,9 @@ for (const [id, host] of [...agentHosts, ["other", "my coding agent"]]) {
   const installSection = registrationSections(installMarkdown)[index][0];
   const snippets = (section) => [...section.matchAll(/^```(bash|json|toml|yaml)\n([\s\S]*?)\n```/gm)].map((match) => match[2]);
   assert.deepEqual(panel.querySelectorAll("pre code").map((code) => code.textContent), snippets(mdSection), `${host} HTML/Markdown snippet drift`);
-  assert.deepEqual(snippets(mdSection), snippets(installSection), `${host} install/Markdown snippet drift`);
+  // /agents shows one working registration; install.md retains scope/version alternatives.
+  assert.equal(snippets(mdSection).length, id === "other" ? 0 : 1, `${host} must show one manual registration`);
+  for (const snippet of snippets(mdSection)) assert(snippets(installSection).includes(snippet), `${host} install/Markdown snippet drift`);
   for (const link of panel.querySelectorAll('a[href^="https:"]')) {
     const href = link.getAttribute("href");
     assert(mdSection.includes(href) && installSection.includes(href), `${host} docs link drift: ${href}`);
@@ -261,7 +275,19 @@ for (const [id, host] of [...agentHosts, ["other", "my coding agent"]]) {
     assert(existsSync(join(dist, logo)) && read("public/providers/SOURCES.md").includes(logo.split("/").at(-1)), `${host} logo missing or unattributed`);
   }
 }
-assert.equal(agentPage.querySelectorAll('table tbody tr').length, 3);
+const toolRows = [
+  ["research", "Preview or start research across your chosen sources."],
+  ["get_run", "Read saved answers and citations, or resume pending research."],
+  ["list_sources", "Discover configured sources and price hints without making provider calls."],
+];
+assert.deepEqual(agentPage.querySelectorAll("table thead th").map((cell) => cell.textContent), ["Tool", "What it does"]);
+assert.deepEqual(agentPage.querySelectorAll("table tbody tr").map((row) => row.querySelectorAll("th, td").map((cell) => cell.textContent)), toolRows);
+for (const [tool, description] of toolRows) assert(agentMarkdown.includes(`| \`${tool}\` | ${description} |`), `tool summary Markdown drift: ${tool}`);
+for (const column of agentPage.querySelector('[aria-labelledby="evidence-heading"]').querySelectorAll("h3")) {
+  const paragraph = column.parentNode.querySelector("p");
+  assert(paragraph.textContent.split(/[.!?]+/).filter((sentence) => sentence.trim()).length <= 2);
+  assert(paragraph.querySelectorAll("a").length <= 1);
+}
 for (const [route, platform] of [["cli", "cli"], ["agents", "cli"], ["javascript", "javascript"], ["laravel", "laravel"]]) {
   const page = parse(output(`${route}/index.html`), parseOptions);
   const steps = page.querySelector(`[data-research-steps="${platform}"]`);
@@ -271,7 +297,12 @@ for (const [route, platform] of [["cli", "cli"], ["agents", "cli"], ["javascript
   assert.deepEqual(steps.querySelectorAll('code').map((node) => node.textContent), [commands.install, commands.setup, commands.preview, commands.research]);
   const markdown = output(`${route}.md`);
   for (const command of [commands.install, commands.setup, commands.preview, commands.research]) assert(markdown.includes(command), `${route}.md missing canonical command ${command}`);
-  assert(page.querySelector('a[href$="/costs-and-limits"]'), `${route} missing costs reference`);
+  if (route === "agents") {
+    assert(page.querySelector('a[href="/docs/using-with-agents#mcp-server"]'), "agents missing setup details link");
+    assert(agentDocs.includes("/docs/costs-and-limits"), "agent setup docs missing costs reference");
+  } else {
+    assert(page.querySelector('a[href$="/costs-and-limits"]'), `${route} missing costs reference`);
+  }
 }
 for (const [path, labels] of Object.entries(READING_LABELS)) {
   for (const label of Object.values(labels)) assert(text(output("guides/index.html")).includes(label) && output("guides/index.md").includes(label), `missing reading label ${path}: ${label}`);

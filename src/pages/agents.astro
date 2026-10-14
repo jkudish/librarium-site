@@ -45,40 +45,37 @@ const hosts: Host[] = [
   {
     id: "amp", name: "Amp", logo: "/agents/amp.svg",
     docs: [{ label: "MCP docs", href: "https://ampcode.com/docs/customize/mcp" }],
-    intro: "User-wide: add it by command, or merge into `~/.config/amp/settings.json`. For this project, merge into `.amp/settings.json` instead, then approve with `amp mcp approve librarium`.",
+    intro: "Register user-wide from your terminal.",
     blocks: [
       { label: "Terminal (user-wide)", lang: "bash", code: "amp mcp add librarium -- librarium mcp" },
-      { label: "Amp settings", lang: "json", code: '{\n  "amp.mcpServers": {\n    "librarium": {\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' },
     ],
-    note: "User settings do not require workspace-server approval. Preserve every other server when merging configuration.",
   },
   {
     id: "claude-code",
     name: "Claude Code",
     logo: "/providers/claude.svg",
     docs: [{ label: "MCP docs", href: "https://code.claude.com/docs/en/mcp" }],
-    intro: "Use `--scope user` for user-wide; use `--scope local` for this project privately, or `--scope project` for a shared `.mcp.json`.",
+    intro: "Register user-wide from your terminal.",
     blocks: [{ label: "Terminal", lang: "bash", code: "claude mcp add --scope user librarium -- librarium mcp" }],
   },
   {
     id: "claude-desktop", name: "Claude Desktop", logo: "/providers/claude.svg",
     docs: [{ label: "local server docs", href: "https://modelcontextprotocol.io/docs/develop/connect-local-servers" }],
-    intro: "Open Settings → Developer → Edit Config. Merge this user-wide entry into `claude_desktop_config.json`: macOS `~/Library/Application Support/Claude/claude_desktop_config.json`; Windows `%APPDATA%\\Claude\\claude_desktop_config.json`.",
+    intro: "Open Settings, then Developer, then Edit Config; merge this entry and restart Claude Desktop.",
     blocks: [{ label: "claude_desktop_config.json", lang: "json", code: '{\n  "mcpServers": {\n    "librarium": {\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
-    note: "Completely quit and restart Claude Desktop. The linked docs do not document a project-only scope; do not substitute a project file.",
   },
   {
     id: "codex",
     name: "Codex",
     logo: "/agents/codex.svg",
     docs: [{ label: "MCP docs", href: "https://learn.chatgpt.com/codex/extend/mcp" }],
-    intro: "Merge into `~/.codex/config.toml` for user-wide, or `.codex/config.toml` for this project (trusted projects only).",
+    intro: "Merge into `~/.codex/config.toml` for user-wide setup.",
     blocks: [{ label: "config.toml", lang: "toml", code: '[mcp_servers.librarium]\ncommand = "librarium"\nargs = ["mcp"]' }],
   },
   {
     id: "command-code", name: "Command Code", logo: "/agents/command-code.svg",
     docs: [{ label: "MCP docs", href: "https://commandcode.ai/docs/mcp" }],
-    intro: "Use `--scope user` for user-wide (`~/.commandcode/mcp.json`); use `--scope local` for this project privately, or `--scope project` for a shared `.mcp.json`. Flags go before the server name.",
+    intro: "Register user-wide from your terminal.",
     blocks: [{ label: "Terminal", lang: "bash", code: "cmd mcp add --scope user librarium -- librarium mcp" }],
   },
   {
@@ -86,13 +83,19 @@ const hosts: Host[] = [
     name: "Cursor",
     logo: "/agents/cursor.svg",
     docs: [{ label: "MCP docs", href: "https://cursor.com/docs/mcp" }],
-    intro: "Merge into `~/.cursor/mcp.json` for user-wide, or `.cursor/mcp.json` for this project.",
+    intro: "Merge into `~/.cursor/mcp.json` for user-wide setup.",
     blocks: [{ label: "mcp.json", lang: "json", code: '{\n  "mcpServers": {\n    "librarium": {\n      "type": "stdio",\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
+  },
+  {
+    id: "devin", name: "Devin", logo: "/agents/devin.svg",
+    docs: [{ label: "MCP docs", href: "https://docs.devin.ai/cli/extensibility/mcp/configuration" }],
+    intro: "For Devin for Terminal, register user-wide from your terminal.",
+    blocks: [{ label: "Terminal", lang: "bash", code: "devin mcp add --scope user librarium -- librarium mcp" }],
   },
   {
     id: "gemini-cli", name: "Gemini CLI", logo: "/providers/gemini.svg",
     docs: [{ label: "MCP docs", href: "https://geminicli.com/docs/tools/mcp-server/" }],
-    intro: "Use `--scope user` for user-wide (`~/.gemini/settings.json`), or `--scope project` for this project (`.gemini/settings.json`).",
+    intro: "Register user-wide from your terminal.",
     blocks: [{ label: "Terminal", lang: "bash", code: "gemini mcp add --scope user librarium librarium mcp" }],
   },
   {
@@ -100,14 +103,13 @@ const hosts: Host[] = [
     docs: [{ label: "MCP docs", href: "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp" }],
     intro: "Merge into `~/.hermes/config.yaml` for user-wide.",
     blocks: [{ label: "~/.hermes/config.yaml", lang: "yaml", code: 'mcp_servers:\n  librarium:\n    command: "librarium"\n    args: ["mcp"]' }],
-    note: "The linked MCP docs do not document a project-only config file. If that scope is required, ask rather than inventing one.",
   },
   {
     id: "openclaw", name: "OpenClaw", logo: "/agents/openclaw.svg",
     docs: [{ label: "MCP registry docs", href: "https://docs.openclaw.ai/cli/mcp/registry" }],
-    intro: "Save it in OpenClaw's user configuration. The local Gateway must be stopped before CLI mutations; ask before stopping a running Gateway, or use its Control UI.",
+    intro: "Register in OpenClaw's user configuration.",
     blocks: [{ label: "Terminal", lang: "bash", code: "openclaw mcp add librarium --command librarium --arg mcp" }],
-    note: "The linked registry docs do not document a project-only registration scope.",
+    note: "Ask before stopping a running Gateway; CLI changes require it stopped, or use the Control UI.",
   },
   {
     id: "opencode",
@@ -115,43 +117,30 @@ const hosts: Host[] = [
     logo: "/agents/opencode.svg",
     docs: [
       { label: "v2 MCP docs", href: "https://opencode.ai/v2/docs/mcp-servers/" },
-      { label: "config locations", href: "https://opencode.ai/v2/docs/config/" },
-      { label: "v1 MCP docs", href: "https://opencode.ai/docs/mcp-servers/" },
     ],
-    intro: "For v2, use `--global` for user-wide; omit it for this project. Or merge under `mcp.servers` in `~/.config/opencode/opencode.json` for user-wide, or `opencode.json` in this project.",
+    intro: "With OpenCode v2, register user-wide from your terminal.",
     blocks: [
       { label: "Terminal (v2)", lang: "bash", code: "opencode mcp add librarium --global -- librarium mcp" },
-      { label: "opencode.json (v2)", lang: "json", code: '{\n  "mcp": {\n    "servers": {\n      "librarium": {\n        "type": "local",\n        "command": ["librarium", "mcp"]\n      }\n    }\n  }\n}' },
     ],
-    note: "For OpenCode v1, put `librarium` directly under `mcp`, without the `servers` wrapper. Keep the same `type` and `command` fields; do not apply the v2 layout to v1.",
   },
   {
     id: "pi", name: "Pi", logo: "/agents/pi.svg",
     docs: [{ label: "MCP docs", href: "https://pi.dev/docs/latest/mcp" }],
-    intro: "Current Pi has native MCP support. User-wide is the default (`~/.pi/agent/mcp.json`); add `--local` for this project (`.pi/mcp.json`, loaded after project trust).",
+    intro: "Register user-wide with Pi's native MCP support.",
     blocks: [{ label: "Terminal", lang: "bash", code: "pi mcp add librarium -- librarium mcp" }],
-    note: "An extension that registers `/mcp` replaces Pi's built-in MCP support. Resolve that conflict with the user first. Run `/reload` after changing configuration outside a session.",
+    note: "An extension providing `/mcp` overrides native support; resolve that conflict first.",
   },
   {
     id: "vscode", name: "VS Code (GitHub Copilot)", logo: "/agents/vscode.png",
     docs: [{ label: "MCP docs", href: "https://code.visualstudio.com/docs/copilot/customization/mcp-servers" }],
-    intro: "Run MCP: Open User Configuration for user-wide within the active VS Code profile; for this project, edit `.vscode/mcp.json`. Merge this VS Code-format entry.",
+    intro: "Run MCP: Open User Configuration and merge this entry.",
     blocks: [{ label: "mcp.json (VS Code format)", lang: "json", code: '{\n  "servers": {\n    "librarium": {\n      "type": "stdio",\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
-    note: "For portable Copilot/Agent Host configuration, use `~/.copilot/mcp-config.json` user-wide or `.mcp.json` in this project, with `mcpServers` instead of `servers`.",
-  },
-  {
-    id: "windsurf", name: "Windsurf", logo: "/agents/windsurf.svg",
-    docs: [{ label: "Cascade MCP docs", href: "https://docs.windsurf.com/windsurf/cascade/mcp" }],
-    intro: "These current docs apply to legacy Cascade, not the default Devin Local agent. Open Cascade's Actions → Open MCP config file and merge this user-wide entry. Current documented locations: macOS/Linux `~/.config/devin/mcp_config.json`; Windows `%APPDATA%\\devin\\mcp_config.json`.",
-    blocks: [{ label: "mcp_config.json (Cascade)", lang: "json", code: '{\n  "mcpServers": {\n    "librarium": {\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
-    note: "No project-only scope is documented here. Do not use these instructions for Devin Local.",
   },
   {
     id: "zed", name: "Zed", logo: "/agents/zed.png",
     docs: [{ label: "MCP docs", href: "https://zed.dev/docs/ai/mcp" }],
     intro: "Open zed: open settings file and merge this user-wide entry into settings.",
     blocks: [{ label: "Zed settings", lang: "json", code: '{\n  "context_servers": {\n    "librarium": {\n      "command": "librarium",\n      "args": ["mcp"]\n    }\n  }\n}' }],
-    note: "The linked MCP docs do not document project-only server registration; do not assume project settings support it.",
   },
   {
     id: "other",
@@ -162,117 +151,15 @@ const hosts: Host[] = [
   },
 ];
 
-// Tool contracts mirror "What your agent can call" in agents.md, which in
-// turn mirrors src/mcp/run-server.ts in the librarium repository.
+// Detailed contracts live in /docs/using-with-agents.
 const tools = [
-  {
-    name: "research",
-    input: "a required `question`, plus optional `depth` (`quick` or `deep`), `only`, `skip`, `max_cost`, `dry_run`, and `wait_seconds`.",
-    output: "a bounded summary with id, source statuses, citation counts, costs, skips, and a next hint. It does not paste whole answers into chat.",
-    use: "Use `dry_run: true` to preview offline. `max_cost` can lower but not raise the configured cap. Waiting defaults to 45 seconds, maximum 50.",
-  },
-  {
-    name: "get_run",
-    input: "the Run `id`, optionally `wait_seconds`, one `source`, and a `cursor`.",
-    output: "a Run summary, or paged JSON text containing a source answer and citations.",
-    use: "Follow `cursor` with unchanged id/source until null; concatenate pages before parsing. A changed answer invalidates an old cursor. Retrieves in-progress research without starting new research.",
-  },
-  {
-    name: "list_sources",
-    input: "none.",
-    output: "research sources, AI answer engines chosen by name, saved groups, availability, and price hints.",
-    use: "Offline discovery checks local configuration, not provider authentication. Save your own source lists as groups.",
-  },
+  { name: "research", description: "Preview or start research across your chosen sources." },
+  { name: "get_run", description: "Read saved answers and citations, or resume pending research." },
+  { name: "list_sources", description: "Discover configured sources and price hints without making provider calls." },
 ];
 
-// Practical agent prompts for source selection and complete evidence reading.
-const askPrompts = [
-  {
-    title: "Research a technical decision",
-    prompt: "Use Librarium to compare SQLite and Postgres for a small team app. Start with quick research on deployment, concurrent writes, and operational overhead. Read the evidence and cite the sources behind your recommendation.",
-  },
-  {
-    title: "Plan a provider matrix first",
-    prompt: "Before implementing this integration, use the Librarium MCP tools to research the API’s authentication, rate limits, and retry guidance. Discover sources with list_sources, preview the selection with dry_run, and read the full results with get_run. Cite the relevant documentation.",
-  },
-  {
-    title: "See how answer engines describe you",
-    prompt: "Use Librarium to compare ChatGPT, Gemini, and Copilot answers about luxury villa rentals for a week on the Amalfi Coast. Which services appear, how are they described, and which sources get cited? Keep each engine’s findings separate.",
-  },
-];
-
-// Illustrative summaries, not captured provider results.
-const quickRun = "run_01JAB2C3D4E5F6G7H8J9K0M1N2";
-const deepRun = "run_01JAB2C3D4E5F6G7H8J9K0M1N3";
-type Turn =
-  | { kind: "user"; text: string }
-  | { kind: "agent"; text: string }
-  | { kind: "tool"; name: string; input: string; output: string; note?: string };
-const session: Turn[] = [
-  { kind: "user", text: "Before I add retries to our webhook client, research current guidance on exponential backoff, jitter, and idempotency keys. Start with a quick pass, then go deeper if coverage is thin. Keep each source’s citations attached." },
-  { kind: "agent", text: "First I’ll discover sources and preview the selection offline." },
-  {
-    kind: "tool",
-    name: "list_sources",
-    input: "{}",
-    output: "sources: exa, gemini, openai, …; configured variants and price hints",
-    note: "Local and free",
-  },
-  {
-    kind: "tool",
-    name: "research",
-    input: 'question: "Retry backoff, jitter, and idempotency keys", only: ["exa", "gemini"], dry_run: true',
-    output: 'status: "planned", selected sources and estimates, skipped sources',
-    note: "Not stored; no provider calls",
-  },
-  {
-    kind: "tool",
-    name: "research",
-    input: 'question: "Retry backoff, jitter, and idempotency keys", only: ["exa", "gemini"]',
-    output: `id: "${quickRun}", status: "done", source statuses and citation counts`,
-  },
-  {
-    kind: "tool",
-    name: "get_run",
-    input: `id: "${quickRun}", source: "exa"`,
-    output: 'content: "JSON-text chunk with answer and citations", cursor: "…"',
-    note: "Read each source until cursor is null",
-  },
-  { kind: "agent", text: "The quick answers support backoff with jitter but are thin on repeated idempotency keys. I’ll look for a deeper report on that part." },
-  {
-    kind: "tool",
-    name: "research",
-    input: 'question: "How should a server handle a repeated Idempotency-Key?", depth: "deep", only: ["openai"], wait_seconds: 0',
-    output: `id: "${deepRun}", status: "running"`,
-  },
-  {
-    kind: "tool",
-    name: "get_run",
-    input: `id: "${deepRun}", wait_seconds: 45`,
-    output: 'status: "done", source statuses and citation counts',
-    note: "Starts no new research",
-  },
-  {
-    kind: "tool",
-    name: "get_run",
-    input: `id: "${deepRun}", source: "openai"`,
-    output: 'content: "JSON text with answer and citations", cursor: null',
-  },
-];
-const answer = [
-  {
-    claim: "Retry with capped exponential backoff and full jitter, not fixed intervals.",
-    sources: [{ profile: "exa", source: "AWS Builders’ Library: Timeouts, retries, and backoff with jitter" }, { profile: "gemini", source: "Google Cloud: Retry strategy" }],
-  },
-  {
-    claim: "Send an Idempotency-Key on every retried POST; the server returns the first response for a key it has already seen.",
-    sources: [{ profile: "openai", source: "Stripe API reference: Idempotent requests" }, { profile: "openai", source: "IETF draft: The Idempotency-Key HTTP Header Field" }],
-  },
-  {
-    claim: "Honor Retry-After on 429 and 503 before applying your own backoff.",
-    sources: [{ profile: "gemini", source: "RFC 9110: HTTP Semantics" }],
-  },
-];
+const examplePrompt = "Use Librarium to compare SQLite and Postgres for our team app, with sources.";
+const exampleOutcome = "A recommendation grounded in deployment and concurrency evidence, with links to the sources.";
 
 const sectionHeading = "max-w-[22ch] text-3xl font-medium tracking-tight text-balance text-neutral-950 sm:text-5xl";
 const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 underline-offset-[3px] hover:text-amber-600";
@@ -287,7 +174,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
         <div>
           <p class="mb-4 font-mono text-xs tracking-wide text-amber-700 uppercase">A meta harness for research queries</p>
           <h1 class="max-w-[21ch] text-4xl/[1.08] font-medium tracking-[-0.045em] text-pretty text-neutral-950 sm:text-6xl/[1.06]">{title}</h1>
-          <p class="mt-6 max-w-[58ch] text-lg/8 text-pretty text-neutral-600">Query search engines, AI answer engines, and deep-research APIs from one interface, and keep every answer with its citations.</p>
+          <p class="mt-6 max-w-[58ch] text-lg/8 text-pretty text-neutral-600">Query search, AI answers, and deep research with citations.</p>
           <p class="mt-6 max-w-[58ch] text-lg/8 text-pretty text-neutral-600">{description}</p>
           <div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
             <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
@@ -301,7 +188,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
             {hosts.filter((host) => host.logo).map((host) => (
               <li>
                 <a href={`#host-tab-${host.id}`} data-host-link={host.id} class="flex h-full flex-col items-center gap-2 rounded-md border border-neutral-200 bg-white px-2 py-3 text-center text-xs text-neutral-700 hover:border-neutral-300 hover:text-neutral-950">
-                  <span class="logo-tile flex size-8 items-center justify-center rounded-md"><img src={host.logo} alt="" width="20" height="20" class="size-5" /></span>
+                  <span class="logo-tile flex size-8 items-center justify-center rounded-md"><img src={host.logo} alt="" width="20" height="20" class="logo-mono size-5 object-contain grayscale" /></span>
                   {host.name}
                 </a>
               </li>
@@ -311,92 +198,20 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
       </div>
     </div>
 
-    <!-- How you'd use it: an illustrative agent session over MCP. -->
+    <!-- One illustrative prompt and outcome, not a captured research result. -->
     <section class="py-16 sm:py-24" aria-labelledby="usage-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="usage-heading" class={sectionHeading}>Ask a question. Your agent does the reading.</h2>
-        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">You ask in plain language. Your agent previews sources, researches, resumes the slow ones, and reads every saved page before it answers, with each finding still tied to its source.</p>
-
-        <div class="mt-12 grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:gap-12">
-          <figure class="min-w-0 overflow-hidden rounded-lg border border-neutral-200 bg-white">
-            <div class="flex items-center justify-between gap-4 border-b border-neutral-200 bg-[#faf9f6] px-4 py-3 sm:px-5">
-              <div class="flex items-center gap-2">
-                <span class="flex gap-1.5" aria-hidden="true"><span class="size-2.5 rounded-full bg-neutral-300 dark:bg-neutral-600"></span><span class="size-2.5 rounded-full bg-neutral-300 dark:bg-neutral-600"></span><span class="size-2.5 rounded-full bg-neutral-300 dark:bg-neutral-600"></span></span>
-                <span class="ml-2 font-mono text-xs whitespace-nowrap text-neutral-500"><span class="max-sm:hidden">your agent · </span>Librarium MCP</span>
-              </div>
-              <span class="rounded-sm border border-neutral-200 px-1.5 py-0.5 font-mono text-[11px] tracking-wide text-neutral-500 uppercase">Example session</span>
-            </div>
-            <ol class="space-y-4 px-4 py-6 sm:px-6" aria-label="Example agent session">
-              {session.map((turn) => (
-                turn.kind === "user" ? (
-                  <li class="flex justify-end">
-                    <div class="user-bubble max-w-[85%] rounded-lg rounded-br-sm bg-neutral-950 px-4 py-3 text-sm/6 text-pretty text-white">
-                      <span class="sr-only">You: </span>{turn.text}
-                    </div>
-                  </li>
-                ) : turn.kind === "agent" ? (
-                  <li class="max-w-[90%] text-sm/6 text-pretty text-neutral-700"><span class="sr-only">Agent: </span>{turn.text}</li>
-                ) : (
-                  <li class="tool-call min-w-0 rounded-md border border-neutral-200 bg-neutral-50 font-mono text-xs/5">
-                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-neutral-200 px-3 py-2">
-                      <Icon name="terminal" class="size-3.5 text-amber-700" />
-                      <span class="text-neutral-500">Librarium</span>
-                      <span class="font-semibold text-neutral-950">{turn.name}</span>
-                      {turn.note && <span class="ml-auto font-sans text-[11px] text-neutral-500">{turn.note}</span>}
-                    </div>
-                    <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 px-3 py-2">
-                      <dt class="text-neutral-500">in</dt>
-                      <dd class="break-words text-neutral-800">{turn.input}</dd>
-                      <dt class="text-neutral-500">out</dt>
-                      <dd class="break-words text-neutral-600">{turn.output}</dd>
-                    </dl>
-                  </li>
-                )
-              ))}
-              <li class="rounded-md border border-amber-700/25 bg-amber-50 px-4 py-4 text-sm/6 text-neutral-700">
-                <span class="sr-only">Agent: </span>
-                <p class="text-neutral-950">Here’s what both passes found, with who said it:</p>
-                <ul class="mt-3 space-y-3">
-                  {answer.map((item) => (
-                    <li>
-                      <p class="text-pretty">{item.claim}</p>
-                      <ul class="mt-1.5 flex flex-wrap gap-1.5" aria-label="Sources">
-                        {item.sources.map((source) => (
-                          <li class="source-chip inline-flex max-w-full items-center gap-1.5 rounded-sm border border-neutral-200 bg-white px-2 py-0.5 text-xs text-neutral-600">
-                            <span class="font-mono text-neutral-950">{source.profile}</span>
-                            <span aria-hidden="true" class="text-neutral-400">·</span>
-                            <span class="truncate">{source.source}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  ))}
-                </ul>
-                <p class="mt-4 text-pretty">Only the deep pass covered the IETF Idempotency-Key text, and it’s still a draft. Open it before you depend on its semantics.</p>
-              </li>
-            </ol>
-            <figcaption class="border-t border-neutral-200 px-4 py-3 text-xs/5 text-neutral-500 sm:px-6">Example session with illustrative ids, tool output, and findings.</figcaption>
-          </figure>
-
-          <div class="min-w-0 lg:sticky lg:top-8 lg:self-start">
-            <h3 class="text-lg font-semibold text-neutral-950">Things to ask your agent</h3>
-            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Paste one of these once Librarium is connected.</p>
-            <ul class="mt-6 space-y-4">
-              {askPrompts.map((item, index) => (
-                <li class="rounded-md border border-neutral-200 bg-white p-4">
-                  <div class="flex items-start justify-between gap-3">
-                    <p class="text-sm font-medium text-neutral-950">{item.title}</p>
-                    <button type="button" class="copy-btn group shrink-0" data-copy={item.prompt} data-copy-state="idle" aria-label={`Copy prompt: ${item.title}`}>
-                      <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" />
-                      <Icon name="check" class="hidden size-4 text-amber-700 group-data-[copy-state=success]:block" />
-                    </button>
-                  </div>
-                  <p id={`ask-${index}`} class="mt-2 text-sm/6 text-pretty text-neutral-600">{item.prompt}</p>
-                </li>
-              ))}
-            </ul>
+        <p class="mt-5 max-w-[62ch] text-lg/8 text-pretty text-neutral-600">Ask in plain language and get a source-backed recommendation.</p>
+        <figure class="mt-8 max-w-3xl rounded-lg border border-neutral-200 bg-white p-6" aria-label="Example prompt and outcome">
+          <div class="flex items-center justify-between gap-3">
+            <p class="font-mono text-xs text-neutral-500 uppercase">Prompt</p>
+            <button type="button" class="copy-btn group" data-copy={examplePrompt} data-copy-state="idle" aria-label="Copy example prompt"><Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" /><Icon name="check" class="hidden size-4 text-amber-700 group-data-[copy-state=success]:block" /></button>
           </div>
-        </div>
+          <blockquote class="mt-2 text-base/7 text-neutral-950">{examplePrompt}</blockquote>
+          <p class="mt-5 font-mono text-xs text-neutral-500 uppercase">Illustrative outcome</p>
+          <p class="mt-2 text-base/7 text-neutral-600">{exampleOutcome}</p>
+        </figure>
       </div>
     </section>
 
@@ -404,45 +219,34 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
     <section id="setup" class="scroll-mt-6 border-t border-neutral-200 bg-[#faf9f6] py-16 sm:py-24" aria-labelledby="setup-heading">
       <div class="mx-auto max-w-6xl px-6 lg:px-8">
         <h2 id="setup-heading" class={sectionHeading}>Set it up once.</h2>
-        <div class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
+        <div class="mt-10 grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-12">
+          <div class="min-w-0">
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">One install, two ways to work</p>
             <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Install the CLI</h3>
-            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Your agent gets research through the same CLI you use. Install it once:</p>
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">The CLI includes the MCP server.</p>
             <div class="mt-4"><ResearchSteps /></div>
-            <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The MCP server and the agent skill ship with that install. [Getting started](/docs#install) covers installation, and the [CLI page](/cli) covers terminal use.")} />
           </div>
-          <div class="flex min-w-0 flex-col rounded-lg border border-neutral-200 bg-white p-6">
+          <div class="min-w-0" data-agent-setup>
             <p class="font-mono text-xs tracking-wide text-neutral-500 uppercase">Or let your agent do it</p>
             <h3 class="mt-3 text-xl font-medium tracking-tight text-neutral-950">Choose your agent below</h3>
-            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6">Each agent tab has its own setup prompt and manual registration instructions. Choose your host, then copy its prompt to install and verify Librarium.</p>
-            <p class="mt-4 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("The agent reads [install.md](/install.md) for Node.js requirements, MCP registration, source setup, and offline verification.")} />
-          </div>
-        </div>
-
-        <div class="mt-6 overflow-hidden rounded-lg border border-neutral-200 bg-white">
-          <div class="px-6 pt-6">
-            <h3 class="text-xl font-medium tracking-tight text-neutral-950">Register the MCP server in your agent</h3>
-            <p class="mt-2 max-w-[70ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Every host launches the same local command: `librarium mcp`. The registration spelling differs per host, so use your own agent's form below.")} />
-            <p class="mt-2 max-w-[70ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Default to user-wide unless you ask for this project only. Your agent uses its known client, asks only if it cannot tell or you want a different one, and confirms the client and scope before changing configuration. Merge entries without replacing other servers. If a host cannot find `librarium`, use the absolute path printed by `command -v librarium`.")} />
-          </div>
+            <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Copy its prompt to install and verify Librarium; [install.md](/install.md) has the full instructions.")} />
           <noscript><style is:inline>[data-host-panel][hidden]{display:block !important}#host-tabs{display:none !important}</style></noscript>
-          <div id="host-tabs" role="tablist" aria-label="Coding agent" class="host-tabs mt-5 grid grid-cols-2 gap-2 border-b border-neutral-200 px-4 pb-4 sm:grid-cols-3 sm:px-5 lg:grid-cols-5">
+          <div id="host-tabs" role="tablist" aria-label="Coding agent" class="host-tabs mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {hosts.map((host, index) => (
               <button type="button" role="tab" id={`host-tab-${host.id}`} aria-selected={index === 0 ? "true" : "false"} aria-controls={`host-panel-${host.id}`} tabindex={index === 0 ? 0 : -1} class="flex min-h-12 min-w-0 cursor-pointer items-center gap-2 rounded-md border border-neutral-200 px-3 py-2 text-left text-sm text-neutral-500 hover:text-neutral-950 aria-selected:border-amber-700 aria-selected:font-medium aria-selected:text-neutral-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700">
                 {host.logo
-                  ? <span class="logo-tile flex size-6 shrink-0 items-center justify-center rounded"><img src={host.logo} alt="" width="16" height="16" class="size-4" /></span>
+                  ? <span class="logo-tile flex size-6 shrink-0 items-center justify-center rounded"><img src={host.logo} alt="" width="16" height="16" class="logo-mono size-4 object-contain grayscale" /></span>
                   : <span class="flex size-6 items-center justify-center rounded border border-neutral-200 text-neutral-600"><Icon name="plus" class="size-3.5" /></span>}
                 <span>{host.name}</span>
               </button>
             ))}
           </div>
           {hosts.map((host, index) => (
-            <div id={`host-panel-${host.id}`} role="tabpanel" aria-labelledby={`host-tab-${host.id}`} tabindex="0" data-host-panel hidden={index !== 0} class="p-6 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-amber-700">
+            <div id={`host-panel-${host.id}`} role="tabpanel" aria-labelledby={`host-tab-${host.id}`} tabindex="0" data-host-panel hidden={index !== 0} class="mt-6 min-w-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-700">
               <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
                 <div class="flex items-center gap-3">
                   {host.logo
-                    ? <span class="logo-tile flex size-10 items-center justify-center rounded-md border border-neutral-200"><img src={host.logo} alt="" width="24" height="24" class="size-6" /></span>
+                    ? <span class="logo-tile flex size-10 items-center justify-center rounded-md border border-neutral-200"><img src={host.logo} alt="" width="24" height="24" class="logo-mono size-6 object-contain grayscale" /></span>
                     : <span class="flex size-10 items-center justify-center rounded-md border border-neutral-200 text-neutral-600"><Icon name="terminal" class="size-5" /></span>}
                   <p class="text-lg font-medium text-neutral-950">{host.id === "other" ? "Any other MCP host" : host.name}</p>
                 </div>
@@ -481,9 +285,6 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
               {host.note && <p class="mt-4 max-w-[75ch] text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline(host.note)} />}
             </div>
           ))}
-          <div class="flex items-start gap-3 border-t border-neutral-200 bg-neutral-50 px-6 py-4 text-base/7 text-neutral-700 sm:text-sm/6">
-            <Icon name="check" class="mt-1 size-4 text-amber-700" />
-            <p set:html={inline("After registering, have your agent call `list_sources` to confirm the connection. It is local and free.")} />
           </div>
         </div>
         <p id="copy-status" role="status" class="sr-only"></p>
@@ -496,22 +297,15 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] lg:gap-12">
           <div class="lg:sticky lg:top-8 lg:self-start">
             <h2 id="tools-heading" class={sectionHeading}>What your agent can call</h2>
-            <p class="mt-5 text-base/7 text-pretty text-neutral-600">The server exposes exactly three tools. Preview, start research, and read saved evidence without filling the chat with whole reports.</p>
-            <p class="mt-4 text-sm/6 text-neutral-600" set:html={inline("See [costs and limits](/docs/costs-and-limits) before paid research.")} />
-            <div class="mt-8 rounded-md border border-neutral-200 bg-neutral-50 p-5">
-              <p class="text-sm font-semibold text-neutral-950">Preview before spending</p>
-              <p class="mt-2 text-base/7 text-pretty text-neutral-600 sm:text-sm/6" set:html={inline("Use `research` with `dry_run: true` for an offline preview. The shared CLI workflow shows the same steps.")} />
-            </div>
+            <p class="mt-5 text-base/7 text-pretty text-neutral-600" set:html={inline("Three tools, with [inputs and limits](/docs/using-with-agents#mcp-server) in the agent docs.")} />
           </div>
-          <div class="min-w-0 overflow-x-auto rounded-lg border border-neutral-200 bg-white" tabindex="0" aria-label="MCP tool reference">
-            <table class="w-full min-w-[640px] text-left text-sm/6">
-              <caption class="sr-only">What your agent can call: tools, inputs, outputs, and limits</caption>
-              <thead class="bg-neutral-50 text-neutral-950"><tr>{["Tool", "Inputs", "Outputs", "Limits"].map((label) => <th scope="col" class="p-4">{label}</th>)}</tr></thead>
+          <div class="min-w-0 rounded-lg border border-neutral-200 bg-white">
+            <table class="w-full text-left text-sm/6">
+              <caption class="sr-only">What your agent can call</caption>
+              <thead class="bg-neutral-50 text-neutral-950"><tr>{["Tool", "What it does"].map((label) => <th scope="col" class="p-4">{label}</th>)}</tr></thead>
               <tbody>{tools.map((tool) => <tr class="border-t border-neutral-200 align-top">
                 <th scope="row" class="p-4 font-mono text-neutral-950">{tool.name}</th>
-                <td class="p-4 text-neutral-600" set:html={inline(tool.input)} />
-                <td class="p-4 text-neutral-600" set:html={inline(tool.output)} />
-                <td class="p-4 text-neutral-600" set:html={inline(tool.use)} />
+                <td class="p-4 text-neutral-600">{tool.description}</td>
               </tr>)}</tbody>
             </table>
           </div>
@@ -526,16 +320,12 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
         <div class="mt-12 grid grid-cols-1 gap-12 border-t border-neutral-950/15 pt-8 lg:grid-cols-2">
           <div>
             <h3 class="text-lg font-semibold text-neutral-950">Ask for the whole answer</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600" set:html={inline("The first response to `research` is an index, not the findings. A good agent follows the pages until it has everything: completed results stay readable while slower providers finish. Tell it to. The [coding-agent guide](/guides/agent-research) walks a real engineering question through this loop.")} />
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600" set:html={inline("Ask your agent to [read every saved answer](/docs/using-with-agents#read-evidence-not-just-the-index) before summarizing.")} />
           </div>
           <div>
             <h3 class="text-lg font-semibold text-neutral-950">Check the sources, not just the summary</h3>
-            <p class="mt-3 text-base/7 text-pretty text-neutral-600" set:html={inline("Every answer keeps the provider that wrote it and the links it cited. When several providers agree, that is a lead, not proof; open the sources before you build on it. The [agent docs](/docs/using-with-agents) record every boundary in detail.")} />
+            <p class="mt-3 text-base/7 text-pretty text-neutral-600" set:html={inline("[Open the cited sources](/docs/using-with-agents#read-evidence-not-just-the-index) before relying on a recommendation.")} />
           </div>
-        </div>
-        <div class="mt-12 flex flex-wrap items-center gap-x-7 gap-y-4">
-          <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
-          <CopyPageButton href={markdownHref} />
         </div>
       </div>
     </section>
@@ -544,7 +334,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
 </Base>
 
 <style>
-  /* Brand marks keep their own colors on a light tile in both themes. */
+  /* Monochrome marks stay legible on light tiles in both themes. */
   .logo-tile { background: #fbfaf7; color-scheme: light; }
   /* Keep the selected host visible above the global dark neutral borders. */
   #host-tabs [aria-selected="true"] { border-color: var(--color-amber-700); }
@@ -588,14 +378,7 @@ const codeLink = "font-medium text-amber-700 underline decoration-amber-700/30 u
   }
   .copy-btn:hover { color: var(--color-neutral-950); background: rgb(10 10 10 / 0.04); }
   .copy-btn:focus-visible { outline: 2px solid var(--color-amber-600); outline-offset: 2px; }
-  :global(:root[data-theme="dark"]) .user-bubble { background: #33352f; }
   :global(:root[data-theme="dark"]) .copy-btn:not(.code-toolbar .copy-btn):hover { color: #fff; background: #33352f; }
-  :global(:root[data-theme="dark"]) .tool-call { background: #222321; }
-  :global(:root[data-theme="dark"]) .source-chip { background: #191a19; }
-  @media (prefers-color-scheme: dark) {
-    :global(:root:not([data-theme])) .user-bubble { background: #33352f; }
-    :global(:root:not([data-theme])) .source-chip { background: #191a19; }
-  }
 </style>
 
 <script>

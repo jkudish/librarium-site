@@ -151,8 +151,11 @@ const links = [
   const phone = window.matchMedia("(max-width: 767px)");
   const home = document.createComment("page-format-control");
   formatControl?.before(home);
-  function placeFormatControl() {
+  // Moving a node drops focus, so remember which control had it and restore
+  // focus after the move, once the destination is visible.
+  function placeFormatControl(focused: Element | null = document.activeElement) {
     if (!formatControl) return;
+    const restore = focused instanceof HTMLElement && formatControl.contains(focused) ? focused : null;
     const machineMode = document.documentElement.dataset.pageView === "machine";
     const slot = phone.matches ? document.querySelector<HTMLElement>(`[data-format-slot="${machineMode ? "machine" : "footer"}"]`) : null;
     if (slot) {
@@ -163,9 +166,16 @@ const links = [
       delete formatControl.dataset.placement;
     }
     positionFormatControl();
+    if (restore && document.activeElement !== restore) restore.focus({ preventScroll: true });
   }
-  phone.addEventListener("change", placeFormatControl);
-  new MutationObserver(placeFormatControl).observe(document.documentElement, { attributes: true, attributeFilter: ["data-page-view"] });
+  // Track focus inside the control: a breakpoint move happens after the
+  // browser may already have blurred it, so read the last known target.
+  let focusedControl: HTMLElement | null = null;
+  formatControl?.addEventListener("focusin", (event) => { focusedControl = event.target as HTMLElement; });
+  formatControl?.addEventListener("focusout", (event) => {
+    if (!formatControl.contains(event.relatedTarget as Node | null) && event.relatedTarget !== null) focusedControl = null;
+  });
+  phone.addEventListener("change", () => placeFormatControl(focusedControl ?? document.activeElement));
   placeFormatControl();
   const human = document.querySelector<HTMLAnchorElement>("#human-view");
   const machine = document.querySelector<HTMLAnchorElement>("#machine-view");
@@ -215,6 +225,7 @@ const links = [
     event.preventDefault();
     request?.abort();
     delete document.documentElement.dataset.pageView;
+    placeFormatControl(human);
     if (panel) panel.hidden = true;
     human.setAttribute("aria-current", "page");
     machine?.removeAttribute("aria-current");
@@ -228,6 +239,7 @@ const links = [
     document.documentElement.dataset.pageView = "machine";
     window.scrollTo({ top: 0, behavior: "instant" });
     panel.hidden = false;
+    placeFormatControl(machine);
     machine.setAttribute("aria-current", "page");
     human?.removeAttribute("aria-current");
     content.textContent = "";

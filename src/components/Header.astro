@@ -168,14 +168,23 @@ const links = [
     positionFormatControl();
     if (restore && document.activeElement !== restore) restore.focus({ preventScroll: true });
   }
-  // Track focus inside the control: a breakpoint move happens after the
-  // browser may already have blurred it, so read the last known target.
+  // A breakpoint move happens after the browser may already have blurred the
+  // control (focus falls to <body>). Keep the last focused control only while
+  // focus is still on <body>; any real departure clears it.
   let focusedControl: HTMLElement | null = null;
   formatControl?.addEventListener("focusin", (event) => { focusedControl = event.target as HTMLElement; });
-  formatControl?.addEventListener("focusout", (event) => {
-    if (!formatControl.contains(event.relatedTarget as Node | null) && event.relatedTarget !== null) focusedControl = null;
+  document.addEventListener("focusin", (event) => {
+    if (!formatControl?.contains(event.target as Node)) focusedControl = null;
   });
-  phone.addEventListener("change", () => placeFormatControl(focusedControl ?? document.activeElement));
+  document.addEventListener("pointerdown", (event) => {
+    if (!formatControl?.contains(event.target as Node)) focusedControl = null;
+  });
+  window.addEventListener("blur", () => { focusedControl = null; });
+  phone.addEventListener("change", () => {
+    const active = document.activeElement;
+    const lost = active === null || active === document.body;
+    placeFormatControl(lost ? focusedControl : active);
+  });
   placeFormatControl();
   const human = document.querySelector<HTMLAnchorElement>("#human-view");
   const machine = document.querySelector<HTMLAnchorElement>("#machine-view");

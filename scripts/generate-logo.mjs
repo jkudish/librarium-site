@@ -41,7 +41,7 @@ const svg = (fill, id, extra = '') => {
 };
 const icon = (bg, fill, id, rounded = true) => {
   const { defs, out } = body(fill, id);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs>${defs}</defs><rect width="100" height="100"${rounded ? ' rx="22"' : ''} fill="${bg}"/><g transform="translate(18 18) scale(0.64)">${out}</g></svg>\n`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs>${defs}</defs><rect width="100" height="100"${rounded ? ' rx="22"' : ''} fill="${bg}"/><g transform="translate(15.18 4.86) scale(0.8)">${out}</g></svg>\n`;
 };
 
 writeFileSync(`${OUT}/brand/librarium-mark.svg`, svg('currentColor', 'lm'));

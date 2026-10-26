@@ -3,7 +3,7 @@
 // fails the build if the page copy drifts from it. The full install, verify,
 // and MCP-registration steps live in src/data/install.md, served at /install.md.
 export const AGENT_SETUP_PROMPT =
-  "Install Librarium for me by following https://librarium.agentsy.build/install.md";
+  "Install Librarium for me by following https://librarium.si/install.md";
 
 // The prompt stays one sentence; install.md carries the credential, approval,
 // and offline-verification rules the agent must follow.

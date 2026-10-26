@@ -5,7 +5,7 @@ import { RESEARCH_DEMO } from "../data/research-demo";
 import { INSTALL_CHOICES } from "../data/setup-prompt";
 import Home from "../pages/index.astro";
 
-const SITE = "https://librarium.agentsy.build/";
+const SITE = "https://librarium.si/";
 
 // Purely visual or interactive markup that carries no reading content:
 // decorative glyphs, screen-reader link hints, terminal prompt glyphs

@@ -349,7 +349,7 @@ for (const route of ["laravel.md", "docs/php/index.md", "install.md", "guides/fi
   assert(markdown.includes("composer require jkudish/laravel-ai-librarium") && markdown.includes("php artisan vendor:publish --tag=librarium-config"));
   assert(!markdown.includes("Composer does not inherit repositories") && !markdown.includes('"repositories"') && !markdown.includes("dev-spec-"));
 }
-assert.equal(AGENT_SETUP_PROMPT, "Install Librarium for me by following https://librarium.agentsy.build/install.md");
+assert.equal(AGENT_SETUP_PROMPT, "Install Librarium for me by following https://librarium.si/install.md");
 assert(read("src/content/pages/stories/agentsy-report.md").includes("historical integration evidence"));
 
 const install = output("install.md");
@@ -374,7 +374,7 @@ assert.equal(software.softwareVersion, "2.0.0");
 assert.deepEqual(software.runtimePlatform, ["JavaScript / npm / Node.js 22.12.0+", "PHP 8.4+ / Laravel 13.30+"]);
 assert.deepEqual(software.sameAs, ["https://github.com/jkudish/librarium", "https://github.com/jkudish/laravel-ai-librarium"]);
 const homeMarkdown = output("index.md");
-assert(full.includes("[homepage and historical research demo](https://librarium.agentsy.build/index.md)"));
+assert(full.includes("[homepage and historical research demo](https://librarium.si/index.md)"));
 for (const fact of ["Give your agent more than one source.", "composer require jkudish/laravel-ai-librarium", "What are the best alternatives to Google Analytics?", "php artisan vendor:publish --tag=librarium-config"]) assert(homeText.includes(fact) && homeMarkdown.includes(fact));
 assert(homeText.includes(`${SOURCE_COUNT} research sources`) && homeText.includes(`${ENGINE_COUNT} AI answer engines`));
 assert.equal(homePage.querySelectorAll("main > section").length, 6);
@@ -417,7 +417,7 @@ assert(homeText.includes("Perplexity Research (Agent API)") && homeText.includes
 assert(!homeText.includes("Sonar model") && !homeText.includes("Sonar Deep Research"));
 assert(!/<(?:script|style|button)\b/.test(homeMarkdown));
 assert(!/\[(?:web:|cite:)|vertexaisearch\.cloud\.google\.com|^Terminal$|Try this question/m.test(homeMarkdown));
-assert(homeMarkdown.includes(AGENT_SETUP_PROMPT) && homeMarkdown.includes("https://librarium.agentsy.build/install.md"));
+assert(homeMarkdown.includes(AGENT_SETUP_PROMPT) && homeMarkdown.includes("https://librarium.si/install.md"));
 assert.equal((homeMarkdown.match(/^# /gm) ?? []).length, 1);
 const headingLevels = [...homeMarkdown.matchAll(/^(#{1,6}) /gm)].map((match) => match[1].length);
 for (let i = 1; i < headingLevels.length; i++) assert(headingLevels[i] <= headingLevels[i - 1] + 1, "homepage Markdown skips a heading level");
@@ -433,7 +433,7 @@ for (const choice of INSTALL_CHOICES) {
   assert.equal(panel.querySelector("a").getAttribute("href"), choice.href);
   assert(homeMarkdown.includes(choice.text));
 }
-assert(homeMarkdown.includes("[Set up Librarium](https://librarium.agentsy.build/#install)"));
+assert(homeMarkdown.includes("[Set up Librarium](https://librarium.si/#install)"));
 const agreement = homePage.querySelector('[data-evidence-card="agreement"]');
 assert.equal(agreement.querySelectorAll("li").length, 5);
 assert(agreement.textContent.includes("named in 4 of 5 provider excerpts"));
@@ -463,4 +463,10 @@ const gate = (opener, closer) => {
   return css.slice(start + opener.length, end).split("\n").map((line) => line.trim()).filter(Boolean).join("\n");
 };
 assert.equal(gate(':root[data-theme="dark"] {', "\n}"), gate(":root:not([data-theme]) {", "\n  }"));
+
+// The site moved to librarium.si; no built page, Markdown twin, bundle, or feed may point at the retired host.
+assert.equal(homePage.querySelector('link[rel="canonical"]')?.getAttribute("href"), "https://librarium.si/");
+for (const path of walk(dist).filter((path) => [".html", ".md", ".txt", ".xml", ".json", ".webmanifest", ".js", ".css"].includes(extname(path)))) {
+  assert(!readFileSync(path, "utf8").includes("librarium.agentsy.build"), `${relative(dist, path)} references the retired librarium.agentsy.build host`);
+}
 console.log(`Verified ${SOURCE_COUNT} catalog sources, ${ENGINE_COUNT} AI answer engines, ${htmlFiles.length} HTML pages, H2 Markdown parity for all product/docs pages, redirects, complete Markdown/bundles, metadata, navigation, anchors, examples, install safeguards, and unchanged historical capture.`);

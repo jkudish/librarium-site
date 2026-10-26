@@ -18,7 +18,7 @@ The npm package requires Node.js 22.12.0 or newer:
 node --version
 ```
 
-If Node.js is older or missing, tell the user and stop. Homebrew (`brew install jkudish/tap/librarium`) and the standalone installer in [Getting started](https://librarium.agentsy.build/docs/index.md) include their own runtime; offer them instead of upgrading Node.js without asking.
+If Node.js is older or missing, tell the user and stop. Homebrew (`brew install jkudish/tap/librarium`) and the standalone installer in [Getting started](https://librarium.si/docs/index.md) include their own runtime; offer them instead of upgrading Node.js without asking.
 
 ## 2. Install the CLI
 
@@ -30,7 +30,7 @@ librarium research --help
 librarium setup --help
 ```
 
-If the version is not 2.x, stop and report what is installed. Do not continue with a v1 install; [Upgrade from v1](https://librarium.agentsy.build/docs/upgrading-to-v2.md) covers migration.
+If the version is not 2.x, stop and report what is installed. Do not continue with a v1 install; [Upgrade from v1](https://librarium.si/docs/upgrading-to-v2.md) covers migration.
 
 ## 3. Detect the MCP client and confirm scope
 
@@ -270,7 +270,7 @@ Stop here and tell the user:
 - which providers are configured and any credential setup that remains;
 - that no research or paid provider calls were made.
 
-Do not run a first query unless the user asks for one. When they do, `librarium research "<question>" --only exa --dry-run --json` previews it offline first. The [agent docs](https://librarium.agentsy.build/docs/using-with-agents.md) cover the MCP tools and how to read complete results.
+Do not run a first query unless the user asks for one. When they do, `librarium research "<question>" --only exa --dry-run --json` previews it offline first. The [agent docs](https://librarium.si/docs/using-with-agents.md) cover the MCP tools and how to read complete results.
 
 ## Laravel applications
 
@@ -281,4 +281,4 @@ composer require jkudish/laravel-ai-librarium
 php artisan vendor:publish --tag=librarium-config
 ```
 
-Configure source keys through Laravel configuration and preview with `dryRun()` before approved paid research. The [PHP docs](https://librarium.agentsy.build/docs/php/index.md) cover storage, queues, and agents; [costs and limits](https://librarium.agentsy.build/docs/php/costs-and-limits.md) explain spending controls. Keep the same paid-call approval and key-handling ground rules.
+Configure source keys through Laravel configuration and preview with `dryRun()` before approved paid research. The [PHP docs](https://librarium.si/docs/php/index.md) cover storage, queues, and agents; [costs and limits](https://librarium.si/docs/php/costs-and-limits.md) explain spending controls. Keep the same paid-call approval and key-handling ground rules.

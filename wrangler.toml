@@ -7,7 +7,7 @@ compatibility_date = "2026-06-12"
 directory = "./dist"
 
 [[routes]]
-pattern = "librarium.agentsy.build"
+pattern = "librarium.si"
 custom_domain = true
 
 [observability]

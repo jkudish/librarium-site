@@ -1,6 +1,6 @@
 # librarium-site
 
-Marketing and documentation website for [librarium](https://github.com/jkudish/librarium), the meta harness for research queries. Live at [librarium.agentsy.build](https://librarium.agentsy.build).
+Marketing and documentation website for [librarium](https://github.com/jkudish/librarium), the meta harness for research queries. Live at [librarium.si](https://librarium.si).
 
 Static site built with Astro 7 and Tailwind CSS v4. No JS framework. The landing page has a large centered hero, a full-width research example with readable and JSON views, and expandable prompts. Client scripts power the example tabs, install copy control, mobile menu, and docs version navigation.
 
@@ -27,7 +27,7 @@ Outputs static HTML to `dist/`.
 npm run deploy
 ```
 
-Builds and ships `dist/` to Cloudflare as an assets-only Worker (`librarium-site`) with the custom domain `librarium.agentsy.build`. Config lives in `wrangler.toml`; the Worker runs on Joey's Cloudflare account, so you need wrangler auth against that account (`CLOUDFLARE_API_TOKEN` or `wrangler login`).
+Builds and ships `dist/` to Cloudflare as an assets-only Worker (`librarium-site`) with the custom domain `librarium.si`. Config lives in `wrangler.toml`; the Worker runs on Joey's Cloudflare account, so you need wrangler auth against that account (`CLOUDFLARE_API_TOKEN` or `wrangler login`).
 
 There is no CI/CD. Deploys are manual after merging to `main`.
 

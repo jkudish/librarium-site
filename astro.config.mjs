@@ -3,7 +3,7 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  site: "https://librarium.agentsy.build",
+  site: "https://librarium.si",
   redirects: {
     "/docs/groups-and-modes": "/docs/source-selection",
     "/docs/php/groups-and-modes": "/docs/php/source-selection",

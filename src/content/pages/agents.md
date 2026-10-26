@@ -49,7 +49,7 @@ Copy its prompt to install and verify Librarium; [install.md](/install.md) has t
 **Amp** ([MCP docs](https://ampcode.com/docs/customize/mcp)): register user-wide from your terminal.
 
 ```text
-Install Librarium for me in Amp by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Amp by following https://librarium.si/install.md
 ```
 
 ```bash
@@ -59,7 +59,7 @@ amp mcp add librarium -- librarium mcp
 **Claude Code** ([MCP docs](https://code.claude.com/docs/en/mcp)): register user-wide from your terminal.
 
 ```text
-Install Librarium for me in Claude Code by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Claude Code by following https://librarium.si/install.md
 ```
 
 ```bash
@@ -69,7 +69,7 @@ claude mcp add --scope user librarium -- librarium mcp
 **Claude Desktop** ([local server docs](https://modelcontextprotocol.io/docs/develop/connect-local-servers)): open Settings, then Developer, then Edit Config; merge this entry and restart Claude Desktop.
 
 ```text
-Install Librarium for me in Claude Desktop by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Claude Desktop by following https://librarium.si/install.md
 ```
 
 ```json
@@ -86,7 +86,7 @@ Install Librarium for me in Claude Desktop by following https://librarium.agents
 **Codex** ([MCP docs](https://learn.chatgpt.com/codex/extend/mcp)): merge into `~/.codex/config.toml` for user-wide setup.
 
 ```text
-Install Librarium for me in Codex by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Codex by following https://librarium.si/install.md
 ```
 
 ```toml
@@ -98,7 +98,7 @@ args = ["mcp"]
 **Command Code** ([MCP docs](https://commandcode.ai/docs/mcp)): register user-wide from your terminal.
 
 ```text
-Install Librarium for me in Command Code by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Command Code by following https://librarium.si/install.md
 ```
 
 ```bash
@@ -108,7 +108,7 @@ cmd mcp add --scope user librarium -- librarium mcp
 **Cursor** ([MCP docs](https://cursor.com/docs/mcp)): merge into `~/.cursor/mcp.json` for user-wide setup.
 
 ```text
-Install Librarium for me in Cursor by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Cursor by following https://librarium.si/install.md
 ```
 
 ```json
@@ -126,7 +126,7 @@ Install Librarium for me in Cursor by following https://librarium.agentsy.build/
 **Devin** ([MCP docs](https://docs.devin.ai/cli/extensibility/mcp/configuration)): for Devin for Terminal, register user-wide from your terminal.
 
 ```text
-Install Librarium for me in Devin by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Devin by following https://librarium.si/install.md
 ```
 
 ```bash
@@ -136,7 +136,7 @@ devin mcp add --scope user librarium -- librarium mcp
 **Gemini CLI** ([MCP docs](https://geminicli.com/docs/tools/mcp-server/)): register user-wide from your terminal.
 
 ```text
-Install Librarium for me in Gemini CLI by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Gemini CLI by following https://librarium.si/install.md
 ```
 
 ```bash
@@ -146,7 +146,7 @@ gemini mcp add --scope user librarium librarium mcp
 **Grok Bot** ([computer docs](https://docs.x.ai/grok-bot/computer-and-apps), [setup guide](https://composio.dev/content/how-to-add-mcp-servers-to-grok-bot)): confirm when asked; add your provider keys (`EXA_API_KEY`, `TAVILY_API_KEY`, `PERPLEXITY_API_KEY`) as environment variables on the server entry, never in chat text.
 
 ```text
-Install Librarium for me in Grok Bot by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Grok Bot by following https://librarium.si/install.md
 ```
 
 Send in Grok Bot:
@@ -160,7 +160,7 @@ Grok Bot runs the server on its own cloud computer, so it can't use a config fil
 **Grok Build** ([MCP docs](https://docs.x.ai/build/features/mcp-servers)): register user-wide from your terminal.
 
 ```text
-Install Librarium for me in Grok Build by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Grok Build by following https://librarium.si/install.md
 ```
 
 ```bash
@@ -170,7 +170,7 @@ grok mcp add librarium -- librarium mcp
 **Hermes Agent** ([MCP docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp)): merge into `~/.hermes/config.yaml` for user-wide.
 
 ```text
-Install Librarium for me in Hermes Agent by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Hermes Agent by following https://librarium.si/install.md
 ```
 
 ```yaml
@@ -183,13 +183,13 @@ mcp_servers:
 **Muse** ([official page](https://muse.ai/)): Muse doesn't document a manual MCP config; let Muse follow [install.md](/install.md).
 
 ```text
-Install Librarium for me in Muse by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Muse by following https://librarium.si/install.md
 ```
 
 **OpenClaw** ([MCP registry docs](https://docs.openclaw.ai/cli/mcp/registry)): register in OpenClaw's user configuration.
 
 ```text
-Install Librarium for me in OpenClaw by following https://librarium.agentsy.build/install.md
+Install Librarium for me in OpenClaw by following https://librarium.si/install.md
 ```
 
 ```bash
@@ -201,7 +201,7 @@ Ask before stopping a running Gateway; CLI changes require it stopped, or use th
 **OpenCode** ([v2 MCP docs](https://opencode.ai/v2/docs/mcp-servers/)): with OpenCode v2, register user-wide from your terminal.
 
 ```text
-Install Librarium for me in OpenCode by following https://librarium.agentsy.build/install.md
+Install Librarium for me in OpenCode by following https://librarium.si/install.md
 ```
 
 ```bash
@@ -211,7 +211,7 @@ opencode mcp add librarium --global -- librarium mcp
 **Pi** ([MCP docs](https://pi.dev/docs/latest/mcp)): register user-wide with Pi's native MCP support.
 
 ```text
-Install Librarium for me in Pi by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Pi by following https://librarium.si/install.md
 ```
 
 ```bash
@@ -223,7 +223,7 @@ An extension providing `/mcp` overrides native support; resolve that conflict fi
 **VS Code (GitHub Copilot)** ([MCP docs](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)): run MCP: Open User Configuration and merge this entry.
 
 ```text
-Install Librarium for me in VS Code (GitHub Copilot) by following https://librarium.agentsy.build/install.md
+Install Librarium for me in VS Code (GitHub Copilot) by following https://librarium.si/install.md
 ```
 
 ```json
@@ -241,7 +241,7 @@ Install Librarium for me in VS Code (GitHub Copilot) by following https://librar
 **Zed** ([MCP docs](https://zed.dev/docs/ai/mcp)): open zed: open settings file and merge this user-wide entry into settings.
 
 ```text
-Install Librarium for me in Zed by following https://librarium.agentsy.build/install.md
+Install Librarium for me in Zed by following https://librarium.si/install.md
 ```
 
 ```json
@@ -258,7 +258,7 @@ Install Librarium for me in Zed by following https://librarium.agentsy.build/ins
 **Any other MCP host**: register a stdio server named `librarium` with command `librarium` and args `["mcp"]`, following your host's own config format.
 
 ```text
-Install Librarium for me in my coding agent by following https://librarium.agentsy.build/install.md
+Install Librarium for me in my coding agent by following https://librarium.si/install.md
 ```
 
 ## What your agent can call

@@ -11,6 +11,6 @@ export async function serializeDocs(collection: "docs" | "v1Docs" | "phpDocs"): 
   const root = collection === "phpDocs" ? "/docs/php" : collection === "v1Docs" ? "/v1" : "/docs";
   const label = collection === "phpDocs" ? "PHP / Laravel" : collection === "v1Docs" ? "JavaScript v1 legacy" : "JavaScript v2";
   return `# Librarium ${label} documentation\n\n` + entries.map((entry) =>
-    `Source: https://librarium.agentsy.build${root}/${entry.id}.md\n\n${serializeDocEntry(entry)}`,
+    `Source: https://librarium.si${root}/${entry.id}.md\n\n${serializeDocEntry(entry)}`,
   ).join("\n\n---\n\n") + "\n";
 }

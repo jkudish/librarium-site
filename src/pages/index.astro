@@ -79,13 +79,15 @@ const products = [
               <p class="mt-3 text-sm/6 text-neutral-500">Captured September 18, 2026<span class="max-sm:hidden"> with <code class="font-mono"><CommandText command={capturedCommand} /></code></span>. Playback makes no provider calls; durations are historical.</p>
             </div>
             <div id="example-readable" role="tabpanel" aria-labelledby="example-readable-tab" tabindex="0" class="px-5 pt-5 pb-6 sm:px-7 sm:pb-8">
-              <div id="demo-providers" role="tablist" aria-label="Provider results" class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+              <div id="demo-providers" role="tablist" aria-label="Provider results" class="grid grid-cols-2 gap-2 lg:grid-cols-5">
                 {RESEARCH_DEMO.results.map((result, index) => (
-                  <button type="button" role="tab" id={`demo-tab-${index}`} data-demo-tab={index} data-demo-state="done" aria-selected={index === 0 ? "true" : "false"} aria-controls={`demo-panel-${index}`} tabindex={index === 0 ? 0 : -1} title={result.provider} class="demo-tab flex min-h-10 min-w-0 shrink-0 cursor-pointer flex-wrap items-center gap-x-2 gap-y-0.5 rounded border px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
-                    <img src={providerMark(result.logo)} alt="" width="20" height="20" class="logo-mono size-5 shrink-0 grayscale" />
-                    <span class="whitespace-nowrap font-medium">{result.shortName}</span>
-                    <span class="demo-dot size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
-                    <span class="demo-tab-status min-w-[7ch] text-left font-mono text-xs" data-demo-status>{formatElapsed(result.elapsedSeconds)}</span>
+                  <button type="button" role="tab" id={`demo-tab-${index}`} data-demo-tab={index} data-demo-state="done" aria-selected={index === 0 ? "true" : "false"} aria-controls={`demo-panel-${index}`} tabindex={index === 0 ? 0 : -1} title={result.provider} class="demo-tab grid min-h-14 min-w-0 cursor-pointer grid-cols-[1.75rem_minmax(0,1fr)] items-center gap-x-2.5 rounded border px-3 py-2 text-left text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
+                    <img src={providerMark(result.logo)} alt="" width="28" height="28" class="logo-mono row-span-2 size-7 grayscale" />
+                    <span class="truncate font-medium">{result.shortName}</span>
+                    <span class="flex min-w-0 items-center gap-1.5">
+                      <span class="demo-dot size-1.5 shrink-0 rounded-full" aria-hidden="true"></span>
+                      <span class="demo-tab-status font-mono text-xs" data-demo-status>{formatElapsed(result.elapsedSeconds)}</span>
+                    </span>
                   </button>
                 ))}
               </div>
@@ -224,12 +226,23 @@ const products = [
 
 <style>
   .provider-logo { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 3rem; height: 3rem; border: 1px solid var(--color-neutral-200); border-radius: var(--radius-md); background: var(--color-neutral-100); }
-  .demo-report { overflow-x: auto; }
+  /* Five providers: two columns with the odd one out spanning the row, then one row of five. */
+  .demo-tab:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  @media (min-width: 64rem) { .demo-tab:last-child:nth-child(odd) { grid-column: auto; } }
+  .demo-report { overflow-wrap: break-word; }
   .demo-report :global(a) { text-decoration: underline; text-underline-offset: 2px; color: inherit; }
   .demo-report > :global(* + *) { margin-top: 0.5rem; }
   .demo-report :global(h4) { font-weight: 500; }
   .demo-report :global(ul) { list-style: disc; padding-left: 1.15rem; }
-  .demo-report :global(table) { width: 100%; min-width: 40rem; border-collapse: collapse; text-align: left; }
+  .demo-report :global(table) { width: 100%; border-collapse: collapse; text-align: left; }
+  /* Narrow screens: each table row becomes a stacked card labelled by its column headers. */
+  @media (max-width: 47.99rem) {
+    .demo-report :global(thead) { display: none; }
+    .demo-report :global(table), .demo-report :global(tbody), .demo-report :global(tr), .demo-report :global(td) { display: block; }
+    .demo-report :global(tr) { border-bottom: 1px solid var(--color-neutral-200); padding: 0.5rem 0; }
+    .demo-report :global(td) { border-bottom: 0 !important; padding: 0.25rem 0 !important; }
+    .demo-report :global(td[data-label])::before { content: attr(data-label); display: block; font-size: 0.75rem; font-weight: 500; color: var(--color-neutral-500); }
+  }
   .demo-report :global(th), .demo-report :global(td), .compare-table :is(th, td) { border-bottom: 1px solid var(--color-neutral-200); padding: 0.75rem; vertical-align: top; }
   .compare-table th { font-weight: 500; }
   .compare-table td { text-align: center; }

@@ -4,6 +4,14 @@ description: Three MCP tools, version-matched skill instructions, and complete s
 order: 11
 ---
 
+## Set up with your agent
+
+Paste this into your coding agent. It installs the CLI, registers the MCP server, helps you configure sources, and checks the setup offline without making paid calls.
+
+```text
+Install Librarium for me by following https://librarium.si/install.md
+```
+
 ## Agent skill
 
 ```bash
@@ -46,4 +54,4 @@ AI answer-engine observations differ from research API answers. Shared retrieval
 
 ## Application equivalents
 
-MCP is the coding-agent interface, not a requirement for application research. Use [JavaScript's client](/docs/library) or [Laravel's facade and read-only SDK tool](/docs/php/using-with-agents) to work with approved Runs.
+MCP is the coding-agent interface, not a requirement for application research. Use [JavaScript's client](/docs/library) or [the Laravel package](/docs/php/using-with-agents) to run research from your application.

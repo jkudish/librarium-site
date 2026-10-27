@@ -6,7 +6,7 @@ order: 2
 
 ## Connect and discover offline
 
-Use MCP for current external evidence in your coding agent. For application code, use [JavaScript](/docs/library) or [Laravel's read-only agent tool](/docs/php/using-with-agents).
+Use MCP for current external evidence in your coding agent. For application code, use [JavaScript](/docs/library) or [the Laravel package](/docs/php/using-with-agents).
 
 ```bash
 npm install -g librarium

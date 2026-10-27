@@ -104,7 +104,8 @@ export function renderCapturedMarkdown(source: string): string {
       closeList();
       if (rows.length > 0) {
         out.push("<table><thead><tr>" + rows[0].map((cell) => `<th>${inline(cell)}</th>`).join("") + "</tr></thead><tbody>");
-        for (const row of rows.slice(1)) out.push("<tr>" + row.map((cell) => `<td>${inline(cell)}</td>`).join("") + "</tr>");
+        const labels = rows[0].map((cell) => cell.replace(/\*\*/g, "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;"));
+        for (const row of rows.slice(1)) out.push("<tr>" + row.map((cell, column) => `<td data-label="${labels[column] ?? ""}">${inline(cell)}</td>`).join("") + "</tr>");
         out.push("</tbody></table>");
       }
       continue;
@@ -165,9 +166,12 @@ export const RESEARCH_DEMO: {
     // line from the readable card. `content` stays byte-verbatim for capture
     // verification; citation markers are removed only during rendering.
     const firstLine = content.split("\n", 1)[0];
-    const displayContent = result.title && !failed && (firstLine === `# ${result.title}` || firstLine === `## ${result.title}`)
+    const headless = result.title && !failed && (firstLine === `# ${result.title}` || firstLine === `## ${result.title}`)
       ? content.slice(firstLine.length).replace(/^\n/, "")
       : content;
+    // Captures end with a lone "…" line marking where the excerpt was cut.
+    // The readable card drops it; `content` keeps it for capture verification.
+    const displayContent = headless.replace(/\n+…\s*$/, "");
     return {
       provider: display.name,
       shortName: display.shortName,

@@ -27,7 +27,7 @@ const links = [
     <nav class="flex items-center gap-x-7" aria-label="Primary navigation">
       <div class="flex items-center gap-x-5 text-sm text-neutral-600 max-lg:hidden lg:gap-x-7">
         {links.map((link) => (
-          <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined} class="hover:text-neutral-950 aria-[current=page]:font-medium aria-[current=page]:text-amber-800 aria-[current=page]:underline aria-[current=page]:underline-offset-4">{link.label}</a>
+          <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined} data-nav-link class="hover:text-neutral-950 aria-[current=page]:font-medium aria-[current=page]:text-amber-800 aria-[current=page]:underline aria-[current=page]:underline-offset-4">{link.label}</a>
         ))}
       </div>
       <a
@@ -63,7 +63,7 @@ const links = [
   <div id="mobile-menu" hidden class="border-t border-neutral-950/10 lg:hidden!">
     <nav class="mx-auto flex max-w-6xl flex-col gap-y-1 px-4 py-3" aria-label="Mobile navigation">
       {links.map((link) => (
-        <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined} class="rounded-sm px-2 py-2 text-base text-neutral-700 hover:bg-neutral-950/3 hover:text-neutral-950 aria-[current=page]:bg-amber-50 aria-[current=page]:font-medium aria-[current=page]:text-amber-800">{link.label}</a>
+        <a href={link.href} aria-current={isActive(link.href) ? "page" : undefined} data-nav-link class="rounded-sm px-2 py-2 text-base text-neutral-700 hover:bg-neutral-950/3 hover:text-neutral-950 aria-[current=page]:bg-amber-50 aria-[current=page]:font-medium aria-[current=page]:text-amber-800">{link.label}</a>
       ))}
     </nav>
   </div>

@@ -75,6 +75,13 @@ for (const path of htmlFiles) {
   const label = relative(dist, path);
   assert.equal(page.querySelectorAll("h1").length, 1, `${label} must have exactly one H1, including hidden panels`);
   assert.equal(page.querySelectorAll("footer h1, footer h2, footer h3, footer h4, footer h5, footer h6").length, 0, `${label} footer must not add outline headings`);
+  // Credit links open in a new tab and stay followed (no nofollow/ugc/sponsored).
+  const credits = page.querySelectorAll('footer a[href^="https://agentsy.build/"], footer a[href^="https://jkudish.com/"]');
+  assert.equal(credits.length, 2, `${label} footer must credit Agentsy and Joey Kudish`);
+  for (const credit of credits) {
+    assert.equal(credit.getAttribute("target"), "_blank", `${label} credit link must open a new tab`);
+    assert.equal(credit.getAttribute("rel"), "noopener", `${label} credit link must stay followed`);
+  }
   const pageCopy = page.querySelector("[data-copy-page], [data-copy-article]");
   if (pageCopy) {
     assert.equal(pageCopy.querySelector("[data-copy-label]")?.textContent, "Copy page as markdown");
@@ -222,6 +229,13 @@ const agentsText = text(agents);
 for (const spelling of ["claude mcp add --scope user librarium -- librarium mcp", "[mcp_servers.librarium]", "mcpServers", "amp mcp add librarium -- librarium mcp", "mcp_servers:", "cmd mcp add --scope user librarium -- librarium mcp", "devin mcp add --scope user librarium -- librarium mcp", "gemini mcp add --scope user librarium librarium mcp", "openclaw mcp add librarium --command librarium --arg mcp", "opencode mcp add librarium --global -- librarium mcp", "pi mcp add librarium -- librarium mcp", "context_servers"]) assert(agentsText.includes(spelling), `missing host registration ${spelling}`);
 for (const tool of ["research", "get_run", "list_sources"]) assert(agentsText.includes(tool));
 const agentDocs = read("src/content/docs/using-with-agents.md");
+{
+  // The agent docs page carries the same copyable setup prompt as the homepage and /agents.
+  const page = parse(output("docs/using-with-agents/index.html"), parseOptions);
+  const blocks = page.querySelectorAll("[data-docs-prose] pre code").map((code) => code.textContent.trim());
+  assert(blocks.includes(AGENT_SETUP_PROMPT), "agent docs missing the copyable setup prompt");
+  assert(output("docs/using-with-agents.md").includes(AGENT_SETUP_PROMPT), "agent docs Markdown missing the setup prompt");
+}
 for (const contract of ["Exactly three tools", "dry_run: true", "can only lower", "45 seconds, maximum 50", "until null with unchanged id/source", "concatenate JSON-text pages", "invalidates an old cursor", "agreement are not independent confirmation"]) assert(agentDocs.includes(contract), `agent docs missing detailed contract ${contract}`);
 assert(!/get_results|check_async|list_providers|list_groups|librarium (?:init|doctor|plan)\b/.test(agentsText));
 const agentPage = parse(agents, parseOptions);
@@ -236,7 +250,7 @@ const agentHosts = [
 ];
 const agentMarkdown = read("src/content/pages/agents.md");
 const installMarkdown = read("src/data/install.md");
-const agentHeadings = ["Ask a question. Your agent does the reading.", "Set it up once.", "What your agent can call", "Read everything. Then check it."];
+const agentHeadings = ["Ask a question. Your agent does the research.", "Set it up once.", "What your agent can call", "Read everything. Then check it."];
 assert.deepEqual(agentPage.querySelectorAll("main h2").map((heading) => heading.textContent), agentHeadings);
 assert.deepEqual([...agentMarkdown.matchAll(/^## (.+)$/gm)].map((match) => match[1]), agentHeadings);
 assert.equal(agentPage.querySelectorAll('figure[aria-label="Example prompt and outcome"]').length, 1);

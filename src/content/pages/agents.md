@@ -10,7 +10,7 @@ ctaLabel: Read the agent docs
 
 Query search, AI answers, and deep research with citations.
 
-## Ask a question. Your agent does the reading.
+## Ask a question. Your agent does the research.
 
 Ask in plain language and get a source-backed recommendation.
 

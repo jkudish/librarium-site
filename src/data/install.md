@@ -18,7 +18,7 @@ The npm package requires Node.js 22.12.0 or newer:
 node --version
 ```
 
-If Node.js is older or missing, tell the user and stop. Homebrew (`brew install jkudish/tap/librarium`) and the standalone installer in [Getting started](https://librarium.si/docs/index.md) include their own runtime; offer them instead of upgrading Node.js without asking.
+If Node.js is older or missing, tell the user and stop. Homebrew (`brew install jkudish/tap/librarium`) and the standalone macOS/Linux installer (`curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh`) include their own runtime; offer them instead of upgrading Node.js without asking.
 
 ## 2. Install the CLI
 
@@ -246,7 +246,7 @@ Ask which sources the user wants, then have the user run the setup wizard in the
 librarium setup
 ```
 
-The user types keys into the wizard, not into chat. `setup --auto` discovers existing credentials offline; `setup --enable <names>` chooses sources explicitly. Configuration uses source names, options, and source lists saved as groups. Choose AI answer engines by name.
+The user types keys into the wizard, not into chat. Configuration uses source names, options, and source lists saved as groups. Choose AI answer engines by name.
 
 Keys stored as environment-variable references must also be present in the MCP server's environment. Claude Code passes the shell environment. Codex passes only a small default set, so list the variables in `env_vars` under `[mcp_servers.librarium]`. In Cursor, add an `env` entry such as `"EXA_API_KEY": "${env:EXA_API_KEY}"`. Other hosts have their own `env` setting, such as `amp mcp add --env`. Reference variable names only; never write key values into a committed file.
 

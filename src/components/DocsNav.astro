@@ -11,11 +11,19 @@ interface Props {
 }
 
 const { navItems, currentSlug } = Astro.props;
+const groups = [
+  { title: "Getting started", slugs: ["", "configuration", "upgrading-to-v2"] },
+  { title: "Research", slugs: ["providers", "source-selection", "groups-and-modes", "costs-and-limits", "commands"] },
+  { title: "Build with Librarium", slugs: ["library", "using-with-agents", "custom-providers", "testing"] },
+  { title: "Reference", slugs: ["request-and-retry", "output-formats", "maintenance"] },
+];
 ---
 
-<ul role="list" class="flex flex-col gap-y-0.5">
-  {
-    navItems.map((item) => {
+{groups.map((group) => (
+  <div class="docs-nav-group">
+    <p class="mb-3 text-base font-medium text-neutral-950 sm:text-sm">{group.title}</p>
+    <ul role="list" class="border-l border-neutral-200">
+    {group.slugs.flatMap((slug) => navItems.filter((item) => item.slug === slug)).map((item) => {
       const isActive =
         item.slug === currentSlug ||
         (item.slug === "" && currentSlug === "index");
@@ -24,10 +32,10 @@ const { navItems, currentSlug } = Astro.props;
           <a
             href={item.href}
             class:list={[
-              "block rounded-lg px-3 py-1.5 text-sm",
+              "-ml-px block border-l-2 px-4 py-2 text-base sm:py-1.5 sm:text-sm",
               isActive
-                ? "bg-neutral-950/4 text-neutral-950"
-                : "text-neutral-600 hover:text-neutral-950",
+                ? "border-amber-700 bg-amber-50/50 text-amber-800"
+                : "border-transparent text-neutral-600 hover:border-neutral-300 hover:text-neutral-950",
             ]}
             aria-current={isActive ? "page" : undefined}
           >
@@ -35,6 +43,7 @@ const { navItems, currentSlug } = Astro.props;
           </a>
         </li>
       );
-    })
-  }
-</ul>
+    })}
+    </ul>
+  </div>
+))}

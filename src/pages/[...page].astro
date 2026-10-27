@@ -1,0 +1,23 @@
+---
+import { render, type CollectionEntry } from "astro:content";
+import { getArticles } from "../lib/articles";
+import ArticleLayout from "../layouts/ArticleLayout.astro";
+
+export async function getStaticPaths() {
+  // These routes have dedicated product pages (src/pages/{agents,cli,
+  // javascript,laravel}.astro); their Markdown twins are still served from
+  // src/content/pages/*.md by [...page].md.ts.
+  const dedicated = new Set(["agents", "cli", "javascript", "laravel"]);
+  return (await getArticles())
+    .filter(({ path }) => !dedicated.has(path))
+    .map(({ path, entry }) => ({ params: { page: path }, props: { entry } }));
+}
+const { entry } = Astro.props as { entry: CollectionEntry<"pages"> | CollectionEntry<"guides"> };
+const { Content, headings } = await render(entry);
+const page = entry.collection === "pages" ? entry.data : undefined;
+---
+
+<ArticleLayout title={entry.data.title} description={entry.data.description} headings={headings}
+  kind={page?.kind ?? "guide"} redirect={page?.redirect} ctaHref={page?.ctaHref} ctaLabel={page?.ctaLabel}>
+  <Content />
+</ArticleLayout>

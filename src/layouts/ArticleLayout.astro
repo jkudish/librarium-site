@@ -1,0 +1,62 @@
+---
+import type { MarkdownHeading } from "astro";
+import Base from "./Base.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import Icon from "../components/Icon.astro";
+import CopyPageButton from "../components/CopyPageButton.astro";
+import DocsOutline from "../components/DocsOutline.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  headings: MarkdownHeading[];
+  kind: "product" | "guide" | "comparison" | "story";
+  redirect?: string;
+  ctaHref?: string;
+  ctaLabel?: string;
+}
+const { title, description, headings, kind, redirect, ctaHref = "/docs", ctaLabel = "Open the documentation" } = Astro.props;
+const markdownHref = `${Astro.url.pathname.replace(/\/$/, "")}.md`;
+---
+
+<Base title={`${title} | Librarium`} description={description} includeSoftwareMetadata={false} redirect={redirect}>
+  <Header />
+  <main>
+    <div class="border-b border-neutral-200 bg-[#faf9f6]">
+      <div class="mx-auto max-w-6xl px-6 pt-8 pb-8 sm:pt-10 sm:pb-10 lg:px-8">
+        {kind !== "product" && <a href="/guides" class="mb-9 inline-flex items-center gap-2 text-base text-neutral-500 hover:text-amber-700 sm:text-sm"><Icon name="arrowLeft" /> Guides & field notes</a>}
+        <h1 class="max-w-[21ch] text-4xl/[1.08] font-medium tracking-[-0.045em] text-pretty text-neutral-950 sm:text-6xl/[1.06]">{title}</h1>
+        <p class="mt-6 max-w-[58ch] text-lg/8 text-pretty text-neutral-600">{description}</p>
+        <div class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+          {kind === "product" && <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>}
+          <CopyPageButton href={markdownHref} />
+        </div>
+      </div>
+    </div>
+    <div class="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_216px] lg:px-8 lg:py-10">
+      <article class="prose min-w-0 max-w-[75ch]"><slot /></article>
+      {!redirect && (
+        <aside class="hidden lg:block">
+          <nav aria-label="On this page" class="sticky top-10">
+            <p class="mb-5 text-sm font-medium text-neutral-950">On this page</p>
+            <DocsOutline headings={headings} />
+            <a href="/guides" class="mt-8 flex items-center gap-2 border-t border-neutral-200 pt-6 text-sm font-medium text-amber-700">Explore the guides <Icon name="arrowRight" /></a>
+          </nav>
+        </aside>
+      )}
+    </div>
+    {!redirect && (
+      <div class="mx-auto max-w-6xl px-6 pb-16 lg:px-8">
+        <div class="flex justify-end border-t border-neutral-200 pt-10">
+          <a href={ctaHref} class="inline-flex items-center gap-2 rounded bg-neutral-950 px-4 py-2.5 text-base font-medium text-white hover:bg-neutral-800 sm:text-sm">{ctaLabel} <Icon name="arrowRight" /></a>
+        </div>
+      </div>
+    )}
+  </main>
+  <Footer />
+</Base>
+
+<script>
+  import "../scripts/wrap-shell-code";
+</script>

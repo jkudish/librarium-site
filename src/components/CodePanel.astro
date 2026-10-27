@@ -1,0 +1,86 @@
+---
+// Dark, syntax-highlighted code block with a labelled toolbar and a copy
+// button, matching the /agents page panels. Used by /cli, /javascript, and
+// /laravel. Pages render <p id="copy-status" role="status"> for announcements.
+import { Code } from "astro:components";
+import Icon from "./Icon.astro";
+
+interface Props {
+  label: string;
+  code: string;
+  lang: "bash" | "ts" | "php" | "json" | "text";
+  /** Text placed on the clipboard; defaults to `code`. */
+  copy?: string;
+  copyLabel?: string;
+  /** Scroll long examples inside the panel instead of growing the page. */
+  scroll?: boolean;
+  /** Wrap long lines at spaces (never inside a token) instead of scrolling sideways. */
+  wrap?: boolean;
+  class?: string;
+}
+const { label, code, lang, copy, copyLabel = "Copy", scroll = false, wrap = false, class: className } = Astro.props;
+---
+
+<div class:list={["code-panel min-w-0", scroll && "code-panel-scroll", wrap && "code-panel-wrap", className]}>
+  <div class="code-toolbar">
+    <span>{label}</span>
+    <button type="button" class="copy-btn group" data-code-copy data-copy={copy ?? code} data-copy-state="idle" aria-label={`Copy ${label}`}>
+      <Icon name="copy" class="size-4 group-data-[copy-state=success]:hidden" />
+      <Icon name="check" class="hidden size-4 text-amber-300 group-data-[copy-state=success]:block" />
+      <span class="copy-label">{copyLabel}</span>
+    </button>
+  </div>
+  <Code code={code} lang={lang} theme="github-dark-default" />
+</div>
+
+<style>
+  .code-panel {
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--color-neutral-950, #0a0a0a);
+  }
+  .code-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.1);
+    padding: 0.5rem 0.75rem 0.5rem 1.25rem;
+    color: var(--color-neutral-400, #a1a1a1);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+  .code-toolbar > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .copy-btn {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: var(--radius-sm);
+    padding: 0.375rem 0.5rem;
+    cursor: pointer;
+    color: var(--color-neutral-300, #d4d4d4);
+  }
+  .copy-btn:hover { color: var(--color-amber-300, #ffd230); background: rgb(255 255 255 / 0.06); }
+  .copy-btn:focus-visible { outline: 2px solid var(--color-amber-300, #ffd230); outline-offset: 2px; }
+  .code-panel :global(pre) {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    background: transparent !important;
+    overflow-x: auto;
+    font-size: 0.8125rem;
+    line-height: 1.4rem;
+  }
+  .code-panel-scroll :global(pre) { max-height: 28rem; overflow-y: auto; }
+  .code-panel-wrap :global(pre) { white-space: pre-wrap; overflow-wrap: normal; word-break: normal; }
+  .code-panel :global(pre:focus-visible) { outline: 2px solid var(--color-amber-300, #ffd230); outline-offset: -2px; }
+  :global(:root[data-theme="dark"]) .code-panel { box-shadow: 0 0 0 1px #3e403a; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) .code-panel { box-shadow: 0 0 0 1px #3e403a; }
+  }
+</style>
+
+<script>
+  import "../scripts/wrap-shell-code";
+  import "../scripts/copy-buttons";
+</script>

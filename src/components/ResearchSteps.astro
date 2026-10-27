@@ -1,0 +1,84 @@
+---
+import CommandText from "./CommandText.astro";
+import Icon from "./Icon.astro";
+import { RESEARCH_COMMANDS } from "../data/research-commands";
+interface Props { platform?: keyof typeof RESEARCH_COMMANDS }
+const { platform = "cli" } = Astro.props;
+const commands = RESEARCH_COMMANDS[platform];
+const installOptions = "installOptions" in commands ? commands.installOptions : null;
+---
+<div class="min-w-0" data-research-steps={platform}>
+  {installOptions ? (
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div role="radiogroup" aria-label="Install with" class="inline-flex rounded bg-neutral-100 p-0.5 text-xs" data-install-toggle>
+        {installOptions.map((option, index) => (
+          <button type="button" role="radio" aria-checked={index === 0 ? "true" : "false"} tabindex={index === 0 ? 0 : -1} data-install-option={option.id} class="install-option min-h-8 cursor-pointer rounded-sm px-3 font-medium text-neutral-600 aria-checked:bg-white aria-checked:text-neutral-950 aria-checked:shadow-sm">{option.label}</button>
+        ))}
+      </div>
+      {installOptions.map((option, index) => <p class="text-sm font-medium text-neutral-950" data-install-for={option.id} hidden={index !== 0}>{option.requirement}</p>)}
+    </div>
+  ) : (
+    <p class="text-sm font-medium text-neutral-950">{commands.requirement}</p>
+  )}
+  <ol class="mt-4 space-y-4">
+    {installOptions && installOptions.map((option, index) => <li data-install-for={option.id} hidden={index !== 0}>
+      <div class="mb-1 flex items-center justify-between gap-2">
+        <p class="text-xs font-medium text-neutral-500">Install</p>
+        <button type="button" class="group cursor-pointer rounded p-1 text-neutral-500 hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-amber-700" data-code-copy data-copy={option.install} data-copy-state="idle" aria-label={`Copy ${option.label} install command`}>
+          <Icon name="copy" class="size-3.5 group-data-[copy-state=success]:hidden" />
+          <Icon name="check" class="hidden size-3.5 group-data-[copy-state=success]:block" />
+        </button>
+      </div>
+      <code class="block rounded-md bg-neutral-950 p-3 font-mono text-xs/6 whitespace-pre-wrap text-amber-100"><CommandText command={option.install} /></code>
+    </li>)}
+    {([
+      ...(installOptions ? [] : [["Install", commands.install]]),
+      [platform === "laravel" ? "Publish configuration" : "Configure sources", commands.setup],
+      ["Preview offline", commands.preview],
+      ["Research when ready", commands.research],
+    ] as [string, string][]).map(([label, command]) => <li>
+      <div class="mb-1 flex items-center justify-between gap-2">
+        <p class="text-xs font-medium text-neutral-500">{label}</p>
+        <button type="button" class="group cursor-pointer rounded p-1 text-neutral-500 hover:text-amber-700 focus-visible:outline-2 focus-visible:outline-amber-700" data-code-copy data-copy={command} data-copy-state="idle" aria-label={`Copy ${label} command`}>
+          <Icon name="copy" class="size-3.5 group-data-[copy-state=success]:hidden" />
+          <Icon name="check" class="hidden size-3.5 group-data-[copy-state=success]:block" />
+        </button>
+      </div>
+      <code class="block rounded-md bg-neutral-950 p-3 font-mono text-xs/6 whitespace-pre-wrap text-amber-100"><CommandText command={command} /></code>
+    </li>)}
+  </ol>
+  <p class="mt-4 text-sm/6 text-neutral-600">Previewing makes no provider calls, so it costs nothing. Research calls your providers and bills to your API keys. See <a class="text-amber-700 underline" href="/docs/costs-and-limits">costs and limits</a>.</p>
+</div>
+
+<style>
+  :global(:root[data-theme="dark"]) .install-option[aria-checked="true"] { background: #3a3c36; color: #f7f7f2; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) .install-option[aria-checked="true"] { background: #3a3c36; color: #f7f7f2; }
+  }
+</style>
+
+<script>
+  import "../scripts/copy-buttons";
+  for (const steps of document.querySelectorAll<HTMLElement>("[data-research-steps]")) {
+    const options = [...steps.querySelectorAll<HTMLButtonElement>("[data-install-option]")];
+    const choose = (option: HTMLButtonElement) => {
+      for (const other of options) {
+        const active = other === option;
+        other.setAttribute("aria-checked", String(active));
+        other.tabIndex = active ? 0 : -1;
+      }
+      for (const item of steps.querySelectorAll<HTMLElement>("[data-install-for]")) item.hidden = item.dataset.installFor !== option.dataset.installOption;
+    };
+    for (const [index, option] of options.entries()) {
+      option.addEventListener("click", () => choose(option));
+      option.addEventListener("keydown", (event) => {
+        if (!["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"].includes(event.key)) return;
+        event.preventDefault();
+        const step = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
+        const next = options[(index + step + options.length) % options.length];
+        choose(next);
+        next.focus();
+      });
+    }
+  }
+</script>

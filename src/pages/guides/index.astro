@@ -1,0 +1,37 @@
+---
+import Base from "../../layouts/Base.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import Icon from "../../components/Icon.astro";
+import CopyPageButton from "../../components/CopyPageButton.astro";
+import { getReadingLists, guideTitle, guideDescription } from "../../lib/articles";
+import { READING_LABELS } from "../../data/reading-labels";
+const lists = await getReadingLists();
+---
+
+<Base title={`${guideTitle} | Librarium`} description={guideDescription} includeSoftwareMetadata={false}>
+  <Header />
+  <main class="mx-auto max-w-5xl px-6 pt-10 pb-14 sm:pt-12 lg:px-8">
+    <h1 class="text-4xl font-medium tracking-tight text-pretty text-neutral-950 sm:text-6xl">{guideTitle}</h1>
+    <p class="mt-6 max-w-[50ch] text-lg/8 text-pretty text-neutral-600">{guideDescription}</p>
+    <div class="mt-6"><CopyPageButton href="/guides/index.md" /></div>
+    {lists.map((list) => <section class="mt-10 border-t border-neutral-200 pt-6">
+      <h2 class="text-xl font-medium text-neutral-950">{list.title}</h2>
+      <div class="mt-5 divide-y divide-neutral-200">
+        {list.items.map(({ path, entry }) => <a href={`/${path}`} class="group flex items-start justify-between gap-4 py-5 first:pt-0">
+          <div class="min-w-0">
+            <h3 class="max-w-[40ch] text-2xl/8 font-medium tracking-tight text-pretty text-neutral-950 group-hover:text-amber-700">{entry.data.title}</h3>
+            <p class="mt-3 max-w-[58ch] text-base/7 text-pretty text-neutral-500">{entry.data.description}</p>
+            {READING_LABELS[path] && <dl class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs/5 text-neutral-600">
+              <div><dt class="inline font-medium">Platform: </dt><dd class="inline">{READING_LABELS[path].platform}</dd></div>
+              <div><dt class="inline font-medium">Level: </dt><dd class="inline">{READING_LABELS[path].level}</dd></div>
+              <div class="basis-full"><dt class="inline font-medium">Prerequisite: </dt><dd class="inline">{READING_LABELS[path].prerequisite}</dd></div>
+            </dl>}
+          </div>
+          <Icon name="arrowUpRight" class="mt-1 size-6 shrink-0 text-neutral-400 group-hover:text-amber-700" />
+        </a>)}
+      </div>
+    </section>)}
+  </main>
+  <Footer />
+</Base>

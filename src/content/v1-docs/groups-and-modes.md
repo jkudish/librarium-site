@@ -27,7 +27,7 @@ bare/default run. The six SearchAPI answer surfaces remain absent from
 
 Every grounded default group, including `visibility` and `all`, excludes the
 `llm` tier. Opt in to direct model calls via `--group llm`,
-`-p claude,openai-chat,...`, or a custom group. See [the llm tier](/docs/providers#the-llm-tier) for details.
+`-p claude,openai-chat,...`, or a custom group. See [the llm tier](/v1/providers#the-llm-tier) for details.
 
 Older stored `comprehensive` and `all` rosters are upgraded only when they
 exactly match a prior canonical roster after alias normalization. Customized,

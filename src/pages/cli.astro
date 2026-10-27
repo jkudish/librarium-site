@@ -1,0 +1,44 @@
+---
+import { getEntry } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import ProductHero from "../components/ProductHero.astro";
+import CodePanel from "../components/CodePanel.astro";
+import ResearchSteps from "../components/ResearchSteps.astro";
+import { inline } from "../lib/inline-markup";
+import { fencedBlocks } from "../lib/markdown-code";
+
+const entry = await getEntry("pages", "cli");
+if (!entry) throw new Error("src/content/pages/cli.md is missing");
+const { title, description, ctaHref, ctaLabel } = entry.data;
+// Each Markdown section owns its heading, short copy, and single example.
+const sections = (entry.body ?? "").split(/^## /m).slice(1).map((section) => {
+  const [heading, ...body] = section.split("\n");
+  const content = body.join("\n");
+  const [example] = fencedBlocks(content);
+  return { heading, prose: content.replace(/```[\s\S]*?```/g, "").trim(), example };
+});
+---
+
+<Base title={`${title} | Librarium`} description={description} includeSoftwareMetadata={false}>
+  <Header />
+  <main>
+    <ProductHero title={title} description={description} ctaHref={ctaHref} ctaLabel={ctaLabel} markdownHref="/cli.md">
+      <ResearchSteps />
+    </ProductHero>
+    {sections.map((section, index) => (
+      <section class:list={["border-b border-neutral-200 py-12 sm:py-16", index % 2 === 1 && "bg-[#faf9f6]"]} aria-labelledby={`section-${index}`}>
+        <div class="mx-auto grid max-w-6xl gap-6 px-6 lg:grid-cols-2 lg:gap-12 lg:px-8">
+          <div class="min-w-0">
+            <h2 id={`section-${index}`} class="text-3xl font-medium tracking-tight text-balance text-neutral-950 sm:text-4xl">{section.heading}</h2>
+            <p class="mt-5 text-base/7 text-pretty text-neutral-600" set:html={inline(section.prose)} />
+          </div>
+          <CodePanel class="lg:self-start" label={section.heading} lang="bash" code={section.example.code} wrap />
+        </div>
+      </section>
+    ))}
+    <p id="copy-status" role="status" class="sr-only"></p>
+  </main>
+  <Footer />
+</Base>

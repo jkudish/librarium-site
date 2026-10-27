@@ -1,8 +1,8 @@
 # librarium-site
 
-Marketing and documentation website for [librarium](https://github.com/jkudish/librarium), the meta harness for research queries. Live at [librarium.agentsy.build](https://librarium.agentsy.build).
+Marketing and documentation website for [librarium](https://github.com/jkudish/librarium), the meta harness for research queries. Live at [librarium.si](https://librarium.si).
 
-Static site built with Astro 7 and Tailwind CSS v4. No JS framework; the landing page terminal animation is vanilla JS with a static fallback for no-JS and `prefers-reduced-motion`.
+Static site built with Astro 7 and Tailwind CSS v4. No JS framework. The landing page has a large centered hero, a full-width research example with readable and JSON views, and expandable prompts. Client scripts power the example tabs, install copy control, mobile menu, and docs version navigation.
 
 ## Development
 
@@ -27,26 +27,44 @@ Outputs static HTML to `dist/`.
 npm run deploy
 ```
 
-Builds and ships `dist/` to Cloudflare as an assets-only Worker (`librarium-site`) with the custom domain `librarium.agentsy.build`. Config lives in `wrangler.toml`; the Worker runs on Joey's Cloudflare account, so you need wrangler auth against that account (`CLOUDFLARE_API_TOKEN` or `wrangler login`).
+Builds and ships `dist/` to Cloudflare as an assets-only Worker (`librarium-site`) with the custom domain `librarium.si`. Config lives in `wrangler.toml`; the Worker runs on Joey's Cloudflare account, so you need wrangler auth against that account (`CLOUDFLARE_API_TOKEN` or `wrangler login`).
 
-There is no CI/CD — deploys are manual after merging to `main`.
+There is no CI/CD. Deploys are manual after merging to `main`.
+
+**Current copy describes the unreleased simplified-surface candidate.** Installed versions must expose `research` and `setup`; a 2.x version number alone does not establish that API. Spec, JS, PHP, adapter, and site have separate review/release gates. Green local checks do not authorize merge, publication, or deployment.
 
 ## Structure
 
-- `src/pages/index.astro` — landing page, including the animated terminal demo and install-method popovers
-- `src/content/docs/*.md` — docs content
-- `src/pages/docs/` — docs routes, plus `.md.ts` endpoints that serve each page as raw markdown (append `.md` to any docs URL)
-- `src/pages/llms.txt.ts`, `src/pages/llms-full.txt.ts` — LLM-readable site index and full docs dump
-- `src/lib/docs.ts` — shared serializer used by the markdown/llms endpoints
-- `src/layouts/` — base + docs layouts
-- `src/components/` — header, footer, docs sidebar nav
-- `src/styles/global.css` — Tailwind theme tokens (including `--text-terminal`) and prose styles
-- `mockups/` — design exploration mockups (untracked)
+- `src/pages/index.astro`: landing page, use cases, and illustrative research demo
+- `public/providers/`: provider marks from LobeHub and official brand sources; attribution and license boundaries in `SOURCES.md`. These identify integrations, not endorsements; trademarks belong to their respective owners.
+- `public/languages/`: JavaScript, TypeScript, PHP, and Laravel marks from Simple Icons (CC0; attribution included)
+- `src/content/docs/*.md`: JavaScript v2 docs content
+- `src/content/php-docs/*.md`: first-party PHP/Laravel docs, sourced from `jkudish/laravel-ai-librarium` README, configuration, public API, and tests
+- `src/content/pages/`: dedicated JavaScript, CLI/MCP, and Laravel pages, the direct-provider comparison, and the Agentsy Report development field note
+- `src/content/guides/`: first-query, coding-agent, and Laravel-queue guides; listed at `/guides`
+- `src/content/v1-docs/*.md`: legacy snapshot from site commit `54d73e99552fcdb43b9a772c49f483a5beea4582` (`origin/main` when the v2 work began), with internal links namespaced under `/v1`
+- `src/data/product.ts`: version and presentation derived from pinned `librarium-spec/sources.json`
+- `src/pages/docs/`: docs routes and raw Markdown endpoints
+- `src/pages/llms.txt.ts`, `src/pages/llms-full.txt.ts`: agent index and all current pages, guides, and both documentation sets
+- `src/lib/articles.ts`: shared routes and reading lists for product pages, guides, comparison, and field notes
+- `src/lib/docs.ts`: shared serializer for Markdown and llms endpoints
+- `src/lib/home-markdown.ts`: build-time rendering/conversion of the actual homepage (Astro container + node-html-markdown), without a second authored copy
+- `src/layouts/`: base and docs layouts
+- `src/components/`: header, footer, and docs navigation
+- `src/components/Icon.astro`: build-time individual SVG imports from `@phosphor-icons/core` (MIT); all UI icons use Phosphor. Provider/language marks stay authoritative brand assets, and literal CLI transcript symbols are preserved. The favicon is rasterized from Phosphor's regular magnifying glass.
+- `src/styles/global.css`: Tailwind theme tokens and prose styles
+- `scripts/verify-content.mjs`: factual, metadata, generated-output, and internal-link checks
 
 ## Conventions and gotchas
 
-- **Docs are sourced from the librarium repo** (its `README.md` and `docs/provider-development.md`). When CLI behavior changes, sync the affected pages here — commands, flags, groups, provider counts, and examples are the usual drift points.
-- **The terminal demo has two copies.** The static markup in `index.astro`'s `<code id="terminal-code">` is the no-JS/reduced-motion fallback *and* the layout-height anchor; it must match the animation's final frame (same lines, same column padding). Keep demo lines ≤ ~57 chars so the panel never scrolls horizontally on desktop.
+- **Docs are sourced from the librarium repo** (its `README.md` and `docs/provider-development.md`). When CLI behavior changes, sync the affected pages here. Commands, flags, workflows, provider counts, and examples are the usual drift points.
+- **V2 is the default at `/docs`; v1 is preserved at `/v1`.** Keep route-equivalent pages where practical. Legacy pages are self-canonical, `noindex, follow`, and excluded from the sitemap so they remain accessible without competing with current docs in search.
+- **PHP is first-party, not a JavaScript wrapper.** `/docs/php` has its own navigation and a JavaScript/PHP switch that preserves equivalent topics, falling back to the destination index when absent. Do not imply matching provider coverage, concurrency, durable recovery, or an included PHP MCP server.
+- **Docs navigation is grouped by task.** Keep every collection entry in `DocsNav.astro`; generated-output checks catch omissions. The desktop outline and mobile disclosure use rendered headings. Copy controls progressively enhance static code and Markdown links; documentation remains readable without JavaScript.
+- **Every page has Markdown.** Homepage: `/index.md`. Docs: `/docs/<slug>.md`, `/docs/php/<slug>.md`, `/v1/<slug>.md` (`index.md` for each root). Product pages, guides, comparison, and stories append `.md` to their HTML path; the guides index is `/guides/index.md`. Complete docs bundles: `/docs/all.md`, `/docs/php/all.md`, `/v1/all.md`. `/llms.txt` indexes them; `/llms-full.txt` includes all current pages in full, with legacy linked separately. Each reading page has a visible Markdown link.
+- **Examples describe actual boundaries.** Laravel AI SDK agent examples are application-owned, not built-in agents. The historical Agentsy field note uses the retired `ResearchResponse` contract; it is not proof of migration to Run, a deployed product, or measured customer outcomes. It is grounded in the implementation review for `jkudish/agentsy-platform` PR #4. No PlanMode integration claim is inferred from it.
+- **Catalog facts are centralized.** The pinned spec package owns source and engine membership; `src/data/product.ts` derives counts and presentation. `npm test` checks the generated catalog, current examples, complete Markdown, links, and metadata. Historical v1 docs and provider-capture bytes remain separate from current selectors.
+- **The homepage demo uses captured provider output.** `src/data/provider-display-fixture.json` preserves excerpts, citations, timing, and provenance for five successful deep-research responses about Google Analytics alternatives. `src/data/research-demo.ts` derives the readable and JSON views; the JSON is display data, not the full API response schema. Playback makes no provider calls. The original Exa authentication failure remains in the capture history. The older offline fixture replay remains at `public/demo.gif`.
 - **`vite` is kept as a direct dev dependency.** Keep it aligned with Astro's supported Vite major so the Tailwind plugin and Astro use the same Vite line.
-- **Single light color scheme**, neutral palette with an amber accent (`amber-700` links/accents, `amber-300` in terminals). Product name is lowercase `librarium` except sentence-initial.
+- **Light and dark themes** follow the system preference until the user chooses with the header toggle. Keep both themes readable, including build-time rendered report content. Product name is lowercase `librarium` except sentence-initial.
 - Page metadata, OG tags, and JSON-LD live in `src/layouts/Base.astro`.

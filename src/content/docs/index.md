@@ -1,93 +1,62 @@
 ---
 title: Getting started
-description: Install librarium and run your first research query.
+description: Set up sources, preview a question offline, and read a stored Run.
 order: 1
 ---
 
-## What is librarium?
+Ask a question, choose quick or deep research, and keep each source's answer, citations, provenance, and cost in one Run.
 
-Librarium fans out research queries to multiple search and deep-research APIs in parallel, then merges everything into one structured output. It ships with 31 built-in provider adapters spanning traditional search engines, AI-grounded answers, answer-engine visibility surfaces, deep-research APIs, and an opt-in LLM tier. Librarium works both as a CLI and as an embeddable library via `librarium/core`, which runs in Cloudflare Workers and other edge runtimes.
+| Work from | Start here |
+| --- | --- |
+| Coding agent | [MCP setup](/docs/using-with-agents) |
+| JavaScript application | [Client API](/docs/library) |
+| Laravel application | [PHP docs](/docs/php) |
+| Terminal | CLI steps below |
 
-## Installation
+## Install
 
-### npm
-
-Requires Node.js 22.12 or later.
+The JavaScript v2 npm package requires Node.js 22.12 or newer.
 
 ```bash
 npm install -g librarium
+librarium --version
+librarium research --help
 ```
 
-### pnpm
+For an existing installation, see the [migration guide](/docs/upgrading-to-v2).
+
+## Configure sources
 
 ```bash
-pnpm install -g librarium
+librarium setup
+librarium setup --check
+librarium sources --json
 ```
 
-### yarn
+`setup --check` checks local configuration and credential presence without calling providers—not authentication. Keys may use environment references such as `env:EXA_API_KEY`; never paste keys into a question or commit them.
+
+## Preview, then research
 
 ```bash
-yarn global add librarium
+librarium research "Compare current HTTP caching guidance" --only exa --dry-run --json
+librarium research "Compare current HTTP caching guidance" --only exa
 ```
 
-### Homebrew (macOS and Linux)
+A dry run returns `status: planned`, estimates, and skips without provider calls or storage. Every real request is stored before its first provider call.
+
+Without `--only`, every configured research source runs at quick depth. Choose AI answer engines by name. Narrow with `--only` or `--skip`; see [costs and limits](/docs/costs-and-limits) before paid research.
+
+## Come back to deep work
 
 ```bash
-brew install jkudish/tap/librarium
+librarium research "Compare database hosting options" --deep --only exa --no-wait
+librarium show <run-id> --wait --json
 ```
 
-### Standalone binary
+Deep tasks keep recovery details in private Run state; `show` picks up the same research, not a new submission. Quick work usually finishes in the calling process, though some retrieval services support recovery.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/jkudish/librarium/main/scripts/install.sh | sh
-```
+### Detach and interrupt
 
-### npx (no install required)
+CLI `--no-wait` requires `--deep`, except for a dry run. Ctrl-C prints a recovery command so you can check the Run later.
 
-```bash
-npx librarium run "your query"
-```
-
-## Quick start
-
-The easiest way to get started is to run `librarium` with no arguments in a terminal. It launches an interactive wizard: enter your query, pick a provider group, choose a mode, and kick off the run -- all with guided prompts.
-
-```bash
-librarium
-```
-
-Or run `init --auto` once to discover API keys already present in your
-environment and enable eligible providers. Higher-cost LLM, SearchAPI answer,
-and Perplexity Pro Search adapters remain opt-in even when they share a
-discovered key.
-
-```bash
-librarium init --auto
-
-# Fan out a research query across providers (live results table)
-librarium run "PostgreSQL connection pooling best practices"
-
-# Or get one grounded, cited answer synthesized from the results
-librarium answer "what changed in postgres 17 logical replication"
-
-# Use a specific group
-librarium run "React Server Components" --group quick
-
-# Compare nine answer-engine surfaces deliberately
-librarium run "How do AI assistants describe our product?" --group visibility
-
-# Check async deep research status
-librarium status --wait
-```
-
-The six SearchAPI members of `visibility` share one collection vendor, so treat
-their agreement as correlated observation rather than independent
-corroboration. See [provider provenance and privacy](/docs/providers#ai-grounded-answer-behavior).
-
-## Upgrade
-
-`librarium upgrade` auto-detects your install method (npm, pnpm, yarn, Homebrew, standalone) and runs the correct upgrade command.
-
-```bash
-librarium upgrade
-```
+Continue with [commands](/docs/commands), [source selection](/docs/source-selection), or [agent integration](/docs/using-with-agents).

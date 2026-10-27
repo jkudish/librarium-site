@@ -1,0 +1,25 @@
+---
+import arrowUpRight from "@phosphor-icons/core/assets/regular/arrow-up-right.svg?raw";
+import arrowLeft from "@phosphor-icons/core/assets/regular/arrow-left.svg?raw";
+import arrowRight from "@phosphor-icons/core/assets/regular/arrow-right.svg?raw";
+import caretDown from "@phosphor-icons/core/assets/regular/caret-down.svg?raw";
+import copy from "@phosphor-icons/core/assets/regular/copy.svg?raw";
+import check from "@phosphor-icons/core/assets/regular/check.svg?raw";
+import githubLogo from "@phosphor-icons/core/assets/regular/github-logo.svg?raw";
+import list from "@phosphor-icons/core/assets/regular/list.svg?raw";
+import moon from "@phosphor-icons/core/assets/regular/moon.svg?raw";
+import plus from "@phosphor-icons/core/assets/regular/plus.svg?raw";
+import sun from "@phosphor-icons/core/assets/regular/sun.svg?raw";
+import terminal from "@phosphor-icons/core/assets/regular/terminal.svg?raw";
+import terminalWindow from "@phosphor-icons/core/assets/regular/terminal-window.svg?raw";
+import robot from "@phosphor-icons/core/assets/regular/robot.svg?raw";
+import markdownLogo from "@phosphor-icons/core/assets/regular/markdown-logo.svg?raw";
+
+const icons = { arrowUpRight, arrowLeft, arrowRight, caretDown, copy, check, githubLogo, list, moon, plus, sun, terminal, terminalWindow, robot, markdownLogo };
+interface Props { name: keyof typeof icons; class?: string; }
+const { name, class: className } = Astro.props;
+// Trusted package assets only; keep Phosphor's paths and shared 256px viewBox.
+const paths = icons[name].replace(/<svg\b[^>]*>|<\/svg>/g, "");
+---
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" width="1em" height="1em" aria-hidden="true" focusable="false" data-icon={name} class:list={["shrink-0 align-[-0.125em]", className]}><Fragment set:html={paths} /></svg>

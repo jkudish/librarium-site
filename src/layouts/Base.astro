@@ -1,39 +1,68 @@
 ---
 import "../styles/global.css";
+import {
+  NODE_FLOOR,
+  PRODUCT_VERSION,
+  ENGINE_COUNT,
+  SOURCE_COUNT,
+} from "../data/product";
+import { markdownHrefFor } from "../lib/markdown-href";
 
 interface Props {
   title: string;
   description?: string;
+  robots?: string;
+  includeSoftwareMetadata?: boolean;
+  /** Homepage passes its ivory page color so the hero's negative-z dotted
+      background can paint above the canvas and below all page content. */
+  bodyClass?: string;
+  /** Forwarding address for preserved legacy routes such as /cli-mcp. */
+  redirect?: string;
 }
 
+const productDescription = "Query search engines, AI answer engines, and deep-research APIs from one interface, and keep every answer with its citations.";
 const {
   title,
-  description = "Librarium fans one research query out to search engines, AI-grounded answers, and deep-research APIs in parallel, then merges everything into one structured output.",
+  description = productDescription,
+  robots,
+  includeSoftwareMetadata = true,
+  bodyClass = "bg-white",
+  redirect,
 } = Astro.props;
+const metaDescription = Astro.url.pathname === "/" ? productDescription : description;
 
-const canonical = Astro.site
-  ? new URL(Astro.url.pathname, Astro.site).href
-  : undefined;
+const canonical = redirect
+  ? new URL(redirect, Astro.site ?? Astro.url).href
+  : Astro.site
+    ? new URL(Astro.url.pathname, Astro.site).href
+    : undefined;
+// Agents fetching HTML can discover the page's Markdown twin (the static
+// assets host cannot negotiate on Accept: text/markdown).
+const markdownAlternate = new URL(markdownHrefFor(Astro.url.pathname), Astro.site ?? Astro.url).href;
 
 const jsonLd = JSON.stringify([
-  {
+  ...(includeSoftwareMetadata ? [{
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "librarium",
-    description:
-      "The meta harness for research queries: a CLI, embeddable library, MCP server, and agent skill that fan one query out across 31 provider adapters in four tiers and merge the results into structured, deduplicated output.",
+    name: "Librarium",
+    description: productDescription,
     applicationCategory: "DeveloperApplication",
     operatingSystem: "macOS, Linux, Windows",
+    softwareVersion: PRODUCT_VERSION,
+    runtimePlatform: [`JavaScript / npm / Node.js ${NODE_FLOOR}+`, "PHP 8.4+ / Laravel 13.30+"],
+    codeRepository: ["https://github.com/jkudish/librarium", "https://github.com/jkudish/laravel-ai-librarium"],
+    featureList: [
+      `${SOURCE_COUNT} research sources and ${ENGINE_COUNT} AI answer engines`,
+      "Quick and deep variants with stored Runs",
+      "CLI, three-tool MCP server, agent skill, and runtime-neutral core",
+      "Source, variant, model, and AI answer engine provenance",
+    ],
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     license: "https://github.com/jkudish/librarium/blob/main/LICENSE",
     url: Astro.site?.href,
-    downloadUrl: "https://www.npmjs.com/package/librarium",
-    sameAs: [
-      "https://github.com/jkudish/librarium",
-      "https://www.npmjs.com/package/librarium",
-    ],
+    sameAs: ["https://github.com/jkudish/librarium", "https://github.com/jkudish/laravel-ai-librarium"],
     author: { "@type": "Person", name: "Joey Kudish", url: "https://jkudish.com" },
-  },
+  }] : []),
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -48,19 +77,53 @@ const jsonLd = JSON.stringify([
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // Theme default follows the OS; a stored choice from the header toggle
+      // overrides it. Runs before first paint to avoid a flash.
+      (() => {
+        const root = document.documentElement;
+        const media = window.matchMedia("(prefers-color-scheme: dark)");
+        const storedChoice = () => {
+          try { return localStorage.getItem("librarium-theme"); } catch { return null; }
+        };
+        const apply = (dark) => { root.dataset.theme = dark ? "dark" : "light"; };
+        const stored = storedChoice();
+        apply(stored === "dark" || stored === "light" ? stored === "dark" : media.matches);
+        media.addEventListener("change", (event) => {
+          const current = storedChoice();
+          if (current !== "dark" && current !== "light") apply(event.matches);
+        });
+      })();
+    </script>
     <title>{title}</title>
-    <meta name="description" content={description} />
+    <meta name="description" content={metaDescription} />
+    {redirect && <meta http-equiv="refresh" content={`0; url=${redirect}`} />}
+    {robots && <meta name="robots" content={robots} />}
     {canonical && <link rel="canonical" href={canonical} />}
+    <link rel="alternate" type="text/markdown" href={markdownAlternate} title="Markdown" />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={metaDescription} />
     <meta property="og:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Librarium: the meta harness for research queries" />
     {canonical && <meta property="og:url" content={canonical} />}
     <meta property="og:site_name" content="librarium" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={metaDescription} />
+    <meta name="twitter:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />
+    <meta name="twitter:image:alt" content="Librarium: the meta harness for research queries" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <script type="application/ld+json" set:html={jsonLd} />
-    <link rel="icon" href="/favicon.png" type="image/png" />
+    <script is:inline type="application/ld+json" set:html={jsonLd} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="icon" href="/icon-512.png" type="image/png" sizes="512x512" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#C4501E" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -68,7 +131,7 @@ const jsonLd = JSON.stringify([
       rel="stylesheet"
     />
   </head>
-  <body class="bg-white font-sans text-neutral-600">
+  <body class:list={["font-sans text-neutral-600 pb-[calc(5rem+env(safe-area-inset-bottom))]", bodyClass]}>
     <div class="isolate">
       <slot />
     </div>

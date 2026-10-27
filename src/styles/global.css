@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* The OS preference is the default; the header toggle stores an explicit
+   choice on <html data-theme>. Both paths drive this one variant. */
+@custom-variant dark (&:where(:root[data-theme="dark"] *));
+
 @theme {
   --font-sans: "Geist", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
@@ -21,6 +25,7 @@
   color: var(--color-neutral-600);
   font-size: var(--text-base);
   line-height: --spacing(7);
+  overflow-wrap: anywhere;
 
   & > * + * {
     margin-top: --spacing(5);
@@ -35,15 +40,16 @@
   & h3,
   & h4 {
     color: var(--color-neutral-950);
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-medium);
     letter-spacing: -0.025em;
-    text-wrap: balance;
+    text-wrap: pretty;
+    scroll-margin-top: --spacing(8);
   }
 
   & h2 {
-    margin-top: --spacing(12);
-    font-size: var(--text-2xl);
-    line-height: var(--text-2xl--line-height);
+    margin-top: --spacing(10);
+    font-size: var(--text-3xl);
+    line-height: var(--text-3xl--line-height);
   }
 
   & h3 {
@@ -61,6 +67,9 @@
   & a {
     color: var(--color-amber-700);
     font-weight: var(--font-weight-medium);
+    text-decoration: underline;
+    text-decoration-color: --alpha(var(--color-amber-700) / 30%);
+    text-underline-offset: 3px;
 
     @variant hover {
       color: var(--color-amber-600);
@@ -76,13 +85,32 @@
     padding: 1px 4px;
   }
 
+  & :not(pre) > code {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: bottom;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    overflow-x: auto;
+  }
+
   & pre {
     background-color: var(--color-neutral-950) !important;
-    border-radius: var(--radius-xl);
-    padding: --spacing(5);
+    border-radius: var(--radius-lg);
+    padding: --spacing(6);
     overflow-x: auto;
+    /* Preserve command tokens and indentation; wide lines scroll locally. */
+    white-space: pre;
+    overflow-wrap: normal;
     font-size: var(--text-sm);
     line-height: --spacing(6);
+  }
+
+  /* Shell lines wrap only at whitespace, never inside a command token. */
+  & pre:is([data-language="bash"], [data-language="sh"], [data-language="shell"]) {
+    white-space: pre-wrap;
+    overflow-wrap: normal;
+    word-break: normal;
   }
 
   & pre code {
@@ -91,6 +119,8 @@
     font-size: inherit;
     padding: 0;
     border-radius: 0;
+    overflow-wrap: normal;
+    word-break: normal;
   }
 
   & ul {
@@ -113,14 +143,16 @@
   }
 
   & blockquote {
-    border-left: 2px solid --alpha(var(--color-neutral-950) / 10%);
-    padding-left: --spacing(4);
+    border-left: 2px solid var(--color-amber-600);
+    background: var(--color-amber-50);
+    padding: --spacing(4) --spacing(5);
   }
 
   & table {
     /* display: block so wide flag tables scroll instead of forcing page overflow on mobile */
     display: block;
     overflow-x: auto;
+    overflow-wrap: normal;
     width: 100%;
     text-align: left;
     font-size: var(--text-sm);
@@ -138,5 +170,169 @@
   & td {
     padding: --spacing(2.5) --spacing(4) --spacing(2.5) 0;
     border-bottom: 1px solid --alpha(var(--color-neutral-950) / 5%);
+  }
+}
+
+.docs-code {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-neutral-950);
+}
+
+.docs-code-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: --spacing(4);
+  border-bottom: 1px solid --alpha(var(--color-white) / 10%);
+  padding: --spacing(3) --spacing(6);
+  color: var(--color-neutral-400);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.docs-code-toolbar button {
+  cursor: pointer;
+  color: var(--color-neutral-300);
+}
+
+.docs-code-toolbar button:hover { color: var(--color-amber-300); }
+.prose .docs-code pre { margin: 0; border-radius: 0; }
+.prose pre .shell-token, .code-panel-wrap pre .shell-token { white-space: nowrap; }
+
+@media (max-width: 639px) {
+  .prose pre { padding: --spacing(4); font-size: var(--text-terminal); }
+  .docs-code-toolbar { padding: --spacing(3) --spacing(4); }
+}
+
+/* Leave room for the floating page-format control at the end of every page. */
+body { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+#page-format-control[data-placement="slot"] { position: static; inset: auto; z-index: auto; width: fit-content; }
+#page-format-control[data-placement="slot"] nav { box-shadow: none; }
+@media (max-width: 767px) { body { padding-bottom: env(safe-area-inset-bottom); } }
+#page-format-control { bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
+
+/* Two synchronized gates apply the dark palette: an explicit
+   <html data-theme="dark"> chosen with the header toggle, and the OS
+   preference when no data-theme attribute exists — script-free visitors,
+   and the instant before the pre-paint script mirrors the OS choice.
+   scripts/verify-content.mjs fails the build if the two blocks drift.
+   Existing near-black code panels retain their syntax-highlighting palette. */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  body, .bg-white, [class~="bg-[#faf9f6]"] { background-color: #191a19; }
+  [class~="bg-[#eeeae0]"], [class~="bg-[#efb86b]"], .bg-neutral-50,
+  .bg-neutral-100, .bg-amber-50, [class~="bg-amber-50/50"] { background-color: #222321; }
+  #install-output, #install-runtime, #page-format-control nav { background-color: #242522; }
+  [class~="bg-[#efb86b]"] { border-top: 1px solid #393b36; }
+
+  .text-neutral-950, .text-neutral-900, .text-neutral-800 { color: #f2f2ed; }
+  .text-neutral-700, .text-neutral-600 { color: #c9cbc4; }
+  .text-neutral-500 { color: #adb0a6; }
+  .text-amber-950, .text-amber-800, .text-amber-700, .text-amber-600 { color: #efc184; }
+  [class*="hover:text-neutral-"]:hover { color: #fff; }
+  [class*="hover:bg-neutral-"]:hover { background-color: #33352f; }
+  #page-format-control [aria-current="page"] { background: #e8e9e1; color: #191a19; }
+  [data-nav-link][aria-current="page"] { color: #efc184; }
+  #mobile-menu [data-nav-link][aria-current="page"] { background-color: #2b2720; }
+
+  .border-neutral-200, .border-neutral-300,
+  [class~="border-neutral-950/10"], [class~="divide-neutral-200"] > :not(:last-child) {
+    border-color: #3e403a;
+  }
+  [class~="ring-neutral-950/15"] { --tw-ring-color: #53564c; }
+  [class~="bg-neutral-950/4"], [class~="bg-neutral-950/3"] { background-color: #292b25; }
+
+  .prose { color: #c9cbc4; }
+  .prose :is(h1, h2, h3, h4, strong, th) { color: #f2f2ed; }
+  .prose a { color: #efc184; text-decoration-color: #a58151; }
+  .prose :not(pre) > code { background: #2e302a; color: #f2f2ed; }
+  .prose blockquote { background: #242522; }
+  .prose :is(th, td) { border-color: #3e403a; }
+
+  /* Preserve original brand assets on small light tiles, not filtered images.
+     The integration grid stays monochrome in both themes (#3797). */
+  img[src^="/providers/"].logo-mono {
+    background: #faf9f6;
+    border-radius: 3px;
+    outline: 4px solid #faf9f6;
+    filter: grayscale(1);
+  }
+  img[src^="/providers/"]:not(.agent-stack img):not(.logo-mono) {
+    background: #faf9f6;
+    border-radius: 3px;
+    outline: 4px solid #faf9f6;
+    filter: none;
+  }
+  img[src^="/languages/"]:not(.invert), .agent-stack img {
+    background: none;
+    outline: none;
+    filter: invert(1);
+  }
+}
+
+/* Script-free twin of the block above: same palette, gated on the OS
+   preference and the absence of an explicit data-theme choice. The body
+   must stay byte-identical to the :root[data-theme="dark"] block;
+   verify-content.mjs enforces that. */
+@media (prefers-color-scheme: dark) {
+  /* Tailwind's dark: variant keys on data-theme, so the two shadow-less
+     surfaces are spelled out here for the script-free path. */
+  :root:not([data-theme]) #setup-menu,
+  :root:not([data-theme]) #page-format-control nav { box-shadow: none; }
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    body, .bg-white, [class~="bg-[#faf9f6]"] { background-color: #191a19; }
+    [class~="bg-[#eeeae0]"], [class~="bg-[#efb86b]"], .bg-neutral-50,
+    .bg-neutral-100, .bg-amber-50, [class~="bg-amber-50/50"] { background-color: #222321; }
+    #install-output, #install-runtime, #page-format-control nav { background-color: #242522; }
+    [class~="bg-[#efb86b]"] { border-top: 1px solid #393b36; }
+
+    .text-neutral-950, .text-neutral-900, .text-neutral-800 { color: #f2f2ed; }
+    .text-neutral-700, .text-neutral-600 { color: #c9cbc4; }
+    .text-neutral-500 { color: #adb0a6; }
+    .text-amber-950, .text-amber-800, .text-amber-700, .text-amber-600 { color: #efc184; }
+    [class*="hover:text-neutral-"]:hover { color: #fff; }
+    [class*="hover:bg-neutral-"]:hover { background-color: #33352f; }
+    #page-format-control [aria-current="page"] { background: #e8e9e1; color: #191a19; }
+    [data-nav-link][aria-current="page"] { color: #efc184; }
+    #mobile-menu [data-nav-link][aria-current="page"] { background-color: #2b2720; }
+
+    .border-neutral-200, .border-neutral-300,
+    [class~="border-neutral-950/10"], [class~="divide-neutral-200"] > :not(:last-child) {
+      border-color: #3e403a;
+    }
+    [class~="ring-neutral-950/15"] { --tw-ring-color: #53564c; }
+    [class~="bg-neutral-950/4"], [class~="bg-neutral-950/3"] { background-color: #292b25; }
+
+    .prose { color: #c9cbc4; }
+    .prose :is(h1, h2, h3, h4, strong, th) { color: #f2f2ed; }
+    .prose a { color: #efc184; text-decoration-color: #a58151; }
+    .prose :not(pre) > code { background: #2e302a; color: #f2f2ed; }
+    .prose blockquote { background: #242522; }
+    .prose :is(th, td) { border-color: #3e403a; }
+
+    /* Preserve original brand assets on small light tiles, not filtered images.
+       The integration grid stays monochrome in both themes (#3797). */
+    img[src^="/providers/"].logo-mono {
+      background: #faf9f6;
+      border-radius: 3px;
+      outline: 4px solid #faf9f6;
+      filter: grayscale(1);
+    }
+    img[src^="/providers/"]:not(.agent-stack img):not(.logo-mono) {
+      background: #faf9f6;
+      border-radius: 3px;
+      outline: 4px solid #faf9f6;
+      filter: none;
+    }
+    img[src^="/languages/"]:not(.invert), .agent-stack img {
+      background: none;
+      outline: none;
+      filter: invert(1);
+    }
   }
 }

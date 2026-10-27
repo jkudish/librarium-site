@@ -1,0 +1,12 @@
+---
+interface Props { command: string }
+const { command } = Astro.props;
+// Wrap between words and engine names, keeping flags and hyphenated ids intact.
+const words = command.match(/[^,\s]+,?|\s+/g) ?? [];
+---
+{words.map((word) => (
+  <Fragment>
+    {word.trim() ? <span class="whitespace-nowrap">{word}</span> : word}
+    {word.endsWith(",") && <wbr />}
+  </Fragment>
+))}

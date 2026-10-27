@@ -21,7 +21,7 @@
     "@phosphor-icons/core": "^2.1.1",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.8",
-    "librarium-spec": "github:jkudish/librarium-spec#15c8a30673b43b006944623be2ddf99f216b846c",
+    "librarium-spec": "^1.0.0",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {

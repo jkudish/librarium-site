@@ -31,11 +31,13 @@ Outputs static HTML to `dist/`.
 npm run deploy
 ```
 
-Builds and ships `dist/` to Cloudflare as an assets-only Worker (`librarium-site`) with the custom domain `librarium.si`. Config lives in `wrangler.toml`; the Worker runs on Joey's Cloudflare account, so you need wrangler auth against that account (`CLOUDFLARE_API_TOKEN` or `wrangler login`).
+Builds and ships `dist/` to Cloudflare as an assets-only Worker (`librarium-site`) with the custom domains `librarium.si` and `librarium.agentsy.build`. Config lives in `wrangler.toml`; the Worker runs on Joey's Cloudflare account, so you need wrangler auth against that account (`CLOUDFLARE_API_TOKEN` or `wrangler login`). In an Amp orb, the default `CLOUDFLARE_API_TOKEN` targets a different account: run `CLOUDFLARE_API_TOKEN="$CLOUDFLARE_WORKER_API_KEY" npm run deploy`.
+
+`librarium.agentsy.build` answers with a 301 to `librarium.si` from a Single Redirect rule on the `agentsy.build` zone, not from this Worker.
 
 There is no CI/CD. Deploys are manual after merging to `main`.
 
-**Current copy describes the unreleased simplified-surface candidate.** Installed versions must expose `research` and `setup`; a 2.x version number alone does not establish that API. Spec, JS, PHP, adapter, and site have separate review/release gates. Green local checks do not authorize merge, publication, or deployment.
+The site documents the published releases: JS `librarium` 2.x, PHP `jkudish/laravel-ai-librarium` 1.x and `librarium-spec` 1.x. The Open Graph image is `public/og-v2.png`, rendered from `scripts/og.html`; give it a new file name whenever it changes so link-preview caches refetch it.
 
 ## Structure
 

@@ -117,7 +117,7 @@ for (const path of htmlFiles) {
     assert(svg.hasAttribute("data-icon") || ["librarium", "agentsy"].includes(svg.getAttribute("data-brand")), `${label} non-Phosphor UI icon`);
   }
 }
-for (const file of ["llms.txt", "llms-full.txt", "robots.txt", "sitemap-index.xml", "og.jpg", "demo.gif"]) assert(existsSync(join(dist, file)), `missing ${file}`);
+for (const file of ["llms.txt", "llms-full.txt", "robots.txt", "sitemap-index.xml", "og.png", "demo.gif"]) assert(existsSync(join(dist, file)), `missing ${file}`);
 assert(!output("sitemap-0.xml").includes("/v1"));
 assert(!output("sitemap-0.xml").includes("/cli-mcp"));
 for (const [file, size] of [["favicon.png", 64], ["apple-touch-icon.png", 180], ["icon-192.png", 192], ["icon-512.png", 512]]) {

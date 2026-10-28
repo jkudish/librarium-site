@@ -103,18 +103,18 @@ const jsonLd = JSON.stringify([
     <link rel="alternate" type="text/markdown" href={markdownAlternate} title="Markdown" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={metaDescription} />
-    <meta property="og:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />
+    <meta property="og:image" content={new URL("/og.png", Astro.site ?? Astro.url).href} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Librarium: the meta harness for research queries" />
+    <meta property="og:image:alt" content="librarium: Give your agent more than one source." />
     {canonical && <meta property="og:url" content={canonical} />}
     <meta property="og:site_name" content="librarium" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={metaDescription} />
-    <meta name="twitter:image" content={new URL("/og.jpg", Astro.site ?? Astro.url).href} />
-    <meta name="twitter:image:alt" content="Librarium: the meta harness for research queries" />
+    <meta name="twitter:image" content={new URL("/og.png", Astro.site ?? Astro.url).href} />
+    <meta name="twitter:image:alt" content="librarium: Give your agent more than one source." />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <script is:inline type="application/ld+json" set:html={jsonLd} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

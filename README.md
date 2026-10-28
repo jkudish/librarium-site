@@ -1,7 +1,7 @@
 # librarium-site
 
 <p align="center">
-  <img src="public/og.png" alt="librarium: Give your agent more than one source." width="600" />
+  <img src="public/og-v2.png" alt="librarium: Give your agent more than one source." width="600" />
 </p>
 
 Marketing and documentation website for [librarium](https://github.com/jkudish/librarium), the meta harness for research queries. Live at [librarium.si](https://librarium.si).

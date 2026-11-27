@@ -4,7 +4,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 import { parse } from "node-html-parser";
 import catalog from "librarium-spec/sources.json" with { type: "json" };
-import { NODE_FLOOR, PRODUCT_VERSION, SOURCES, ENGINES, SOURCE_COUNT, ENGINE_COUNT, FEATURED_SOURCES, WORKFLOWS } from "../src/data/product.ts";
+import { NODE_FLOOR, PRODUCT_VERSION, SOURCES, ENGINES, SOURCE_COUNT, ENGINE_COUNT, FEATURED_SOURCES, FEATURED_COLLECTORS, WORKFLOWS } from "../src/data/product.ts";
 import { AGENT_SETUP_PROMPT, INSTALL_CHOICES, agentSetupPromptFor } from "../src/data/setup-prompt.ts";
 import { RESEARCH_COMMANDS } from "../src/data/research-commands.ts";
 import { READING_LABELS } from "../src/data/reading-labels.ts";
@@ -24,11 +24,11 @@ const body = (markdown) => markdown.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, ""
 const flatten = (value) => value.replace(/[\\`#*>\-[\]()|]/g, " ").replace(/\s+/g, " ").trim();
 
 assert.equal(NODE_FLOOR, "22.12.0");
-assert.equal(PRODUCT_VERSION, "2.0.0");
+assert.equal(PRODUCT_VERSION, "2.1.0");
 assert.deepEqual(SOURCES, catalog.sources.filter((source) => source.kind === "research"));
 assert.deepEqual(ENGINES, catalog.engines);
 assert.equal(SOURCE_COUNT, 16);
-assert.equal(ENGINE_COUNT, 5);
+assert.equal(ENGINE_COUNT, 6);
 assert.deepEqual(FEATURED_SOURCES.map((source) => source.id), SOURCES.map((source) => source.id));
 assert.deepEqual(WORKFLOWS.map((choice) => choice.id), ["quick", "deep", "engines"]);
 
@@ -384,7 +384,7 @@ const software = JSON.parse(homePage.querySelector('script[type="application/ld+
 assert.equal(software.description, productDescription);
 assert.equal(software.offers.price, "0");
 assert.equal(software.offers.priceCurrency, "USD");
-assert.equal(software.softwareVersion, "2.0.0");
+assert.equal(software.softwareVersion, "2.1.0");
 assert.deepEqual(software.runtimePlatform, ["JavaScript / npm / Node.js 22.12.0+", "PHP 8.4+ / Laravel 13.30+"]);
 assert.deepEqual(software.sameAs, ["https://github.com/jkudish/librarium", "https://github.com/jkudish/laravel-ai-librarium"]);
 const homeMarkdown = output("index.md");
@@ -395,9 +395,14 @@ assert.equal(homePage.querySelectorAll("main > section").length, 6);
 assert.equal(homePage.querySelectorAll("[data-source]").length, SOURCE_COUNT);
 assert.deepEqual(homePage.querySelectorAll("[data-engine]").map((node) => node.getAttribute("data-engine")), ENGINES.map((engine) => engine.id));
 for (const engine of ENGINES) assert(homeText.includes(engine.name), `missing engine ${engine.id}`);
+assert.deepEqual(homePage.querySelectorAll("[data-collector]").map((node) => node.getAttribute("data-collector")), ["searchapi", "serpapi", "serpbase", "dataforseo", "cloro", "firecrawl"]);
+for (const collector of FEATURED_COLLECTORS) {
+  const mark = `/providers/${collector.logo}.${["you", "serpapi", "dataforseo", "cloro"].includes(collector.logo) ? "png" : "svg"}`;
+  assert(homeText.includes(collector.name) && home.includes(mark) && existsSync(outputPath(mark)), `missing collector ${collector.id}`);
+}
 for (const source of FEATURED_SOURCES) {
   assert(homeText.includes(source.name), `missing catalog source ${source.id}`);
-  const mark = `/providers/${source.logo}.${["you", "serpapi", "dataforseo"].includes(source.logo) ? "png" : "svg"}`;
+  const mark = `/providers/${source.logo}.${["you", "serpapi", "dataforseo", "cloro"].includes(source.logo) ? "png" : "svg"}`;
   assert(home.includes(mark) && existsSync(outputPath(mark)), `missing mark ${source.id}`);
 }
 assert(homePage.querySelector("#research-example"));

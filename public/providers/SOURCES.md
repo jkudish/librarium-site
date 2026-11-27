@@ -2,7 +2,7 @@
 
 Brand marks identify supported integrations, not endorsements. Trademarks belong to their respective owners.
 
-- Brave, Claude, Copilot, Exa, Firecrawl, Gemini, Google, Grok, Jina, Kagi, OpenAI, OpenRouter, Perplexity, SearchAPI and Tavily: `@lobehub/icons-static-svg` 1.95.0, `https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.0/icons/<name>.svg`. MIT license in `LICENSE`.
+- Bing, Brave, Claude, Copilot, Exa, Firecrawl, Gemini, Google, Grok, Jina, Kagi, OpenAI, OpenRouter, Perplexity, SearchAPI and Tavily: `@lobehub/icons-static-svg` 1.95.0, `https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.0/icons/<name>.svg`. MIT license in `LICENSE`.
 - Agent menu marks Codex, OpenCode and Cursor (`../agents/`) use the same pinned LobeHub package and MIT license: `https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.0/icons/codex.svg`, `https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.0/icons/opencode.svg`, and `https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.95.0/icons/cursor.svg`. Claude Code and Claude Desktop reuse `claude.svg`; Gemini CLI reuses `gemini.svg` from that package. These identify setup destinations, not separate provider integrations.
 - Amp (`../agents/amp.svg`): current vector wordmark extracted from the header SVG at `https://ampcode.com/` (viewBox `0 0 281 144`), with only the site's layout class removed. Replaces the raster-backed app icon; path geometry and monochrome fill are unchanged. Official brand asset; no separate asset license published at this URL, used only for product identification.
 - Hermes Agent (`../agents/hermes.png`): current official site icon from `https://hermes-agent.nousresearch.com/marketing-static/assets/hermes-agent/icon.png`, linked by the official site. Replaces the incorrect staff-shaped ACP mark. Official brand asset; no separate asset license published at this URL, used only for product identification.
@@ -18,6 +18,7 @@ Brand marks identify supported integrations, not endorsements. Trademarks belong
 - Parallel: https://parallel.ai/views/icons/logo-parallel.svg — official brand asset.
 - SerpAPI: https://serpapi.com/apple-touch-icon.png — official brand asset; replaces the solid silhouette pinned-tab icon.
 - SerpBase: https://serpbase.dev/icon.svg — official brand asset.
+- Cloro: https://cloro.dev/favicon-192.png — official site icon, linked by `https://cloro.dev/`; the square mark rather than the wide `logo.svg` wordmark.
 - DataForSEO: https://dataforseo.com/wp-content/uploads/2022/04/cropped-favicon_512-1-192x192.png — official brand asset.
 - Valyu: https://valyu.ai/favicon.svg — official brand asset; dark-mode color override removed for this light-background site.
 - You.com: https://you.com/docs/api/fern-docs/favicon.ico — official docs icon, served as PNG and retained as `you.png`.

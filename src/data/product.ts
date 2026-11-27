@@ -25,6 +25,15 @@ export const FEATURED_ENGINES = ENGINES.map((engine) => ({
   monogram: engine.id === "copilot" ? "MC" : "GA",
 }));
 
+// Retrieval services are catalog collectors: engine collectors and google's collector option.
+const collectorNames: Record<string, string> = { searchapi: "SearchAPI", serpapi: "SerpApi", serpbase: "SerpBase", dataforseo: "DataForSEO", cloro: "Cloro", firecrawl: "Firecrawl" };
+const collectorOrder = Object.keys(collectorNames);
+export const COLLECTOR_IDS = [...new Set([
+  ...catalog.engines.flatMap((engine) => Object.keys(engine.collectors)),
+  ...(catalog.sources.find((source) => source.id === "google")?.options?.collector?.values ?? []),
+])].sort((a, b) => collectorOrder.indexOf(a) - collectorOrder.indexOf(b));
+export const FEATURED_COLLECTORS = COLLECTOR_IDS.map((id) => ({ id, name: collectorNames[id] ?? id, logo: id }));
+
 const exampleQuestion = "What are the best alternatives to Google Analytics?";
 export const WORKFLOWS = [
   {

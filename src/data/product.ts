@@ -1,6 +1,6 @@
 import catalog from "librarium-spec/sources.json" with { type: "json" };
 
-export const PRODUCT_VERSION = "2.0.0";
+export const PRODUCT_VERSION = "2.1.0";
 export const NODE_FLOOR = "22.12.0";
 export const SOURCES = catalog.sources.filter((source) => source.kind === "research");
 export const ENGINES = catalog.engines;

@@ -24,7 +24,7 @@ const body = (markdown) => markdown.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, ""
 const flatten = (value) => value.replace(/[\\`#*>\-[\]()|]/g, " ").replace(/\s+/g, " ").trim();
 
 assert.equal(NODE_FLOOR, "22.12.0");
-assert.equal(PRODUCT_VERSION, "2.0.0");
+assert.equal(PRODUCT_VERSION, "2.1.0");
 assert.deepEqual(SOURCES, catalog.sources.filter((source) => source.kind === "research"));
 assert.deepEqual(ENGINES, catalog.engines);
 assert.equal(SOURCE_COUNT, 16);
@@ -384,7 +384,7 @@ const software = JSON.parse(homePage.querySelector('script[type="application/ld+
 assert.equal(software.description, productDescription);
 assert.equal(software.offers.price, "0");
 assert.equal(software.offers.priceCurrency, "USD");
-assert.equal(software.softwareVersion, "2.0.0");
+assert.equal(software.softwareVersion, "2.1.0");
 assert.deepEqual(software.runtimePlatform, ["JavaScript / npm / Node.js 22.12.0+", "PHP 8.4+ / Laravel 13.30+"]);
 assert.deepEqual(software.sameAs, ["https://github.com/jkudish/librarium", "https://github.com/jkudish/laravel-ai-librarium"]);
 const homeMarkdown = output("index.md");

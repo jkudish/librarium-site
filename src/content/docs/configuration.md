@@ -49,7 +49,7 @@ A source is set up when it has a resolved key and `enabled` is not false. Enviro
 
 A call can override options through `{ options: { parallel: { processor: 'ultra' } } }`.
 
-Google's retrieval service is SearchAPI, SerpAPI, Serpbase, or Cloro. Set it with the source option below; `vertical: "news"` needs Serpbase or Cloro. Cloro's Google search and news make one synchronous call and default to country `US`. AI answer-engine retrieval is configured separately and may be overridden per engine. Availability differs by language and retrieval service; check local discovery before selection.
+Google's retrieval service is SearchAPI, SerpAPI, Serpbase, Cloro, or Serply. Set it with the source option below; `vertical: "news"` needs Serpbase or Cloro. Cloro's Google search and news make one synchronous call and default to country `US`. Serply retrieves Google web results only and reads `SERPLY_API_KEY`. AI answer-engine retrieval is configured separately and may be overridden per engine. Availability differs by language and retrieval service; check local discovery before selection.
 
 ```json
 { "sources": { "google": { "collector": "searchapi" } } }

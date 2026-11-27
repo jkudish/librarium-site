@@ -10,7 +10,7 @@ import { WORKFLOWS, FEATURED_SOURCES, FEATURED_ENGINES, FEATURED_COLLECTORS, SOU
 import { RESEARCH_DEMO, RUN_EXAMPLE, COMPARED_TOOLS, PROVIDER_COMPARISON, formatElapsed, renderCapturedMarkdown } from "../data/research-demo";
 import { INSTALL_CHOICES } from "../data/setup-prompt";
 
-const providerMark = (logo: string) => `/providers/${logo}.${["you", "serpapi", "dataforseo", "cloro"].includes(logo) ? "png" : "svg"}`;
+const providerMark = (logo: string) => `/providers/${logo}.${["you", "serpapi", "dataforseo", "cloro", "serply"].includes(logo) ? "png" : "svg"}`;
 const capturedCommand = `librarium research "${RESEARCH_DEMO.query}" --deep`;
 const products = [
   { title: "Agents & MCP", description: "Give Claude Code, Codex, Cursor, and other agents a research tool. One prompt sets it up.", href: "/agents", link: "Explore Agents & MCP" },
@@ -188,7 +188,7 @@ const products = [
             ))}
           </ul>
           <h3 class="mt-8 text-lg font-medium text-neutral-950">Retrieved through</h3>
-          <ul role="list" class="mt-4 grid grid-cols-2 border-t border-l border-neutral-200 sm:grid-cols-3 lg:grid-cols-6" aria-label="Retrieval services">
+          <ul role="list" class="mt-4 grid grid-cols-2 border-t border-l border-neutral-200 sm:grid-cols-4 lg:grid-cols-7" aria-label="Retrieval services">
             {FEATURED_COLLECTORS.map((collector) => (
               <li data-collector={collector.id} class="flex items-center gap-3 border-r border-b border-neutral-200 p-4 text-base text-neutral-700 sm:flex-col sm:text-center sm:text-sm">
                 <div class="provider-logo"><img src={providerMark(collector.logo)} alt="" width="28" height="28" loading="lazy" class="logo-mono size-7 object-contain grayscale" /></div>

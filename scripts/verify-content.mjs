@@ -28,7 +28,7 @@ assert.equal(PRODUCT_VERSION, "2.0.0");
 assert.deepEqual(SOURCES, catalog.sources.filter((source) => source.kind === "research"));
 assert.deepEqual(ENGINES, catalog.engines);
 assert.equal(SOURCE_COUNT, 16);
-assert.equal(ENGINE_COUNT, 5);
+assert.equal(ENGINE_COUNT, 6);
 assert.deepEqual(FEATURED_SOURCES.map((source) => source.id), SOURCES.map((source) => source.id));
 assert.deepEqual(WORKFLOWS.map((choice) => choice.id), ["quick", "deep", "engines"]);
 

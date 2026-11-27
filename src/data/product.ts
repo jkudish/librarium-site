@@ -17,7 +17,7 @@ export const FEATURED_SOURCES = SOURCES.map((source) => ({
   hint: "deep" in source.variants ? "Quick + deep" : "Quick",
 }));
 
-const engineLogos: Record<string, string> = { chatgpt: "openai", "gemini-app": "gemini", "google-ai-mode": "google", "google-ai-overview": "google", copilot: "copilot" };
+const engineLogos: Record<string, string> = { chatgpt: "openai", "gemini-app": "gemini", "google-ai-mode": "google", "google-ai-overview": "google", copilot: "copilot", "bing-ai-mode": "bing" };
 export const FEATURED_ENGINES = ENGINES.map((engine) => ({
   id: engine.id,
   name: engine.name,

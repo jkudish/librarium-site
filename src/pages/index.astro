@@ -179,7 +179,7 @@ const products = [
             ))}
           </ul>
           <h3 class="mt-8 text-lg font-medium text-neutral-950">AI answer engines · choose by name</h3>
-          <ul role="list" class="mt-4 grid grid-cols-1 border-t border-l border-neutral-200 sm:grid-cols-5" aria-label="AI answer engines">
+          <ul role="list" class="mt-4 grid grid-cols-1 border-t border-l border-neutral-200 sm:grid-cols-3 lg:grid-cols-6" aria-label="AI answer engines">
             {FEATURED_ENGINES.map((engine) => (
               <li data-engine={engine.id} class="flex items-center gap-3 border-r border-b border-neutral-200 p-4 text-base text-neutral-700 sm:flex-col sm:text-center sm:text-sm">
                 <div class="provider-logo">{engine.logo ? <img src={providerMark(engine.logo)} alt="" width="28" height="28" loading="lazy" class="logo-mono size-7 object-contain grayscale" /> : <span class="font-mono font-medium" aria-hidden="true">{engine.monogram}</span>}</div>

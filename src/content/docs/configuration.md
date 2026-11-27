@@ -49,11 +49,29 @@ A source is set up when it has a resolved key and `enabled` is not false. Enviro
 
 A call can override options through `{ options: { parallel: { processor: 'ultra' } } }`.
 
-Google's retrieval service is SearchAPI, SerpAPI, or Serpbase. Set it with the source option below; AI answer-engine retrieval is configured separately and may be overridden per engine. Availability differs by language and retrieval service; check local discovery before selection.
+Google's retrieval service is SearchAPI, SerpAPI, Serpbase, or Cloro. Set it with the source option below; `vertical: "news"` needs Serpbase or Cloro. Cloro's Google search and news make one synchronous call and default to country `US`. AI answer-engine retrieval is configured separately and may be overridden per engine. Availability differs by language and retrieval service; check local discovery before selection.
 
 ```json
 { "sources": { "google": { "collector": "searchapi" } } }
 ```
+
+To retrieve AI answer engines through Cloro or DataForSEO, set the engine collector and its key. An entry such as `engines["google-ai-mode"]` can override `collector`, `key`, `priority`, and `options` for that engine:
+
+```json
+{
+  "engines": {
+    "collector": "cloro",
+    "key": "env:CLORO_API_KEY",
+    "priority": "standard",
+    "options": { "country": "US" },
+    "google-ai-mode": { "priority": "live" }
+  }
+}
+```
+
+Without a key, each collector reads its own environment variable: `SEARCHAPI_API_KEY`, `CLORO_API_KEY`, or `DATAFORSEO_LOGIN` and `DATAFORSEO_PASSWORD`.
+
+Cloro needs an uppercase ISO `country`; DataForSEO needs `locationCode` and `languageCode`. `openai`, `claude`, `perplexity`, and `gemini` also accept `collector: "dataforseo"`, which asks the same model through DataForSEO's LLM Responses API for quick research.
 
 ## Storage and retention
 

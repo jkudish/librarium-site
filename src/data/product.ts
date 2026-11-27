@@ -26,7 +26,7 @@ export const FEATURED_ENGINES = ENGINES.map((engine) => ({
 }));
 
 // Retrieval services are catalog collectors: engine collectors and google's collector option.
-const collectorNames: Record<string, string> = { searchapi: "SearchAPI", serpapi: "SerpApi", serpbase: "SerpBase", dataforseo: "DataForSEO", cloro: "Cloro", firecrawl: "Firecrawl" };
+const collectorNames: Record<string, string> = { searchapi: "SearchAPI", serpapi: "SerpApi", serpbase: "SerpBase", dataforseo: "DataForSEO", cloro: "Cloro", serply: "Serply", firecrawl: "Firecrawl" };
 const collectorOrder = Object.keys(collectorNames);
 export const COLLECTOR_IDS = [...new Set([
   ...catalog.engines.flatMap((engine) => Object.keys(engine.collectors)),

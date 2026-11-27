@@ -29,7 +29,7 @@ Configure the retrieval service separately from the source name. Inspect the pac
 'sources' => ['google' => ['collector' => 'cloro', 'options' => ['country' => 'US']]],
 ```
 
-Choose `live` per request with `->options(['chatgpt' => ['priority' => 'live']])`. The `google` source's Cloro collector makes one synchronous call for web results and for `vertical: news`, which needs Serpbase or Cloro.
+Choose `live` per request with `->options(['chatgpt' => ['priority' => 'live']])`. The `google` source's Cloro collector makes one synchronous call for web results and for `vertical: news`, which needs Serpbase or Cloro. The `serply` collector retrieves Google web results only and reads `services.serply.key`.
 
 ## Firecrawl
 

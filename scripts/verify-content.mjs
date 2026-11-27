@@ -395,14 +395,14 @@ assert.equal(homePage.querySelectorAll("main > section").length, 6);
 assert.equal(homePage.querySelectorAll("[data-source]").length, SOURCE_COUNT);
 assert.deepEqual(homePage.querySelectorAll("[data-engine]").map((node) => node.getAttribute("data-engine")), ENGINES.map((engine) => engine.id));
 for (const engine of ENGINES) assert(homeText.includes(engine.name), `missing engine ${engine.id}`);
-assert.deepEqual(homePage.querySelectorAll("[data-collector]").map((node) => node.getAttribute("data-collector")), ["searchapi", "serpapi", "serpbase", "dataforseo", "cloro", "firecrawl"]);
+assert.deepEqual(homePage.querySelectorAll("[data-collector]").map((node) => node.getAttribute("data-collector")), ["searchapi", "serpapi", "serpbase", "dataforseo", "cloro", "serply", "firecrawl"]);
 for (const collector of FEATURED_COLLECTORS) {
-  const mark = `/providers/${collector.logo}.${["you", "serpapi", "dataforseo", "cloro"].includes(collector.logo) ? "png" : "svg"}`;
+  const mark = `/providers/${collector.logo}.${["you", "serpapi", "dataforseo", "cloro", "serply"].includes(collector.logo) ? "png" : "svg"}`;
   assert(homeText.includes(collector.name) && home.includes(mark) && existsSync(outputPath(mark)), `missing collector ${collector.id}`);
 }
 for (const source of FEATURED_SOURCES) {
   assert(homeText.includes(source.name), `missing catalog source ${source.id}`);
-  const mark = `/providers/${source.logo}.${["you", "serpapi", "dataforseo", "cloro"].includes(source.logo) ? "png" : "svg"}`;
+  const mark = `/providers/${source.logo}.${["you", "serpapi", "dataforseo", "cloro", "serply"].includes(source.logo) ? "png" : "svg"}`;
   assert(home.includes(mark) && existsSync(outputPath(mark)), `missing mark ${source.id}`);
 }
 assert(homePage.querySelector("#research-example"));
